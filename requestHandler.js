@@ -1,7 +1,5 @@
-var zmq = require('zmq');
 var locator = require('./locator');
-	
-var	pull_socket = zmq.socket('pull');
+var factory = require('./factory');
 
 exports.start = function (){
 	locator.start();
@@ -15,14 +13,12 @@ exports.handleRequest = function (data){
 	var requestBody = request[1];
 	
 	switch(requestType){
-		case 'personUpdate':
-			console.log('Handling person update');
-			
+		case 'personUpdate':			
 			requestBody.forEach(function(item){
-
-				var personInstance = {ID: item.Person_ID, Location: {X: item.Location.X, Y: item.Location.Y, Z: item.Location.Z}};	
-				locator.updatePersons(personInstance);			
+				var person = factory.makePerson(item.Person_ID, item.Location);				
+				locator.updatePersons(person);			
 				
+				// Logging current list of users in the locator
 				console.log(locator.printPersons());
 			});
 			
