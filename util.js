@@ -4,27 +4,30 @@ var DEFAULT_FIELD_OF_VIEW = 25.0;
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
 
-
+// Tested!
 exports.normalizeAngle = function(value){
 	if(value >= 0){
 		return value % 360;
 	}
 	else{
-		return (360 - Math.Abs(doublevalue % 360)) % 360;
+		return (360 - Math.abs(value % 360)) % 360;
 	}
 }
 
 // TODO: implement!
+// TODO: test!
 exports.translateFromCoordinateSpace = function(){
 	// TODO: implement!
 	// Leave until we have multiple Kinects. Otherwise, use the Kinect coordinate space
 	// We will probably need this but we might need to re-implement it in a different way
 }
 
+// TODO: test!
 exports.distanceBetweenPoints = function(a,b){
 	return Math.sqrt(Math.pow(a.X - b.X, 2) + Math.pow(a.Y - b.Y, 2) + Math.pow(a.Z - b.Z, 2));
 }
 
+// TODO: test!
 exports.angleBetweenPoints = function(start, end){
 	// TODO: implement!
 	// We will probably need this but we might need to re-implement it in a different way
@@ -33,7 +36,8 @@ exports.angleBetweenPoints = function(start, end){
 }
 
 // TODO: implement!
-exports.getLinesOfDevice = function(device){
+// TODO: test!
+exports.getLinesOfShape = function(device){
 	// TODO: implement!
 	// var returnLines = [];
 	// List<Point> corners = getCornersOfShape(device);
@@ -52,6 +56,7 @@ exports.getLinesOfDevice = function(device){
 }
 
 // TODO: implement!
+// TODO: test!
 exports.getCornersOfShape = function(device){
 	// TODO: implement!
 	// List<Point> returnPoints = new List<Point>();
@@ -94,6 +99,7 @@ exports.getCornersOfShape = function(device){
 }
 
 // TODO: implement!
+// TODO: test!
 exports.GetRatioPositionOnScreen = function(target, intersection){
 	// TODO: implement!
 	// List<Point> cornersOfShape = getCornersOfShape(target);
@@ -149,6 +155,7 @@ exports.GetRatioPositionOnScreen = function(target, intersection){
 	// return new Point(-1, -1);
 }
 
+// TODO: test!
 exports.getIntersectionPoint = function(line1, line2){
 	var IntersectionPoint = null;
             
@@ -193,6 +200,7 @@ exports.getIntersectionPoint = function(line1, line2){
 	return IntersectionPoint;
 }
 
+// Tested!
 exports.isGreater = function(num1, num2){
 	var answer = num1 - num2;
 	answer = Math.round(answer*1000)/1000;
@@ -200,6 +208,7 @@ exports.isGreater = function(num1, num2){
 	return false;
 }
 
+// Tested!
 exports.isLess = function(num1, num2){
 	var answer = num1 - num2;
 	answer = Math.round(answer*1000)/1000;

@@ -1,4 +1,4 @@
-var util = require('./util');
+var util = require('../util');
 var chai = require('chai');
 var assert = chai.assert;
 
@@ -86,4 +86,57 @@ describe("util.isLess()", function(){
 	it("should return 'false', if passed '1.044' and '1.00044'", function(){
 		assert.equal(util.isLess(1.00044,1.00045), false);		
 	});	
+});
+
+// normalizeAngle
+describe("util.normalizeAngle()", function(){
+	// 0 case
+	it("should return '0', if passed '0'", function(){
+		assert.equal(util.normalizeAngle(0), 0);		
+	});
+	
+	// 360 case
+	it("should return '0', if passed '360'", function(){
+		assert.equal(util.normalizeAngle(360), 0);		
+	});
+	
+	// 180 case
+	it("should return '180', if passed '180'", function(){
+		assert.equal(util.normalizeAngle(180), 180);		
+	});
+	
+	// -360 case
+	it("should return '0', if passed '-360'", function(){
+		assert.equal(util.normalizeAngle(-360), 0);		
+	});
+	
+	// -180 case
+	it("should return '180', if passed '-180'", function(){
+		assert.equal(util.normalizeAngle(-180), 180);		
+	});
+	
+	// -270 case
+	it("should return '90', if passed '-270'", function(){
+		assert.equal(util.normalizeAngle(-270), 90);		
+	});
+	
+	// -90 case
+	it("should return '270', if passed '-90'", function(){
+		assert.equal(util.normalizeAngle(-90), 270);		
+	});
+	
+	// -0 case
+	it("should return '0', if passed '-0'", function(){
+		assert.equal(util.normalizeAngle(-0), 0);		
+	});
+	
+	// 500 case
+	it("should return '140', if passed '500'", function(){
+		assert.equal(util.normalizeAngle(500), 140);		
+	});
+	
+	// -500 case
+	it("should return '220', if passed '-500'", function(){
+		assert.equal(util.normalizeAngle(-500), 220);		
+	});
 });

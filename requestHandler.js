@@ -1,10 +1,12 @@
 var locator = require('./locator');
 var factory = require('./factory');
 
+// TODO: test!
 exports.start = function (){
 	locator.start();
 }
 
+// TODO: test!
 exports.handleRequest = function (data){
 	
 	// Handles different requests here 	

@@ -1,5 +1,6 @@
 var util = require('./util');
 
+// TODO: test!
 exports.makePerson = function(id, location){
 	return	{ID: id, 
 			Location: {X: location.X, Y: location.Y, Z: location.Z},
@@ -8,6 +9,7 @@ exports.makePerson = function(id, location){
 			TrackedBy: []};
 }
 
+// TODO: test!
 exports.makeDevice = function(){
 	return	{ID: null,
 			Location: {X: null, Y: null, Z:null},
@@ -19,11 +21,13 @@ exports.makeDevice = function(){
 			IntersectionPoint: {X: 0, Y: 0}};
 }
 
+// TODO: test!
 exports.make2DPoint = function(x,y){
 	return {X: x,
 			Y: y};
 }
 
+// TODO: test!
 exports.makeLineUsingPoints = function(start, end){
 	var line = 	{startPoint: {X: start.X, Y: start.Y, Z: start.Z},
 				endPoint: {X: end.X, Y: end.Y, Z: end.Z},
@@ -46,6 +50,7 @@ exports.makeLineUsingPoints = function(start, end){
 	return line;
 }
 
+// TODO: test!
 exports.makeLineUsingOrientation = function(start, orientation){
 	var line = 	{startPoint: {X: start.X, Y: start.Y, Z: start.Z},
 				endPoint: {X: null, Y: null, Z: null},
