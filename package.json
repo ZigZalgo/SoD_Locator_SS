@@ -7,8 +7,8 @@
   },
   "dependencies": {
     "jade": "*",
-    "zmq": "*"
-	"chai": "*"
+    "zmq": "*",
+	"chai": "*",
 	"mocha": "*"
   }
 }
