@@ -1,3 +1,4 @@
+var factory = require('./factory');
 	
 var Persons = [];
 var Devices = [];
@@ -35,4 +36,7 @@ exports.updateDevices = function(device){
 
 exports.getDevicesInView = function(observer){
 	// TODO: implement!
+	var obseverLineOfSight = factory.makeLineUsingOrientation(observer.Location, observer.Orientation);
+	
+	var devicesInView 
 }
