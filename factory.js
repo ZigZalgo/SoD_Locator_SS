@@ -1,3 +1,4 @@
+var util = require('./util');
 
 exports.makePerson = function(id, location){
 	return	{ID: id, 
@@ -11,10 +12,16 @@ exports.makeDevice = function(){
 	return	{ID: null,
 			Location: {X: null, Y: null, Z:null},
 			Orientation: null,
+			FOV: util.DEFAULT_FIELD_OF_VIEW,
 			Height: null,
 			Width: null,
 			OwnerID: null,
-			IntersectionPoint: {X: null, Y: null}};
+			IntersectionPoint: {X: 0, Y: 0}};
+}
+
+exports.make2DPoint = function(x,y){
+	return {X: x,
+			Y: y};
 }
 
 exports.makeLineUsingPoints = function(start, end){
