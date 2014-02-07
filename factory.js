@@ -37,14 +37,14 @@ exports.makeLineUsingPoints = function(start, end){
 				x: null,
 				isLineSegment: true};			
 	
-	if(end.X === start.X){
+	if(line.endPoint.X === line.startPoint.X){
 		line.isVerticalLine = true;
-		line.x = start.X;
+		line.x = line.startPoint.X;
 	}
 	else{
 		line.isVerticalLine = false;
-		line.slope = (end.Y - start.Y) / (end.X - start.X);
-		line.yIntercept = start.Y - line.slope * start.X;
+		line.slope = (line.endPoint.Z - line.startPoint.Z) / (line.endPoint.X - line.startPoint.X);
+		line.yIntercept = line.startPoint.Z - line.slope * line.startPoint.X;
 	}
 	
 	return line;
@@ -62,13 +62,13 @@ exports.makeLineUsingOrientation = function(start, orientation){
 				
 	if(orientation === 90 || orientation === 270){
 		line.isVerticalLine = true;
-		line.x = start.X;
+		line.x = line.startPoint.X;
 	}
 	else{
 		line.isVerticalLine = false;
 		line.slope = orientation * Math.PI / 180;
 		line.slope = Math.tan(line.slope);
-		line.yIntercept = start.Y - line.slope * start.X;
+		line.yIntercept = line.startPoint.Z - line.slope * line.startPoint.X;
 	}
 	
 	return line;
