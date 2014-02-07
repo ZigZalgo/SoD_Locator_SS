@@ -265,3 +265,47 @@ describe("util.angleBetweenPoints()", function(){
 		assert.deepEqual(util.angleBetweenPoints({X: 5, Y: 1, Z: 1}, {X: 1, Y: 1, Z: 5}), 135);		
 	});		
 });
+
+// getCornersOfShape
+describe("util.getCornersOfShape()", function(){
+	// stationary square device at origin case
+	it("should return 'expected', if passed 'device'", function(){	
+		var device = factory.makeDevice();
+		device.Width = 2;
+		device.Height = 2;
+		device.Location = {X: 0, Y: 0, Z:0};
+		
+		var expected = [{X: 1, Y: 1},{X: 1, Y: -1},{X: -1, Y: -1},{X: -1, Y: 1}];
+		
+		assert.deepEqual(util.getCornersOfShape(device), expected);		
+	});
+	
+	// moving device with orientation 90 case
+	it("should return 'expected', if passed 'device'", function(){	
+		var device = factory.makeDevice();
+		device.Width = 1;
+		device.Height = 2;
+		device.Location = {X: 3, Y: 0, Z:4};
+		device.Orientation = 90;
+		
+		var expected = [{X: 3.5, Y: 5},{X: 3.5, Y: 3},{X: 2.5, Y: 3},{X: 2.5, Y: 5}];
+		
+		assert.deepEqual(util.getCornersOfShape(device), expected);		
+	});	
+	
+	// device without location case
+	it("should return 'expected', if passed 'device'", function(){	
+		var device = factory.makeDevice();
+		device.Location = null;		
+		var expected = [];		
+		assert.deepEqual(util.getCornersOfShape(device), expected);		
+	});	
+	
+	// width & height not specified case
+	it("should return 'expected', if passed 'device'", function(){	
+		var device = factory.makeDevice();
+		device.Location = {X: 3, Y: 0, Z:4};		
+		var expected = [{X: 3, Y: 4},{X: 3, Y: 4},{X: 3, Y: 4},{X: 3, Y: 4}];		
+		assert.deepEqual(util.getCornersOfShape(device), expected);		
+	});		
+});

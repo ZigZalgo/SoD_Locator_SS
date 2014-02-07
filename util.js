@@ -126,47 +126,51 @@ exports.getLinesOfShape = function(device){
 	// return returnLines;
 }
 
-// TODO: implement!
-// TODO: test!
-exports.getCornersOfShape = function(device){
-	// TODO: implement!
-	// List<Point> returnPoints = new List<Point>();
-	// List<Point> intPoints = new List<Point>();
-	// Point deviceLocation = device.Location.Value;
+// Tested!
+exports.getCornersOfShape = function(device){	
+	var returnPoints = [];
+	var intPoints = [];
+	try{
+		var deviceLocation = device.Location;
+		
+		intPoints.push(factory.make2DPoint(deviceLocation.X + device.Width / 2, deviceLocation.Z + device.Height / 2));
+		intPoints.push(factory.make2DPoint(deviceLocation.X + device.Width / 2, deviceLocation.Z - device.Height / 2));
+		intPoints.push(factory.make2DPoint(deviceLocation.X - device.Width / 2, deviceLocation.Z - device.Height / 2));
+		intPoints.push(factory.make2DPoint(deviceLocation.X - device.Width / 2, deviceLocation.Z + device.Height / 2));
+	}
+	catch(err){
+		// Device does not have a location
+		// This will return an empty list
+		console.log('Error: Device must have a location!');
+		return returnPoints;
+	}
 
-	// intPoints.Add(new Point((double)(deviceLocation.X + device.Width / 2), (double)(deviceLocation.Y + device.Height / 2)));
-	// intPoints.Add(new Point((double)(deviceLocation.X + device.Width / 2), (double)(deviceLocation.Y - device.Height / 2)));
-	// intPoints.Add(new Point((double)(deviceLocation.X - device.Width / 2), (double)(deviceLocation.Y - device.Height / 2)));
-	// intPoints.Add(new Point((double)(deviceLocation.X - device.Width / 2), (double)(deviceLocation.Y + device.Height / 2)));
+	var angle = 0; 
+	
+	if(device.Orientation != null){
+		// This will help when we consider sending to moving devices that change its 
+		// orientation dynamically. The choice of 270 is for consistency with the 
+		// current code that handles the special case of a tabletop facing away 
+		// from the kinect
+		angle = device.Orientation - 90;
+		angle = angle * DEGREES_TO_RADIANS;		
+	}
+	
+	else
+	{
+		// No changes neccessary
+		return intPoints;
+	}	
 
-	// double angle;
-	// // Check if the device's orientation is not null
-	// if (device.Orientation != null)
-	// {
-		// // This will help when we consider sending to moving devices that change its 
-		// // orientation dynamically. The choice of 270 is for consistency with the 
-		// // current code that handles the special case of a tabletop facing away 
-		// // from the kinect
-		// angle = ((Double)device.Orientation - 90);
-		// angle = angle * Math.PI / 180;
-	// }
+	intPoints.forEach(function(point){
+		var xValue = (point.X - deviceLocation.X) * Math.cos(angle) - (point.Y - deviceLocation.Z) * Math.sin(angle) + deviceLocation.X;
+		var yValue = (point.Y - deviceLocation.Z) * Math.cos(angle) + (point.X - deviceLocation.X) * Math.sin(angle) + deviceLocation.Z;
 
-	// else
-	// {
-		// // No changes neccessary
-		// return intPoints;
-	// }
-
-	// foreach (Point point in intPoints)
-	// {
-		// double xValue = (point.X - deviceLocation.X) * Math.Cos(angle) - (point.Y - deviceLocation.Y) * Math.Sin(angle) + deviceLocation.X;
-		// double yValue = (point.Y - deviceLocation.Y) * Math.Cos(angle) + (point.X - deviceLocation.X) * Math.Sin(angle) + deviceLocation.Y;
-
-		// Point newPoint = new Point(xValue, yValue);
-		// returnPoints.Add(newPoint);
-	// }
-
-	// return returnPoints;
+		var newPoint = factory.make2DPoint(xValue, yValue);
+		returnPoints.push(newPoint);		
+	});
+	
+	return returnPoints;
 }
 
 // TODO: implement!
