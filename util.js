@@ -22,7 +22,15 @@ exports.distanceBetweenPoints = function(a,b){
 	
 	// We are still passing a 3D point, however, as it will make migrating 
 	// to 3D easier.
-	return Math.sqrt(Math.pow(a.X - b.X, 2) + Math.pow(a.Z - b.Z, 2));
+	
+	// We check whether the points are in 2D or 3D and do the 
+	// calculations accordingly
+	if(a.Z == null){
+		return Math.sqrt(Math.pow(a.X - b.X, 2) + Math.pow(a.Y - b.Y, 2));
+	}
+	else{
+		return Math.sqrt(Math.pow(a.X - b.X, 2) + Math.pow(a.Z - b.Z, 2));
+	}
 }
 
 // Tested!
@@ -65,8 +73,8 @@ exports.getIntersectionPoint = function(line1, line2){
 	{
 		if(isGreater(IntersectionPoint.X, line1.startPoint.X) && isGreater(IntersectionPoint.X, line1.endPoint.X) ||
 			isLess(IntersectionPoint.X, line1.startPoint.X) && isLess(IntersectionPoint.X, line1.endPoint.X) ||
-			isGreater(IntersectionPoint.Z, line1.startPoint.Z) && isGreater(IntersectionPoint.Z, line1.endPoint.Z) ||
-			isLess(IntersectionPoint.Z, line1.startPoint.Z) && isLess(IntersectionPoint.Z, line1.endPoint.Z))
+			isGreater(IntersectionPoint.Y, line1.startPoint.Z) && isGreater(IntersectionPoint.Y, line1.endPoint.Z) ||
+			isLess(IntersectionPoint.Y, line1.startPoint.Z) && isLess(IntersectionPoint.Y, line1.endPoint.Z))
 			return null;
 	}
 	
@@ -74,8 +82,8 @@ exports.getIntersectionPoint = function(line1, line2){
 	{
 		if (isGreater(IntersectionPoint.X, line2.startPoint.X) && isGreater(IntersectionPoint.X, line2.endPoint.X) ||
 			isLess(IntersectionPoint.X, line2.startPoint.X) && isLess(IntersectionPoint.X, line2.endPoint.X) ||
-			isGreater(IntersectionPoint.Z, line2.startPoint.Z) && isGreater(IntersectionPoint.Z, line2.endPoint.Z) ||
-			isLess(IntersectionPoint.Z, line2.startPoint.Z) && isLess(IntersectionPoint.Z, line2.endPoint.Z))
+			isGreater(IntersectionPoint.Y, line2.startPoint.Z) && isGreater(IntersectionPoint.Y, line2.endPoint.Z) ||
+			isLess(IntersectionPoint.Y, line2.startPoint.Z) && isLess(IntersectionPoint.Y, line2.endPoint.Z))
 			return null;
 	}
 	 
@@ -98,32 +106,33 @@ exports.isLess = function(num1, num2){
 	return false;
 }
 
-// TODO: implement!
-// TODO: test!
-exports.translateFromCoordinateSpace = function(){
-	// TODO: implement!
-	// Leave until we have multiple Kinects. Otherwise, use the Kinect coordinate space
-	// We will probably need this but we might need to re-implement it in a different way
-}
-
-// TODO: implement!
-// TODO: test!
+// Tested!
 exports.getLinesOfShape = function(device){
-	// TODO: implement!
-	// var returnLines = [];
-	// List<Point> corners = getCornersOfShape(device);
+	var returnLines = [];
+	var corners = this.getCornersOfShape(device);
 
-	// Line topSide = new Line(corners[0], corners[1]);
-	// Line rightSide = new Line(corners[1], corners[2]);
-	// Line bottomSide = new Line(corners[2], corners[3]);
-	// Line leftSide = new Line(corners[3], corners[0]);
+	try{
+		var topSide = factory.makeLineUsingPoints(corners[0], corners[1]);
+		var rightSide = factory.makeLineUsingPoints(corners[1], corners[2]);
+		var bottomSide = factory.makeLineUsingPoints(corners[2], corners[3]);
+		var leftSide = factory.makeLineUsingPoints(corners[3], corners[0]);
+	
+		returnLines.push(topSide);
+		returnLines.push(rightSide);
+		returnLines.push(bottomSide);
+		returnLines.push(leftSide);		
+		
+		return returnLines;
+	}
+	
+	catch(err){
+		// Device does not have a location
+		// This will return an empty list
+		// console.log('Device must have a location');
+		return returnLines;
+	}
 
-	// returnLines.Add(topSide);
-	// returnLines.Add(rightSide);
-	// returnLines.Add(bottomSide);
-	// returnLines.Add(leftSide);
-
-	// return returnLines;
+	
 }
 
 // Tested!
@@ -141,7 +150,7 @@ exports.getCornersOfShape = function(device){
 	catch(err){
 		// Device does not have a location
 		// This will return an empty list
-		console.log('Error: Device must have a location!');
+		// console.log('Error: Device must have a location!');
 		return returnPoints;
 	}
 
@@ -173,59 +182,60 @@ exports.getCornersOfShape = function(device){
 	return returnPoints;
 }
 
+// Tested!
+exports.GetRatioPositionOnScreen = function(target, intersection){
+	var cornersOfShape = this.getCornersOfShape(target);
+	if(cornersOfShape.length <1){
+		// Device does not have a location
+		return factory.make2DPoint(-1, -1);
+	}
+	var distance1 = this.distanceBetweenPoints(intersection,cornersOfShape[0]);
+	var distance2 = this.distanceBetweenPoints(intersection,cornersOfShape[1]);
+	var distance3 = this.distanceBetweenPoints(cornersOfShape[0],cornersOfShape[1]);
+	if (Math.abs(distance3 - (distance1 + distance2)) < 0.01)
+	{
+		var xRatio = 1;
+		var yRatio = distance1 / distance3;
+		return factory.make2DPoint(xRatio, yRatio);
+	}
+
+	distance1 = this.distanceBetweenPoints(intersection, cornersOfShape[2]);
+	distance2 = this.distanceBetweenPoints(intersection, cornersOfShape[1]);
+	distance3 = this.distanceBetweenPoints(cornersOfShape[1], cornersOfShape[2]);
+	if (Math.abs(distance3 - (distance1 + distance2)) < 0.01)
+	{
+		var yRatio = 1;
+		var xRatio = distance1 / distance3;
+		return factory.make2DPoint(xRatio, yRatio);
+	}
+
+	distance1 = this.distanceBetweenPoints(intersection, cornersOfShape[3]);
+	distance2 = this.distanceBetweenPoints(intersection, cornersOfShape[2]);
+	distance3 = this.distanceBetweenPoints(cornersOfShape[2], cornersOfShape[3]);
+	if (Math.abs(distance3 - (distance1 + distance2)) < 0.01)
+	{
+		var xRatio = 0;
+		var yRatio = distance1 / distance3;
+		return factory.make2DPoint(xRatio, yRatio);
+	}
+
+	distance1 = this.distanceBetweenPoints(intersection, cornersOfShape[3]);
+	distance2 = this.distanceBetweenPoints(intersection, cornersOfShape[0]);
+	distance3 = this.distanceBetweenPoints(cornersOfShape[3], cornersOfShape[0]);
+	if (Math.abs(distance3 - (distance1 + distance2)) < 0.01)
+	{
+		var yRatio = 0;
+		var xRatio = distance1 / distance3;
+		return factory.make2DPoint(xRatio, yRatio);		
+	}
+
+	return factory.make2DPoint(-1, -1);
+}
+
 // TODO: implement!
 // TODO: test!
-exports.GetRatioPositionOnScreen = function(target, intersection){
+exports.translateFromCoordinateSpace = function(){
 	// TODO: implement!
-	// List<Point> cornersOfShape = getCornersOfShape(target);
-
-	// Double distance1 = Line.getDistanceBetweenPoints(intersection,cornersOfShape[0]);
-	// Double distance2 = Line.getDistanceBetweenPoints(intersection,cornersOfShape[1]);
-	// Double distance3 = Line.getDistanceBetweenPoints(cornersOfShape[0],cornersOfShape[1]);
-	// if (Math.Abs(distance3 - (distance1 + distance2)) < 0.01)
-	// {
-		// Double xRatio = 1;
-		// Double yRatio = distance1 / distance3;
-		// //Double xRatio = distance1 / distance3;
-		// //Double yRatio = 0;
-		// return new Point(xRatio, yRatio);
-	// }
-
-	// distance1 = Line.getDistanceBetweenPoints(intersection, cornersOfShape[2]);
-	// distance2 = Line.getDistanceBetweenPoints(intersection, cornersOfShape[1]);
-	// distance3 = Line.getDistanceBetweenPoints(cornersOfShape[1], cornersOfShape[2]);
-	// if (Math.Abs(distance3 - (distance1 + distance2)) < 0.01)
-	// {
-		// Double yRatio = 1;
-		// Double xRatio = distance1 / distance3;
-		// //Double xRatio = 1;
-		// //Double yRatio = distance2 / distance3;
-		// return new Point(xRatio, yRatio);
-	// }
-
-	// distance1 = Line.getDistanceBetweenPoints(intersection, cornersOfShape[3]);
-	// distance2 = Line.getDistanceBetweenPoints(intersection, cornersOfShape[2]);
-	// distance3 = Line.getDistanceBetweenPoints(cornersOfShape[2], cornersOfShape[3]);
-	// if (Math.Abs(distance3 - (distance1 + distance2)) < 0.01)
-	// {
-		// Double xRatio = 0;
-		// Double yRatio = distance1 / distance3;
-		// //Double xRatio = distance1 / distance3;
-		// //Double yRatio = 1;
-		// return new Point(xRatio, yRatio);
-	// }
-
-	// distance1 = Line.getDistanceBetweenPoints(intersection, cornersOfShape[3]);
-	// distance2 = Line.getDistanceBetweenPoints(intersection, cornersOfShape[0]);
-	// distance3 = Line.getDistanceBetweenPoints(cornersOfShape[3], cornersOfShape[0]);
-	// if (Math.Abs(distance3 - (distance1 + distance2)) < 0.01)
-	// {
-		// Double yRatio = 0;
-		// Double xRatio = distance1 / distance3;
-		// //Double xRatio = 0;
-		// //Double yRatio = distance2 / distance3;
-		// return new Point(xRatio, yRatio);
-	// }
-
-	// return new Point(-1, -1);
+	// Leave until we have multiple Kinects. Otherwise, use the Kinect coordinate space
+	// We will probably need this but we might need to re-implement it in a different way
 }
