@@ -1,15 +1,24 @@
 var util = require('./util');
 
-// TODO: test!
+// tested... should it be possible to create a Person if null ID passed? I've left that as YES for now, otherwise just emit another error
 exports.makePerson = function(id, location){
-	return	{ID: id, 
-			Location: {X: location.X, Y: location.Y, Z: location.Z},
-			Orientation: null,
-			OwnedDeivceID: null, 
-			TrackedBy: []};
+    try{
+        if(location.X == null || location.Y == null || location.Z == null){
+            var err = new Error("X, Y, or Z is null")
+            this.emit('error', err);
+        }
+        return	{ID: id,
+                Location: {X: location.X, Y: location.Y, Z: location.Z},
+                Orientation: null,
+                OwnedDeviceID: null,
+                TrackedBy: []};
+    }
+    catch(err){
+        return false;
+    }
 }
 
-// TODO: test!
+// tested
 exports.makeDevice = function(){
 	return	{ID: null,
 			Location: {X: null, Y: null, Z:null},
@@ -21,13 +30,13 @@ exports.makeDevice = function(){
 			IntersectionPoint: {X: 0, Y: 0}};
 }
 
-// TODO: test!
+// tested
 exports.make2DPoint = function(x,y){
 	return {X: x,
 			Y: y};
 }
 
-// TODO: test!
+// tested
 exports.makeLineUsingPoints = function(start, end){
 	var line = 	{startPoint: {X: start.X, Y: start.Y, Z: start.Z},
 				endPoint: {X: end.X, Y: end.Y, Z: end.Z},

@@ -1,6 +1,6 @@
 var factory = require('./factory');
 	
-var Persons = [];
+var Persons = []; //consider changing to {}. currently Persons is created with a null object inside
 var Devices = [];
 
 // TODO: test!
@@ -8,32 +8,51 @@ exports.start = function(){
 	// Do initialization here, if any
 };
 
-// TODO: test!
+// tested
 exports.updatePersons = function(person){
     var found = false;
     Persons.forEach(function(item) {
-        if(item.ID == person.ID){
-            found = true;
-			
-			Persons[Persons.indexOf(item)].Location.X = person.Location.X;
-            Persons[Persons.indexOf(item)].Location.Y = person.Location.Y;
-            Persons[Persons.indexOf(item)].Location.Z = person.Location.Z;
+        try{
+            if(item.ID == person.ID){
+                found = true;
+
+                Persons[Persons.indexOf(item)].Location.X = person.Location.X;
+                Persons[Persons.indexOf(item)].Location.Y = person.Location.Y;
+                Persons[Persons.indexOf(item)].Location.Z = person.Location.Z;
+            }
+        }
+        catch(err){
+            //if null or cannot read for some other reason... return false for now
+            return false;
         }
     });
 	
 	if(!found){
 		Persons.push(person);
 	}
+    return found;
 };
 
-// TODO: test!
+// added tests, 1 failing, will check when in lab (see comment of definition for Persons[] above)
 exports.printPersons = function(){
 	console.log("People tracked: ");
-	Persons.forEach(function(item) { console.log("ID: " + item.ID + 
-											"     X: " + item.Location.X + 
-											"     Y: " + item.Location.Y + 
-											"     Z: " + item.Location.Z) });
+    var output;
+    console.log(Persons);
+    try{
+        Persons.forEach(function(item) {
+            output = "ID: " + item.ID +
+                "     X: " + item.Location.X +
+                "     Y: " + item.Location.Y +
+                "     Z: " + item.Location.Z;
+            console.log(output)
+        });
+    }
+    catch(err){
+        console.log(err);
+        return false;
+    }
 	console.log("///////////////////////////////////////////////////////////////");
+    return true;
 }
 
 // TODO: implement!
