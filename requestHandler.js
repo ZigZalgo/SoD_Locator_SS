@@ -11,17 +11,20 @@ exports.handleRequest = function (data){
 	
 	// Handles different requests here 	
 	var request = JSON.parse(data.toString());
-	var requestType = request[0];
-	var requestBody = request[1];
-	
+	var requestType = request.requestType;
+	var requestBody = request.persons;
+
+    //console.log(requestType);
+    //console.log(requestBody);
+
 	switch(requestType){
-		case 'personUpdate':			
+		case 'personUpdate':
 			requestBody.forEach(function(item){
 				var person = factory.makePerson(item.Person_ID, item.Location);				
-				locator.updatePersons(person);			
-				
+				locator.updatePersons(person);
+
 				// Logging current list of users in the locator
-				console.log(locator.printPersons());
+				locator.printPersons();
 			});
 			
 			break;

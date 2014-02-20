@@ -9,6 +9,7 @@
     "jade": "*",
     "zmq": "*",
 	"chai": "*",
-	"mocha": "*"
+	"mocha": "*",
+    "underscore": "*"
   }
 }

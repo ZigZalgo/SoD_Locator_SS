@@ -1,4 +1,5 @@
 var factory = require('./factory');
+var _ = require('underscore');
 	
 var Persons = []; //consider changing to {}. currently Persons is created with a null object inside
 var Devices = [];
@@ -45,6 +46,9 @@ exports.printPersons = function(){
                 "     Y: " + item.Location.Y +
                 "     Z: " + item.Location.Z;
             console.log(output)
+            if(item = null){
+                console.log("null person");
+            }
         });
     }
     catch(err){
@@ -64,8 +68,53 @@ exports.updateDevices = function(device){
 // TODO: implement!
 // TODO: test!
 exports.getDevicesInView = function(observer){
-	// TODO: implement!
-	// var obseverLineOfSight = factory.makeLineUsingOrientation(observer.Location, observer.Orientation);
+	// TODO: test
+	var returnDevices = {};
+    var observerLineOfSight = new Line(observer.Location, observer.Orientation);
+    var devicesInView = this.GetDevicesInFront(observer);
+
+    devicesInView.forEach(function(target){
+        var wantToSkip = false;
+        if(target.Width == null){
+            wantToSkip = true;
+        }
+        if(!wantToSkip){
+            var sides = this.getLinesOfShape(target);
+            var intersectionPoints = {};
+
+            sides.forEach(function(side){
+                var intPoint = this.getIntersectionPoint(observerLineOfSight, side);
+                if(intPoint != null){
+                    intersectionPoints.push(intPoint);
+                }
+            });
+
+            if(_.size(intersectionPoints) == 0){
+                //this.continue;
+                wantToSkip = true;
+            }
+            if(!wantToSkip){
+                var nearestPoint = intersectionPoints[0];
+                var shortestDistance = this.distanceBetweenPoints(observer.Location, nearestPoint);
+
+                intersectionPoints.forEach(function(point){
+                    var distance = this.distanceBetweenPoints(observer.Location, point);
+                    if(distance < shortestDistance){
+                        nearestPoint = point;
+                        shortestDistance = distance;
+                    }
+                });
+
+                var ratioOnScreen = GetRatioPositionOnScreen(target, nearestPoint);
+
+                target.IntersectionPoint.X = ratioOnScreen.X;
+                target.IntersectionPoint.Y = ratioOnScreen.Y;
+                returnDevices.push(target);
+            }
+        }
+    });
+
+    return returnDevices;
 
 	// List<Device> returnDevices = new List<Device>();
 
@@ -166,7 +215,9 @@ exports.GetDevicesInFront = function(observer){
 // TODO: implement!
 // TODO: test!
 exports.GetNearestDeviceInView = function(observer){
-	// TODO: implement!
+	// TODO: test
+    var devicesInView = this.GetDevicesInView(observer);
+    return this.FindNearestDevice(observer, devicesInView);
 	// List<Device> devicesInView = GetDevicesInView(observer);
 	// return FindNearestDevice(observer, devicesInView);
 }
@@ -174,7 +225,24 @@ exports.GetNearestDeviceInView = function(observer){
 // TODO: implement!
 // TODO: test!
 exports.GetDevicesWithinRange = function(observer, distance){
-	// TODO: implement!
+	// TODO: test
+    var returnDevices = {};
+    if(observer.Location == null){
+        return returnDevices;
+    }
+
+    Devices.forEach(function(device){
+        var wantToSkip = false;
+        if(device == observer){
+           //this.continue /////is this necessary, if it's an else if?
+        }
+        else if(device.Location != null && util.distanceBetweenPoints((observer.Location, device.Location) < distance)){
+            returnDevices.push(device);
+        }
+    });
+
+    return returnDevices;
+
 	// List<Device> returnDevices = new List<Device>();
 
 	// if (!observer.Location.HasValue)
@@ -196,7 +264,10 @@ exports.GetDevicesWithinRange = function(observer, distance){
 // TODO: implement!
 // TODO: test!
 exports.GetNearestDeviceWithinRange = function(observer, distance){
-	// TODO: implement!
+	// TODO: test
+    var devicesInView = this.GetDevicesWithinRange(observer, distance);
+    return this.FindNearestDevice(observer, devicesInView);
+
 	// List<Device> devicesInView = GetDevicesWithinRange(observer, distance);
 	// return FindNearestDevice(observer, devicesInView);
 }
@@ -204,7 +275,31 @@ exports.GetNearestDeviceWithinRange = function(observer, distance){
 // TODO: implement!
 // TODO: test!
 exports.FindNearestDevice = function(observer, deviceList){
-	// TODO: implement!
+	// TODO: test
+    if(_.size(deviceList) > 0){
+        return null;
+    }
+    else{
+        var nearest = null;
+
+        deviceList.forEach(function(device){
+           if(device != observer && device.Location != null){//!=null equivalent to .HasValue?
+               nearest = device;
+           }
+        });
+        if(nearest == null){
+            return null;
+        }
+
+        deviceList.forEach(function(device){
+           if(device != observer && device.Location != null &&
+                        util.distanceBetweenPoints(device.Location, observer.Location) < util.distanceBetweenPoints(nearest.Location, observer.Location)){
+              nearest = device;
+           }
+        });
+        return nearest;
+    }
+
 	// if (deviceList.Count == 0)
 		// return null;
 	// else
