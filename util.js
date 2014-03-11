@@ -54,18 +54,18 @@ exports.getIntersectionPoint = function(line1, line2){
 		return null;
 	else if (line1.isVerticalLine)
 	{
-		var yValue = line2.slope * line1.x + line2.yIntercept;
+		var yValue = line2.slope * line1.x + line2.zIntercept;
 		IntersectionPoint = factory.make2DPoint(line1.x, yValue);
 	}
 	else if (line2.isVerticalLine)
 	{
-		var yValue = line1.slope * line2.x + line1.yIntercept;
+		var yValue = line1.slope * line2.x + line1.zIntercept;
 		IntersectionPoint = factory.make2DPoint(line2.x, yValue);
 	}
 	else
 	{
-		var xValue = (line2.yIntercept - line1.yIntercept) / (line1.slope - line2.slope);
-		var yValue = line1.slope * xValue + line1.yIntercept;
+		var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
+		var yValue = line1.slope * xValue + line1.zIntercept;
 		IntersectionPoint = factory.make2DPoint(xValue, yValue);
 	}
 

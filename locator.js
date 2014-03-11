@@ -1,7 +1,8 @@
 var factory = require('./factory');
 var _ = require('underscore');
+var locator = require('./locator');
 	
-var Persons = []; //consider changing to {}. currently Persons is created with a null object inside
+var Persons = [];
 var Devices = [];
 
 // TODO: test!
@@ -23,8 +24,10 @@ exports.updatePersons = function(person){
             }
         }
         catch(err){
-            //if null or cannot read for some other reason... return false for now
-            return false;
+            //if null or cannot read for some other reason... remove null
+            if(item == null){
+                Persons.splice(Persons.indexOf(item), 1)
+            }
         }
     });
 	
@@ -34,7 +37,7 @@ exports.updatePersons = function(person){
     return found;
 };
 
-// added tests, 1 failing, will check when in lab (see comment of definition for Persons[] above)
+//tested
 exports.printPersons = function(){
 	console.log("People tracked: ");
     var output;

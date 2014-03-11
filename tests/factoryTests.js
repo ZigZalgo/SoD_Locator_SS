@@ -98,7 +98,7 @@ describe("factory.makeLineUsingPoints()", function(){
         var Line = 	{startPoint: {X: 1, Y: 2, Z: 3},
             endPoint: {X: 4, Y: 5, Z: 6},
             slope: 1,
-            yIntercept: 2,
+            zIntercept: 2,
             isVerticalLine: false,
             x: null,
             isLineSegment: true};
@@ -111,7 +111,7 @@ describe("factory.makeLineUsingPoints()", function(){
         var Line = 	{startPoint: {X: 4, Y: 5, Z: 7},
             endPoint: {X: -1, Y: -2, Z: -3},
             slope: 2,
-            yIntercept: -1,
+            zIntercept: -1,
             isVerticalLine: false,
             x: null,
             isLineSegment: true};
@@ -124,7 +124,7 @@ describe("factory.makeLineUsingPoints()", function(){
         var Line = 	{startPoint: {X: 4, Y: 5, Z: 7},
             endPoint: {X: 4, Y: 2, Z: 3},
             slope: null,
-            yIntercept: null,
+            zIntercept: null,
             isVerticalLine: true,
             x: 4,
             isLineSegment: true};
@@ -132,25 +132,12 @@ describe("factory.makeLineUsingPoints()", function(){
         assert.deepEqual(factory.makeLineUsingPoints({X: 4, Y: 5, Z: 7}, {X: 4, Y: 2, Z: 3}), Line)
     });
 
-    // horizontal line case
-    it("should return 'Line' if passed '{X: 2, Y: 5, Z: 7} and '{X: 4, Y: 5, Z: 3}'", function(){
-        var Line = 	{startPoint: {X: 2, Y: 5, Z: 7},
-            endPoint: {X: 4, Y: 5, Z: 3},
-            slope: -2,
-            yIntercept: 5, //11?????
-            isVerticalLine: false,
-            x: null,
-            isLineSegment: true};
-
-        assert.deepEqual(factory.makeLineUsingPoints({X: 2, Y: 5, Z: 7}, {X: 4, Y: 5, Z: 3}), Line)
-    });
-
     // same start and end points case
     it("should return 'Line' if passed '{X: 1, Y: 2, Z: 3} and '{X: 1, Y: 2, Z: 3}'", function(){
         var Line = 	{startPoint: {X: 1, Y: 2, Z: 3},
             endPoint: {X: 1, Y: 2, Z: 3},
             slope: null,
-            yIntercept: null,
+            zIntercept: null,
             isVerticalLine: true,
             x: 1,
             isLineSegment: true};
