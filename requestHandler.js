@@ -1,6 +1,7 @@
 var locator = require('./locator');
 var factory = require('./factory');
 var frontend = require('./frontend');
+var util = require('./util');
 var portList = [];
 
 // TODO: test!
@@ -15,28 +16,42 @@ exports.handleRequest = function (data, socket){
 	var request = JSON.parse(data.toString());
 	var requestType = request.requestType;
 
-    console.log(requestType);
-    console.log("Got request");
+    //console.log(requestType);
+    //console.log("Got request");
 	switch(requestType){
-        case 'requestPort':
-            console.log("handling request for port number");
-            var assignPort = randomIntInc(50000, 60000);
-            console.log(portList.indexOf(assignPort));
-            while(portList.indexOf(assignPort) != -1){
-                var assignPort = randomIntInc(50000, 60000);
+        case 'requestPorts':
+            console.log("handling request for dual port numbers");
+            var assignPairPort = randomIntInc(50000, 60000);
+            var assignRequestPort = randomIntInc(50000, 60000);
+            while(portList.indexOf(assignPairPort) != -1){
+                assignPairPort = randomIntInc(50000, 60000);
             }
-            portList.push(assignPort);
-            frontend.updateSocket(assignPort);
-            console.log("Binded to " + assignPort);
-            socket.send(assignPort);
+            while(portList.indexOf(assignRequestPort) != -1){
+                assignRequestPort = randomIntInc(50000, 60000);
+            }
+            if(util.findWithAttr(portList, "deviceID", request.additionalInfo.deviceID) == undefined){
+                portList.push({"deviceID": request.additionalInfo.deviceID, "pairPort": assignPairPort, "requestPort": assignRequestPort});
+            }
+            else{
+                portList[util.findWithAttr(portList, "deviceID", request.additionalInfo.deviceID)].pairPort = assignPairPort;
+                portList[util.findWithAttr(portList, "deviceID", request.additionalInfo.deviceID)].requestPort = assignRequestPort;
+            }
+
+            frontend.updatePairSocket(assignPairPort);
+            frontend.updateRequestSocket(assignRequestPort);
+            console.log("Binded pair socket to " + assignPairPort + " and request socket to " + assignRequestPort);
+            socket.send(JSON.stringify(portList[util.findWithAttr(portList, "deviceID", request.additionalInfo.deviceID)]));
+            portList.forEach(function(port){
+                console.log(port.deviceID + "\t" + port.pairPort + "\t" + port.requestPort);
+            })
             break;
         case 'relinquishPort':
-            console.log("handling request for relinquishing port " + parseInt(request.additionalInfo));
+            console.log("handling request for relinquishing port " + parseInt(request.additionalInfo.port));
             try{
-                portList.splice(portList.indexOf(parseInt(request.additionalInfo)), 1)
+                portList.splice(portList.indexOf(parseInt(request.additionalInfo.port)), 1)
                 console.log("Ports tracked: " + portList);
-                frontend.unbindSocket(request.additionalInfo);
-                socket.send('success');
+                frontend.unbindSocket(request.additionalInfo.port);
+                socket.send(JSON.stringify({"status": 'success', "port": request.additionalInfo.port}));
             }
             catch(err){
                 console.log(err);
@@ -50,16 +65,42 @@ exports.handleRequest = function (data, socket){
 				locator.updatePersons(person);
 
 				// Logging current list of users in the locator
-				locator.printPersons();
+				//locator.printPersons();
 			});
             console.log("handling request for update person");
 			break;
 		case 'deviceUpdate':
-			console.log(requestBody);
+            break;
+        case 'updateOrientation':
+            var device = new factory.Device();
+            device.Orientation = request.additionalInfo.orientation;
+            device.ID = request.additionalInfo.deviceID;
+            locator.updateDeviceOrientation(device);
+            locator.printDevices();
+            break;
 		case 'gestureSent':
 			break;
 		case 'spatialRequest':
 			break;
+        case 'setPairingState':
+            locator.setPairingState(request.additionalInfo.deviceID);
+            break;
+        case 'unpairDevice':
+            locator.unpairDevice(request.additionalInfo.deviceID, request.additionalInfo.personID);
+            break;
+        case 'getPeople':
+            locator.purgeInactivePersons();
+            socket.send(JSON.stringify(locator.Persons));
+            break;
+        case 'getDevices':
+            locator.purgeInactiveDevices();
+            socket.send(JSON.stringify(locator.Devices));
+            break;
+        case 'forcePair':
+            var deviceID = request.additionalInfo.deviceID;
+            var personID = request.additionalInfo.personID;
+            locator.pairDevice(deviceID, personID, socket);
+            break;
 	}
 }
 

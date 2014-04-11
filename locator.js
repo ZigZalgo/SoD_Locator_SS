@@ -1,9 +1,12 @@
 var factory = require('./factory');
 var _ = require('underscore');
 var locator = require('./locator');
+var util = require('./util');
 	
 var Persons = [];
 var Devices = [];
+exports.Persons = Persons;
+exports.Devices = Devices;
 
 // TODO: test!
 exports.start = function(){
@@ -12,30 +15,64 @@ exports.start = function(){
 
 // tested
 exports.updatePersons = function(person){
-    var found = false;
-    Persons.forEach(function(item) {
+    this.purgeInactivePersons();
+    if(util.findWithAttr(Persons, "ID", person.ID) != undefined){
         try{
-            if(item.ID == person.ID){
-                found = true;
-
-                Persons[Persons.indexOf(item)].Location.X = person.Location.X;
-                Persons[Persons.indexOf(item)].Location.Y = person.Location.Y;
-                Persons[Persons.indexOf(item)].Location.Z = person.Location.Z;
+            Persons[util.findWithAttr(Persons, "ID", person.ID)].Location.X = person.Location.X;
+            Persons[util.findWithAttr(Persons, "ID", person.ID)].Location.Y = person.Location.Y;
+            Persons[util.findWithAttr(Persons, "ID", person.ID)].Location.Z = person.Location.Z;
+            Persons[util.findWithAttr(Persons, "ID", person.ID)].LastUpdated = new Date();
+            if(Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID != null){
+                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.X = person.Location.X;
+                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.Y = person.Location.Y;
+                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.Z = person.Location.Y;
             }
         }
         catch(err){
             //if null or cannot read for some other reason... remove null
-            if(item == null){
-                Persons.splice(Persons.indexOf(item), 1)
+            if(Persons[util.findWithAttr(Persons, "ID", person.ID)] == null){
+                Persons.splice(util.findWithAttr(Persons, "ID", person.ID), 1)
             }
         }
-    });
-	
-	if(!found){
-		Persons.push(person);
+    }
+	else{
+        if(person.ID != undefined && person.Location != undefined){
+            person.LastUpdated = new Date();
+            Persons.push(person);
+        }
 	}
-    return found;
 };
+
+exports.pairDevice = function(deviceID, personID, socket){
+    var deviceIndex = util.findWithAttr(Devices, "ID", deviceID);
+    var personIndex = util.findWithAttr(Persons, "ID", personID);
+    var statusMsg = "Device ID: " + deviceID +
+                    "\nDevice Index: " + deviceIndex +
+                    "\nPerson ID: " + personID +
+                    "\nPerson Index: " + personIndex + "\n\n";
+    if(deviceIndex != undefined && personIndex != undefined){
+        if(Devices[deviceIndex].PairingState == "unpaired" && Persons[personIndex].PairingState == "unpaired"){
+            Devices[deviceIndex].OwnerID = Persons[personIndex].ID;
+            Devices[deviceIndex].PairingState = "paired";
+            Persons[personIndex].OwnedDeviceID = Devices[deviceIndex].ID;
+            Persons[personIndex].PairingState = "paired";
+            statusMsg += "\n Pairing successful.";
+        }
+        else{
+            statusMsg += "\nPairing attempt unsuccessful";
+            if(Devices[deviceIndex].PairingState != "unpaired"){
+                statusMsg += "Device unavailable for pairing.";
+            }
+            if(Persons[personIndex].PairingState != "unpaired"){
+                statusMsg += "Person unavailable for pairing.";
+            }
+        }
+    }
+    else{
+        statusMsg += "Pairing attempt unsuccessful. One or both objects were not found.";
+    }
+    socket.send(JSON.stringify({"status": statusMsg, "ownerID": personID}));
+}
 
 //tested
 exports.printPersons = function(){
@@ -47,7 +84,8 @@ exports.printPersons = function(){
             output = "ID: " + item.ID +
                 "     X: " + item.Location.X +
                 "     Y: " + item.Location.Y +
-                "     Z: " + item.Location.Z;
+                "     Z: " + item.Location.Z +
+                "     Orientation: " + item.Orientation;
             console.log(output)
             if(item = null){
                 console.log("null person");
@@ -62,10 +100,104 @@ exports.printPersons = function(){
     return true;
 }
 
+exports.purgeInactiveDevices = function(){
+    Devices.forEach(function(device){
+        var timeDifference = (new Date() - device.LastUpdated);
+        if(timeDifference > 3000){
+            //console.log("TIME DIFFERENCE: " + timeDifference);
+            Devices.splice(Devices.indexOf(device), 1)
+        }
+    })
+}
+
+exports.setPairingState = function(deviceID){
+    var index = util.findWithAttr(Devices, 'ID', deviceID);
+    if(index != -1){
+        Devices[index].PairingState = "pairing";
+    }
+}
+
+exports.unpairDevice = function(deviceID, personID){
+    if(util.findWithAttr(Devices, 'ID', deviceID) != undefined){
+        Devices[util.findWithAttr(Devices, 'ID', deviceID)].PairingState = "unpaired";
+        Devices[util.findWithAttr(Devices, 'ID', deviceID)].OwnerID = null;
+        Devices[util.findWithAttr(Devices, 'ID', deviceID)].Location.X = null;
+        Devices[util.findWithAttr(Devices, 'ID', deviceID)].Location.Y = null;
+        Devices[util.findWithAttr(Devices, 'ID', deviceID)].Location.Z = null;
+    }
+    if(util.findWithAttr(Persons, 'ID', personID) != undefined){
+        Persons[util.findWithAttr(Persons, "ID", personID)].PairingState = "unpaired";
+        Persons[util.findWithAttr(Persons, "ID", personID)].OwnedDeviceID = null;
+        Persons[util.findWithAttr(Persons, "ID", personID)].Orientation = null;
+    }
+}
+
+exports.purgeInactivePersons = function(){
+    Persons.forEach(function(person){
+        var timeDifference = (new Date() - person.LastUpdated);
+        if(timeDifference > 3000){
+            if(person.OwnedDeviceID != null){
+                Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].PairingState = "unpaired";
+                Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].OwnerID = null;
+            }
+            Persons.splice(Persons.indexOf(person), 1)
+        }
+    })
+}
+
+exports.printDevices = function(){
+    console.log("Devices tracked: ");
+    var output;
+    //console.log(Devices);
+    try{
+        Devices.forEach(function(item) {
+            output = "ID: " + item.ID +
+                "     X: " + item.Location.X +
+                "     Y: " + item.Location.Y +
+                "     Z: " + item.Location.Z +
+                "     Orientation: " + item.Orientation +
+                "     PairingState: " + item.PairingState;
+            console.log(output)
+            if(item = null){
+                console.log("null device");
+            }
+        });
+    }
+    catch(err){
+        console.log(err);
+        return false;
+    }
+    console.log("///////////////////////////////////////////////////////////////");
+    return true;
+}
+
 // TODO: implement!
 // TODO: test!
-exports.updateDevices = function(device){
-	// TODO: implement!
+exports.updateDeviceOrientation = function(device){
+    this.purgeInactiveDevices();
+    if(util.findWithAttr(Devices, "ID", device.ID) != undefined){
+        try{
+            Devices[util.findWithAttr(Devices, "ID", device.ID)].Orientation = device.Orientation;
+            Devices[util.findWithAttr(Devices, "ID", device.ID)].LastUpdated = new Date();
+
+            if(Devices[util.findWithAttr(Devices, "ID", device.ID)].OwnerID != null){
+                Persons[util.findWithAttr(Persons, "ID", Devices[util.findWithAttr(Devices, "ID", device.ID)].OwnerID)].Orientation = device.Orientation;
+                console.log("THIS PART OF THE CODE EXECUTED");
+            }
+        }
+        catch(err){
+            //if null or cannot read for some other reason... remove null
+            if(Devices[util.findWithAttr(Devices, "ID", device.ID)] == null){
+                Devices.splice(Devices.indexOf(Devices[util.findWithAttr(Devices, "ID", device.ID)]), 1)
+            }
+        }
+    }
+    else{
+        if(device.ID != undefined && device.Orientation != undefined){
+            device.LastUpdated = new Date();
+            Devices.push(device);
+        }
+    }
 }
 
 // TODO: implement!
@@ -73,7 +205,7 @@ exports.updateDevices = function(device){
 exports.getDevicesInView = function(observer){
 	// TODO: test
 	var returnDevices = {};
-    var observerLineOfSight = new Line(observer.Location, observer.Orientation);
+    var observerLineOfSight = factory.makeLineUsingOrientation(observer.Location, observer.Orientation);
     var devicesInView = this.GetDevicesInFront(observer);
 
     devicesInView.forEach(function(target){
@@ -82,11 +214,11 @@ exports.getDevicesInView = function(observer){
             wantToSkip = true;
         }
         if(!wantToSkip){
-            var sides = this.getLinesOfShape(target);
+            var sides = util.getLinesOfShape(target);
             var intersectionPoints = {};
 
             sides.forEach(function(side){
-                var intPoint = this.getIntersectionPoint(observerLineOfSight, side);
+                var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
                 if(intPoint != null){
                     intersectionPoints.push(intPoint);
                 }
@@ -98,17 +230,17 @@ exports.getDevicesInView = function(observer){
             }
             if(!wantToSkip){
                 var nearestPoint = intersectionPoints[0];
-                var shortestDistance = this.distanceBetweenPoints(observer.Location, nearestPoint);
+                var shortestDistance = util.distanceBetweenPoints(observer.Location, nearestPoint);
 
                 intersectionPoints.forEach(function(point){
-                    var distance = this.distanceBetweenPoints(observer.Location, point);
+                    var distance = util.distanceBetweenPoints(observer.Location, point);
                     if(distance < shortestDistance){
                         nearestPoint = point;
                         shortestDistance = distance;
                     }
                 });
 
-                var ratioOnScreen = GetRatioPositionOnScreen(target, nearestPoint);
+                var ratioOnScreen = util.GetRatioPositionOnScreen(target, nearestPoint);
 
                 target.IntersectionPoint.X = ratioOnScreen.X;
                 target.IntersectionPoint.Y = ratioOnScreen.Y;

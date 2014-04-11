@@ -20,7 +20,9 @@ function Person(id, location){
         this.Location = location;
         this.Orientation = null;
         this.OwnedDeviceID = null;
+        this.PairingState = "unpaired";
         this.TrackedBy = [];
+        this.LastUpdated = new Date();
     }
     catch(err){
         return false;
@@ -45,7 +47,9 @@ function Device(){
         this.Height = null;
         this.Width =  null;
         this.OwnerID = null;
+        this.PairingState = "unpaired";
         this.IntersectionPoint = {X: 0, Y: 0};
+        this.LastUpdated = new Date();
     }
     catch(err){
     }

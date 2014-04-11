@@ -239,3 +239,11 @@ exports.translateFromCoordinateSpace = function(){
 	// Leave until we have multiple Kinects. Otherwise, use the Kinect coordinate space
 	// We will probably need this but we might need to re-implement it in a different way
 }
+
+exports.findWithAttr = function(array, attr, value) {
+    for(var i = 0; i < array.length; i += 1) {
+        if(array[i][attr] === value) {
+            return i;
+        }
+    }
+}
