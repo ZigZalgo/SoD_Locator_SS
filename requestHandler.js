@@ -9,6 +9,14 @@ exports.start = function (){
 	locator.start();
 }
 
+exports.getDevicesInView = function(device){
+	return locator.getDevicesInFront(device.ID);
+}
+
+exports.registerDevice = function(device){
+	locator.Devices.push(device);
+}
+
 // TODO: test!
 exports.handleRequest = function (data, socket){
 	

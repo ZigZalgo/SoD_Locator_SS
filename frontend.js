@@ -1,10 +1,22 @@
+var io = require('socket.io').listen(3000);
+
 var zmq = require('zmq'),
 	requestHandler = require('./requestHandler');
 	
 var request_socket = zmq.socket('rep');
 var pull_socket = zmq.socket('pull');
-var address = 'tcp://192.168.20.12:'
+var address = 'tcp://192.168.20.179:'
 //var socketList = [socket];
+
+io.sockets.on('connection', function (socket) {
+  socket.on('getDevicesInView', function (device, fn) {
+    fn(requestHandler.getDevicesInView(device));
+  });
+  
+  socket.on('registerDevice', function(device){
+	requestHandler.registerDevice(device);
+  });
+});
 
 requestHandler.start();
 
