@@ -1,24 +1,84 @@
 var io = require('socket.io').listen(3000);
-
 var zmq = require('zmq'),
-	requestHandler = require('./requestHandler');
+    requestHandler = require('./requestHandler');
+var factory = require('./factory');
+var locator = requestHandler.locator;
 	
 var request_socket = zmq.socket('rep');
 var pull_socket = zmq.socket('pull');
-var address = 'tcp://192.168.20.179:'
+var address = 'tcp://192.168.20.12:'
 //var socketList = [socket];
 
-io.sockets.on('connection', function (socket) {
-  socket.on('getDevicesInView', function (device, fn) {
-    fn(requestHandler.getDevicesInView(device));
-  });
-  
-  socket.on('registerDevice', function(device){
-	requestHandler.registerDevice(device);
-  });
-});
-
 requestHandler.start();
+
+io.sockets.on('connection', function (socket) {
+    socket.on('getDevicesInView', function (device, fn) {
+        fn(requestHandler.getDevicesInView(device));
+    });
+  
+    socket.on('registerDevice', function(device){
+    	requestHandler.registerDevice(device);
+    });
+
+    socket.on('setPairingState', function (data) {
+        locator.setPairingState(data.additionalInfo.deviceID);
+    });
+
+    socket.on('unpairDevice', function (request) {
+        locator.unpairDevice(request.additionalInfo.deviceID, request.additionalInfo.personID);
+    });
+
+    socket.on('sendOrientation', function (request) {
+        var device = new factory.Device();
+        device.Orientation = request.additionalInfo.orientation;
+        device.ID = request.additionalInfo.deviceID;
+        locator.updateDeviceOrientation(device);
+    });
+
+    socket.on('unpairDevice', function (request) {
+        locator.unpairDevice(request.additionalInfo.deviceID, request.additionalInfo.personID);
+    });
+
+    socket.on('unpairAllPeople', function (request, fn) {
+        locator.unpairAllPeople();
+        fn(JSON.stringify({"status": 'success'}));
+    });
+
+    socket.on('sendDeviceInfoToServer', function (request, fn) {
+        console.log("Got request to init device");
+        locator.initDevice(request.additionalInfo.deviceID, request.additionalInfo.height, request.additionalInfo.width);
+        fn(JSON.stringify({"status": 'success'}));
+    });
+
+    socket.on('getPeopleFromServer', function (request, fn) {
+        locator.purgeInactivePersons();
+        fn(JSON.stringify(locator.Persons));
+    });
+
+    socket.on('getDevicesWithSelection', function (request, fn) {
+        locator.purgeInactiveDevices();
+        console.log(request.additionalInfo.selection);
+        switch(request.additionalInfo.selection){
+            case 'all':
+                fn(JSON.stringify(locator.Devices));
+                break;
+            case 'inView':
+                console.log("GETTING ALL DEVICES IN VIEW");
+                fn(JSON.stringify(locator.Persons))
+                console.log(locator.getDevicesInFront(request.additionalInfo.deviceID));
+                break;
+            default:
+                fn(JSON.stringify(locator.Devices));
+        }
+    });
+
+    socket.on('forcePairRequest', function (request, fn) {
+        var deviceID = request.additionalInfo.deviceID;
+        var personID = request.additionalInfo.personID;
+        locator.pairDevice(deviceID, personID, socket);
+        fn(JSON.stringify({"status": 'success'}));
+    });
+});
 
 request_socket.bindSync(address + '5570');
 

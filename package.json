@@ -8,9 +8,10 @@
   "dependencies": {
     "jade": "*",
     "zmq": "*",
-	"chai": "*",
-	"mocha": "*",
+    "chai": "*",
+    "mocha": "*",
     "underscore": "*",
-	"socket.io": "*"
+    "socket.io": "*",
+    "zeparser": "0.0.7"
   }
 }

@@ -17,6 +17,8 @@ exports.registerDevice = function(device){
 	locator.Devices.push(device);
 }
 
+exports.locator = locator;
+
 // TODO: test!
 exports.handleRequest = function (data, socket){
 	
@@ -123,6 +125,7 @@ exports.handleRequest = function (data, socket){
             break;
         case 'unpairAllPeople':
             locator.unpairAllPeople();
+            socket.send(JSON.stringify({"status": 'success'}));
             break;
         case 'initDevice':
             console.log("Got request to init device");
