@@ -67,7 +67,7 @@ exports.handleRequest = function (data, socket){
 				// Logging current list of users in the locator
 				//locator.printPersons();
 			});
-            console.log("handling request for update person");
+            //console.log("handling request for update person");
 			break;
 		case 'deviceUpdate':
             break;
@@ -76,7 +76,7 @@ exports.handleRequest = function (data, socket){
             device.Orientation = request.additionalInfo.orientation;
             device.ID = request.additionalInfo.deviceID;
             locator.updateDeviceOrientation(device);
-            locator.printDevices();
+            //locator.printDevices();
             break;
 		case 'gestureSent':
 			break;
@@ -94,12 +94,32 @@ exports.handleRequest = function (data, socket){
             break;
         case 'getDevices':
             locator.purgeInactiveDevices();
-            socket.send(JSON.stringify(locator.Devices));
+            console.log(request.additionalInfo.selection);
+            switch(request.additionalInfo.selection){
+                case 'all':
+                    socket.send(JSON.stringify(locator.Devices));
+                    break;
+                case 'inView':
+                    console.log("GETTING ALL DEVICES IN VIEW");
+                    socket.send(JSON.stringify(locator.Persons))
+                    console.log(locator.getDevicesInFront(request.additionalInfo.deviceID));
+                    break;
+                default:
+                    socket.send(JSON.stringify(locator.Devices));
+            }
             break;
         case 'forcePair':
             var deviceID = request.additionalInfo.deviceID;
             var personID = request.additionalInfo.personID;
             locator.pairDevice(deviceID, personID, socket);
+            break;
+        case 'unpairAllPeople':
+            locator.unpairAllPeople();
+            break;
+        case 'initDevice':
+            console.log("Got request to init device");
+            locator.initDevice(request.additionalInfo.deviceID, request.additionalInfo.height, request.additionalInfo.width);
+            socket.send(JSON.stringify({"status": 'success'}));
             break;
 	}
 }

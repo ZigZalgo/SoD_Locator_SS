@@ -1,6 +1,6 @@
 var factory = require('./factory');
 
-var DEFAULT_FIELD_OF_VIEW = 25.0;
+exports.DEFAULT_FIELD_OF_VIEW = 25.0;
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
 

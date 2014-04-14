@@ -2,6 +2,8 @@ var factory = require('./factory');
 var _ = require('underscore');
 var locator = require('./locator');
 var util = require('./util');
+var events = require("events");
+var EventEmitter = require("events").EventEmitter;
 	
 var Persons = [];
 var Devices = [];
@@ -25,7 +27,7 @@ exports.updatePersons = function(person){
             if(Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID != null){
                 Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.X = person.Location.X;
                 Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.Y = person.Location.Y;
-                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.Z = person.Location.Y;
+                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.Z = person.Location.Z;
             }
         }
         catch(err){
@@ -182,7 +184,6 @@ exports.updateDeviceOrientation = function(device){
 
             if(Devices[util.findWithAttr(Devices, "ID", device.ID)].OwnerID != null){
                 Persons[util.findWithAttr(Persons, "ID", Devices[util.findWithAttr(Devices, "ID", device.ID)].OwnerID)].Orientation = device.Orientation;
-                console.log("THIS PART OF THE CODE EXECUTED");
             }
         }
         catch(err){
@@ -200,56 +201,85 @@ exports.updateDeviceOrientation = function(device){
     }
 }
 
+exports.unpairAllPeople = function(){
+    Persons.forEach(function(person){
+        if(person != null){
+            person.PairingState == null;
+        }
+    })
+}
+
+exports.initDevice = function(deviceID, height, width){
+    if(util.findWithAttr(Devices, "ID", deviceID) != undefined){
+        Devices[util.findWithAttr(Devices, "ID", deviceID)].Height = height;
+        Devices[util.findWithAttr(Devices, "ID", deviceID)].Width = width;
+        console.log("Device initiated late, updating height and width");
+    }
+    else{
+        var device = new factory.Device();
+        device.ID = deviceID;
+        device.Height = height;
+        device.Width = width;
+        device.LastUpdated = new Date();
+        Devices.push(device);
+        console.log("Initiating device");
+    }
+}
+
 // TODO: implement!
 // TODO: test!
-exports.getDevicesInView = function(observer){
+exports.getDevicesInView = function(observer, devicesInFront){
+    console.log("GetDevicesInView was called");
 	// TODO: test
-	var returnDevices = {};
+    console.log(observer);
+	//var returnDevices = {};
+    var returnDevices = [];
     var observerLineOfSight = factory.makeLineUsingOrientation(observer.Location, observer.Orientation);
-    var devicesInView = this.GetDevicesInFront(observer);
-
-    devicesInView.forEach(function(target){
-        var wantToSkip = false;
-        if(target.Width == null){
-            wantToSkip = true;
+    for(var i = 0; i <= devicesInFront.length; i++){
+        console.log("i: " + i + " // " + devicesInFront.length);
+        console.log("Devices in front: " + devicesInFront);
+        if(i == devicesInFront.length){
+            console.log("returning devices for sending: " + returnDevices);
+            return returnDevices;
         }
-        if(!wantToSkip){
-            var sides = util.getLinesOfShape(target);
-            var intersectionPoints = {};
+        else{
+            console.log(devicesInFront[i]);
+            if(devicesInFront[i].Width != null){
+                console.log("width not null");
+                var sides = util.getLinesOfShape(devicesInFront[i]);
+                var intersectionPoints = [];
 
-            sides.forEach(function(side){
-                var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
-                if(intPoint != null){
-                    intersectionPoints.push(intPoint);
-                }
-            });
-
-            if(_.size(intersectionPoints) == 0){
-                //this.continue;
-                wantToSkip = true;
-            }
-            if(!wantToSkip){
-                var nearestPoint = intersectionPoints[0];
-                var shortestDistance = util.distanceBetweenPoints(observer.Location, nearestPoint);
-
-                intersectionPoints.forEach(function(point){
-                    var distance = util.distanceBetweenPoints(observer.Location, point);
-                    if(distance < shortestDistance){
-                        nearestPoint = point;
-                        shortestDistance = distance;
+                sides.forEach(function(side){
+                    var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
+                    if(intPoint != null){
+                        intersectionPoints.push(intPoint);
                     }
                 });
 
-                var ratioOnScreen = util.GetRatioPositionOnScreen(target, nearestPoint);
+                if(intersectionPoints.length != 0){
+                    console.log("intersection points not empty");
+                    //this.continue;
+                    var nearestPoint = intersectionPoints[0];
+                    var shortestDistance = util.distanceBetweenPoints(observer.Location, nearestPoint);
 
-                target.IntersectionPoint.X = ratioOnScreen.X;
-                target.IntersectionPoint.Y = ratioOnScreen.Y;
-                returnDevices.push(target);
+                    intersectionPoints.forEach(function(point){
+                        var distance = util.distanceBetweenPoints(observer.Location, point);
+                        if(distance < shortestDistance){
+                            nearestPoint = point;
+                            shortestDistance = distance;
+                        }
+                    });
+
+                    var ratioOnScreen = util.GetRatioPositionOnScreen(devicesInFront[i], nearestPoint);
+
+                    devicesInFront[i].IntersectionPoint.X = ratioOnScreen.X;
+                    devicesInFront[i].IntersectionPoint.Y = ratioOnScreen.Y;
+                    console.log("Pushed a target for sending!");
+                    returnDevices.push(devicesInFront[i]);
+                }
             }
         }
-    });
-
-    return returnDevices;
+    };
 
 	// List<Device> returnDevices = new List<Device>();
 
@@ -301,21 +331,48 @@ exports.getDevicesInView = function(observer){
 
 // TODO: implement!
 // TODO: test!
-exports.GetDevicesInFront = function(observer){
+exports.getDevicesInFront = function(observerID){
 	// TODO: implement!
 	// List<Device> returnDevices = new List<Device>();
+    var observer = Devices[util.findWithAttr(Devices, "ID", observerID)];
+    console.log("GetDevicesInFront was called");
+    var returnDevices = [];
 
 	// //(CB - Should we throw an exception here? Rather then just returning an empty list?)
-	// if (observer.Location == null || observer.Orientation == null)
-		// return returnDevices;
-	// if (observer.FieldOfView == 0.0)
-		// return returnDevices;
+	 if (observer.Location == null || observer.Orientation == null)
+		 return returnDevices;
+	 if (observer.FOV == 0.0)
+		 return returnDevices;
 
 	// // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
 	// // We will use angles to represent these vectors.
-	// double leftFieldOfView = Util.NormalizeAngle(observer.Orientation.Value + 30);
-	// double rightFieldOfView = Util.NormalizeAngle(observer.Orientation.Value - 30);
+	 var leftFieldOfView = util.normalizeAngle(observer.Orientation + 30);
+	 var rightFieldOfView = util.normalizeAngle(observer.Orientation - 30);
 
+    for(var i = 0; i <= Devices.length; i++){
+        console.log("i: " + i);
+        if(i == Devices.length){
+            console.log("returning devices: " + returnDevices);
+            return this.getDevicesInView(observer, returnDevices);
+        }
+        else{
+            console.log("Searching all devices...");
+            if(Devices[i] != observer && Devices[i].Location != undefined){
+                var angle = util.normalizeAngle(Math.atan2(Devices[i].Location.Y - observer.Location.Y, Devices[i].Location.X - observer.Location.X) * 180 / Math.PI);
+                if (leftFieldOfView > rightFieldOfView && angle < leftFieldOfView && angle > rightFieldOfView){
+                    console.log("Pushed a target1!: " + Devices[i]);
+                    returnDevices.push(Devices[i]);
+                }
+            }
+            else if (leftFieldOfView < rightFieldOfView)
+            {
+                if (angle < leftFieldOfView || angle > rightFieldOfView){
+                    returnDevices.push(Devices[i]);
+                    console.log("Pushed a target2!: " + Devices[i]);
+                }
+            }
+        }
+    }
 
 	// foreach (Device target in _devices)
 	// {

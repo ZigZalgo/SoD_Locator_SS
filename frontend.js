@@ -11,7 +11,7 @@ requestHandler.start();
 request_socket.bindSync(address + '5570');
 
 request_socket.on('message', function (data) {
-    console.log("Received request on request socket");
+    //console.log("Received request on request socket");
     console.log(data);
     requestHandler.handleRequest(data, request_socket);
 });
@@ -39,7 +39,7 @@ exports.unbindSocket = function(portNumber){
 }
 
 pull_socket.on('message', function (data) {
-    console.log("Received request on pull socket");
+    //console.log("Received request on pull socket");
     requestHandler.handleRequest(data, pull_socket);
 });
 
