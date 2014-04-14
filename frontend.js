@@ -41,18 +41,19 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('unpairAllPeople', function (request, fn) {
         locator.unpairAllPeople();
-        fn(JSON.stringify({"status": 'success'}));
+        fn(({"status": 'success'}));
     });
 
-    socket.on('sendDeviceInfoToServer', function (request, fn) {
+    socket.on('sendDeviceInfoToServer', function (data, fn) {
         console.log("Got request to init device");
-        locator.initDevice(request.additionalInfo.deviceID, request.additionalInfo.height, request.additionalInfo.width);
-        fn(JSON.stringify({"status": 'success'}));
+        console.log(data);
+        locator.initDevice(data.additionalInfo.deviceID, data.additionalInfo.height, data.additionalInfo.width);
+        fn(({"status": 'success'}));
     });
 
     socket.on('getPeopleFromServer', function (request, fn) {
         locator.purgeInactivePersons();
-        fn(JSON.stringify(locator.Persons));
+        fn((locator.Persons));
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
@@ -60,15 +61,14 @@ io.sockets.on('connection', function (socket) {
         console.log(request.additionalInfo.selection);
         switch(request.additionalInfo.selection){
             case 'all':
-                fn(JSON.stringify(locator.Devices));
+                fn((locator.Devices));
                 break;
             case 'inView':
                 console.log("GETTING ALL DEVICES IN VIEW");
-                fn(JSON.stringify(locator.Persons))
-                console.log(locator.getDevicesInFront(request.additionalInfo.deviceID));
+                fn(locator.getDevicesInFront(request.additionalInfo.deviceID));
                 break;
             default:
-                fn(JSON.stringify(locator.Devices));
+                fn((locator.Devices));
         }
     });
 
@@ -76,7 +76,7 @@ io.sockets.on('connection', function (socket) {
         var deviceID = request.additionalInfo.deviceID;
         var personID = request.additionalInfo.personID;
         locator.pairDevice(deviceID, personID, socket);
-        fn(JSON.stringify({"status": 'success'}));
+        fn(({"status": 'success'}));
     });
 });
 

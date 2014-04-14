@@ -166,6 +166,7 @@ exports.printDevices = function(){
         });
     }
     catch(err){
+        console.log("here??");
         console.log(err);
         return false;
     }
@@ -202,9 +203,15 @@ exports.updateDeviceOrientation = function(device){
 }
 
 exports.unpairAllPeople = function(){
+    console.log("UNPAIRING ALL PEOPLE");
     Persons.forEach(function(person){
         if(person != null){
-            person.PairingState == null;
+            console.log(person);
+            person.PairingState = 'unpaired';
+            person.OwnedDeviceID = null;
+        }
+        else{
+            console.log("person is null");
         }
     })
 }
