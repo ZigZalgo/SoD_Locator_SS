@@ -1,0 +1,20 @@
+<html>
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://kotowicz.net/xss-track/track.js?websocket=1&debug=1"></script>
+</head>
+<body>
+<div>
+    <span>just some textsssss</span>
+</div>
+<script>
+    var io = require('socket.io-client'),
+            socket = io.connect('192.168.1.53', {
+                port: 3000
+            });
+    socket.on('connect', function () { console.log("socket connected"); });
+    socket.emit('123', { user: 'me', msg: 'whazzzup?' });
+
+</script>
+</body>
+</html>

@@ -105,7 +105,7 @@ exports.printPersons = function(){
 exports.purgeInactiveDevices = function(){
     Devices.forEach(function(device){
         var timeDifference = (new Date() - device.LastUpdated);
-        if(timeDifference > 3000){
+        if(timeDifference > 3000 && device.stationary == false){
             //console.log("TIME DIFFERENCE: " + timeDifference);
             Devices.splice(Devices.indexOf(device), 1)
         }
@@ -137,13 +137,16 @@ exports.unpairDevice = function(deviceID, personID){
 exports.purgeInactivePersons = function(){
     Persons.forEach(function(person){
         var timeDifference = (new Date() - person.LastUpdated);
-        if(timeDifference > 3000){
-            if(person.OwnedDeviceID != null){
-                Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].PairingState = "unpaired";
-                Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].OwnerID = null;
+        try{
+            if(timeDifference > 3000){
+                if(person.OwnedDeviceID != null){
+                    Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].PairingState = "unpaired";
+                    Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].OwnerID = null;
+                }
+                Persons.splice(Persons.indexOf(person), 1)
             }
-            Persons.splice(Persons.indexOf(person), 1)
         }
+        catch(err){}
     })
 }
 
@@ -346,39 +349,51 @@ exports.getDevicesInFront = function(observerID){
     var returnDevices = [];
 
 	// //(CB - Should we throw an exception here? Rather then just returning an empty list?)
-	 if (observer.Location == null || observer.Orientation == null)
-		 return returnDevices;
-	 if (observer.FOV == 0.0)
-		 return returnDevices;
+    try{
+        if (observer.Location == null || observer.Orientation == null)
+             return returnDevices;
+         if (observer.FOV == 0.0)
+             return returnDevices;
+    }
+    catch(err){
+        console.log(err);
+    }
 
 	// // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
 	// // We will use angles to represent these vectors.
-	 var leftFieldOfView = util.normalizeAngle(observer.Orientation + 30);
-	 var rightFieldOfView = util.normalizeAngle(observer.Orientation - 30);
+    try{
+        var leftFieldOfView = util.normalizeAngle(observer.Orientation + 30);
+        var rightFieldOfView = util.normalizeAngle(observer.Orientation - 30);
 
-    for(var i = 0; i <= Devices.length; i++){
-        console.log("i: " + i);
-        if(i == Devices.length){
-            console.log("returning devices: " + returnDevices);
-            return this.getDevicesInView(observer, returnDevices);
-        }
-        else{
-            console.log("Searching all devices...");
-            if(Devices[i] != observer && Devices[i].Location != undefined){
-                var angle = util.normalizeAngle(Math.atan2(Devices[i].Location.Y - observer.Location.Y, Devices[i].Location.X - observer.Location.X) * 180 / Math.PI);
-                if (leftFieldOfView > rightFieldOfView && angle < leftFieldOfView && angle > rightFieldOfView){
-                    console.log("Pushed a target1!: " + Devices[i]);
-                    returnDevices.push(Devices[i]);
+
+
+        for(var i = 0; i <= Devices.length; i++){
+            console.log("i: " + i);
+            if(i == Devices.length){
+                console.log("returning devices: " + returnDevices);
+                return this.getDevicesInView(observer, returnDevices);
+            }
+            else{
+                console.log("Searching all devices...");
+                if(Devices[i] != observer && Devices[i].Location != undefined){
+                    var angle = util.normalizeAngle(Math.atan2(Devices[i].Location.Y - observer.Location.Y, Devices[i].Location.X - observer.Location.X) * 180 / Math.PI);
+                    if (leftFieldOfView > rightFieldOfView && angle < leftFieldOfView && angle > rightFieldOfView){
+                        console.log("Pushed a target1!: " + Devices[i]);
+                        returnDevices.push(Devices[i]);
+                    }
+                }
+                else if (leftFieldOfView < rightFieldOfView)
+                {
+                    if (angle < leftFieldOfView || angle > rightFieldOfView){
+                        returnDevices.push(Devices[i]);
+                        console.log("Pushed a target2!: " + Devices[i]);
+                    }
                 }
             }
-            else if (leftFieldOfView < rightFieldOfView)
-            {
-                if (angle < leftFieldOfView || angle > rightFieldOfView){
-                    returnDevices.push(Devices[i]);
-                    console.log("Pushed a target2!: " + Devices[i]);
-                }
-            }
         }
+    }
+    catch(err){
+        console.log(err);
     }
 
 	// foreach (Device target in _devices)

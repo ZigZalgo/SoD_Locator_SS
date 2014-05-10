@@ -50,6 +50,7 @@ function Device(){
         this.PairingState = "unpaired";
         this.IntersectionPoint = {X: 0, Y: 0};
         this.LastUpdated = new Date();
+        this.stationary = false;
     }
     catch(err){
     }

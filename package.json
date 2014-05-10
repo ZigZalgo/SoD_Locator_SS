@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "jade": "*",
-    "zmq": "*",
     "chai": "*",
     "mocha": "*",
     "underscore": "*",

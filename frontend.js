@@ -1,121 +1,26 @@
-var io = require('socket.io').listen(3000);
-var zmq = require('zmq'),
-    requestHandler = require('./requestHandler');
+var express = require('express');
+var app = express();
+var http = require('http')
+    , server = http.createServer(app)
+    , io = require('socket.io').listen(server);
+io.set('log level',5);
+var requestHandler = require('./requestHandler');
 var factory = require('./factory');
 var locator = requestHandler.locator;
-	
-var request_socket = zmq.socket('rep');
-var pull_socket = zmq.socket('pull');
-var address = 'tcp://192.168.20.12:'
+
+//var address = 'tcp://192.168.0.104:'
+server.listen(3000);
 //var socketList = [socket];
+
+var visibleLayers;
 
 requestHandler.start();
 
+app.get('/', function (req, res) {
+    res.sendfile(__dirname + '/index.html');
+});
+
 io.sockets.on('connection', function (socket) {
-    socket.on('getDevicesInView', function (device, fn) {
-        fn(requestHandler.getDevicesInView(device));
-    });
-  
-    socket.on('registerDevice', function(device){
-    	requestHandler.registerDevice(device);
-    });
-
-    socket.on('setPairingState', function (data) {
-        locator.setPairingState(data.additionalInfo.deviceID);
-    });
-
-    socket.on('unpairDevice', function (request) {
-        locator.unpairDevice(request.additionalInfo.deviceID, request.additionalInfo.personID);
-    });
-
-    socket.on('sendOrientation', function (request) {
-        var device = new factory.Device();
-        device.Orientation = request.additionalInfo.orientation;
-        device.ID = request.additionalInfo.deviceID;
-        locator.updateDeviceOrientation(device);
-    });
-
-    socket.on('unpairDevice', function (request) {
-        locator.unpairDevice(request.additionalInfo.deviceID, request.additionalInfo.personID);
-    });
-
-    socket.on('unpairAllPeople', function (request, fn) {
-        locator.unpairAllPeople();
-        fn(({"status": 'success'}));
-    });
-
-    socket.on('sendDeviceInfoToServer', function (data, fn) {
-        console.log("Got request to init device");
-        console.log(data);
-        locator.initDevice(data.additionalInfo.deviceID, data.additionalInfo.height, data.additionalInfo.width);
-        fn(({"status": 'success'}));
-    });
-
-    socket.on('getPeopleFromServer', function (request, fn) {
-        locator.purgeInactivePersons();
-        fn((locator.Persons));
-    });
-
-    socket.on('getDevicesWithSelection', function (request, fn) {
-        locator.purgeInactiveDevices();
-        console.log(request.additionalInfo.selection);
-        switch(request.additionalInfo.selection){
-            case 'all':
-                fn((locator.Devices));
-                break;
-            case 'inView':
-                console.log("GETTING ALL DEVICES IN VIEW");
-                fn(locator.getDevicesInFront(request.additionalInfo.deviceID));
-                break;
-            default:
-                fn((locator.Devices));
-        }
-    });
-
-    socket.on('forcePairRequest', function (request, fn) {
-        var deviceID = request.additionalInfo.deviceID;
-        var personID = request.additionalInfo.personID;
-        locator.pairDevice(deviceID, personID, socket);
-        fn(({"status": 'success'}));
-    });
-});
-
-request_socket.bindSync(address + '5570');
-
-request_socket.on('message', function (data) {
-    //console.log("Received request on request socket");
-    console.log(data);
-    requestHandler.handleRequest(data, request_socket);
-});
-
-request_socket.on('error', function(err){
-	console.log("Error");
-	console.log(err);
-});
-
-exports.updatePairSocket = function(portNumber){
-    pull_socket.bindSync(address + portNumber);
-    console.log(address + portNumber);
-    console.log("Pair Socket is updated");
-}
-
-exports.updateRequestSocket = function(portNumber){
-    request_socket.bindSync(address + portNumber);
-    console.log(address + portNumber);
-    console.log("Request Socket is updated");
-}
-
-exports.unbindSocket = function(portNumber){
-    pull_socket.unbind(address + portNumber); //unbind? is it really unbinding? not tested, trivial for now...
-    console.log(address + portNumber + ' removed.');
-}
-
-pull_socket.on('message', function (data) {
-    //console.log("Received request on pull socket");
-    requestHandler.handleRequest(data, pull_socket);
-});
-
-pull_socket.on('error', function(err){
-    console.log("Error");
-    console.log(err);
+    console.log("something connected");
+    requestHandler.handleRequest(socket);
 });
