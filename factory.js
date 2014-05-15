@@ -5,6 +5,7 @@ function Person(){
     this.ID = null;
     this.Location = null;
     this.Orientation = null;
+    this.orientationToKinect=null;
     this.OwnedDeviceID = null;
     this.TrackedBy = [];
 }
@@ -18,6 +19,8 @@ function Person(id, location){
 
         this.ID = id;
         this.Location = location;
+        this.orientationToKinect = util.getPersonOrientation(location.X,location.Z);
+        this.distanceToKinect = util.getDistanceToKinect(location.X,location.Z);
         this.Orientation = null;
         this.OwnedDeviceID = null;
         this.PairingState = "unpaired";

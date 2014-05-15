@@ -82,13 +82,23 @@ exports.printPersons = function(){
     var output;
     console.log(Persons);
     try{
+        console.log("There are "+Persons.length+" people in this view."); // adding sensor ID if possible
+
         Persons.forEach(function(item) {
-            output = "ID: " + item.ID +
+            output = "The "+Persons.indexOf(item)+"th Person --> "+
+                "ID: " + item.ID +
+                "     Angle: " + item.orientationToKinect +
+                "     Distance: " + item.distanceToKinect +
+                "     Orientation: " + item.Orientation+
                 "     X: " + item.Location.X +
                 "     Y: " + item.Location.Y +
-                "     Z: " + item.Location.Z +
-                "     Orientation: " + item.Orientation;
+                "     Z: " + item.Location.Z ;
             console.log(output)
+            if(Persons.indexOf(item)>0)                             //if not the first person
+            {
+                console.log("\t Distance to the 0th person :"+  //print the distance between this person to the first person for testing
+                    util.distanceBetweenPoints(Persons[0].Location,item.Location));
+            }
             if(item = null){
                 console.log("null person");
             }

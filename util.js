@@ -1,8 +1,10 @@
 var factory = require('./factory');
 
 exports.DEFAULT_FIELD_OF_VIEW = 25.0;
+exports.KINECT_VIEW_RANGE = 28.5;               // not being used yet
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
+//var KINECT_X_MAX = 1;
 
 // Tested!
 exports.normalizeAngle = function(value){
@@ -135,8 +137,43 @@ exports.getLinesOfShape = function(device){
 	
 }
 
+/*
+    get the orientation of a person based on X value of the person
+    @param:
+            personX         -- X position of the person
+            personZ         -- Z position of the person
+    @return:
+            returnDegree    -- degree value of orientation (+/- KINECT_VIEW_RANGE)
+*/
+exports.getPersonOrientation = function(personX,personZ){
+    var angleTowardsKinect = Math.atan2(personX,personZ);
+    var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+    /*  Based on the assumption of X is not in meters
+    var XtoZ_ratio = Math.tan(KINECT_VIEW_RANGE*DEGREES_TO_RADIANS);
+    var Z = KINECT_X_MAX/XtoZ_ratio;
+    var angleTowardsKinect = Math.atan(personX/Z);                    // get the radiance of the person orientation
+    var returnDegree = angleTowardsKinect*RADIANS_TO_DEGREES;               // return degree for testing
+    */
+    return returnDegree;
+}
+
+
+/*
+ get Distance from person to kinect
+ @param:
+        personX         -- X position of the person
+        personZ         -- Z position of the person
+ @return:
+        returnDistance    -- Distance value of orientation
+ */
+exports.getDistanceToKinect = function(personX,personZ){
+    var returnDistance = Math.sqrt(personX*personX+personZ*personZ);
+    return returnDistance;
+}
+
+
 // Tested!
-exports.getCornersOfShape = function(device){	
+exports.getCornersOfShape = function(device){
 	var returnPoints = [];
 	var intPoints = [];
 	try{
