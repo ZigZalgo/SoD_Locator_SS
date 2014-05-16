@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>StackOverflow test bed</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        var cameraHeightInPixels = 320;
+        var cameraWidthInPixels = 480;
+        var cameraFOV = 57;
+
+        function drawGrid() {
+            var cnv = document.getElementById("cnvBG");
+
+            var gridOptions = {
+                minorLines: {
+                    separation: 20,
+                    color: '#EEEEEE'
+                },
+                majorLines: {
+                    separation: 100,
+                    color: '#BBBBBB'
+                }
+            };
+
+            drawGridLines(cnv, gridOptions.minorLines);
+            drawGridLines(cnv, gridOptions.majorLines);
+
+            return;
+        }
+
+        function drawGridLines(cnv, lineOptions) {
+
+
+            var iWidth = cnv.width;
+            var iHeight = cnv.height;
+
+            var ctx = cnv.getContext('2d');
+
+            ctx.strokeStyle = lineOptions.color;
+            ctx.strokeWidth = 1;
+
+            ctx.beginPath();
+
+            var iCount = null;
+            var i = null;
+            var x = null;
+            var y = null;
+
+            iCount = Math.floor(iWidth / lineOptions.separation);
+
+            for (i = 1; i <= iCount; i++) {
+                x = (i * lineOptions.separation);
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, iHeight);
+                ctx.stroke();
+            }
+
+
+            iCount = Math.floor(iHeight / lineOptions.separation);
+
+            for (i = 1; i <= iCount; i++) {
+                y = (i * lineOptions.separation);
+                ctx.moveTo(0, y);
+                ctx.lineTo(iWidth, y);
+                ctx.stroke();
+            }
+
+            ctx.closePath();
+
+            return;
+        }
+
+        function shiftXToGridMiddle(x){
+            //$('body').append('<p>X: ' + (x + ((document.getElementById("cnv").width)/2)) +'</p>')
+            return (x + ((document.getElementById("cnv").width)/2));
+        }
+
+        function shiftYToGridMiddle(z){
+            //$('body').append('<p>Y: ' + (z + ((document.getElementById("cnv").height)/2)) +'</p>')
+            return (z + ((document.getElementById("cnv").height)/2));
+        }
+
+        io = io.connect()
+
+        function updateCanvasWithKinects(){
+            var cBG = document.getElementById("cnvBG");
+            var ctxBG = cBG.getContext("2d");
+
+            ctxBG.beginPath();
+            ctxBG.arc(shiftXToGridMiddle(0), shiftYToGridMiddle(0),40,0,2*Math.PI);
+            ctxBG.stroke();
+        }
+
+        function updateCanvasWithPeople(){
+            io.emit('getPeopleFromServer', {}, function(data){
+                //draw kinect position (0,0) for single kinect
+                var c = document.getElementById("cnv");
+                var ctx = c.getContext("2d");
+                ctx.clearRect(0, 0, c.width, c.height);
+
+                data.forEach(function(person){
+
+                    var xInMeters = person.Location.X*100;
+                    var yInMeters = person.Location.Y*100;
+                    var zInMeters = person.Location.Z*100;
+
+                    ctx.beginPath();
+                    ctx.arc(shiftXToGridMiddle(xInMeters),shiftYToGridMiddle(zInMeters),10,0,2*Math.PI);
+                    ctx.stroke();
+                    //$('body').append('<p>New visitor, hooray! ' + data +'</p>')
+                })
+            });
+        }
+
+
+        setInterval(function() {updateCanvasWithPeople(); }, 200);
+        // Listen for the new visitor event.
+    </script>
+</head>
+<body onload="drawGrid(); updateCanvasWithKinects();">
+<canvas id="cnv" width="800" height="800"
+        style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+<canvas id="cnvBG" width="800" height="800"
+        style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+</body>
+</html>

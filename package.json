@@ -11,6 +11,7 @@
     "mocha": "*",
     "underscore": "*",
     "socket.io": "*",
-    "zeparser": "0.0.7"
+    "zeparser": "0.0.7",
+    "express.io": "*"
   }
 }

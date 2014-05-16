@@ -1,4 +1,4 @@
-var express = require('express');
+var express = require('express.io');
 var app = express();
 var http = require('http')
     , server = http.createServer(app)
@@ -18,6 +18,9 @@ requestHandler.start();
 
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/index.html');
+});
+app.get('/setup', function (req, res) {
+    res.sendfile(__dirname + '/setup.html');
 });
 
 io.sockets.on('connection', function (socket) {
