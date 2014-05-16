@@ -112,9 +112,11 @@ exports.handleRequest = function (socket){
         }
     });
 
-    socket.on('personUpdate', function(request, fn){
+    socket.on('personUpdate', function(capsule, fn){
         console.log("personUpdate reeceived");
         //get persons from body, call update function for each person
+        console.log(capsule.sensorID);
+        var request = capsule.persons;
         request.forEach(function(item){
             var person = new factory.Person(item.Person_ID, item.Location);
             locator.updatePersons(person);
