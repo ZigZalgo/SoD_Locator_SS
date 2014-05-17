@@ -15,7 +15,7 @@ exports.getDevicesInView = function(device){
 
 exports.registerDevice = function(device){
     device.stationary = true;
-	locator.Devices.push(device);
+	locator.devices.push(device);
 }
 
 exports.locator = locator;
@@ -63,7 +63,7 @@ exports.handleRequest = function (socket){
 
     socket.on('getPeopleFromServer', function (request, fn) {
         locator.purgeInactivePersons();
-        fn((locator.Persons));
+        fn((locator.persons));
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
@@ -71,14 +71,14 @@ exports.handleRequest = function (socket){
         console.log(request.additionalInfo.selection);
         switch(request.additionalInfo.selection){
             case 'all':
-                fn((locator.Devices));
+                fn((locator.devices));
                 break;
             case 'inView':
                 console.log("GETTING ALL DEVICES IN VIEW");
                 fn(locator.getDevicesInFront(request.additionalInfo.deviceID));
                 break;
             default:
-                fn((locator.Devices));
+                fn((locator.devices));
         }
     });
 
@@ -97,30 +97,38 @@ exports.handleRequest = function (socket){
         io.sockets.emit('testingEvent', request);
     });
 
-    socket.on('save/layers/visible', function (request, fn) {
-        visibleLayers = request;
-        console.log(request);
-        console.log(visibleLayers);
-        console.log("saved visible layers");
-    });
-
-    socket.on('retrieve/layers/visible', function (request, fn) {
-        console.log("retrieving visible layers...");
-        console.log(request);
-        if(visibleLayers != null && visibleLayers != undefined){
-            fn((visibleLayers));
-        }
-    });
-
     socket.on('personUpdate', function(capsule, fn){
         console.log("personUpdate reeceived");
         //get persons from body, call update function for each person
         console.log(capsule.sensorID);
         var request = capsule.persons;
-        request.forEach(function(item){
-            var person = new factory.Person(item.Person_ID, item.Location);
-            locator.updatePersons(person);
-        });
+        if(request!=null){
+            request.forEach(function(item){
+                var person = new factory.Person(item.Person_ID, item.Location);
+                locator.updatePersons(person);
+            });
+        }
+        else{
+            console.log("request was null");
+        }
+
         locator.printPersons();
+    });
+
+    socket.on('error', function(err){
+        console.log("error: " + err);
+    })
+
+    socket.on('uncaughtException', function (err){
+        console.log("uncaughtException: " + err);
+    });
+
+    socket.on('printDebug', function(data){
+        console.log("event happened, used for debugging: " + data)
+    })
+
+    socket.on('getSensorsFromServer', function (request, fn) {
+        locator.purgeInactivePersons();
+        fn((locator.sensors));
     });
 }

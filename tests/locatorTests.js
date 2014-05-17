@@ -35,7 +35,7 @@ describe("locator.updatePersons()", function(){
 
 //printPersons
 describe("locator.printPersons()", function(){
-    // Print empty Persons[] case
+    // Print empty persons[] case
     it("should return 'false', if passed ''", function(){
         assert.equal(locator.printPersons(), false);
     });

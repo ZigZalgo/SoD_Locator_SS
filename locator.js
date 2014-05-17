@@ -5,10 +5,12 @@ var util = require('./util');
 var events = require("events");
 var EventEmitter = require("events").EventEmitter;
 	
-var Persons = [];
-var Devices = [];
-exports.Persons = Persons;
-exports.Devices = Devices;
+var persons = [];
+var devices = [];
+var sensors = [];
+exports.persons = persons;
+exports.devices = devices;
+exports.sensors = sensors;
 
 // TODO: test!
 exports.start = function(){
@@ -18,54 +20,54 @@ exports.start = function(){
 // tested
 exports.updatePersons = function(person){
     this.purgeInactivePersons();
-    if(util.findWithAttr(Persons, "ID", person.ID) != undefined){
+    if(util.findWithAttr(persons, "ID", person.ID) != undefined){
         try{
-            Persons[util.findWithAttr(Persons, "ID", person.ID)].Location.X = person.Location.X;
-            Persons[util.findWithAttr(Persons, "ID", person.ID)].Location.Y = person.Location.Y;
-            Persons[util.findWithAttr(Persons, "ID", person.ID)].Location.Z = person.Location.Z;
-            Persons[util.findWithAttr(Persons, "ID", person.ID)].LastUpdated = new Date();
-            if(Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID != null){
-                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.X = person.Location.X;
-                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.Y = person.Location.Y;
-                Devices[util.findWithAttr(Devices, "ID", Persons[util.findWithAttr(Persons, "ID", person.ID)].OwnedDeviceID)].Location.Z = person.Location.Z;
+            persons[util.findWithAttr(persons, "ID", person.ID)].Location.X = person.Location.X;
+            persons[util.findWithAttr(persons, "ID", person.ID)].Location.Y = person.Location.Y;
+            persons[util.findWithAttr(persons, "ID", person.ID)].Location.Z = person.Location.Z;
+            persons[util.findWithAttr(persons, "ID", person.ID)].LastUpdated = new Date();
+            if(persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID != null){
+                devices[util.findWithAttr(devices, "ID", persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID)].Location.X = person.Location.X;
+                devices[util.findWithAttr(devices, "ID", persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID)].Location.Y = person.Location.Y;
+                devices[util.findWithAttr(devices, "ID", persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID)].Location.Z = person.Location.Z;
             }
         }
         catch(err){
             //if null or cannot read for some other reason... remove null
-            if(Persons[util.findWithAttr(Persons, "ID", person.ID)] == null){
-                Persons.splice(util.findWithAttr(Persons, "ID", person.ID), 1)
+            if(persons[util.findWithAttr(persons, "ID", person.ID)] == null){
+                persons.splice(util.findWithAttr(persons, "ID", person.ID), 1)
             }
         }
     }
 	else{
         if(person.ID != undefined && person.Location != undefined){
             person.LastUpdated = new Date();
-            Persons.push(person);
+            persons.push(person);
         }
 	}
 };
 
 exports.pairDevice = function(deviceID, personID, socket){
-    var deviceIndex = util.findWithAttr(Devices, "ID", deviceID);
-    var personIndex = util.findWithAttr(Persons, "ID", personID);
+    var deviceIndex = util.findWithAttr(devices, "ID", deviceID);
+    var personIndex = util.findWithAttr(persons, "ID", personID);
     var statusMsg = "Device ID: " + deviceID +
                     "\nDevice Index: " + deviceIndex +
                     "\nPerson ID: " + personID +
                     "\nPerson Index: " + personIndex + "\n\n";
     if(deviceIndex != undefined && personIndex != undefined){
-        if(Devices[deviceIndex].PairingState == "unpaired" && Persons[personIndex].PairingState == "unpaired"){
-            Devices[deviceIndex].OwnerID = Persons[personIndex].ID;
-            Devices[deviceIndex].PairingState = "paired";
-            Persons[personIndex].OwnedDeviceID = Devices[deviceIndex].ID;
-            Persons[personIndex].PairingState = "paired";
+        if(devices[deviceIndex].PairingState == "unpaired" && persons[personIndex].PairingState == "unpaired"){
+            devices[deviceIndex].OwnerID = persons[personIndex].ID;
+            devices[deviceIndex].PairingState = "paired";
+            persons[personIndex].OwnedDeviceID = devices[deviceIndex].ID;
+            persons[personIndex].PairingState = "paired";
             statusMsg += "\n Pairing successful.";
         }
         else{
             statusMsg += "\nPairing attempt unsuccessful";
-            if(Devices[deviceIndex].PairingState != "unpaired"){
+            if(devices[deviceIndex].PairingState != "unpaired"){
                 statusMsg += "Device unavailable for pairing.";
             }
-            if(Persons[personIndex].PairingState != "unpaired"){
+            if(persons[personIndex].PairingState != "unpaired"){
                 statusMsg += "Person unavailable for pairing.";
             }
         }
@@ -80,12 +82,12 @@ exports.pairDevice = function(deviceID, personID, socket){
 exports.printPersons = function(){
 	console.log("People tracked: ");
     var output;
-    console.log(Persons);
+    console.log(persons);
     try{
-        console.log("There are "+Persons.length+" people in this view."); // adding sensor ID if possible
+        console.log("There are "+persons.length+" people in this view."); // adding sensor ID if possible
 
-        Persons.forEach(function(item) {
-            output = "The "+Persons.indexOf(item)+"th Person --> "+
+        persons.forEach(function(item) {
+            output = "The "+persons.indexOf(item)+"th Person --> "+
                 "ID: " + item.ID +
                 "     Angle: " + item.orientationToKinect +
                 "     Distance: " + item.distanceToKinect +
@@ -94,10 +96,10 @@ exports.printPersons = function(){
                 "     Y: " + item.Location.Y +
                 "     Z: " + item.Location.Z ;
             console.log(output)
-            if(Persons.indexOf(item)>0)                             //if not the first person
+            if(persons.indexOf(item)>0)                             //if not the first person
             {
                 console.log("\t Distance to the 0th person :"+  //print the distance between this person to the first person for testing
-                    util.distanceBetweenPoints(Persons[0].Location,item.Location));
+                    util.distanceBetweenPoints(persons[0].Location,item.Location));
             }
             if(item = null){
                 console.log("null person");
@@ -113,47 +115,47 @@ exports.printPersons = function(){
 }
 
 exports.purgeInactiveDevices = function(){
-    Devices.forEach(function(device){
+    devices.forEach(function(device){
         var timeDifference = (new Date() - device.LastUpdated);
-        if(timeDifference > 3000 && device.stationary == false){
+        if(timeDifference > 900 && device.stationary == false){
             //console.log("TIME DIFFERENCE: " + timeDifference);
-            Devices.splice(Devices.indexOf(device), 1)
+            devices.splice(devices.indexOf(device), 1)
         }
     })
 }
 
 exports.setPairingState = function(deviceID){
-    var index = util.findWithAttr(Devices, 'ID', deviceID);
+    var index = util.findWithAttr(devices, 'ID', deviceID);
     if(index != -1){
-        Devices[index].PairingState = "pairing";
+        devices[index].PairingState = "pairing";
     }
 }
 
 exports.unpairDevice = function(deviceID, personID){
-    if(util.findWithAttr(Devices, 'ID', deviceID) != undefined){
-        Devices[util.findWithAttr(Devices, 'ID', deviceID)].PairingState = "unpaired";
-        Devices[util.findWithAttr(Devices, 'ID', deviceID)].OwnerID = null;
-        Devices[util.findWithAttr(Devices, 'ID', deviceID)].Location.X = null;
-        Devices[util.findWithAttr(Devices, 'ID', deviceID)].Location.Y = null;
-        Devices[util.findWithAttr(Devices, 'ID', deviceID)].Location.Z = null;
+    if(util.findWithAttr(devices, 'ID', deviceID) != undefined){
+        devices[util.findWithAttr(devices, 'ID', deviceID)].PairingState = "unpaired";
+        devices[util.findWithAttr(devices, 'ID', deviceID)].OwnerID = null;
+        devices[util.findWithAttr(devices, 'ID', deviceID)].Location.X = null;
+        devices[util.findWithAttr(devices, 'ID', deviceID)].Location.Y = null;
+        devices[util.findWithAttr(devices, 'ID', deviceID)].Location.Z = null;
     }
-    if(util.findWithAttr(Persons, 'ID', personID) != undefined){
-        Persons[util.findWithAttr(Persons, "ID", personID)].PairingState = "unpaired";
-        Persons[util.findWithAttr(Persons, "ID", personID)].OwnedDeviceID = null;
-        Persons[util.findWithAttr(Persons, "ID", personID)].Orientation = null;
+    if(util.findWithAttr(persons, 'ID', personID) != undefined){
+        persons[util.findWithAttr(persons, "ID", personID)].PairingState = "unpaired";
+        persons[util.findWithAttr(persons, "ID", personID)].OwnedDeviceID = null;
+        persons[util.findWithAttr(persons, "ID", personID)].Orientation = null;
     }
 }
 
 exports.purgeInactivePersons = function(){
-    Persons.forEach(function(person){
+    persons.forEach(function(person){
         var timeDifference = (new Date() - person.LastUpdated);
         try{
-            if(timeDifference > 3000){
+            if(timeDifference > 900){
                 if(person.OwnedDeviceID != null){
-                    Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].PairingState = "unpaired";
-                    Devices[util.findWithAttr(Devices, "ID", person.OwnedDeviceID)].OwnerID = null;
+                    devices[util.findWithAttr(devices, "ID", person.OwnedDeviceID)].PairingState = "unpaired";
+                    devices[util.findWithAttr(devices, "ID", person.OwnedDeviceID)].OwnerID = null;
                 }
-                Persons.splice(Persons.indexOf(person), 1)
+                persons.splice(persons.indexOf(person), 1)
             }
         }
         catch(err){}
@@ -161,11 +163,11 @@ exports.purgeInactivePersons = function(){
 }
 
 exports.printDevices = function(){
-    console.log("Devices tracked: ");
+    console.log("devices tracked: ");
     var output;
-    //console.log(Devices);
+    //console.log(devices);
     try{
-        Devices.forEach(function(item) {
+        devices.forEach(function(item) {
             output = "ID: " + item.ID +
                 "     X: " + item.Location.X +
                 "     Y: " + item.Location.Y +
@@ -191,33 +193,33 @@ exports.printDevices = function(){
 // TODO: test!
 exports.updateDeviceOrientation = function(device){
     this.purgeInactiveDevices();
-    if(util.findWithAttr(Devices, "ID", device.ID) != undefined){
+    if(util.findWithAttr(devices, "ID", device.ID) != undefined){
         try{
-            Devices[util.findWithAttr(Devices, "ID", device.ID)].Orientation = device.Orientation;
-            Devices[util.findWithAttr(Devices, "ID", device.ID)].LastUpdated = new Date();
+            devices[util.findWithAttr(devices, "ID", device.ID)].Orientation = device.Orientation;
+            devices[util.findWithAttr(devices, "ID", device.ID)].LastUpdated = new Date();
 
-            if(Devices[util.findWithAttr(Devices, "ID", device.ID)].OwnerID != null){
-                Persons[util.findWithAttr(Persons, "ID", Devices[util.findWithAttr(Devices, "ID", device.ID)].OwnerID)].Orientation = device.Orientation;
+            if(devices[util.findWithAttr(devices, "ID", device.ID)].OwnerID != null){
+                persons[util.findWithAttr(persons, "ID", devices[util.findWithAttr(devices, "ID", device.ID)].OwnerID)].Orientation = device.Orientation;
             }
         }
         catch(err){
             //if null or cannot read for some other reason... remove null
-            if(Devices[util.findWithAttr(Devices, "ID", device.ID)] == null){
-                Devices.splice(Devices.indexOf(Devices[util.findWithAttr(Devices, "ID", device.ID)]), 1)
+            if(devices[util.findWithAttr(devices, "ID", device.ID)] == null){
+                devices.splice(devices.indexOf(devices[util.findWithAttr(devices, "ID", device.ID)]), 1)
             }
         }
     }
     else{
         if(device.ID != undefined && device.Orientation != undefined){
             device.LastUpdated = new Date();
-            Devices.push(device);
+            devices.push(device);
         }
     }
 }
 
 exports.unpairAllPeople = function(){
     console.log("UNPAIRING ALL PEOPLE");
-    Persons.forEach(function(person){
+    persons.forEach(function(person){
         if(person != null){
             console.log(person);
             person.PairingState = 'unpaired';
@@ -230,9 +232,9 @@ exports.unpairAllPeople = function(){
 }
 
 exports.initDevice = function(deviceID, height, width){
-    if(util.findWithAttr(Devices, "ID", deviceID) != undefined){
-        Devices[util.findWithAttr(Devices, "ID", deviceID)].Height = height;
-        Devices[util.findWithAttr(Devices, "ID", deviceID)].Width = width;
+    if(util.findWithAttr(devices, "ID", deviceID) != undefined){
+        devices[util.findWithAttr(devices, "ID", deviceID)].Height = height;
+        devices[util.findWithAttr(devices, "ID", deviceID)].Width = width;
         console.log("Device initiated late, updating height and width");
     }
     else{
@@ -241,7 +243,7 @@ exports.initDevice = function(deviceID, height, width){
         device.Height = height;
         device.Width = width;
         device.LastUpdated = new Date();
-        Devices.push(device);
+        devices.push(device);
         console.log("Initiating device");
     }
 }
@@ -257,7 +259,7 @@ exports.getDevicesInView = function(observer, devicesInFront){
     var observerLineOfSight = factory.makeLineUsingOrientation(observer.Location, observer.Orientation);
     for(var i = 0; i <= devicesInFront.length; i++){
         console.log("i: " + i + " // " + devicesInFront.length);
-        console.log("Devices in front: " + devicesInFront);
+        console.log("devices in front: " + devicesInFront);
         if(i == devicesInFront.length){
             console.log("returning devices for sending: " + returnDevices);
             return returnDevices;
@@ -354,7 +356,7 @@ exports.getDevicesInView = function(observer, devicesInFront){
 exports.getDevicesInFront = function(observerID){
 	// TODO: implement!
 	// List<Device> returnDevices = new List<Device>();
-    var observer = Devices[util.findWithAttr(Devices, "ID", observerID)];
+    var observer = devices[util.findWithAttr(devices, "ID", observerID)];
     console.log("GetDevicesInFront was called");
     var returnDevices = [];
 
@@ -377,26 +379,26 @@ exports.getDevicesInFront = function(observerID){
 
 
 
-        for(var i = 0; i <= Devices.length; i++){
+        for(var i = 0; i <= devices.length; i++){
             console.log("i: " + i);
-            if(i == Devices.length){
+            if(i == devices.length){
                 console.log("returning devices: " + returnDevices);
                 return this.getDevicesInView(observer, returnDevices);
             }
             else{
                 console.log("Searching all devices...");
-                if(Devices[i] != observer && Devices[i].Location != undefined){
-                    var angle = util.normalizeAngle(Math.atan2(Devices[i].Location.Y - observer.Location.Y, Devices[i].Location.X - observer.Location.X) * 180 / Math.PI);
+                if(devices[i] != observer && devices[i].Location != undefined){
+                    var angle = util.normalizeAngle(Math.atan2(devices[i].Location.Y - observer.Location.Y, devices[i].Location.X - observer.Location.X) * 180 / Math.PI);
                     if (leftFieldOfView > rightFieldOfView && angle < leftFieldOfView && angle > rightFieldOfView){
-                        console.log("Pushed a target1!: " + Devices[i]);
-                        returnDevices.push(Devices[i]);
+                        console.log("Pushed a target1!: " + devices[i]);
+                        returnDevices.push(devices[i]);
                     }
                 }
                 else if (leftFieldOfView < rightFieldOfView)
                 {
                     if (angle < leftFieldOfView || angle > rightFieldOfView){
-                        returnDevices.push(Devices[i]);
-                        console.log("Pushed a target2!: " + Devices[i]);
+                        returnDevices.push(devices[i]);
+                        console.log("Pushed a target2!: " + devices[i]);
                     }
                 }
             }
@@ -455,7 +457,7 @@ exports.GetDevicesWithinRange = function(observer, distance){
         return returnDevices;
     }
 
-    Devices.forEach(function(device){
+    devices.forEach(function(device){
         var wantToSkip = false;
         if(device == observer){
            //this.continue /////is this necessary, if it's an else if?
