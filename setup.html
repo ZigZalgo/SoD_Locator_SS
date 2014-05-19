@@ -150,6 +150,18 @@
             });
         }
 
+        function calibrateSensors(){
+            //grab 3 points from each of two sensors (can change this for more sensors later...?
+
+
+            //calculate centroids for both polygons
+
+            //calculate transformation between the two centroids
+
+            //calculate angle of (reference P1)(reference origin)(transformed P1)
+
+        }
+
         io.on("webMessageEvent",function(message){
             message = JSON.parse(message);
             $('#content').append('<div >'+message.data+'</div>'); /*appending the data on the page using Jquery */
@@ -175,6 +187,13 @@
                     $('#content').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
                 });
             });
+
+            $('#getPoints').click(function(){ /*listening to the button click using Jquery listener*/
+                io.emit('getDevicesWithSelection', {additionalInfo: {selection: "all"}}, function(data){
+                    $('#content').val('');
+                    $('#content').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
+                });
+            });
         });
 
         setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
@@ -193,7 +212,7 @@
         <form>
 
             <!--<input type="text" id="message" /> <!--text form to send data to the server-->
-            <!--<input id="getPeople" type="button" value="Not really used right now...">   -->
+            <input id="getPoints" type="button" value="getPoints">
             <div id="content"></div> <!--This is where the data from the server is added-->
             <div id="content2"></div> <!--This is where the data from the server is added-->
             <div id="content3"></div> <!--This is where the data from the server is added-->

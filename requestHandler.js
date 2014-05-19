@@ -2,32 +2,31 @@ var locator = require('./locator');
 var factory = require('./factory');
 var frontend = require('./frontend');
 var util = require('./util');
-var portList = [];
 
 // TODO: test!
 exports.start = function (){
 	locator.start();
 }
 
-exports.getDevicesInView = function(device){
-	return locator.getDevicesInFront(device.ID);
-}
-
-exports.registerDevice = function(device){
-    device.stationary = true;
-	locator.devices.push(device);
-}
-
 exports.locator = locator;
 
 exports.handleRequest = function (socket){
     socket.on('getDevicesInView', function (device, fn) {
-        fn(requestHandler.getDevicesInView(device));
+        fn(locator.getDevicesInFront(device.ID));
     });
 
-    socket.on('registerDevice', function(device){
-        requestHandler.registerDevice(device);
-        //io.sockets.emit('123', 'hello');
+    socket.on('registerDevice', function(device){ //changes this to stationary devices, or merge with iosAPI's "sendDeviceInfoToServer"
+        device.stationary = true;
+        locator.devices.push(device);
+    });
+
+    socket.on('registerSensor', function(sensorInfo){
+        console.log(sensorInfo);
+        var sensor = new factory.Sensor(socket);
+        sensor.SensorType = sensorInfo.sensorType;
+        sensor.FOV = sensorInfo.FOV;
+        console.log("passing on to locator.registerSensor()");
+        locator.registerSensor(sensor);
     });
 
     socket.on('setPairingState', function (data) {
@@ -97,15 +96,12 @@ exports.handleRequest = function (socket){
         io.sockets.emit('testingEvent', request);
     });
 
-    socket.on('personUpdate', function(capsule, fn){
+    socket.on('personUpdate', function(persons, fn){
         console.log("personUpdate reeceived");
         //get persons from body, call update function for each person
-        console.log(capsule.sensorID);
-        var request = capsule.persons;
-        if(request!=null){
-            request.forEach(function(item){
-                var person = new factory.Person(item.Person_ID, item.Location);
-                locator.updatePersons(person);
+        if(persons!=null){
+            persons.forEach(function(person){
+                locator.updatePersons(person, socket);
             });
         }
         else{
@@ -128,7 +124,12 @@ exports.handleRequest = function (socket){
     })
 
     socket.on('getSensorsFromServer', function (request, fn) {
-        locator.purgeInactivePersons();
         fn((locator.sensors));
     });
+
+    socket.on('calibrateSensors', function (request, fn){
+        fn(locator.calibrateSensors());
+        //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
+        //return calibration for client? nah....... maybe....
+    })
 }

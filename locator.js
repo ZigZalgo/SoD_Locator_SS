@@ -8,6 +8,7 @@ var EventEmitter = require("events").EventEmitter;
 var persons = [];
 var devices = [];
 var sensors = [];
+sensors.reference = null;
 exports.persons = persons;
 exports.devices = devices;
 exports.sensors = sensors;
@@ -17,34 +18,99 @@ exports.start = function(){
 	// Do initialization here, if any
 };
 
+exports.registerSensor = function(sensor){
+    console.log("registering server from locator.js");
+    if(sensors.reference == null){
+        this.Calibration = {Rotation: 0, TransformX: 0, TransformY: 0};
+        //sensors.reference = sensor;
+        console.log("setting default reference")
+    }
+    sensors.push(sensor);
+};
+
+exports.calibrateSensors = function(){
+    console.log("Calibrating sensors...")
+    var sensor1 = sensors[0];
+    var sensor2 = sensors[1];
+    sensor1.points = [];
+    sensor2.points = [];
+
+    console.log("Sensor1: " + sensor1.sensorType);
+    console.log("Sensor2: " + sensor2.sensorType);
+
+    //BIG ASSUMPTION: assuming only two people on server... this is a restriction during setup
+    var sensor1target = persons[util.findWithAttr(persons, "LastUpdatedBy", sensor1.socket)];
+    var sensor2target = persons[util.findWithAttr(persons, "LastUpdatedBy", sensor2.socket)];
+
+
+    var interval = setInterval(function(){
+        sensor1.points.push({X: sensor1target.Location.X, Y: sensor1target.Location.Y});
+        sensor2.points.push({X: sensor2target.Location.X, Y: sensor2target.Location.Y});
+        if(sensor1.points.count == 3 && sensor2.points.count == sensor1.points.count){
+            clearInterval(interval);
+
+            console.log("Sensor1...\n"
+                + "X1: " + sensor1.points[0].X + "\tY1: " + sensor1.points[0].Y
+                + "X2: " + sensor1.points[1].X + "\tY2: " + sensor1.points[1].Y
+                + "X3: " + sensor1.points[2].X + "\tY3: " + sensor1.points[2].Y);
+
+            console.log("Sensor2...\n"
+                + "X1: " + sensor2.points[0].X + "\tY1: " + sensor2.points[0].Y
+                + "X2: " + sensor2.points[1].X + "\tY2: " + sensor2.points[1].Y
+                + "X3: " + sensor2.points[2].X + "\tY3: " + sensor2.points[2].Y);
+
+            return {sensor1: sensor1, sensor2: sensor2}
+        }
+    }, 1000);
+
+
+        //grab 3 points from each of two sensors (can change this for more sensors later...?
+
+
+        //calculate centroids for both polygons
+
+        //calculate transformation between the two centroids
+
+        //calculate angle of (reference P1)(reference origin)(transformed P1)
+}
+
 // tested
-exports.updatePersons = function(person){
+exports.updatePersons = function(receivedPerson, socket){
     this.purgeInactivePersons();
-    if(util.findWithAttr(persons, "ID", person.ID) != undefined){
+    if(util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}) != undefined){
+        console.log("FOUND WITH THIS ID: " + util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}))
+        //person was found
+        var returnedID = util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id});
         try{
-            persons[util.findWithAttr(persons, "ID", person.ID)].Location.X = person.Location.X;
-            persons[util.findWithAttr(persons, "ID", person.ID)].Location.Y = person.Location.Y;
-            persons[util.findWithAttr(persons, "ID", person.ID)].Location.Z = person.Location.Z;
-            persons[util.findWithAttr(persons, "ID", person.ID)].LastUpdated = new Date();
-            if(persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID != null){
-                devices[util.findWithAttr(devices, "ID", persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID)].Location.X = person.Location.X;
-                devices[util.findWithAttr(devices, "ID", persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID)].Location.Y = person.Location.Y;
-                devices[util.findWithAttr(devices, "ID", persons[util.findWithAttr(persons, "ID", person.ID)].OwnedDeviceID)].Location.Z = person.Location.Z;
+            persons[returnedID].Location.X = person.Location.X;
+            persons[returnedID].Location.Y = person.Location.Y;
+            persons[returnedID].Location.Z = person.Location.Z;
+            persons[returnedID].LastUpdated = new Date();
+            if(persons[returnedID].OwnedDeviceID != null){
+                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.X = receivedPerson.Location.X;
+                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.Y = receivedPerson.Location.Y;
+                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.Z = receivedPerson.Location.Z;
             }
         }
         catch(err){
             //if null or cannot read for some other reason... remove null
-            if(persons[util.findWithAttr(persons, "ID", person.ID)] == null){
-                persons.splice(util.findWithAttr(persons, "ID", person.ID), 1)
+            if(persons[returnedID] == null){
+                persons.splice(returnedID, 1)
             }
         }
     }
-	else{
-        if(person.ID != undefined && person.Location != undefined){
+    else{
+        //person was not found
+        console.log("NOT FOUND")
+        console.log(receivedPerson.Person_ID)
+        if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
+            var person = new factory.Person(receivedPerson.Person_ID, receivedPerson.Location, socket);
             person.LastUpdated = new Date();
             persons.push(person);
         }
-	}
+    }
+
+
 };
 
 exports.pairDevice = function(deviceID, personID, socket){
@@ -87,15 +153,9 @@ exports.printPersons = function(){
         console.log("There are "+persons.length+" people in this view."); // adding sensor ID if possible
 
         persons.forEach(function(item) {
-            output = "The "+persons.indexOf(item)+"th Person --> "+
-                "ID: " + item.ID +
-                "     Angle: " + item.orientationToKinect +
-                "     Distance: " + item.distanceToKinect +
-                "     Orientation: " + item.Orientation+
-                "     X: " + item.Location.X +
-                "     Y: " + item.Location.Y +
-                "     Z: " + item.Location.Z ;
-            console.log(output)
+            console.log("The "+persons.indexOf(item)+"th Person --> "
+                + JSON.stringify(item, null, 2));
+            console.log(JSON.stringify(item.ID))
             if(persons.indexOf(item)>0)                             //if not the first person
             {
                 console.log("\t Distance to the 0th person :"+  //print the distance between this person to the first person for testing
@@ -525,6 +585,7 @@ exports.FindNearestDevice = function(observer, deviceList){
         });
         return nearest;
     }
+
 
 	// if (deviceList.Count == 0)
 		// return null;

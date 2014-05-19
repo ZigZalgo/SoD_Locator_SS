@@ -10,21 +10,21 @@ function Person(){
     this.TrackedBy = [];
 }
 
-function Person(id, location){
+function Person(id, location, socket){
     try{
         if(location.X == null || location.Y == null || location.Z == null){
             var err = new Error("X, Y, or Z is null")
             this.emit('error', err);
         }
-
-        this.ID = id;
+        this.ID = [];
+        this.ID.push({value: id, originatingSocket: socket.id});
         this.Location = location;
         this.orientationToKinect = util.getPersonOrientation(location.X,location.Z);
         this.distanceToKinect = util.getDistanceToKinect(location.X,location.Z);
         this.Orientation = null;
         this.OwnedDeviceID = null;
         this.PairingState = "unpaired";
-        this.TrackedBy = [];
+        this.LastUpdatedBy = socket.id;
         this.LastUpdated = new Date();
     }
     catch(err){
@@ -39,6 +39,32 @@ Person.prototype = {
 }
 
 exports.Person = Person;
+
+function Sensor(socket){
+    try{
+        this.SocketID = socket.id;
+        this.SensorType = "";
+        this.FOV = 0;
+        this.LastUpdated = new Date();
+        this.Calibration = {Rotation: null, TransformX: null, TransformY: null};
+    }
+    catch(err){
+        return false;
+    }
+}
+
+Sensor.prototype = {
+    isCalibrated: function(){
+        if(this.Calibration.Rotation == null || this.Calibration.TransformX == null || this.Calibration.TransformY == null){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+}
+
+exports.Sensor = Sensor;
 
 // TODO: TEST
 function Device(){
@@ -64,6 +90,8 @@ Device.prototype = {
 }
 
 exports.Device = Device;
+
+
 
 // tested
 exports.make2DPoint = function(x,y){

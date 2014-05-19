@@ -204,7 +204,7 @@ exports.getCornersOfShape = function(device){
 	
 	else
 	{
-		// No changes neccessary
+		// No changes necessary
 		return intPoints;
 	}	
 
@@ -265,7 +265,6 @@ exports.GetRatioPositionOnScreen = function(target, intersection){
 		var xRatio = distance1 / distance3;
 		return factory.make2DPoint(xRatio, yRatio);		
 	}
-
 	return factory.make2DPoint(-1, -1);
 }
 
@@ -281,6 +280,18 @@ exports.findWithAttr = function(array, attr, value) {
     for(var i = 0; i < array.length; i += 1) {
         if(array[i][attr] === value) {
             return i;
+        }
+    }
+}
+
+exports.findWithAttrWeak = function(array, attr, query) {
+    for(var i = 0; i < array.length; i += 1) {
+        console.log("looking through: " + JSON.stringify(array[i][attr]));
+        console.log("with: " + JSON.stringify(query))
+        //console.log(array[i][attr])
+        if(JSON.stringify(array[i][attr]).indexOf(JSON.stringify(query)) != -1) {
+            return i;
+            console.log("returned: ");
         }
     }
 }
