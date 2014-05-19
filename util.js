@@ -2,9 +2,142 @@ var factory = require('./factory');
 
 exports.DEFAULT_FIELD_OF_VIEW = 25.0;
 exports.KINECT_VIEW_RANGE = 28.5;               // not being used yet
+exports.ROUND_RATIO         = 1000000000;         // the round ratio for dealing with not accurate calculation
+
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
-//var KINECT_X_MAX = 1;
+
+
+/*
+    take a location from sub-kinect and translate to the location to the MASTER kinect
+@param:
+    location        -- the location of a point from the sub-kinect
+    translateRules  -- the rules each sub-kinect has for translate the points in its plane to the MASTER-kinect
+@return:
+    rotatedPoint    -- the translated location of point in the subKinect to the MASTER kinect
+*/
+exports.translateToCoordinateSpace = function(location,translateRules)
+{
+    var vectorToStartingPoint = this.getVector(translateRules.startingLocation,location);
+    var rotatedPoint = this.matrixTransformation(vectorToStartingPoint,translateRules.degree);
+    rotatedPoint.X += translateRules.xDistance+translateRules.startingLocation.X;
+    rotatedPoint.Z += translateRules.zDistance+translateRules.startingLocation.Z;
+    return rotatedPoint;
+}
+
+
+/*
+    Get translation rule for a sensor which is not from the master Kinect when doing calibration
+    Since we are only considering 2D situation, Use dot product to get the angle between two sensor
+ @param:
+    startingLocation1   -- The location of the starting point observed by the MASTER kinect
+    endingLocation1     -- The location of the ending point observed by the MASTER kinect
+    startingLocation2   -- The location of the starting point observed by the sub-kinect
+    endingLocation2     -- The location of the ending point observed by the sub-kinect
+ @return:
+    translationRules    -- returns an object contains:
+        * angle           -- the angle between two sensors ("+" as clockwise, "-" as counter-clockwise)
+        * x.Distance      -- the x distance between the point from sub-kinect to MASTER-kinect
+        * z.Distance      -- the z distance between the point from sub-kinect to MASTER-kinect
+        * startingLocation-- contains the location of the startingPoint of the sub-kinect
+ */
+exports. getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
+    var vector1 = this.getVector(startingLocation1,endingLocation1);
+    var vector2 = this.getVector(startingLocation2,endingLocation2);
+    var degreeBetweenVectors = this.getDegreeOfTwoVectors(vector1,vector2); // using dot product
+    var translateRules = {degree:0,xDistance: 0,zDistance: 0,
+        startingLocation:startingLocation2};                                //initialize translation rules
+
+    var xDistance = startingLocation1.X - startingLocation2.X;
+    var zDistance = startingLocation1.Z - startingLocation2.Z;
+    translateRules.xDistance = xDistance;
+    translateRules.zDistance = zDistance;
+
+    // Since dot product algorithm doesn't indicate whether the angle is clockwise or counter-clockwise, we need to check
+    var rotatedVector2 = this.matrixTransformation(vector2,degreeBetweenVectors);               // clockwise
+    var counterRotatedVector2 = this.matrixTransformation(vector2,-degreeBetweenVectors);       // counter clockwise
+    if(Math.abs(rotatedVector2.X - vector1.X) < (1/this.ROUND_RATIO) && Math.abs(rotatedVector2.Z - vector1.Z) < this.ROUND_RATIO)
+    {
+        translateRules.degree = degreeBetweenVectors;  // represetn the degree of two sensor
+    }
+    else if(Math.abs(counterRotatedVector2.X - vector1.X) < (1/this.ROUND_RATIO) && Math.abs(counterRotatedVector2.Z - vector1.Z) < this.ROUND_RATIO)
+    {
+        translateRules.degree =  -degreeBetweenVectors;
+    }else
+    {
+        translateRules.degree = NaN;
+    }
+
+    return translateRules;  // different sensors should have their own rules
+
+}
+
+
+
+
+/*
+    get the vector from two points, since we are dealing with 2D space we only care about X and Z value of a location
+ @param:
+    locationA         -- the location of the starting point
+    locationB         -- the location of the ending point
+ @return:
+    returnVector      -- return the vector of the two points
+ */
+exports.getVector = function(locationA,locationB){
+    var returnVector = {X:0,Y:0,Z:0};
+    returnVector.X = locationB.X - locationA.X;
+    returnVector.Z = locationB.Z - locationA.Z;
+    return returnVector;
+}
+
+
+/*
+    use dot product to calculate the degree between two vectors
+ @param:
+    vector1             -- first vector
+    vector2             -- second vector
+ @return:
+    returnDegrees       -- The degree between two vectors
+ */
+exports.getDegreeOfTwoVectors = function(vector1,vector2){
+    var vector1length = Math.sqrt(Math.pow(vector1.X,2) + Math.pow(vector1.Z,2));
+    var vector2length = Math.sqrt(Math.pow(vector2.X,2) + Math.pow(vector2.Z,2));
+    var v1MulV2 = vector1.X* vector2.X + vector1.Z*vector2.Z;
+    var returnDegree = Math.acos(v1MulV2/(vector1length*vector2length)) * RADIANS_TO_DEGREES; // Dot product
+    //var returnDegree = Math.atan2(vector1length,vector2length) * RADIANS_TO_DEGREES;;
+
+    if(isNaN(returnDegree))
+    {
+        /*var negativeVector2 = {X:(-vector2.X),Y:0,Z:(-vector2.Z)};
+         v1MulV2 = vector1.X* negativeVector2.X + vector1.Z*negativeVector2.Z;
+         returnDegree = Math.acos(v1MulV2/(vector1length*vector2length))
+         * RADIANS_TO_DEGREES; // Dot product */
+        return 0;
+    }
+
+    return returnDegree;
+}
+
+/*
+    Matrix CLOCKWISE transformation ,
+ given point(x,y) and rotation angle A, return (x',y') after transformation.
+ @param:
+    personLocation   -- location contains x,y,z value of a point, we are going to use x,z since
+        we are dealing with 2D-dimension
+    angle            -- Rotation angle
+ @return:
+    returnLocation   -- location after transformation
+ */
+exports.matrixTransformation = function(personLocation,angle){
+    var returnLocation = {X:0,Y:0,Z:0};
+    var returnX = personLocation.X * Math.cos(angle * DEGREES_TO_RADIANS) + personLocation.Z * Math.sin(angle * DEGREES_TO_RADIANS);
+    var returnZ = personLocation.Z * Math.cos(angle * DEGREES_TO_RADIANS) - (personLocation.X * Math.sin(angle * DEGREES_TO_RADIANS));
+    returnLocation.X = Math.round(returnX*this.ROUND_RATIO)/this.ROUND_RATIO;
+    returnLocation.Z = Math.round(returnZ*this.ROUND_RATIO)/this.ROUND_RATIO;
+    return returnLocation; // for testing
+}
+
+
 
 // Tested!
 exports.normalizeAngle = function(value){
