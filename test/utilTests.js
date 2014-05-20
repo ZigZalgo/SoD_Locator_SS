@@ -81,7 +81,29 @@ describe("util.matrixTransformation()", function(){
 
 });
 
+
+//Test function util.getVector() with callback
+/*
+describe("util.getVector",function(){
+    var vectorA={X:1, Y:0.11, Z: 2};
+    var vectorB={X:2,Y:0.11,Z:1};
+    //var vectorA={X:1, Y:0.11, Z: (Math.sqrt(3))};
+    //var vectorB={X:Math.sqrt(3), Y:0.11, Z:1};
+    var vector0 = {X:1,Y:0,Z:0}
+    var vector4 = {X:1,Y:0,Z:-Math.sqrt(3)}
+
+    //testing callback with util.getDegreeOfTwoVectors()
+    describe("util.getDegreeOfTwoVectors",function(){
+        it('should get angle without error', function(done){
+            var vector1 = util.getVector(vectorA,vectorB);
+
+        })
+    });
+
+});
+*/
 // Test function util.getVector()
+
 describe("util.getVector()", function(){
     var vectorA={X:1, Y:0.11, Z: 2};
     var vectorB={X:2,Y:0.11,Z:1};
@@ -91,7 +113,9 @@ describe("util.getVector()", function(){
     });
 });
 
+
 // Test function util.getDegreeOfTwoVectors()
+
 describe("util.getDegreeOfTwoVectors()", function(){
     var vectorA={X:1, Y:0.11, Z: (Math.sqrt(3))};
     var vectorB={X:Math.sqrt(3), Y:0.11, Z:1};
