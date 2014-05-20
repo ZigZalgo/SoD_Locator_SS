@@ -7,13 +7,12 @@ io.set('log level',5);
 var requestHandler = require('./requestHandler');
 var factory = require('./factory');
 var locator = requestHandler.locator;
+var util = require('./util');
 var allClients = [];
+exports.io = io;
+exports.allClients = allClients;
 
 server.listen(3000);
-
-process.addListener( "uncaughtException", function captureException( err ) {
-    console.log('Error occurred, prevented Node.js crash: ' + err);
-});
 
 requestHandler.start();
 
@@ -29,13 +28,27 @@ io.sockets.on('connection', function (socket) {
     console.log("something connected with sessionID: " + socket.id);
     requestHandler.handleRequest(socket);
 
-    allClients.push(socket);
+    allClients.push({socketID: socket.id, clientType: null});
 
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
 
-        var i = allClients.indexOf(socket);
-        allClients.splice(i, 1);
+        //run cleanup functions for socket
+        if(allClients[util.findWithAttr(allClients, "socketID", socket.id)] != undefined){
+            switch(allClients[util.findWithAttr(allClients, "socketID", socket.id)].clientType){
+                case 'sensor':
+                    socket.emit("refreshWebClientSensors", {});
+                    console.log("CLEANING UP SENSOR")
+                    locator.cleanUpSensor(socket.id);
+                    break;
+                case 'webClient':
+                    break;
+                case 'device':
+                    break;
+                default:
+                    break;
+            }
+            allClients.splice(util.findWithAttr(allClients, "socketID", socket.id), 1);
+        }
     });
 });
-

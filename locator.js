@@ -2,6 +2,7 @@ var factory = require('./factory');
 var _ = require('underscore');
 var locator = require('./locator');
 var util = require('./util');
+var frontend = require('./frontend');
 var events = require("events");
 var EventEmitter = require("events").EventEmitter;
 	
@@ -19,13 +20,20 @@ exports.start = function(){
 };
 
 exports.registerSensor = function(sensor){
+    frontend.io.sockets.emit("refreshWebClientSensors", {});
     console.log("registering server from locator.js");
-    if(sensors.reference == null){
-        this.Calibration = {Rotation: 0, TransformX: 0, TransformY: 0};
-        //sensors.reference = sensor;
+    console.log("REFERENCE IS: " + sensors.reference)
+    if(sensors.reference == null || sensors.length == 0){
+        console.log("")
+        sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0};
+        sensor.isCalibrated = true;
+        sensors.reference = sensor;
         console.log("setting default reference")
+        sensors.push(sensor);
     }
-    sensors.push(sensor);
+    else{
+        sensors.push(sensor);
+    }
 };
 
 exports.calibrateSensors = function(){
@@ -39,57 +47,63 @@ exports.calibrateSensors = function(){
     console.log("Sensor2: " + sensor2.sensorType);
 
     //BIG ASSUMPTION: assuming only two people on server... this is a restriction during setup
-    var sensor1target = persons[util.findWithAttr(persons, "LastUpdatedBy", sensor1.socket)];
-    var sensor2target = persons[util.findWithAttr(persons, "LastUpdatedBy", sensor2.socket)];
-
-
     var interval = setInterval(function(){
-        sensor1.points.push({X: sensor1target.Location.X, Y: sensor1target.Location.Y});
-        sensor2.points.push({X: sensor2target.Location.X, Y: sensor2target.Location.Y});
-        if(sensor1.points.count == 3 && sensor2.points.count == sensor1.points.count){
+        console.log("SETTING INTERVAL");
+        if(sensor1.points.length == 2 && sensor2.points.length == sensor1.points.length){
             clearInterval(interval);
 
-            console.log("Sensor1...\n"
-                + "X1: " + sensor1.points[0].X + "\tY1: " + sensor1.points[0].Y
-                + "X2: " + sensor1.points[1].X + "\tY2: " + sensor1.points[1].Y
-                + "X3: " + sensor1.points[2].X + "\tY3: " + sensor1.points[2].Y);
-
-            console.log("Sensor2...\n"
-                + "X1: " + sensor2.points[0].X + "\tY1: " + sensor2.points[0].Y
-                + "X2: " + sensor2.points[1].X + "\tY2: " + sensor2.points[1].Y
-                + "X3: " + sensor2.points[2].X + "\tY3: " + sensor2.points[2].Y);
-
-            return {sensor1: sensor1, sensor2: sensor2}
+            console.log("Sensor1...\n" + JSON.stringify(sensor1));
+            console.log("Sensor2...\n" + JSON.stringify(sensor2));
+            console.log("THIS IS THE POINT CONTAINER FOR CALIBRATION");
+            //return {sensor1: sensor1, sensor2: sensor2}
+            frontend.io.sockets.emit("webMessageEvent", util.getTranslationRule(sensor1.points[0], sensor1.points[1], sensor2.points[0], sensor2.points[1]))
+            return (util.getTranslationRule(sensor1.points[0], sensor1.points[1], sensor2.points[0], sensor2.points[1]))
+        }
+        else{
+            sensor1.points.push({X: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor1.socketID)].Location.X, Z: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor1.socketID)].Location.Z});
+            sensor2.points.push({X: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor2.socketID)].Location.X, Z: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor2.socketID)].Location.Z});
+            console.log("Sensor1 points count is: " + sensor1.points.length)
+            console.log("Sensor2 points count is: " + sensor2.points.length)
         }
     }, 1000);
-
-
-        //grab 3 points from each of two sensors (can change this for more sensors later...?
-
-
-        //calculate centroids for both polygons
-
-        //calculate transformation between the two centroids
-
-        //calculate angle of (reference P1)(reference origin)(transformed P1)
 }
 
-// tested
+exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
+    for(var i = 0; i <= persons.length; i++){
+        if(i < persons.length){
+            persons[i].ID.forEach(function(trackedID){
+                if(trackedID.originatingSocket == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", trackedID) == undefined){
+                    persons[i].ID.splice(persons[i].ID.indexOf(trackedID), 1);
+                }
+            })
+        }
+        else{
+            persons.forEach(function(person){
+                //console.log("CHECKING FOR EMPTY ID LISTS");
+                if(person.ID.length <= 0){
+                    persons.splice(persons.indexOf(person), 1);
+                }
+            })
+        }
+    }
+}
+
 exports.updatePersons = function(receivedPerson, socket){
-    this.purgeInactivePersons();
     if(util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}) != undefined){
-        console.log("FOUND WITH THIS ID: " + util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}))
+        //console.log("FOUND WITH THIS ID: " + util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}))
         //person was found
         var returnedID = util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id});
         try{
-            persons[returnedID].Location.X = person.Location.X;
-            persons[returnedID].Location.Y = person.Location.Y;
-            persons[returnedID].Location.Z = person.Location.Z;
+            persons[returnedID].Location.X = receivedPerson.Location.X.toFixed(3);
+            persons[returnedID].Location.Y = receivedPerson.Location.Y.toFixed(3);
+            persons[returnedID].Location.Z = receivedPerson.Location.Z.toFixed(3);
+            persons[returnedID].distanceToKinect = util.getDistanceToKinect(location.X, location.Z).toFixed(3);
+            persons[returnedID].orientationToKinect = util.getPersonOrientation(location.X, location.Z).toFixed(3);
             persons[returnedID].LastUpdated = new Date();
             if(persons[returnedID].OwnedDeviceID != null){
-                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.X = receivedPerson.Location.X;
-                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.Y = receivedPerson.Location.Y;
-                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.Z = receivedPerson.Location.Z;
+                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.X = receivedPerson.Location.X.toFixed(3);
+                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.Y = receivedPerson.Location.Y.toFixed(3);
+                devices[util.findWithAttr(devices, "ID", persons[returnedID].OwnedDeviceID)].Location.Z = receivedPerson.Location.Z.toFixed(3);
             }
         }
         catch(err){
@@ -101,16 +115,12 @@ exports.updatePersons = function(receivedPerson, socket){
     }
     else{
         //person was not found
-        console.log("NOT FOUND")
-        console.log(receivedPerson.Person_ID)
         if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
             var person = new factory.Person(receivedPerson.Person_ID, receivedPerson.Location, socket);
             person.LastUpdated = new Date();
             persons.push(person);
         }
     }
-
-
 };
 
 exports.pairDevice = function(deviceID, personID, socket){
@@ -177,8 +187,7 @@ exports.printPersons = function(){
 exports.purgeInactiveDevices = function(){
     devices.forEach(function(device){
         var timeDifference = (new Date() - device.LastUpdated);
-        if(timeDifference > 900 && device.stationary == false){
-            //console.log("TIME DIFFERENCE: " + timeDifference);
+        if(timeDifference > 3000 && device.stationary == false){
             devices.splice(devices.indexOf(device), 1)
         }
     })
@@ -206,42 +215,17 @@ exports.unpairDevice = function(deviceID, personID){
     }
 }
 
-exports.purgeInactivePersons = function(){
-    persons.forEach(function(person){
-        var timeDifference = (new Date() - person.LastUpdated);
-        try{
-            if(timeDifference > 900){
-                if(person.OwnedDeviceID != null){
-                    devices[util.findWithAttr(devices, "ID", person.OwnedDeviceID)].PairingState = "unpaired";
-                    devices[util.findWithAttr(devices, "ID", person.OwnedDeviceID)].OwnerID = null;
-                }
-                persons.splice(persons.indexOf(person), 1)
-            }
-        }
-        catch(err){}
-    })
-}
-
 exports.printDevices = function(){
     console.log("devices tracked: ");
-    var output;
-    //console.log(devices);
     try{
         devices.forEach(function(item) {
-            output = "ID: " + item.ID +
-                "     X: " + item.Location.X +
-                "     Y: " + item.Location.Y +
-                "     Z: " + item.Location.Z +
-                "     Orientation: " + item.Orientation +
-                "     PairingState: " + item.PairingState;
-            console.log(output)
+            console.log(JSON.stringify(item));
             if(item = null){
                 console.log("null device");
             }
         });
     }
     catch(err){
-        console.log("here??");
         console.log(err);
         return false;
     }
@@ -289,6 +273,29 @@ exports.unpairAllPeople = function(){
             console.log("person is null");
         }
     })
+}
+
+exports.cleanUpSensor = function(socketID){
+    frontend.io.sockets.emit("refreshWebClientSensors", {});
+    sensors.splice(util.findWithAttr(sensors, "socketID", socketID), 1);
+    for(var i = 0; i <= persons.length; i++){
+        console.log("Persons[] length: " + persons.length);
+        console.log("i value: " + i);
+        if(i < persons.length){
+            while(util.findWithAttr(persons[i].ID, "originatingSocket", socketID) != undefined){
+                console.log("Person " + i + "has ID with socket being removed.");
+                persons[i].ID.splice(util.findWithAttr(persons[i].ID, "originatingSocket", socketID), 1);
+            }
+        }
+        else{
+            persons.forEach(function(person){
+                //console.log("CHECKING FOR EMPTY ID LISTS");
+                if(person.ID.length <= 0){
+                    persons.splice(persons.indexOf(person), 1);
+                }
+            })
+        }
+    }
 }
 
 exports.initDevice = function(deviceID, height, width){
@@ -362,53 +369,6 @@ exports.getDevicesInView = function(observer, devicesInFront){
             }
         }
     };
-
-	// List<Device> returnDevices = new List<Device>();
-
-	// Line obseverLineOfSight = new Line(observer.Location, observer.Orientation);
-
-	// List<Device> devicesInView = GetDevicesInFront(observer);
-
-	// foreach (Device target in devicesInView)
-	// {
-	// if (target.Width == null || target.Width == null)
-		// continue;
-
-	// List<Line> sides = getLinesOfShape(target);
-	// List<Point?> intersectionPoints = new List<Point?>();
-
-	// foreach (Line side in sides)
-	// {
-		// Point? intPoint = Line.getIntersectionPoint(obseverLineOfSight, side);
-		// if (intPoint != null)
-			// intersectionPoints.Add(intPoint);
-	// }
-
-	// if (intersectionPoints.Count == 0)
-		// continue;
-
-	// Point? nearestPoint = intersectionPoints[0];
-	// double shortestDistance = Line.getDistanceBetweenPoints((Point)observer.Location, (Point)nearestPoint);
-
-	// foreach (Point point in intersectionPoints)
-	// {
-		// double distance = Line.getDistanceBetweenPoints((Point)observer.Location, point);
-		// if (distance < shortestDistance)
-		// {
-			// nearestPoint = point;
-			// shortestDistance = distance;
-		// }
-	// }
-
-	// Point ratioOnScreen = GetRatioPositionOnScreen(target, (Point)nearestPoint);
-
-
-	// target.intersectionPoint["x"] = ratioOnScreen.X;
-	// target.intersectionPoint["y"] = ratioOnScreen.Y;
-	// returnDevices.Add(target);                
-	// }
-
-	// return returnDevices;
 }
 
 // TODO: implement!
@@ -467,35 +427,6 @@ exports.getDevicesInFront = function(observerID){
     catch(err){
         console.log(err);
     }
-
-	// foreach (Device target in _devices)
-	// {
-		// if (target == observer || !target.Location.HasValue)
-			// continue;
-
-		// // Atan2 is the inverse tangent function, given lengths for the opposite and adjacent legs of a right triangle, it returns the angle
-		// double angle = Util.NormalizeAngle(Math.Atan2(target.Location.Value.Y - observer.Location.Value.Y, target.Location.Value.X - observer.Location.Value.X) * 180 / Math.PI);
-
-		// // Ordinarily, the angle defining the left boundary of the field of view will be larger than the angle for the right.
-		// // For example, if our device has an orientation of 90.0 and a field of view of 15 degrees, then the left and right FoV vectors are at 97.5 and 82.5 degrees.
-		// // In this case, the target must be at an angle between left and right to be in view.
-		// if (leftFieldOfView > rightFieldOfView && angle < leftFieldOfView && angle > rightFieldOfView)
-		// {
-			// returnDevices.Add(target);
-		// }
-		// // If the field of view includes the X axis, then the left field of view will be smaller than the right field of view.
-		// // For example, if our device has an orientation of 0.0 and a field of view of 15 degrees, then the left FoV vector will be at 7.5 degrees,
-		// // and the right FoV will be at 352.5 degrees.
-		// else if (leftFieldOfView < rightFieldOfView)
-		// {
-			// if (angle < leftFieldOfView || angle > rightFieldOfView)
-				// returnDevices.Add(target);
-		// }
-
-
-	// }
-
-	// return returnDevices;
 }
 
 // TODO: implement!
@@ -504,8 +435,6 @@ exports.GetNearestDeviceInView = function(observer){
 	// TODO: test
     var devicesInView = this.GetDevicesInView(observer);
     return this.FindNearestDevice(observer, devicesInView);
-	// List<Device> devicesInView = GetDevicesInView(observer);
-	// return FindNearestDevice(observer, devicesInView);
 }
 
 // TODO: implement!
@@ -518,7 +447,6 @@ exports.GetDevicesWithinRange = function(observer, distance){
     }
 
     devices.forEach(function(device){
-        var wantToSkip = false;
         if(device == observer){
            //this.continue /////is this necessary, if it's an else if?
         }
@@ -528,23 +456,6 @@ exports.GetDevicesWithinRange = function(observer, distance){
     });
 
     return returnDevices;
-
-	// List<Device> returnDevices = new List<Device>();
-
-	// if (!observer.Location.HasValue)
-		// return returnDevices;
-
-	// foreach (Device device in _devices)
-	// {
-		// if (device == observer)
-			// continue;
-		// else if (device.Location.HasValue && Util.DistanceBetweenPoints(observer.Location.Value, device.Location.Value) < distance)
-		// {
-			// returnDevices.Add(device);
-		// }
-	// }
-
-	// return returnDevices;
 }
 
 // TODO: implement!
@@ -553,9 +464,6 @@ exports.GetNearestDeviceWithinRange = function(observer, distance){
 	// TODO: test
     var devicesInView = this.GetDevicesWithinRange(observer, distance);
     return this.FindNearestDevice(observer, devicesInView);
-
-	// List<Device> devicesInView = GetDevicesWithinRange(observer, distance);
-	// return FindNearestDevice(observer, devicesInView);
 }
 
 // TODO: implement!
@@ -585,35 +493,4 @@ exports.FindNearestDevice = function(observer, deviceList){
         });
         return nearest;
     }
-
-
-	// if (deviceList.Count == 0)
-		// return null;
-	// else
-	// {
-		// Device nearest = null;
-
-		// //First, find a device with a location to compare against
-		// foreach (Device device in deviceList)
-		// {
-			// if (device != observer && device.Location.HasValue)
-			// {
-				// nearest = device;
-			// }
-		// }
-		// if (nearest == null)
-			// return null;
-
-		// //Find the device with the least distance to the observer
-		// foreach (Device device in deviceList)
-		// {
-			// if (device != observer && device.Location.HasValue &&
-				// Util.DistanceBetweenPoints(device.Location.Value, observer.Location.Value) < Util.DistanceBetweenPoints(nearest.Location.Value, observer.Location.Value))
-			// {
-				// nearest = device;
-			// }
-		// }
-		// return nearest;
-
-	// }
 }

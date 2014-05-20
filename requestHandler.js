@@ -21,12 +21,15 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('registerSensor', function(sensorInfo){
-        console.log(sensorInfo);
+        frontend.allClients[util.findWithAttr(frontend.allClients, "socketID", socket.id)].clientType = "sensor";
         var sensor = new factory.Sensor(socket);
-        sensor.SensorType = sensorInfo.sensorType;
+        sensor.sensorType = sensorInfo.sensorType;
         sensor.FOV = sensorInfo.FOV;
-        console.log("passing on to locator.registerSensor()");
         locator.registerSensor(sensor);
+    });
+
+    socket.on('registerWebClient', function(clientInfo){
+        frontend.allClients[util.findWithAttr(frontend.allClients, "socketID", socket.id)].clientType = "webClient";
     });
 
     socket.on('setPairingState', function (data) {
@@ -61,8 +64,11 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getPeopleFromServer', function (request, fn) {
-        locator.purgeInactivePersons();
         fn((locator.persons));
+    });
+
+    socket.on('getClientsFromServer', function (request, fn) {
+        fn((frontend.allClients));
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
@@ -92,14 +98,11 @@ exports.handleRequest = function (socket){
         socket.broadcast.emit(request.listener, request.payload);
     });
 
-    socket.on('testingEvent', function (request, fn) {
-        io.sockets.emit('testingEvent', request);
-    });
-
     socket.on('personUpdate', function(persons, fn){
-        console.log("personUpdate reeceived");
+        //console.log("personUpdate reeceived");
         //get persons from body, call update function for each person
         if(persons!=null){
+            locator.removeIDsNoLongerTracked(socket, persons);
             persons.forEach(function(person){
                 locator.updatePersons(person, socket);
             });
@@ -108,7 +111,7 @@ exports.handleRequest = function (socket){
             console.log("request was null");
         }
 
-        locator.printPersons();
+        //locator.printPersons();
     });
 
     socket.on('error', function(err){
@@ -119,11 +122,8 @@ exports.handleRequest = function (socket){
         console.log("uncaughtException: " + err);
     });
 
-    socket.on('printDebug', function(data){
-        console.log("event happened, used for debugging: " + data)
-    })
-
     socket.on('getSensorsFromServer', function (request, fn) {
+        console.log("getting sensors from server")
         fn((locator.sensors));
     });
 

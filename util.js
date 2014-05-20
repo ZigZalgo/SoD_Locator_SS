@@ -76,12 +76,12 @@ exports. getTranslationRule= function(startingLocation1,endingLocation1,starting
 
 
 /*
-    get the vector from two points, since we are dealing with 2D space we only care about X and Z value of a location
+ get the vector from two points, since we are dealing with 2D space we only care about X and Z value of a location
  @param:
-    locationA         -- the location of the starting point
-    locationB         -- the location of the ending point
+ locationA         -- the location of the starting point
+ locationB         -- the location of the ending point
  @return:
-    returnVector      -- return the vector of the two points
+ returnVector      -- return the vector of the two points
  */
 exports.getVector = function(locationA,locationB){
     var returnVector = {X:0,Y:0,Z:0};
@@ -92,12 +92,12 @@ exports.getVector = function(locationA,locationB){
 
 
 /*
-    use dot product to calculate the degree between two vectors
+ use dot product to calculate the degree between two vectors
  @param:
-    vector1             -- first vector
-    vector2             -- second vector
+ vector1             -- first vector
+ vector2             -- second vector
  @return:
-    returnDegrees       -- The degree between two vectors
+ returnDegrees       -- The degree between two vectors
  */
 exports.getDegreeOfTwoVectors = function(vector1,vector2){
     var vector1length = Math.sqrt(Math.pow(vector1.X,2) + Math.pow(vector1.Z,2));
@@ -419,12 +419,9 @@ exports.findWithAttr = function(array, attr, value) {
 
 exports.findWithAttrWeak = function(array, attr, query) {
     for(var i = 0; i < array.length; i += 1) {
-        console.log("looking through: " + JSON.stringify(array[i][attr]));
-        console.log("with: " + JSON.stringify(query))
-        //console.log(array[i][attr])
         if(JSON.stringify(array[i][attr]).indexOf(JSON.stringify(query)) != -1) {
             return i;
-            console.log("returned: ");
+            //console.log("returned: ");
         }
     }
 }

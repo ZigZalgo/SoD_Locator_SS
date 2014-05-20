@@ -19,8 +19,11 @@ function Person(id, location, socket){
         this.ID = [];
         this.ID.push({value: id, originatingSocket: socket.id});
         this.Location = location;
-        this.orientationToKinect = util.getPersonOrientation(location.X,location.Z);
-        this.distanceToKinect = util.getDistanceToKinect(location.X,location.Z);
+        this.Location.X = location.X.toFixed(3);
+        this.Location.Y = location.Y.toFixed(3);
+        this.Location.Z = location.Z.toFixed(3);
+        this.orientationToKinect = util.getPersonOrientation(location.X,location.Z).toFixed(3);
+        this.distanceToKinect = util.getDistanceToKinect(location.X,location.Z).toFixed(3);
         this.Orientation = null;
         this.OwnedDeviceID = null;
         this.PairingState = "unpaired";
@@ -42,25 +45,15 @@ exports.Person = Person;
 
 function Sensor(socket){
     try{
-        this.SocketID = socket.id;
-        this.SensorType = "";
+        this.socketID = socket.id;
+        this.sensorType = "";
         this.FOV = 0;
         this.LastUpdated = new Date();
-        this.Calibration = {Rotation: null, TransformX: null, TransformY: null};
+        this.calibration = {Rotation: null, TransformX: null, TransformY: null};
+        this.isCalibrated = false;
     }
     catch(err){
         return false;
-    }
-}
-
-Sensor.prototype = {
-    isCalibrated: function(){
-        if(this.Calibration.Rotation == null || this.Calibration.TransformX == null || this.Calibration.TransformY == null){
-            return false;
-        }
-        else{
-            return true;
-        }
     }
 }
 

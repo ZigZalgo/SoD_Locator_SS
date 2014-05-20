@@ -8,17 +8,19 @@
         var cameraHeightInPixels = 320;
         var cameraWidthInPixels = 480;
         var cameraFOV = 57;
+        var minorGridLineWidth = 10;
+        var majorGridLineWidth = 50;
 
         function drawGrid() {
             var cnv = document.getElementById("cnvBG");
 
             var gridOptions = {
                 minorLines: {
-                    separation: 20,
+                    separation: minorGridLineWidth,
                     color: '#EEEEEE'
                 },
                 majorLines: {
-                    separation: 100,
+                    separation: majorGridLineWidth,
                     color: '#BBBBBB'
                 }
             };
@@ -77,39 +79,42 @@
         io = io.connect()
 
         function updateCanvasWithSensors(){
-            ////
-            var sensorX = 0; //get this from sensor list later on
-            var sensorY = 0; //get this from sensor list later on
-            var sensorRotationAngle = 0; //get this from sensor list later on
-            var sensorFOV = 57; //get this from sensor list later on
-            ////
-            var radius = 400; //how long are the view lines? in pixels...
+            var cSensors = document.getElementById("cnvSensors");
+            var ctxSensors = cSensors.getContext("2d");
+            ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
+            io.emit('getSensorsFromServer', {}, function(data){
+                data.forEach((function(sensor){
+                    var sensorX = 0; //get this from sensor list later on
+                    var sensorY = 0; //get this from sensor list later on
+                    var sensorRotationAngle = 0; //get this from sensor list later on
+                    var sensorFOV = sensor.FOV; //get this from sensor list later on
+                    ////
+                    var radius = 400; //how long are the view lines? in pixels...
 
-            //Calculate polygon for FOV indicator on visualizer
-            var viewPoint1X = (radius)*(Math.sin((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
-            var viewPoint1Y = (radius)*(Math.cos((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
-            var viewPoint2X = (radius)*(Math.sin((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
-            var viewPoint2Y = (radius)*(Math.cos((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
+                    //Calculate polygon for FOV indicator on visualizer
+                    var viewPoint1X = (radius)*(Math.sin((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
+                    var viewPoint1Y = (radius)*(Math.cos((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
+                    var viewPoint2X = (radius)*(Math.sin((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
+                    var viewPoint2Y = (radius)*(Math.cos((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
 
-            //Get Context for drawing on HTML5 Canvas
-            var cBG = document.getElementById("cnvBG");
-            var ctxBG = cBG.getContext("2d");
+                    //Get Context for drawing on HTML5 Canvas
 
-            //draw view polygon
-            ctxBG.fillStyle = "rgba(0, 0, 0, 0.2)";
-            ctxBG.beginPath();
-            ctxBG.moveTo(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY));  //move to Kinect coordinates
-            ctxBG.lineTo(shiftXToGridOrigin(viewPoint1X), shiftYToGridOrigin(viewPoint1Y));
-            ctxBG.lineTo(shiftXToGridOrigin(viewPoint2X), shiftYToGridOrigin(viewPoint2Y));
-            ctxBG.closePath();
-            ctxBG.fill();
 
-            //draw circle for sensor on visualizer
-            ctxBG.beginPath();
-            ctxBG.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),40,0,2*Math.PI);
-            ctxBG.stroke();
+                    //draw view polygon
+                    ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
+                    ctxSensors.beginPath();
+                    ctxSensors.moveTo(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY));  //move to Kinect coordinates
+                    ctxSensors.lineTo(shiftXToGridOrigin(viewPoint1X), shiftYToGridOrigin(viewPoint1Y));
+                    ctxSensors.lineTo(shiftXToGridOrigin(viewPoint2X), shiftYToGridOrigin(viewPoint2Y));
+                    ctxSensors.closePath();
+                    ctxSensors.fill();
 
-            //$('#content2').append('<p> ' + 'ViewPoint1X: ' + viewPoint1X + 'ViewPoint1Y: ' + viewPoint1Y + 'ViewPoint2X: ' + viewPoint2X + 'ViewPoint2Y: ' + viewPoint2Y +'</p>')
+                    //draw circle for sensor on visualizer
+                    ctxSensors.beginPath();
+                    ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),40,0,2*Math.PI);
+                    ctxSensors.stroke();
+                }))
+            });
         }
 
         function updateCanvasWithPeople(){
@@ -121,9 +126,9 @@
 
                 data.forEach(function(person){
 
-                    var xInMeters = person.Location.X*100;
-                    var yInMeters = person.Location.Y*100;
-                    var zInMeters = person.Location.Z*100;
+                    var xInMeters = person.Location.X*majorGridLineWidth;
+                    var yInMeters = person.Location.Y*majorGridLineWidth;
+                    var zInMeters = person.Location.Z*majorGridLineWidth;
 
                     ctx.beginPath();
                     ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
@@ -132,70 +137,96 @@
                     //$('body').append('<p>New visitor, hooray! ' + data +'</p>')
 
                     ctx.font = "30px Arial";
-                    ctx.fillText(person.ID,shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters)+30);
+                    ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters)+30);
                 })
             });
         }
 
         function updateContentWithObjects(){
-            $('#content').html('<b>Updates...</b>');
+            $('#contentHeader').html('<b>Overview...</b>');
+
+            io.emit('getClientsFromServer', {}, function(data){
+                var htmlString = ""
+                data.forEach(function(client){
+                    htmlString += ('<tr>' +
+                            '<td>' + client.clientType + '</td>' +
+                            '<td>' + client.socketID + '</td>' +
+                            '</tr>')
+                });
+                $('#clients').html('<b>Clients:</b>:<table style="width:100%"><tr>' +
+                        '<td style="width:150px">Type</td>' +
+                        '<td style="width:400px">socketID</td>' +
+                        '</tr>' + htmlString + '</table>')
+            });
+
             io.emit('getSensorsFromServer', {}, function(data){
-                $('#content').append('<div >Sensors:'+JSON.stringify(data)+'</div>'); /*appending the data on the page using Jquery */
+                var htmlString = ""
+                data.forEach(function(sensor){
+                    htmlString += ('<tr>' +
+                            '<td>' + sensor.sensorType + '</td>' +
+                            '<td>' + sensor.socketID + '</td>' +
+                            '<td>' + sensor.FOV + '</td>' +
+                            '<td>' + sensor.isCalibrated + '</td>' +
+                            '</tr>')
+                });
+                $('#sensors').html('<b>Sensors:</b>:<table style="width:100%"><tr>' +
+                        '<td style="width:150px">Type</td>' +
+                        '<td style="width:400px">socketID</td>' +
+                        '<td style="width:400px">FOV</td>' +
+                        '<td style="width:400px">Calibrated</td>' +
+                        '</tr>' + htmlString + '</table>')
             });
+
             io.emit('getPeopleFromServer', {}, function(data){
-                $('#content').append('<div >People:'+JSON.stringify(data)+'</div>'); /*appending the data on the page using Jquery */
+                var htmlString = ""
+                data.forEach(function(person){
+                    htmlString += ('<tr>' +
+                            '<td>' + JSON.stringify(person.ID) + '</td>' +
+                            '<td>' + JSON.stringify(person.Location) + '</td>' +
+                            '<td>' + person.PairingState + '</td>' +
+                            '<td>' + person.OwnedDeviceID + '</td>' +
+                            '<td>' + person.Orientation + '</td>' +
+                            '<td>' + person.orientationToKinect + '</td>' +
+                            '<td>' + person.distanceToKinect + '</td>' +
+                            '</tr>')
+                });
+                $('#people').html('<b>People:</b>:<table style="width:100%"><tr>' +
+                        '<td style="width:150px">ID</td>' +
+                        '<td style="width:100px">Location</td>' +
+                        '<td style="width:100px">Pairing State</td>' +
+                        '<td style="width:100px">Paired Device</td>' +
+                        '<td style="width:100px">Orientation</td>' +
+                        '<td style="width:100px">Orientation to Sensor</td>' +
+                        '<td style="width:100px">Distance to Sensor</td>' +
+                        '</tr>' + htmlString + '</table>')
             });
-            io.emit('getDevicesWithSelection', {additionalInfo: {selection: "all"}}, function(data){
-                $('#content').append('<div >Devices:'+JSON.stringify(data)+'</div>'); /*appending the data on the page using Jquery */
+
+            io.emit('getDevicesFromServer', {}, function(data){
+                $('#devices').html('<div >Devices:'+JSON.stringify(data)+'</div>'); /*appending the data on the page using Jquery */
             });
-        }
-
-        function calibrateSensors(){
-            //grab 3 points from each of two sensors (can change this for more sensors later...?
-
-
-            //calculate centroids for both polygons
-
-            //calculate transformation between the two centroids
-
-            //calculate angle of (reference P1)(reference origin)(transformed P1)
-
         }
 
         io.on("webMessageEvent",function(message){
-            message = JSON.parse(message);
-            $('#content').append('<div >'+message.data+'</div>'); /*appending the data on the page using Jquery */
+            $('#status').html('GOT MESSAGE');
+            $('#status').append('<div >'+JSON.stringify(message)+'</div>'); /*appending the data on the page using Jquery */
         });
+        io.on("connect", function(){
+            io.emit("registerWebClient", {});
+        });
+
+        io.on("refreshWebClientSensors", function(){
+            updateCanvasWithSensors();
+        });
+
         $(function(){
-            $('#getSensors').click(function(){ /*listening to the button click using Jquery listener*/
-                io.emit('getSensorsFromServer', {}, function(data){
-                    $('#content').val('');
-                    $('#content').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
-                });
-            });
-
-            $('#getPeople').click(function(){ /*listening to the button click using Jquery listener*/
-                io.emit('getPeopleFromServer', {}, function(data){
-                    $('#content').val('');
-                    $('#content').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
-                });
-            });
-
-            $('#getDevices').click(function(){ /*listening to the button click using Jquery listener*/
-                io.emit('getDevicesWithSelection', {additionalInfo: {selection: "all"}}, function(data){
-                    $('#content').val('');
-                    $('#content').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
-                });
-            });
-
             $('#getPoints').click(function(){ /*listening to the button click using Jquery listener*/
-                io.emit('getDevicesWithSelection', {additionalInfo: {selection: "all"}}, function(data){
-                    $('#content').val('');
-                    $('#content').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
+                io.emit('calibrateSensors', {}, function(){
+                    //$('#status').html('');
+                    //$('#status').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
                 });
             });
         });
-
+        io.emit("registerWebClient", {});
         setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
         setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for sensors, people, and devices and display to the side
 
@@ -204,6 +235,8 @@
 <body onload="drawGrid(); updateCanvasWithSensors();">
     <div>
         <canvas id="cnv" width="800" height="800"
+                style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+        <canvas id="cnvSensors" width="800" height="800"
                 style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
         <canvas id="cnvBG" width="800" height="800"
                 style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
@@ -213,11 +246,15 @@
 
             <!--<input type="text" id="message" /> <!--text form to send data to the server-->
             <input id="getPoints" type="button" value="getPoints">
-            <div id="content"></div> <!--This is where the data from the server is added-->
-            <div id="content2"></div> <!--This is where the data from the server is added-->
-            <div id="content3"></div> <!--This is where the data from the server is added-->
-
+            <div id="contentHeader" style="height: 30px; z-index: 1;"></div> <!--This is where the data from the server is added-->
+            <div id="clients" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
+            <div id="sensors" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
+            <div id="people" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
+            <div id="devices" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
         </form>
+    </div>
+    <div style="position: absolute; left: 0px; top: 810px;">
+        <div id="status" style="height: 200px; z-index: 1;"></div> <!--This is where the data from the server is added-->
     </div>
 </body>
 </html>
