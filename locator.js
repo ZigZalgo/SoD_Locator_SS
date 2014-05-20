@@ -88,8 +88,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 
 exports.updatePersons = function(receivedPerson, socket){
     if(util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}) != undefined){
-        //console.log("FOUND WITH THIS ID: " + util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}))
-        //person was found
+        //person already exists in database
         var returnedID = util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id});
         try{
             persons[returnedID].Location.X = receivedPerson.Location.X.toFixed(3);
@@ -286,12 +285,15 @@ exports.cleanUpSensor = function(socketID){
             }
         }
         else{
-            persons.forEach(function(person){
-                //console.log("CHECKING FOR EMPTY ID LISTS");
-                if(person.ID.length <= 0){
-                    persons.splice(persons.indexOf(person), 1);
+            for(var j = persons.length-1; j >= 0; j--){
+                console.log("CHECKING FOR EMPTY ID LISTS");
+                console.log(JSON.stringify(persons))
+                if(persons[j].ID.length <= 0){
+                    console.log("REMOVING AN EMPTY ID LIST AT INDEX:  " + j)
+                    persons.splice(j, 1);
                 }
-            })
+
+            }
         }
     }
 }
