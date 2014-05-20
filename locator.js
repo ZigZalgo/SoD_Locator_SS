@@ -55,7 +55,6 @@ exports.calibrateSensors = function(){
             console.log("Sensor1...\n" + JSON.stringify(sensor1));
             console.log("Sensor2...\n" + JSON.stringify(sensor2));
             console.log("THIS IS THE POINT CONTAINER FOR CALIBRATION");
-            //return {sensor1: sensor1, sensor2: sensor2}
             frontend.io.sockets.emit("webMessageEvent", util.getTranslationRule(sensor1.points[0], sensor1.points[1], sensor2.points[0], sensor2.points[1]))
             return (util.getTranslationRule(sensor1.points[0], sensor1.points[1], sensor2.points[0], sensor2.points[1]))
         }
@@ -72,14 +71,13 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
     for(var i = 0; i <= persons.length; i++){
         if(i < persons.length){
             persons[i].ID.forEach(function(trackedID){
-                if(trackedID.originatingSocket == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", trackedID) == undefined){
+                if(trackedID.originatingSocket == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", trackedID.value) == undefined){
                     persons[i].ID.splice(persons[i].ID.indexOf(trackedID), 1);
                 }
             })
         }
         else{
             persons.forEach(function(person){
-                //console.log("CHECKING FOR EMPTY ID LISTS");
                 if(person.ID.length <= 0){
                     persons.splice(persons.indexOf(person), 1);
                 }
