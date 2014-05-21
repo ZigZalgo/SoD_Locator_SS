@@ -5,7 +5,7 @@ var util = require('./util');
 
 // TODO: test!
 exports.start = function (){
-	locator.start();
+    locator.start();
 }
 
 exports.locator = locator;
@@ -96,6 +96,7 @@ exports.handleRequest = function (socket){
 
     socket.on('broadcast', function (request, fn) {
         socket.broadcast.emit(request.listener, request.payload);
+        console.log("GOT A BROADCAST, relaying to: " + request.listener);
     });
 
     socket.on('personUpdate', function(persons, fn){

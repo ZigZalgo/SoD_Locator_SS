@@ -29,6 +29,9 @@ app.get('/user', function (req, res) {
 app.get('/style', function (req, res) {
     res.sendfile(__dirname + '/view/style/style.css');
 });
+app.get('/calibrate', function (req, res) {
+    res.sendfile(__dirname + '/view/calibrate.html');
+});
 
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });
