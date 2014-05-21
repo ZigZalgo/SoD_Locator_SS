@@ -59,6 +59,7 @@ exports. getTranslationRule= function(startingLocation1,endingLocation1,starting
 
     function fixSign(vector1, vector2, degreeBetweenVectors, rotatedVector2, counterRotatedVector2)
     {
+
         return {
             degree:degreeBetweenVectors,
             xDistance: startingLocation1.X - startingLocation2.X,

@@ -4,6 +4,7 @@
     <title>Super Cool SOD Visualizer</title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <link href="/style" rel="stylesheet"  />
     <script type="text/javascript">
         var cameraHeightInPixels = 320;
         var cameraWidthInPixels = 480;
@@ -233,28 +234,48 @@
     </script>
 </head>
 <body onload="drawGrid(); updateCanvasWithSensors();">
-    <div>
-        <canvas id="cnv" width="800" height="800"
-                style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
-        <canvas id="cnvSensors" width="800" height="800"
-                style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
-        <canvas id="cnvBG" width="800" height="800"
-                style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
-    </div>
-    <div style="position: absolute; left: 810px; top: 0;">
-        <form>
+    <div id="page-wrap">
+        <section id="top">
+            <header>Super Cool SOD Visualizer</header>
+            <nav id="mode_selection">
+                <ul>
+                    <li><a href="#" id="userMode">User</a></li>
+                    <li><a href="#" id="devMode">Developer</a></li>
+                </ul>
+            <nav>
+        </section>
+        <section id="canvas">
+            <canvas id="cnv" width="800" height="800" ></canvas>
+            <canvas id="cnvSensors" width="800" height="800"></canvas>
+            <canvas id="cnvBG" width="800" height="800"</canvas>
+        </section>
+        <section id="overview">
+            <form>
+                <!--<input type="text" id="message" /> <!--text form to send data to the server-->
+                <input id="getPoints" type="button" value="getPoints">
+                <div id="contentHeader" ></div> <!--This is where the data from the server is added-->
 
-            <!--<input type="text" id="message" /> <!--text form to send data to the server-->
-            <input id="getPoints" type="button" value="getPoints">
-            <div id="contentHeader" style="height: 30px; z-index: 1;"></div> <!--This is where the data from the server is added-->
-            <div id="clients" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
-            <div id="sensors" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
-            <div id="people" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
-            <div id="devices" style="height: 250px; z-index: 1;"></div> <!--This is where the data from the server is added-->
-        </form>
-    </div>
-    <div style="position: absolute; left: 0px; top: 810px;">
-        <div id="status" style="height: 200px; z-index: 1;"></div> <!--This is where the data from the server is added-->
-    </div>
+                <fieldset id="clients">
+                    <legend> Clients </legend>
+                </fieldset>  <!--This is where the data from the server is added-->
+
+                <fieldset id="sensors" >
+                    <legend> Sensors </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+
+                <fieldset id="people">
+                    <legend> Sensors </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+
+                <fieldset id="devices">
+                    <legend> Sensors </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+
+            </form>
+        </section>
+        <div style="position: absolute; left: 0px; top: 810px;">
+            <div id="status" style="height: 200px; z-index: 1;"></div> <!--This is where the data from the server is added-->
+        </div>
+    </div><!-- closing page wrap -->
 </body>
 </html>

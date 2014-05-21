@@ -1,5 +1,6 @@
 var express = require('express.io');
 var app = express();
+
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
@@ -20,10 +21,13 @@ app.get('/', function (req, res) {
     res.sendfile(__dirname + '/index.html');
 });
 app.get('/setup', function (req, res) {
-    res.sendfile(__dirname + '/setup.html');
+    res.sendfile(__dirname + '/view/setup.html');
 });
 app.get('/user', function (req, res) {
-    res.sendfile(__dirname + '/user.html');
+    res.sendfile(__dirname + '/view/user.html');
+});
+app.get('/style', function (req, res) {
+    res.sendfile(__dirname + '/view/style/style.css');
 });
 
 io.sockets.on('connection', function (socket) {
