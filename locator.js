@@ -64,7 +64,7 @@ exports.calibrateSensors = function(){
             console.log("Sensor1 points count is: " + sensor1.points.length)
             console.log("Sensor2 points count is: " + sensor2.points.length)
         }
-    }, 1000);
+    }, 3000);
 }
 
 exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){

@@ -45,87 +45,27 @@ exports.translateToCoordinateSpace = function(location,translateRules)
 
 
 exports. getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
+    return(setVariables(this, fixSign));
 
-    var translateRules = {degree:0,xDistance: 0,zDistance: 0,
-        startingLocation:startingLocation2};
-    var xDistance = startingLocation1.X - startingLocation2.X;
-    var zDistance = startingLocation1.Z - startingLocation2.Z;
-    translateRules.xDistance = xDistance;
-    translateRules.zDistance = zDistance;
-
-    var vector1                 = undefined;
-    var vector2                 = undefined;
-    var degreeBetweenVectors    = undefined;
-    var rotatedVector2          = undefined;
-    var counterRotatedVector2   = undefined;
-    cb1(this,cb2);
-
-    function cb1(functions,cb2){
-        vector1 = functions.getVector(startingLocation1,endingLocation1);
-        cb2(functions,cb3);
-    }
-    function cb2(functions,cb3)
-    {
-        vector2 = functions.getVector(startingLocation2,endingLocation2);
-        cb3(functions,cb4);
-    }
-    function cb3(functions,cb4)
-    {
-        degreeBetweenVectors = functions.getDegreeOfTwoVectors(vector1,vector2); // using dot product
-        cb4(functions,cb5)
-    }
-    function cb4(functions,cb5)
-    {
-        rotatedVector2 = functions.matrixTransformation(vector2,degreeBetweenVectors);               // clockwise
-        cb5(functions,cb6)
-    }
-    function cb5(functions,cb6)
-    {
-        counterRotatedVector2 = functions.matrixTransformation(vector2,-degreeBetweenVectors);
-        cb6(functions);
-    }
-    function cb6(functions)
-    {
-        if(Math.abs(rotatedVector2.X - vector1.X) < (1/functions.ROUND_RATIO) && Math.abs(rotatedVector2.Z - vector1.Z) < functions.ROUND_RATIO)
-        {
-            translateRules.degree = degreeBetweenVectors;  // represetn the degree of two sensor
-        }
-        else if(Math.abs(counterRotatedVector2.X - vector1.X) < (1/functions.ROUND_RATIO) && Math.abs(counterRotatedVector2.Z - vector1.Z) < functions.ROUND_RATIO)
-        {
-            translateRules.degree =  -degreeBetweenVectors;
-        }else
-        {
-            translateRules.degree = NaN;
-        }
+    function setVariables(functions,cb){
+        var vector1 = functions.getVector(startingLocation1,endingLocation1);
+        var vector2 = functions.getVector(startingLocation2,endingLocation2);
+        var degreeBetweenVectors = functions.getDegreeOfTwoVectors(vector1,vector2); // using dot product
+        var rotatedVector2 = functions.matrixTransformation(vector2,degreeBetweenVectors);               // clockwise
+        var counterRotatedVector2 = functions.matrixTransformation(vector2,-degreeBetweenVectors);
+        console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
+        return(cb(vector1, vector2, degreeBetweenVectors, rotatedVector2, counterRotatedVector2));
     }
 
-    return translateRules;  // different sensors should have their own rules
-    /*var vector1 = this.getVector(startingLocation1,endingLocation1);
-    var vector2 = this.getVector(startingLocation2,endingLocation2);
-    var degreeBetweenVectors = this.getDegreeOfTwoVectors(vector1,vector2); // using dot product
-    var translateRules = {degree:0,xDistance: 0,zDistance: 0,
-        startingLocation:startingLocation2};                                //initialize translation rules
-    */
-
-
-
-    // Since dot product algorithm doesn't indicate whether the angle is clockwise or counter-clockwise, we need to check
-    //var rotatedVector2 = this.matrixTransformation(vector2,degreeBetweenVectors);               // clockwise
-    //var counterRotatedVector2 = this.matrixTransformation(vector2,-degreeBetweenVectors);       // counter clockwise
-    /*if(Math.abs(rotatedVector2.X - vector1.X) < (1/this.ROUND_RATIO) && Math.abs(rotatedVector2.Z - vector1.Z) < this.ROUND_RATIO)
+    function fixSign(vector1, vector2, degreeBetweenVectors, rotatedVector2, counterRotatedVector2)
     {
-        translateRules.degree = degreeBetweenVectors;  // represetn the degree of two sensor
+        return {
+            degree:degreeBetweenVectors,
+            xDistance: startingLocation1.X - startingLocation2.X,
+            zDistance: startingLocation1.Z - startingLocation2.Z,
+            startingLocation:startingLocation2
+        };
     }
-    else if(Math.abs(counterRotatedVector2.X - vector1.X) < (1/this.ROUND_RATIO) && Math.abs(counterRotatedVector2.Z - vector1.Z) < this.ROUND_RATIO)
-    {
-        translateRules.degree =  -degreeBetweenVectors;
-    }else
-    {
-        translateRules.degree = NaN;
-    }*/
-
-
-
 }
 
 

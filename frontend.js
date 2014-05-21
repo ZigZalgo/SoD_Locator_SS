@@ -22,6 +22,9 @@ app.get('/', function (req, res) {
 app.get('/setup', function (req, res) {
     res.sendfile(__dirname + '/setup.html');
 });
+app.get('/user', function (req, res) {
+    res.sendfile(__dirname + '/user.html');
+});
 
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });
