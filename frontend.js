@@ -10,8 +10,10 @@ var factory = require('./factory');
 var locator = requestHandler.locator;
 var util = require('./util');
 var allClients = [];
+var clients = {};
 exports.io = io;
 exports.allClients = allClients;
+exports.clients = clients;
 
 server.listen(3000);
 
@@ -39,9 +41,11 @@ io.sockets.on('connection', function (socket) {
     requestHandler.handleRequest(socket);
 
     allClients.push({socketID: socket.id, clientType: null});
+    clients[socket.id] = socket;
 
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
+        delete clients[socket.id];
 
         //run cleanup functions for socket
         if(allClients[util.findWithAttr(allClients, "socketID", socket.id)] != undefined){

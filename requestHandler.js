@@ -128,9 +128,17 @@ exports.handleRequest = function (socket){
         fn((locator.sensors));
     });
 
+    socket.on('getCalibrationFrames', function(request, fn){
+        frontend.clients[request.referenceSensorID].emit('calibrateSensor', {}, function (referenceSensorFrame){
+            frontend.clients[request.uncalibratedSensorID].emit('calibrateSensor', {}, function (uncalibratedSensorFrame){
+                fn({reference: referenceSensorFrame, uncalibrated: uncalibratedSensorFrame});
+            });
+        });
+    });
+
     socket.on('calibrateSensors', function (request, fn){
         fn(locator.calibrateSensors());
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....
-    })
+    });
 }
