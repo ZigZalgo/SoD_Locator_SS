@@ -155,6 +155,16 @@
             });
         }
 
+        function printPersonID(ID)
+        {
+            var htmlString= "";
+            htmlString += '<table>';
+            ID.forEach(function(IDInfo){
+                htmlString += '<tr><td>' + IDInfo.value + '</td><td>'+IDInfo.originatingSocket +'</td></tr>';
+            });
+            htmlString += '</table>';
+            return htmlString;
+        }
         function updateContentWithObjects(){
 
             io.emit('getClientsFromServer', {}, function(data){
@@ -193,9 +203,9 @@
                 var htmlString = ""
                 data.forEach(function(person){
                     htmlString += ('<tr>' +
-                            '<td>'+JSON.stringify(person.ID)+'</td>' +
+                            '<td>'+printPersonID(person.ID)//JSON.stringify(person.ID)
+                            +'</td>' +
                             '<td><table class="location">' +
-                                '<tr><th>X</th><th>Y</th><th>Z</th></tr>'+
                                 '<tr><td>'+Math.round(person.Location.X*ROUND_RATIO)/ROUND_RATIO+'</td>'
                                 + '<td>'+Math.round(person.Location.Y*ROUND_RATIO)/ROUND_RATIO+'</td>'
                                 + '<td>'+Math.round(person.Location.Z*ROUND_RATIO)/ROUND_RATIO+'</td></tr>'
@@ -208,8 +218,10 @@
                             '</tr>')
                 });
                 $('#people').html('<legend>People:</legend><table style="width:100%"><tr>' +
-                        '<th style="width:150px">Person</th>' +
-                        '<th style="width:100px">Location</th>' +
+                        '<th style="width:150px"><table><tr><td colspan="2">Person</td></tr><tr><td>ID</td><td>OriginatingSocket</td></tr></table></th>' +
+                        '<th><table><tr><td colspan="3">Location</td></tr>' + '<tr><th style="width:15px">X</th>' +
+                        '<th style="width:15px">Y</th><th style="15px">Z</th></tr>'+
+                        '</table></th>' +
                         '<th style="width:100px">Pairing State</th>' +
                         '<th style="width:100px">Paired Device</th>' +
                         '<th style="width:100px">Orientation</th>' +
@@ -217,7 +229,6 @@
                         '<th style="width:100px">Distance to Sensor</th>' +
                         '</tr>' + htmlString + '</table>')
             });
-
             io.emit('getDevicesFromServer', {}, function(data){
                 $('#devices').html('<div >Devices:'+JSON.stringify(data)+'</div>'); /*appending the data on the page using Jquery */
             });
@@ -247,18 +258,93 @@
         setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
         setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for sensors, people, and devices and display to the side
 
+
+    // calibration section:
+        $(document).ready(function(){
+            $("#calibration_flip").click(function(){
+                $("#calibration_section").slideToggle("slow");
+            });
+        });
+
     </script>
 </head>
 <body onload="drawGrid(); updateCanvasWithSensors();">
     <div id="page-wrap">
         <section id="top">
             <header>Super Cool SOD Visualizer</header>
+            <div id="calibration_flip">Calibration Mode!</div>
+            <section id="calibration_section">
+                <div id="getImage">Get Image</div> <!-- Get Image button -->
+                <form>
+                    <table>
+                    <tr>
+                        <td>
+                            <fieldset class="master">
+                            <legend>Master References</legend>
+                                <div class="calibration_wrap">
+                                    <h5>Please Select a master reference:</h5>
+                                    <select required>
+                                        <option> A Little Cool </option>
+                                        <option> Sorta Cool </option>
+                                        <option> Ultra Cool </option>
+                                    </select>
+                                    <div class="canvas_fake">
+                                        CANVAS!
+                                    </div>
+                                </div>
+                                <fieldset class="sub_field">
+                                    <legend>Points Selected</legend>
+                                    <div class="points">
+                                        Master Point1    X:<input type="text" name="master_point1X" value="0.52">
+                                        Y:<input type="text" name="master_point1Y" value="0.38"></br>
+                                    </div>
+                                    <div class="points">
+                                        Master Point2 X:<input type="text" name="master_point2X" value="0.52">
+                                                      Y:<input type="text" name="master_point2Y" value="0.38"></br>
+                                    </div>
+                                </fieldset>
+                            </fieldset>
+
+                        </td>
+                        <td>
+                            <fieldset class="master">
+                                <legend>Sensors Being Calibrated</legend>
+                                <div class="calibration_wrap">
+                                    <h5>Please Select a Sensor:</h5>
+                                    <select required>
+                                        <option> A Little Cool </option>
+                                        <option> Sorta Cool </option>
+                                        <option> Ultra Cool </option>
+                                    </select>
+                                    <div class="canvas_fake">
+                                        CANVAS!
+                                    </div>
+                                    <fieldset class="sub_field">
+                                        <legend>Points Selected</legend>
+                                        <div class="points">
+                                            Sensor Point1   X:<input type="text" name="sensor_point1X" value="0.52">
+                                            Y:<input type="text" name="sensor_point1Y" value="0.38"></br>
+                                        </div>
+                                        <div class="points">
+                                            Sensor Point2 X:<input type="text" name="sensor_point2X" value="0.52">
+                                                          Y:<input type="text" name="sensor_point2Y" value="0.38"></br>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </fieldset>
+                        </td>
+                    </tr>
+                    </table>
+                </form>
+                <div id="calibrate_button">Calibrate</div>
+                <div id="calibration_bottom"> </div>
+            </section>
             <nav id="mode_selection">
                 <ul>
                     <li><a href="#" id="userMode">User</a></li>
                     <li><a href="#" id="devMode">Developer</a></li>
                 </ul>
-            <nav>
+            </nav>
         </section>
         <section id="canvas">
             <canvas id="cnv" width="800" height="800" ></canvas>

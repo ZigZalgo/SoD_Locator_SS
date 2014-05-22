@@ -36,12 +36,13 @@ header{
     line-height:1.6;font-family: "Agency FB",DinRound, Sans-Serif;
     color: #ffffff; text-align: center; font-size: 36px;
     text-shadow:2px 2px 5px grey;
+    z-index: 2;
 }
 
 nav#mode_selection{
     text-align: center;
     position: relative;
-    top: -74px;
+    top: -70px;
     left: -571px;
     z-index: 2;
     float: right;
@@ -90,14 +91,14 @@ nav#mode_selection li{
 
 /* Overview section */
 section#overview{
-    word-wrap: break-word;
+
     position: relative;
     left: 827px;
     top: -74px;
     background: #CACACA;
     width: 554px;
     border: 2px solid;
-
+    height:871px;
 }
 #contentHeader{
     height: 30px; z-index: 1;
@@ -108,7 +109,7 @@ section#overview fieldset{
     border:1px solid #292929;;
     color:black;
     font-size:90%;
-    height: 250px; z-index: 1;
+    height:auto; z-index: 1;
     background: white;
     border-radius: 9px;
     width:535px;
@@ -128,13 +129,30 @@ section#overview #contentHeader{
     font-size:2em;
     color:#292929
 }
+section#overview table td{
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+section#overview table th{
+    font-family:"Consolas",DinRound, Sans-Serif;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre-wrap;
+}
+
+fieldset#clients {
+    height:150px;
+}
 fieldset#clients legend{
     color:#ffffff;
     border: 2px solid #292929;;
     background:#292929;
 }
 #clients table td{
-    width:50%
+
 }
 section #sensors legend{
     background: #3370d4;
@@ -153,3 +171,176 @@ section #devices legend{
     background: #2cd72A;border: solid #2cd72A;color: #ffffff;
 }
 /* End overview section */
+
+
+/* Calibration */
+div#calibration_flip{
+    width: 200px;
+    position: absolute;
+    top: -5px;
+    left: 598px;
+    Z-index: 2;
+    text-align: center;
+    background: #d05a47;
+    color: white;
+    float: right;
+    font-weight:bold;
+    border-radius:10px;
+}
+div#calibration_flip:hover{
+    color:black;
+    cursor:pointer;
+}
+section#calibration_section{
+    color:#ffffff;
+    padding:0px;
+    margin:0px;
+    /*display:none;*/
+    background: transparent;
+    position:relative;;
+    top:0px;
+    left:0px;
+    height:1078px;
+}
+
+section#calibration_section table{
+    width:100%;
+}
+
+section#calibration_section table td{
+    width:50%;
+}
+
+section#calibration_section fieldset.master{
+    width:95%;
+    margin:auto;
+    padding:0px;
+    background:#cacaca;
+    height:auto;
+}
+section#calibration_section h5{
+    color:#1656bf;
+}
+section#calibration_section fieldset.master legend{
+    font-family:"Agency FB",DinRound, Sans-Serif;
+    padding:10px 20px;
+    text-align:center;
+    font-size: 1.8em;
+    background:#3370d4;
+    line-height:1.2em;
+    border-radius:5px;
+}
+section#calibration_section fieldset.sub_field{
+    width:95%;
+    margin:auto;
+    padding:0px;
+    height:auto;
+    background: #ffffff;
+    margin-bottom:20px;
+}
+
+section#calibration_section fieldset.sub_field legend{
+    font-family:"Consolas",DinRound, Sans-Serif;
+    padding:10px 20px;
+    font-weight:bold;
+    text-align:center;
+    font-size: 1.0em;
+    background:#3370d4;
+    line-height:1em;
+    border-radius:5px;
+}
+
+section#calibration_section select{
+    margin:auto;
+    padding:0px;
+    width:50%;
+    padding: 10px;
+    border-radius:4px;
+    height:40px;
+}
+
+section#calibration_section .calibration_wrap{
+    margin:auto;
+    width:100%;
+    margin:10px 10px;
+}
+
+.canvas_fake{
+    color:#292929;
+    text-align:center;
+    vertical-align: middle;
+    border:solid black 2px;
+    margin:10px 0px;
+    padding:0px;
+    background:white;
+    width: 650px;
+    height:650px;
+}
+#calibration_bottom{
+    position:relative;
+    left:0px;
+    top:-20px;
+    width:100%;
+    height:10px;
+    background:#3370d4;
+}
+#getImage{
+    margin: auto;
+    background: #d05a47;
+    padding: 5px 0px;
+    width: 134px;
+    text-align: center;
+    font-weight: bold;
+    position: relative;
+    top: 61px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px #888888;
+}
+
+#getImage:hover{
+    color:#292929;
+    cursor:pointer;
+    box-shadow:none;
+}
+
+#calibrate_button{
+    margin: auto;
+    background: #d05a47;
+    padding: 5px 0px;
+    width: 134px;
+    text-align: center;
+    font-weight: bold;
+    position: relative;
+    top: -43px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px #888888;
+}
+
+#calibrate_button:hover{
+    color:#292929;
+    cursor:pointer;
+    box-shadow:none;
+}
+
+.button{
+    margin: auto;
+    background: #d05a47;
+    padding: 5px 0px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px #888888;
+}
+#button:hover{
+    color:#292929;
+    cursor:pointer;
+    box-shadow:none;
+}
+
+.points{
+    font-weight: bold;
+    color: #1656bf;
+    text-align: center;
+    padding:3px;
+}
+
