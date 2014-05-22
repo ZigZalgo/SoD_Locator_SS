@@ -40,10 +40,14 @@ header{
 
 nav#mode_selection{
     text-align: center;
-    position: relative;top: -74px;left: -573px;float: right;
+    position: relative;
+    top: -74px;
+    left: -571px;
+    z-index: 2;
+    float: right;
 }
 nav#mode_selection a{
-    font-family: Arial,sans-serif;font-size: 19px; padding:2px 8px;
+    font-family: "Arial Black",Arial,sans-serif;font-size: 19px; padding:2px 8px;
     text-decoration: none;
 }
 nav#mode_selection ul{
@@ -60,7 +64,7 @@ nav#mode_selection li{
     color: #ffffff;
 }
 #devMode{
-    background:white;
+    background:#cacaca;
     color: #d05a47;
 }
 /* End top section*/
@@ -93,7 +97,7 @@ section#overview{
     background: #CACACA;
     width: 554px;
     border: 2px solid;
-    border-radius: 9px;
+
 }
 #contentHeader{
     height: 30px; z-index: 1;
@@ -101,21 +105,51 @@ section#overview{
 section#overview fieldset{
     padding: 0.2em 0.5em;
     margin: 0.1em;
-    border:1px solid green;
+    border:1px solid #292929;;
     color:black;
     font-size:90%;
     height: 250px; z-index: 1;
+    background: white;
+    border-radius: 9px;
+    width:535px;
 }
-fieldset#clients{
-
+section#overview td{
+    text-align:center;
 }
-section #sensors{
-
+section#overview legend{
+    font-size:1.5em;
+    font-weight:bold;
 }
-section #people{
-    ;
+section#overview #contentHeader{
+    text-align:center;
+    padding-top:5px;
+    font-family:"Agency FB",DinRound, Sans-Serif;
+    font-weight:bold;
+    font-size:2em;
+    color:#292929
 }
-section #devices{
-
+fieldset#clients legend{
+    color:#ffffff;
+    border: 2px solid #292929;;
+    background:#292929;
+}
+#clients table td{
+    width:50%
+}
+section #sensors legend{
+    background: #3370d4;
+    border: solid #3370d4;
+    color: #ffffff;
+}
+section input#getPoints{
+    position:relative;
+}
+section #people legend{
+    color:#ffffff;
+    border: 2px solid #d05a47;;
+    background:#d05a47;
+}
+section #devices legend{
+    background: #2cd72A;border: solid #2cd72A;color: #ffffff;
 }
 /* End overview section */

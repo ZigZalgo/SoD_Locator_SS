@@ -11,6 +11,7 @@
         var cameraFOV = 57;
         var minorGridLineWidth = 10;
         var majorGridLineWidth = 50;
+        var ROUND_RATIO  = 10;
 
         function drawGrid() {
             var cnv = document.getElementById("cnvBG");
@@ -112,8 +113,19 @@
 
                     //draw circle for sensor on visualizer
                     ctxSensors.beginPath();
-                    ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),40,0,2*Math.PI);
+
+                    ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
+                    ctxSensors.closePath();
+                    ctxSensors.lineWidth = 1;
+                    ctxSensors.fillStyle = '#3370d4';
+                    ctxSensors.fill();
+                    ctxSensors.strokeStyle = '#292929';
                     ctxSensors.stroke();
+
+                    ctxSensors.font = "20px Arial";
+                    ctxSensors.fillStyle = '#ffffff';
+                    ctxSensors.fillText('K'+data.indexOf(sensor),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+
                 }))
             });
         }
@@ -130,21 +142,20 @@
                     var xInMeters = person.Location.X*majorGridLineWidth;
                     var yInMeters = person.Location.Y*majorGridLineWidth;
                     var zInMeters = person.Location.Z*majorGridLineWidth;
-
+                    ctx.fillStyle = "#c82124"; //red
                     ctx.beginPath();
                     ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
                     ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
-                    ctx.stroke();
+                    ctx.fill();
                     //$('body').append('<p>New visitor, hooray! ' + data +'</p>')
-
-                    ctx.font = "30px Arial";
-                    ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters)+30);
+                    ctx.fillStyle = "#ffffff"; //white
+                    ctx.font = "20px Arial";
+                    ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
                 })
             });
         }
 
         function updateContentWithObjects(){
-            $('#contentHeader').html('<b>Overview...</b>');
 
             io.emit('getClientsFromServer', {}, function(data){
                 var htmlString = ""
@@ -154,9 +165,9 @@
                             '<td>' + client.socketID + '</td>' +
                             '</tr>')
                 });
-                $('#clients').html('<b>Clients:</b>:<table style="width:100%"><tr>' +
-                        '<td style="width:150px">Type</td>' +
-                        '<td style="width:400px">socketID</td>' +
+                $('#clients').html('<legend>Clients</legend><table id="client_table"><tr>' +
+                        '<th>Type</td>' +
+                        '<th>socketID</td>' +
                         '</tr>' + htmlString + '</table>')
             });
 
@@ -170,11 +181,11 @@
                             '<td>' + sensor.isCalibrated + '</td>' +
                             '</tr>')
                 });
-                $('#sensors').html('<b>Sensors:</b>:<table style="width:100%"><tr>' +
-                        '<td style="width:150px">Type</td>' +
-                        '<td style="width:400px">socketID</td>' +
-                        '<td style="width:400px">FOV</td>' +
-                        '<td style="width:400px">Calibrated</td>' +
+                $('#sensors').html('<legend>Sensors:</legend><table style="width:100%"><tr>' +
+                        '<th>Type</th>' +
+                        '<th>socketID</th>' +
+                        '<th>FOV</th>' +
+                        '<th>Calibrated</th>' +
                         '</tr>' + htmlString + '</table>')
             });
 
@@ -182,23 +193,28 @@
                 var htmlString = ""
                 data.forEach(function(person){
                     htmlString += ('<tr>' +
-                            '<td>' + JSON.stringify(person.ID) + '</td>' +
-                            '<td>' + JSON.stringify(person.Location) + '</td>' +
+                            '<td>'+JSON.stringify(person.ID)+'</td>' +
+                            '<td><table class="location">' +
+                                '<tr><th>X</th><th>Y</th><th>Z</th></tr>'+
+                                '<tr><td>'+Math.round(person.Location.X*ROUND_RATIO)/ROUND_RATIO+'</td>'
+                                + '<td>'+Math.round(person.Location.Y*ROUND_RATIO)/ROUND_RATIO+'</td>'
+                                + '<td>'+Math.round(person.Location.Z*ROUND_RATIO)/ROUND_RATIO+'</td></tr>'
+                                + '</table></td>' + //JSON.stringify(person.Location)
                             '<td>' + person.PairingState + '</td>' +
                             '<td>' + person.OwnedDeviceID + '</td>' +
                             '<td>' + person.Orientation + '</td>' +
-                            '<td>' + person.orientationToKinect + '</td>' +
-                            '<td>' + person.distanceToKinect + '</td>' +
+                            '<td>' + Math.round(person.orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
+                            '<td>' + Math.round(person.distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
                             '</tr>')
                 });
-                $('#people').html('<b>People:</b>:<table style="width:100%"><tr>' +
-                        '<td style="width:150px">ID</td>' +
-                        '<td style="width:100px">Location</td>' +
-                        '<td style="width:100px">Pairing State</td>' +
-                        '<td style="width:100px">Paired Device</td>' +
-                        '<td style="width:100px">Orientation</td>' +
-                        '<td style="width:100px">Orientation to Sensor</td>' +
-                        '<td style="width:100px">Distance to Sensor</td>' +
+                $('#people').html('<legend>People:</legend><table style="width:100%"><tr>' +
+                        '<th style="width:150px">Person</th>' +
+                        '<th style="width:100px">Location</th>' +
+                        '<th style="width:100px">Pairing State</th>' +
+                        '<th style="width:100px">Paired Device</th>' +
+                        '<th style="width:100px">Orientation</th>' +
+                        '<th style="width:100px">Orientation to Sensor</th>' +
+                        '<th style="width:100px">Distance to Sensor</th>' +
                         '</tr>' + htmlString + '</table>')
             });
 
@@ -252,23 +268,21 @@
         <section id="overview">
             <form>
                 <!--<input type="text" id="message" /> <!--text form to send data to the server-->
-                <input id="getPoints" type="button" value="getPoints">
-                <div id="contentHeader" ></div> <!--This is where the data from the server is added-->
+                <div id="contentHeader" >Overview</div> <!--This is where the data from the server is added-->
 
                 <fieldset id="clients">
                     <legend> Clients </legend>
                 </fieldset>  <!--This is where the data from the server is added-->
-
+                <input id="getPoints" type="button" value="getPoints">
                 <fieldset id="sensors" >
                     <legend> Sensors </legend>
                 </fieldset> <!--This is where the data from the server is added-->
-
                 <fieldset id="people">
                     <legend> Sensors </legend>
                 </fieldset> <!--This is where the data from the server is added-->
 
                 <fieldset id="devices">
-                    <legend> Sensors </legend>
+                    <legend> Devices </legend>
                 </fieldset> <!--This is where the data from the server is added-->
 
             </form>
