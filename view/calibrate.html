@@ -6,9 +6,58 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
 
+        var calibrationFrames = {};
+
         io = io.connect()
         io.on("connect", function(){
             io.emit("registerWebClient", {});
+            //$('#status').html("Listening on: " + io.socket.sessionid + "/setCalibrationFrame");
+        });
+
+        io.on("anything", function(data){
+            ('#status').html("MESSAGE RECEIVED: " + data);
+        })
+
+        io.on("setCalibrationFrame", function(data){
+            if(calibrationFrames[data.sourceID] != undefined){
+                if(calibrationFrames[data.sourceID] == "reference"){
+                    canvas = document.getElementById("cnvSensor1");
+                    var ctx = canvas.getContext("2d");
+                    var bytearray = new Uint8Array(data.payload);
+                    var imgdata = ctx.getImageData(0,0, 640, 480);
+                    var imgdatalen = imgdata.data.length;
+                    $('#status').append(imgdatalen);
+                    for(var i=0;i<(imgdatalen/4);i++){
+                        var depth = data.payload[i]*255/32760;
+
+                        imgdata.data[4*i] = depth;
+                        imgdata.data[4*i+1] = depth;
+                        imgdata.data[4*i+2] = depth;
+                        imgdata.data[4*i+3] = 255;
+                    }
+                    ctx.putImageData(imgdata,0,0)
+                }
+                else{
+                    canvas = document.getElementById("cnvSensor2");
+                    var ctx = canvas.getContext("2d");
+                    var bytearray = new Uint8Array(data.payload);
+                    var imgdata = ctx.getImageData(0,0, 512, 424);
+                    var imgdatalen = imgdata.data.length;
+                    $('#status').append(imgdatalen);
+                    for(var i=0;i<(imgdatalen/4);i++){
+                        var depth = data.payload[i]*255/5;
+
+                        imgdata.data[4*i] = depth;
+                        imgdata.data[4*i+1] = depth;
+                        imgdata.data[4*i+2] = depth;
+                        imgdata.data[4*i+3] = 255;
+                    }
+                    ctx.putImageData(imgdata,0,0)
+                }
+
+
+            }
+
         });
 
         $(function(){
@@ -33,26 +82,13 @@
             $('#getCalibrationFrames').click(function(){ /*listening to the button click using Jquery listener*/
                 var e1 = document.getElementById("referenceSensorList");
                 var e2 = document.getElementById("uncalibratedSensorList");
-
+                while(calibrationFrames.length > 0){
+                    calibrationFrames.pop();
+                }
+                calibrationFrames[e1.options[e1.selectedIndex].text] = "reference";
+                calibrationFrames[e2.options[e2.selectedIndex].text] = "uncalibrated";
                 $('#status').html('CLICKED BUTTON');
-                io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text}, function(data){
-                    $('#status').html("GOT CALIBRATION FRAMES DATA");
-                    canvas = document.getElementById("cnvSensor1");
-                    var ctx = canvas.getContext("2d");
-                    var bytearray = new Uint8Array(data);
-                    var imgdata = ctx.getImageData(0,0, 640, 480);
-                    var imgdatalen = imgdata.data.length;
-                    $('#status').append(imgdatalen);
-                    for(var i=0;i<(imgdatalen/4);i++){
-                        var depth = data[i]*255/32760;
-
-                        imgdata.data[4*i] = depth;
-                        imgdata.data[4*i+1] = depth;
-                        imgdata.data[4*i+2] = depth;
-                        imgdata.data[4*i+3] = 255;
-                    }
-                    ctx.putImageData(imgdata,0,0)
-                });
+                io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
             });
         });
         io.emit("registerWebClient", {});

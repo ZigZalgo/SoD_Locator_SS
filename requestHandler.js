@@ -21,15 +21,16 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('registerSensor', function(sensorInfo){
-        frontend.allClients[util.findWithAttr(frontend.allClients, "socketID", socket.id)].clientType = "sensor";
+        frontend.clients[socket.id].clientType = "sensor";
         var sensor = new factory.Sensor(socket);
         sensor.sensorType = sensorInfo.sensorType;
         sensor.FOV = sensorInfo.FOV;
+        sensor.rangeInMM = sensorInfo.rangeInMM;
         locator.registerSensor(sensor);
     });
 
     socket.on('registerWebClient', function(clientInfo){
-        frontend.allClients[util.findWithAttr(frontend.allClients, "socketID", socket.id)].clientType = "webClient";
+        frontend.clients[socket.id].clientType = "webClient";
     });
 
     socket.on('setPairingState', function (data) {
@@ -68,7 +69,11 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getClientsFromServer', function (request, fn) {
-        fn((frontend.allClients));
+        var selectedValues = [];
+        for(var key in frontend.clients){
+            selectedValues.push({socketID: frontend.clients[key].id, clientType: frontend.clients[key].clientType})
+        };
+        fn(selectedValues);
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
@@ -95,7 +100,7 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('broadcast', function (request, fn) {
-        socket.broadcast.emit(request.listener, request.payload);
+        socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});
         console.log("GOT A BROADCAST, relaying to: " + request.listener);
     });
 
@@ -129,11 +134,8 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getCalibrationFrames', function(request, fn){
-        frontend.clients[request.referenceSensorID].emit('calibrateSensor', {}, function (referenceSensorFrame){
-            frontend.clients[request.uncalibratedSensorID].emit('calibrateSensor', {}, function (uncalibratedSensorFrame){
-                fn({reference: referenceSensorFrame, uncalibrated: uncalibratedSensorFrame});
-            });
-        });
+        frontend.clients[request.referenceSensorID].emit('getFrameFromSensor', socket.id);
+        frontend.clients[request.uncalibratedSensorID].emit('getFrameFromSensor', socket.id);
     });
 
     socket.on('calibrateSensors', function (request, fn){

@@ -9,10 +9,8 @@ var requestHandler = require('./requestHandler');
 var factory = require('./factory');
 var locator = requestHandler.locator;
 var util = require('./util');
-var allClients = [];
 var clients = {};
 exports.io = io;
-exports.allClients = allClients;
 exports.clients = clients;
 
 server.listen(3000);
@@ -40,16 +38,16 @@ io.sockets.on('connection', function (socket) {
     console.log("something connected with sessionID: " + socket.id);
     requestHandler.handleRequest(socket);
 
-    allClients.push({socketID: socket.id, clientType: null});
+    var tempID = String(socket.id);
     clients[socket.id] = socket;
+    clients[socket.id].clientType = null;
 
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
-        delete clients[socket.id];
 
         //run cleanup functions for socket
-        if(allClients[util.findWithAttr(allClients, "socketID", socket.id)] != undefined){
-            switch(allClients[util.findWithAttr(allClients, "socketID", socket.id)].clientType){
+        if(clients[socket.id] != undefined){
+            switch(clients[socket.id].clientType){
                 case 'sensor':
                     socket.emit("refreshWebClientSensors", {});
                     console.log("CLEANING UP SENSOR")
@@ -62,7 +60,7 @@ io.sockets.on('connection', function (socket) {
                 default:
                     break;
             }
-            allClients.splice(util.findWithAttr(allClients, "socketID", socket.id), 1);
+            delete clients[socket.id];
         }
     });
 });

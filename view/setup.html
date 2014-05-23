@@ -244,7 +244,7 @@
                         '<th style="width:100px">Distance to Sensor</th>' +
                         '</tr>' + htmlString + '</table>')
             });
-            io.emit('getDevicesFromServer', {}, function(data){
+            io.emit('getDevicesFromServer', {additionalInfo:{selection: "all"}}, function(data){
                 var htmlString= "";
                 data.forEach(function(device){
                     htmlString+='<tr><td>' +device.ID+'</td></tr>'+
