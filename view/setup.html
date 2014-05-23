@@ -191,7 +191,7 @@
                             '<td>' + sensor.isCalibrated + '</td>' +
                             '</tr>')
                 });
-                $('#sensors').html('<legend>Sensors:</legend><table style="width:100%"><tr>' +
+                $('#sensors').html('<legend>Sensors</legend><table style="width:100%"><tr>' +
                         '<th>Type</th>' +
                         '<th>socketID</th>' +
                         '<th>FOV</th>' +
@@ -217,7 +217,7 @@
                             '<td>' + Math.round(person.distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
                             '</tr>')
                 });
-                $('#people').html('<legend>People:</legend><table style="width:100%"><tr>' +
+                $('#people').html('<legend>People</legend><table style="width:100%"><tr>' +
                         '<th style="width:150px"><table><tr><td colspan="2">Person</td></tr><tr><td>ID</td><td>OriginatingSocket</td></tr></table></th>' +
                         '<th><table><tr><td colspan="3">Location</td></tr>' + '<tr><th style="width:15px">X</th>' +
                         '<th style="width:15px">Y</th><th style="15px">Z</th></tr>'+
@@ -230,7 +230,19 @@
                         '</tr>' + htmlString + '</table>')
             });
             io.emit('getDevicesFromServer', {}, function(data){
-                $('#devices').html('<div >Devices:'+JSON.stringify(data)+'</div>'); /*appending the data on the page using Jquery */
+                var htmlString= "";
+                data.forEach(function(device){
+                    htmlString+='<tr><td>' +device.ID+'</td></tr>'+
+                            ''
+                })
+                $('#devices').html('<legend>Devices</legend>' +
+                        '<table>' +
+                        '<tr><th>ID</th><th><table><tr><td colspan="3">Location</td></tr>' + '<tr><th style="width:15px">X</th>' +
+                        '<th style="width:15px">Y</th><th style="15px">Z</th></tr>'+
+                        '</table></th></tr>'+
+                        '' +htmlString+
+                        '</table>'); /*appending the data on the page using Jquery */
+
             });
         }
 
@@ -375,7 +387,7 @@
         </section>
         <div class="status_wrap">
             <h1>status:</h1>
-            <div id="status">hello world, this status box helps debugging</div> <!--This is where the data from the server is added-->
+            <div id="status"></div> <!--This is where the data from the server is added-->
         </div>
     </div><!-- closing page wrap -->
 </body>

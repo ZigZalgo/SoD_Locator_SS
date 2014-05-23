@@ -141,4 +141,9 @@ exports.handleRequest = function (socket){
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....
     });
+    socket.on('getDevicesFromServer',function(request,fn){
+        console.log("get Devices From Server!");
+        locator.printDevices();
+        fn((locator.devices));
+    });
 }
