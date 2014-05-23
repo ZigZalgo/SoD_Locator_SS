@@ -90,10 +90,24 @@
                     var sensorY = 0; //get this from sensor list later on
                     var sensorRotationAngle = 0; //get this from sensor list later on
                     var sensorFOV = sensor.FOV; //get this from sensor list later on
-                    ////
-                    var radius = 400; //how long are the view lines? in pixels...
+
+                    //// radius value should be taken from sensor
+                    var radius = 200; //how long are the view lines? in pixels...
+
+
+                    var positionX = shiftXToGridOrigin(sensorX);
+                    var positionY = shiftXToGridOrigin(sensorY);
+                    var startAngle = (90-(sensorFOV/2))*Math.PI/180;//0.75;    // 90 as the Z orientation of sensor
+                    var endAngle = (90+(sensorFOV/2))*Math.PI/180;
+                    var antiClockwise = false;
+                    ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
+                    ctxSensors.beginPath();
+                    ctxSensors.arc(positionX, positionY, radius, startAngle, endAngle, antiClockwise);
+                    ctxSensors.lineTo(positionX, positionY);
+                    ctxSensors.closePath();
 
                     //Calculate polygon for FOV indicator on visualizer
+                    /*
                     var viewPoint1X = (radius)*(Math.sin((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
                     var viewPoint1Y = (radius)*(Math.cos((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
                     var viewPoint2X = (radius)*(Math.sin((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
@@ -109,6 +123,7 @@
                     ctxSensors.lineTo(shiftXToGridOrigin(viewPoint1X), shiftYToGridOrigin(viewPoint1Y));
                     ctxSensors.lineTo(shiftXToGridOrigin(viewPoint2X), shiftYToGridOrigin(viewPoint2Y));
                     ctxSensors.closePath();
+                    */
                     ctxSensors.fill();
 
                     //draw circle for sensor on visualizer

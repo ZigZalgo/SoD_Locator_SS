@@ -147,15 +147,17 @@ section#overview table th{
 }
 
 fieldset#clients {
-    height:150px;
+    width:100%;
+    height:auto;
 }
 fieldset#clients legend{
     color:#ffffff;
     border: 2px solid #A1A2A5;;
     background:#292929;
 }
-#clients table td{
-
+#clients_table {
+    width:100%;
+    max-width:100%;
 }
 section #sensors legend{
     background: #3370d4;
@@ -198,7 +200,7 @@ section#calibration_section{
     color:#ffffff;
     padding:0px;
     margin:0px;
-    /*display:none;*/
+    display:none;
     background: transparent;
     position:relative;;
     top:-40px;
