@@ -14,6 +14,7 @@ section,aside,nav,footer{display:block;}
 
 body{background:#bfbfbf;
     font-size: 16px;
+    width:100%;
     line-height: 138%;
     font-family: "futura-pt",Century Gothic,Futura,sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -22,15 +23,17 @@ body{background:#bfbfbf;
     background: #292929;
     position:relative;
     margin:auto;
-    width: 1400px;
+    width:80%;
+    max-width: 1400px;
     height:auto;
+    box-shadow: 5px 5px 10px #888888;
 }
 
 /* top section*/
 header{
     position: relative;
     top: -7px;
-    width: 365px; background: #1e1e1e;
+    max-width: 365px; background: #1e1e1e;
     margin:10px 0px 10px 50px;
     padding-top:10px;padding-bottom: 10px;
     line-height:1.6;font-family: "Agency FB",DinRound, Sans-Serif;
@@ -148,7 +151,7 @@ fieldset#clients {
 }
 fieldset#clients legend{
     color:#ffffff;
-    border: 2px solid #292929;;
+    border: 2px solid #A1A2A5;;
     background:#292929;
 }
 #clients table td{
@@ -156,7 +159,7 @@ fieldset#clients legend{
 }
 section #sensors legend{
     background: #3370d4;
-    border: solid #3370d4;
+    border: 2px solid #A1A2A5;
     color: #ffffff;
 }
 section input#getPoints{
@@ -164,11 +167,11 @@ section input#getPoints{
 }
 section #people legend{
     color:#ffffff;
-    border: 2px solid #d05a47;;
+    border: 2px solid #A1A2A5;;
     background:#d05a47;
 }
 section #devices legend{
-    background: #2cd72A;border: solid #2cd72A;color: #ffffff;
+    background: #2cd72A;border: solid #A1A2A5;color: #ffffff;
 }
 /* End overview section */
 
@@ -198,7 +201,7 @@ section#calibration_section{
     /*display:none;*/
     background: transparent;
     position:relative;;
-    top:0px;
+    top:-40px;
     left:0px;
     height:1078px;
 }
@@ -344,3 +347,28 @@ section#calibration_section .calibration_wrap{
     padding:3px;
 }
 
+
+/* status box*/
+.status_wrap{
+    margin:10px;
+    max-width: 100%;height: 100px;max-height: 200px;
+    background: #cacaca;
+    position: relative;
+    top: -53px;
+    z-index: 1;
+    padding: 10px;
+    border-radius:5px;
+    word-wrap:break-word;
+}
+    .status_wrap h1{
+        text-decoration:underline;
+        text-transform: uppercase;
+        font:font-family:"Agency FB",DinRound, Sans-Serif;
+        font-size:1.3em;
+        margin:2px;
+    }
+
+    #status{
+        font-family:"Consolas",DinRound, Sans-Serif;
+        border:solid 1px #292929;text-align:left;background:#ffffff;max-height: 200px; z-index: 1;}
+/* END Break word*/
