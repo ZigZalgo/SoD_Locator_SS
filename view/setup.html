@@ -11,6 +11,7 @@
         var cameraFOV = 57;
         var minorGridLineWidth = 10;
         var majorGridLineWidth = 50;
+        var pixelsPerMeter = majorGridLineWidth;
         var ROUND_RATIO  = 10;
 
         function drawGrid() {
@@ -92,7 +93,7 @@
                     var sensorFOV = sensor.FOV; //get this from sensor list later on
 
                     //// radius value should be taken from sensor
-                    var radius = 200; //how long are the view lines? in pixels...
+                    var radius = sensor.rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
 
 
                     var positionX = shiftXToGridOrigin(sensorX);
