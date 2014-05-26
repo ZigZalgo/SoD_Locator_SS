@@ -132,15 +132,20 @@ section#overview #contentHeader{
     font-size:2em;
     color:#292929
 }
+section#overview table{
+    width:100%;
+}
 section#overview table td{
-    max-width: 100px;
+    max-width: 50%;
+    width:50%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 section#overview table th{
-    font-family:"Consolas",DinRound, Sans-Serif;
+    font-family:oblique,DinRound, Sans-Serif;
     max-width: 150px;
+    font-size:1.2em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: pre-wrap;

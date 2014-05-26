@@ -245,17 +245,23 @@
                         '<th style="width:100px">Distance to Sensor</th>' +
                         '</tr>' + htmlString + '</table>')
             });
-            io.emit('getDevicesFromServer', {additionalInfo:{selection: "all"}}, function(data){
+            io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
                 var htmlString= "";
                 data.forEach(function(device){
-                    htmlString+='<tr><td>' +device.ID+'</td></tr>'+
-                            ''
+                    htmlString+='<tr><td>' +device.ID+'</td>'+
+                            '<td><table><tr><td>'+device.Location.X+'</td>'+'<td>'+device.Location.Y+'</td>'+'<td>'+device.Location.Z+'</td></tr></table></td>'+
+                            '<td>'+Math.round(device.Orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+device.PairingState+'</td>'+
+                            '<td>'+device.OwnerID+'</td>'+
+                            '</tr>'
                 })
                 $('#devices').html('<legend>Devices</legend>' +
                         '<table>' +
                         '<tr><th>ID</th><th><table><tr><td colspan="3">Location</td></tr>' + '<tr><th style="width:15px">X</th>' +
                         '<th style="width:15px">Y</th><th style="15px">Z</th></tr>'+
-                        '</table></th></tr>'+
+                        '</table></th> <th>Orientation</th>'+
+                        '<th>Pairing State</th>'+
+                        '<th>OwnerID</th>'+
+                        '</tr>'+
                         '' +htmlString+
                         '</table>'); /*appending the data on the page using Jquery */
 
@@ -287,12 +293,15 @@
         setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for sensors, people, and devices and display to the side
 
 
+
     // calibration section:
         $(document).ready(function(){
             $("#calibration_flip").click(function(){
                 $("#calibration_section").slideToggle("slow");
             });
         });
+
+
 
     </script>
 </head>
