@@ -55,24 +55,25 @@
                 sensors = {};
                 var referenceSensorList = document.getElementById("referenceSensorList")
                 var uncalibratedSensorList = document.getElementById("uncalibratedSensorList")
-                data.forEach((function(sensor){
-                    sensors[sensor.socketID] = sensor;
-                    var option = document.createElement("option");
-                    option.text = sensor.socketID;
-                    if(sensor.isCalibrated == true){
-                        var option2 = document.createElement("option");
-                        option2.text = sensor.socketID;
-                        referenceSensorList.add(option2);
+                for(var key in data){
+                    if(data.hasOwnProperty(key)){
+                        sensors[key] = data[key];
+                        var option = document.createElement("option");
+                        option.text = data[key].socketID;
+                        if(data[key].isCalibrated == true){
+                            var option2 = document.createElement("option");
+                            option2.text = data[key].socketID;
+                            referenceSensorList.add(option2);
+                        }
+                        uncalibratedSensorList.add(option);
                     }
-                    uncalibratedSensorList.add(option);
-                }))
+                }
             });
         }
 
         io = io.connect()
         io.on("connect", function(){
             io.emit("registerWebClient", {});
-            //$('#status').html("Listening on: " + io.socket.sessionid + "/setCalibrationFrame");
         });
 
         io.on("anything", function(data){
@@ -80,15 +81,15 @@
         })
 
         io.on("setCalibrationFrame", function(data){
-            if(calibrationFrames[data.sourceID] != undefined){
+            if(calibrationFrames["reference"] == data.sourceID || calibrationFrames["uncalibrated"] == data.sourceID){
                 depthArrays[data.sourceID] = data.payload;
                 if(sensors[data.sourceID].sensorType == "Kinect1"){
-                    var depthMultiplier = 3000;
+                    var depthMultiplier = 7000;
                 }
                 else{
                     var depthMultiplier = 5;
                 }
-                if(calibrationFrames[data.sourceID] == "reference"){
+                if(calibrationFrames["reference"] == data.sourceID){
                     canvas = document.getElementById("cnvSensorOne");
                     var ctx = canvas.getContext("2d");
                     var bytearray = new Uint8Array(data.payload);
@@ -108,8 +109,9 @@
                     canvas.addEventListener("mousedown", function(event){
                         getPosition("cnvSensorOne", data.sourceID, event);
                     }, false);
+                    $('#sensorOneStatus').html(depthMultiplier);
                 }
-                else if(calibrationFrames[data.sourceID] == "uncalibrated"){
+                else if(calibrationFrames["uncalibrated"] == data.sourceID){
                     canvas = document.getElementById("cnvSensorTwo");
                     var ctx = canvas.getContext("2d");
                     var bytearray = new Uint8Array(data.payload);
@@ -129,6 +131,7 @@
                     canvas.addEventListener("mousedown", function(event){
                         getPosition("cnvSensorTwo", data.sourceID, event);
                     }, false);
+                    $('#sensorTwoStatus').html(depthMultiplier);
                 }
             }
 
@@ -144,8 +147,8 @@
                 while(calibrationFrames.length > 0){
                     calibrationFrames.pop();
                 }
-                calibrationFrames[e1.options[e1.selectedIndex].text] = "reference";
-                calibrationFrames[e2.options[e2.selectedIndex].text] = "uncalibrated";
+                calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
+                calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
                 $('#status').html('CLICKED BUTTON');
                 io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
             });
@@ -162,9 +165,14 @@
 
             $('#calibrate').click(function(){
                 if(sensorOnePoints.length == 2 && sensorTwoPoints.length == sensorOnePoints.length){
-                    io.emit("calibrateSensors", {sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){
+                    io.emit("calibrateSensors", {referenceSensorID: calibrationFrames["reference"], uncalibratedSensorID: calibrationFrames["uncalibrated"],
+                        sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){
+
                         $('#status').html(JSON.stringify(data))
                     })
+                }
+                else{
+                    $('#status').html('Error: There are not enough points for calibration.');
                 }
             })
         });

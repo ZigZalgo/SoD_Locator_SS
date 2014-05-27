@@ -38,7 +38,6 @@ io.sockets.on('connection', function (socket) {
     console.log("something connected with sessionID: " + socket.id);
     requestHandler.handleRequest(socket);
 
-    var tempID = String(socket.id);
     clients[socket.id] = socket;
     clients[socket.id].clientType = null;
 

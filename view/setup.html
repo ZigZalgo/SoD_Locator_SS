@@ -185,12 +185,14 @@
 
             io.emit('getClientsFromServer', {}, function(data){
                 var htmlString = ""
-                data.forEach(function(client){
-                    htmlString += ('<tr>' +
-                            '<td>' + client.clientType + '</td>' +
-                            '<td>' + client.socketID + '</td>' +
-                            '</tr>')
-                });
+                for(var key in data){
+                    if(data.hasOwnProperty(key)){
+                        htmlString += ('<tr>' +
+                                '<td>' + data[key].clientType + '</td>' +
+                                '<td>' + data[key].socketID + '</td>' +
+                                '</tr>')
+                    }
+                }
                 $('#clients').html('<legend>Clients</legend><table id="client_table"><tr>' +
                         '<th>Type</td>' +
                         '<th>socketID</td>' +
@@ -199,14 +201,16 @@
 
             io.emit('getSensorsFromServer', {}, function(data){
                 var htmlString = ""
-                data.forEach(function(sensor){
-                    htmlString += ('<tr>' +
-                            '<td>' + sensor.sensorType + '</td>' +
-                            '<td>' + sensor.socketID + '</td>' +
-                            '<td>' + sensor.FOV + '</td>' +
-                            '<td>' + sensor.isCalibrated + '</td>' +
-                            '</tr>')
-                });
+                for(var key in data){
+                    if(data.hasOwnProperty(key)){
+                        htmlString += ('<tr>' +
+                                '<td>' + data[key].sensorType + '</td>' +
+                                '<td>' + data[key].socketID + '</td>' +
+                                '<td>' + data[key].FOV + '</td>' +
+                                '<td>' + data[key].isCalibrated + '</td>' +
+                                '</tr>')
+                    }
+                };
                 $('#sensors').html('<legend>Sensors</legend><table style="width:100%"><tr>' +
                         '<th>Type</th>' +
                         '<th>socketID</th>' +

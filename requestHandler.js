@@ -71,9 +71,9 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getClientsFromServer', function (request, fn) {
-        var selectedValues = [];
+        var selectedValues = {};
         for(var key in frontend.clients){
-            selectedValues.push({socketID: frontend.clients[key].id, clientType: frontend.clients[key].clientType})
+            selectedValues[key] = {socketID: frontend.clients[key].id, clientType: frontend.clients[key].clientType}
         };
         fn(selectedValues);
     });
@@ -141,6 +141,7 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('calibrateSensors', function (request, fn){
+        frontend.clients[request.uncalibratedSensorID].emit('setTranslateRule', locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints))
         fn(locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints));
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....

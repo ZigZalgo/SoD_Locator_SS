@@ -41,10 +41,7 @@ exports.translateToCoordinateSpace = function(location,translateRules)
         * z.Distance      -- the z distance between the point from sub-kinect to MASTER-kinect
         * startingLocation-- contains the location of the startingPoint of the sub-kinect
  */
-
-
-
-exports. getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
+exports.getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
     console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
     return(setVariables(this, fixSign));
 
@@ -66,8 +63,6 @@ exports. getTranslationRule= function(startingLocation1,endingLocation1,starting
         };
     }
 }
-
-
 
 
 /*
@@ -119,8 +114,6 @@ exports.matrixTransformation = function(personLocation,angle){
     returnLocation.Z = Math.round(returnZ*this.ROUND_RATIO)/this.ROUND_RATIO;
     return returnLocation; // for testing
 }
-
-
 
 // Tested!
 exports.normalizeAngle = function(value){
