@@ -7,6 +7,67 @@
     <script type="text/javascript">
 
         var calibrationFrames = {};
+        var sensorOnePoints = [];
+        var sensorTwoPoints = [];
+        var sensors = {};
+        var depthArrays = {};
+
+
+        function getPosition(canvasID, sid, event)
+        {
+            var rect = document.getElementById(canvasID).getBoundingClientRect();
+            var xInPixels = event.x - rect.left;
+            var y = event.y - rect.top;
+            var z = depthArrays[sid][xInPixels+(y*sensors[sid].frameWidth)];
+            if(sensors[sid].sensorType == "Kinect2"){
+                z = z*10;
+            }
+
+            var xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2))
+            if(canvasID == "cnvSensorOne"){
+                if(sensorOnePoints.length < 2 && z > 0){
+                    sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
+                }
+                $('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
+            }
+            else if(canvasID == "cnvSensorTwo"){
+                if(sensorTwoPoints.length < 2 && z > 0){
+                    sensorTwoPoints.push({X: xInMM, Y: y, Z: z >>> 3});
+                }
+                $('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
+            }
+            if(z == 0){
+                $('#status').html("Depth is out of range, please choose another point!");
+            }
+            else{
+                $('#status').html("Point saved!");
+            }
+        }
+
+        function setup(){
+            //
+        }
+
+        function refreshSensors(){
+            $("#referenceSensorList").empty();
+            $("#uncalibratedSensorList").empty();
+            io.emit('getSensorsFromServer', {}, function(data){
+                sensors = {};
+                var referenceSensorList = document.getElementById("referenceSensorList")
+                var uncalibratedSensorList = document.getElementById("uncalibratedSensorList")
+                data.forEach((function(sensor){
+                    sensors[sensor.socketID] = sensor;
+                    var option = document.createElement("option");
+                    option.text = sensor.socketID;
+                    if(sensor.isCalibrated == true){
+                        var option2 = document.createElement("option");
+                        option2.text = sensor.socketID;
+                        referenceSensorList.add(option2);
+                    }
+                    uncalibratedSensorList.add(option);
+                }))
+            });
+        }
 
         io = io.connect()
         io.on("connect", function(){
@@ -15,37 +76,28 @@
         });
 
         io.on("anything", function(data){
-            ('#status').html("MESSAGE RECEIVED: " + data);
+            $('#status').html("MESSAGE RECEIVED: " + data);
         })
 
         io.on("setCalibrationFrame", function(data){
             if(calibrationFrames[data.sourceID] != undefined){
-                if(calibrationFrames[data.sourceID] == "reference"){
-                    canvas = document.getElementById("cnvSensor1");
-                    var ctx = canvas.getContext("2d");
-                    var bytearray = new Uint8Array(data.payload);
-                    var imgdata = ctx.getImageData(0,0, 640, 480);
-                    var imgdatalen = imgdata.data.length;
-                    $('#status').append(imgdatalen);
-                    for(var i=0;i<(imgdatalen/4);i++){
-                        var depth = data.payload[i]*255/32760;
-
-                        imgdata.data[4*i] = depth;
-                        imgdata.data[4*i+1] = depth;
-                        imgdata.data[4*i+2] = depth;
-                        imgdata.data[4*i+3] = 255;
-                    }
-                    ctx.putImageData(imgdata,0,0)
+                depthArrays[data.sourceID] = data.payload;
+                if(sensors[data.sourceID].sensorType == "Kinect1"){
+                    var depthMultiplier = 3000;
                 }
                 else{
-                    canvas = document.getElementById("cnvSensor2");
+                    var depthMultiplier = 5;
+                }
+                if(calibrationFrames[data.sourceID] == "reference"){
+                    canvas = document.getElementById("cnvSensorOne");
                     var ctx = canvas.getContext("2d");
                     var bytearray = new Uint8Array(data.payload);
-                    var imgdata = ctx.getImageData(0,0, 512, 424);
+                    var imgdata = ctx.getImageData(0,0, sensors[data.sourceID].frameWidth, sensors[data.sourceID].frameHeight);
+                    ctx.canvas.width = sensors[data.sourceID].frameWidth;
+                    ctx.canvas.height = sensors[data.sourceID].frameHeight;
                     var imgdatalen = imgdata.data.length;
-                    $('#status').append(imgdatalen);
                     for(var i=0;i<(imgdatalen/4);i++){
-                        var depth = data.payload[i]*255/5;
+                        var depth = (data.payload[i]>>>3)*255/depthMultiplier;
 
                         imgdata.data[4*i] = depth;
                         imgdata.data[4*i+1] = depth;
@@ -53,31 +105,38 @@
                         imgdata.data[4*i+3] = 255;
                     }
                     ctx.putImageData(imgdata,0,0)
+                    canvas.addEventListener("mousedown", function(event){
+                        getPosition("cnvSensorOne", data.sourceID, event);
+                    }, false);
                 }
+                else if(calibrationFrames[data.sourceID] == "uncalibrated"){
+                    canvas = document.getElementById("cnvSensorTwo");
+                    var ctx = canvas.getContext("2d");
+                    var bytearray = new Uint8Array(data.payload);
+                    var imgdata = ctx.getImageData(0,0, sensors[data.sourceID].frameWidth, sensors[data.sourceID].frameHeight);
+                    ctx.canvas.width = sensors[data.sourceID].frameWidth;
+                    ctx.canvas.height = sensors[data.sourceID].frameHeight;
+                    var imgdatalen = imgdata.data.length;
+                    for(var i=0;i<(imgdatalen/4);i++){
+                        var depth = (data.payload[i]>>>3)*255/depthMultiplier;
 
-
+                        imgdata.data[4*i] = depth;
+                        imgdata.data[4*i+1] = depth;
+                        imgdata.data[4*i+2] = depth;
+                        imgdata.data[4*i+3] = 255;
+                    }
+                    ctx.putImageData(imgdata,0,0)
+                    canvas.addEventListener("mousedown", function(event){
+                        getPosition("cnvSensorTwo", data.sourceID, event);
+                    }, false);
+                }
             }
 
         });
 
         $(function(){
             $('#refreshSensors').click(function(){
-                $("#referenceSensorList").empty();
-                $("#uncalibratedSensorList").empty();
-                io.emit('getSensorsFromServer', {}, function(data){
-                    var referenceSensorList = document.getElementById("referenceSensorList")
-                    var uncalibratedSensorList = document.getElementById("uncalibratedSensorList")
-                    data.forEach((function(sensor){
-                        var option = document.createElement("option");
-                        option.text = sensor.socketID;
-                        if(sensor.isCalibrated == true){
-                            var option2 = document.createElement("option");
-                            option2.text = sensor.socketID;
-                            referenceSensorList.add(option2);
-                        }
-                        uncalibratedSensorList.add(option);
-                    }))
-                });
+                refreshSensors();
             })
             $('#getCalibrationFrames').click(function(){ /*listening to the button click using Jquery listener*/
                 var e1 = document.getElementById("referenceSensorList");
@@ -90,22 +149,44 @@
                 $('#status').html('CLICKED BUTTON');
                 io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
             });
+
+            $('#resetPointsOne').click(function(){
+                sensorOnePoints = [];
+                $('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
+            })
+
+            $('#resetPointsTwo').click(function(){
+                sensorTwoPoints = [];
+                $('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
+            })
+
+            $('#calibrate').click(function(){
+                if(sensorOnePoints.length == 2 && sensorTwoPoints.length == sensorOnePoints.length){
+                    io.emit("calibrateSensors", {sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){
+                        $('#status').html(JSON.stringify(data))
+                    })
+                }
+            })
         });
         io.emit("registerWebClient", {});
 
+
+
     </script>
 </head>
-<body onload="">
+<body onload="setup(), refreshSensors()">
     <form>
         <select id="referenceSensorList" size="5"></select>
         <select id="uncalibratedSensorList" size="5"></select>
     </form>
 
     <div>
-        <canvas id="cnvSensor1" width="640" height="480"
+        <canvas id="cnvSensorOne" width="640" height="480"
                 style="position: absolute; left: 0px; top: 150px; z-index: 3;"></canvas>
-        <canvas id="cnvSensor2" width="700" height="600"
+        <div id="sensorOneStatus" style="position: absolute; left: 0px; top: 860px;"></div> <!--This is where the data from the server is added-->
+        <canvas id="cnvSensorTwo" width="700" height="600"
                 style="position: absolute; left: 810px; top: 150px; z-index: 3;"></canvas>
+        <div id="sensorTwoStatus" style="position: absolute; left: 810px; top: 860px;"></div> <!--This is where the data from the server is added-->
     </div>
     <div style="position: absolute; left: 810px; top: 0;">
         <form>
@@ -117,6 +198,9 @@
     </div>
     <div style="position: absolute; left: 0px; top: 810px;">
         <div id="status" style="height: 200px; z-index: 1;"></div> <!--This is where the data from the server is added-->
+        <input id="resetPointsOne" type="button" value="Reset Points for Sensor One">
+        <input id="resetPointsTwo" type="button" value="Reset Points for Sensor Two">
+        <input id="calibrate" type="button" value="Calibrate!">
     </div>
 </body>
 </html>

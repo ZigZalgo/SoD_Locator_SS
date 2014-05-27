@@ -36,35 +36,9 @@ exports.registerSensor = function(sensor){
     }
 };
 
-exports.calibrateSensors = function(){
+exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
     console.log("Calibrating sensors...")
-    var sensor1 = sensors[0];
-    var sensor2 = sensors[1];
-    sensor1.points = [];
-    sensor2.points = [];
-
-    console.log("Sensor1: " + sensor1.sensorType);
-    console.log("Sensor2: " + sensor2.sensorType);
-
-    //BIG ASSUMPTION: assuming only two people on server... this is a restriction during setup
-    var interval = setInterval(function(){
-        console.log("SETTING INTERVAL");
-        if(sensor1.points.length == 2 && sensor2.points.length == sensor1.points.length){
-            clearInterval(interval);
-
-            console.log("Sensor1...\n" + JSON.stringify(sensor1));
-            console.log("Sensor2...\n" + JSON.stringify(sensor2));
-            console.log("THIS IS THE POINT CONTAINER FOR CALIBRATION");
-            frontend.io.sockets.emit("webMessageEvent", util.getTranslationRule(sensor1.points[0], sensor1.points[1], sensor2.points[0], sensor2.points[1]))
-            return (util.getTranslationRule(sensor1.points[0], sensor1.points[1], sensor2.points[0], sensor2.points[1]))
-        }
-        else{
-            sensor1.points.push({X: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor1.socketID)].Location.X, Z: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor1.socketID)].Location.Z});
-            sensor2.points.push({X: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor2.socketID)].Location.X, Z: persons[util.findWithAttr(persons, "LastUpdatedBy", sensor2.socketID)].Location.Z});
-            console.log("Sensor1 points count is: " + sensor1.points.length)
-            console.log("Sensor2 points count is: " + sensor2.points.length)
-        }
-    }, 3000);
+    return util.getTranslationRule(sensorOnePoints[0], sensorOnePoints[1], sensorTwoPoints[0], sensorTwoPoints[1])
 }
 
 exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){

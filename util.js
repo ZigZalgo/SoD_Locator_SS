@@ -45,21 +45,19 @@ exports.translateToCoordinateSpace = function(location,translateRules)
 
 
 exports. getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
+    console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
     return(setVariables(this, fixSign));
 
     function setVariables(functions,cb){
-        var vector1 = functions.getVector(startingLocation1,endingLocation1);
-        var vector2 = functions.getVector(startingLocation2,endingLocation2);
-        var degreeBetweenVectors = functions.getDegreeOfTwoVectors(vector1,vector2); // using dot product
-        var rotatedVector2 = functions.matrixTransformation(vector2,degreeBetweenVectors);               // clockwise
-        var counterRotatedVector2 = functions.matrixTransformation(vector2,-degreeBetweenVectors);
+        var degreeBetweenVectors = functions.getDegreeOfTwoVectors(functions.getVector(startingLocation1,endingLocation1),functions.getVector(startingLocation2,endingLocation2)); // using dot product
+        var rotatedVector2 = functions.matrixTransformation(functions.getVector(startingLocation2,endingLocation2),degreeBetweenVectors);               // clockwise
+        var counterRotatedVector2 = functions.matrixTransformation(functions.getVector(startingLocation2,endingLocation2),-degreeBetweenVectors);
         console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
-        return(cb(vector1, vector2, degreeBetweenVectors, rotatedVector2, counterRotatedVector2));
+        return(cb(degreeBetweenVectors, rotatedVector2, counterRotatedVector2));
     }
 
-    function fixSign(vector1, vector2, degreeBetweenVectors, rotatedVector2, counterRotatedVector2)
+    function fixSign(degreeBetweenVectors, rotatedVector2, counterRotatedVector2)
     {
-
         return {
             degree:degreeBetweenVectors,
             xDistance: startingLocation1.X - startingLocation2.X,
@@ -81,10 +79,7 @@ exports. getTranslationRule= function(startingLocation1,endingLocation1,starting
  returnVector      -- return the vector of the two points
  */
 exports.getVector = function(locationA,locationB){
-    var returnVector = {X:0,Y:0,Z:0};
-    returnVector.X = locationB.X - locationA.X;
-    returnVector.Z = locationB.Z - locationA.Z;
-    return returnVector;
+    return {X:locationB.X - locationA.X,Y:0,Z:locationB.Z - locationA.Z};
     //typeof callback === 'function' && callback();
 }
 
@@ -101,19 +96,9 @@ exports.getDegreeOfTwoVectors = function(vector1,vector2){
     var vector1length = Math.sqrt(Math.pow(vector1.X,2) + Math.pow(vector1.Z,2));
     var vector2length = Math.sqrt(Math.pow(vector2.X,2) + Math.pow(vector2.Z,2));
     var v1MulV2 = vector1.X* vector2.X + vector1.Z*vector2.Z;
-    var returnDegree = Math.acos(v1MulV2/(vector1length*vector2length)) * RADIANS_TO_DEGREES; // Dot product
     //var returnDegree = Math.atan2(vector1length,vector2length) * RADIANS_TO_DEGREES;;
 
-    if(isNaN(returnDegree))
-    {
-        /*var negativeVector2 = {X:(-vector2.X),Y:0,Z:(-vector2.Z)};
-         v1MulV2 = vector1.X* negativeVector2.X + vector1.Z*negativeVector2.Z;
-         returnDegree = Math.acos(v1MulV2/(vector1length*vector2length))
-         * RADIANS_TO_DEGREES; // Dot product */
-        return 0;
-    }
-
-    return returnDegree;
+    return Math.acos(v1MulV2/(vector1length*vector2length)) * RADIANS_TO_DEGREES; // Dot product
 }
 
 /*

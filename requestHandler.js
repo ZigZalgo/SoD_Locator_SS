@@ -26,6 +26,8 @@ exports.handleRequest = function (socket){
         sensor.sensorType = sensorInfo.sensorType;
         sensor.FOV = sensorInfo.FOV;
         sensor.rangeInMM = sensorInfo.rangeInMM;
+        sensor.frameHeight = sensorInfo.frameHeight;
+        sensor.frameWidth = sensorInfo.frameWidth;
         locator.registerSensor(sensor);
     });
 
@@ -139,7 +141,7 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('calibrateSensors', function (request, fn){
-        fn(locator.calibrateSensors());
+        fn(locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints));
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....
     });
