@@ -24,7 +24,6 @@ exports.registerSensor = function(sensor){
     console.log("registering server from locator.js");
     console.log("REFERENCE IS: " + sensorsReference)
     if(sensorsReference == null){
-        console.log("")
         sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0};
         sensor.isCalibrated = true;
         sensorsReference = sensor;
@@ -259,23 +258,34 @@ exports.cleanUpSensor = function(socketID){
         }
         else{
             for(var j = persons.length-1; j >= 0; j--){
-                console.log("CHECKING FOR EMPTY ID LISTS");
                 console.log(JSON.stringify(persons))
                 if(persons[j].ID.length <= 0){
-                    console.log("REMOVING AN EMPTY ID LIST AT INDEX:  " + j)
                     persons.splice(j, 1);
                 }
 
             }
         }
     }
-    if(sensorsReference == sensors[socketID]){
-        if(Object.keys(sensors).length != 0){
-            sensorsReference = sensors[Object.keys(sensors)[0]]
+    if(sensorsReference.socketID){
+        if(Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)}).length > 0){
+            sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]].isCalibrated = true;
+            sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]].calibration = {Rotation: 0, TransformX: 0, TransformY: 0};
+            sensorsReference = sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]];
         }
         else{
-            sensorsReference == null;
+                if(Object.keys(sensors).length != 0){
+                    sensors[Object.keys(sensors)[0]].isCalibrated = true;
+                    sensorsReference = sensors[Object.keys(sensors)[0]]
+                }
+                else{
+                    sensorsReference = null;
+                }
         }
+    }
+    else{
+        console.log("1.  " + JSON.stringify(sensorsReference))
+        console.log("2.  " + JSON.stringify(sensors[socketID]))
+        console.log("all good, removed sensor is not reference");
     }
 }
 
