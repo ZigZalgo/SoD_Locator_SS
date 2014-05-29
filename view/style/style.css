@@ -194,7 +194,10 @@ section#calibration_section{
     position:relative;;
     top:-40px;
     left:0px;
-    height:1208px;
+    height:1080px;
+}
+section#calibration_section form{
+    height:788px;
 }
 
 section#calibration_section table{
@@ -211,7 +214,7 @@ section#calibration_section fieldset.master{
     margin:auto;
     padding:0px;
     background:#cacaca;
-    height:auto;
+    height:788px;
 }
 section#calibration_section h5{
     color:#1656bf;
@@ -226,11 +229,11 @@ section#calibration_section fieldset.master legend{
     border-radius:5px;
 }
 section#calibration_section fieldset.sub_field{
-    width:95%;
-    margin:auto;
-    height:auto;
+    width: 93%;
+    margin: 10px 3px;
+    height: 109px;
     background: #ffffff;
-    margin-bottom:20px;
+    margin-bottom: 20px;
 }
 
 section#calibration_section fieldset.sub_field legend{
@@ -244,17 +247,30 @@ section#calibration_section fieldset.sub_field legend{
     border-radius:5px;
 }
 
-section#calibration_section select{
-    font-family:"Consolas",DinRound, Sans-Serif;
-    font-size:1em;
-    color:#3370d4;
-    margin:auto;
-    padding:0px;
-    width:50%;
+
+section#calibration_section select {
+    font-family: "Consolas",DinRound, Sans-Serif;
+    font-size: 1.2em;
+    color: #3370d4;
+    margin: auto;
+    width: 50%;
+    border: none;
+    display: inline-block;
     padding: 10px;
-    border-radius:4px;
-    height:40px;
+    /* border-radius: 4px; */
+    border-radius: 8px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    height: 40px;
+    overflow: hidden;
 }
+
+section#calibration_section select:focus {
+    outline: none;
+}
+
 
 section#calibration_section .calibration_wrap{
     margin:auto;
@@ -271,7 +287,7 @@ section#calibration_section .calibration_wrap{
     padding:0px;
     background:white;
     width: 650px;
-    height:650px;
+    height:500px;
 }
 #calibration_bottom{
     position:relative;
@@ -323,7 +339,7 @@ section#calibration_section .calibration_wrap{
 .points{
     font-weight: bold;
     color: #1656bf;
-    text-align: center;
+    text-align: left;
     padding:3px;
 }
 
@@ -363,7 +379,8 @@ section#calibration_section .calibration_wrap{
 /* status box*/
 .status_wrap{
     margin:10px;
-    max-width: 100%;height: 100px;max-height: 200px;
+    max-width: 100%;height: 100px;
+    height:auto;
     background: #cacaca;
     position: relative;
     top: 0px;
@@ -371,7 +388,7 @@ section#calibration_section .calibration_wrap{
     color:black;
     padding: 10px;
     border-radius:5px;
-    word-wrap:break-word;
+    word-wrap:normal;
 }
 .status_wrap h1{
     text-decoration:underline;
@@ -384,8 +401,10 @@ section#calibration_section .calibration_wrap{
 #status{
     vertical-align:middle;
     padding-left: 10px;
+    padding-top:10px;
+    padding-bottom:10px;
     font-family:"Consolas",DinRound, Sans-Serif;
-    border:solid 1px #292929;text-align:left;background:#ffffff;max-height: 200px;}
+    border:solid 1px #292929;text-align:left;background:#ffffff;}
 
 .pointsStatus{
     height:1.5em;
@@ -395,5 +414,63 @@ section#calibration_section .calibration_wrap{
     vertical-align:middle;
     font-family:"Consolas",DinRound, Sans-Serif;
     border:solid 1px #292929;text-align:left;background:#ffffff;max-height: 200px;}
+.green_status{
+    background: #41cf3a;
+    color: #ffffff;
+    width: auto;
+    border-radius: 4px;
+    padding: 2px 20px;
+    margin: 5px 5px 5px 15px;
+    font-weight: bold;
+    font-size: 1.2em;
+    line-height: 1.5em;
+    display:none;
+    box-shadow: 2px 2px 5px #888888;
+}
+.red_status{
+    background: #b75252;
+    color: #ffffff;
+    width: auto;
+    border-radius: 4px;
+    padding: 2px 20px;
+    margin: 5px 5px 5px 15px;
+    font-weight: bold;
+    font-size: 1.2em;
+    line-height: 1.5em;
+    display:none;
+    box-shadow: 2px 2px 5px #888888;
 
+}
+.normal_status{
+    background: #7d7979;
+    color: #ffffff;
+    width: auto;
+    border-radius: 4px;
+    padding: 2px 20px;
+    margin: 5px 5px 5px 15px;
+    font-weight: bold;
+    font-size: 1.2em;
+    line-height: 1.5em;
+    display:none;
+    box-shadow: 2px 2px 5px #888888;
+}
+
+#clear_master_points{
+    width: 18%;
+    float: right;
+    padding-top: 23px;
+    height: 45px;
+    position: relative;
+    left: -20px;
+    bottom: 70px;
+}
+#clear_sensorTwo_points{
+    width: 18%;
+    float: right;
+    padding-top: 23px;
+    height: 45px;
+    position: relative;
+    left: -20px;
+    bottom: 70px;
+}
 /* END Break word*/

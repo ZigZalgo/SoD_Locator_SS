@@ -285,10 +285,34 @@
 
     // calibration section:
         $(document).ready(function(){
+            // calibration mode flip
             $("#calibration_flip").click(function(){
                 $("#calibration_section").slideToggle("slow");
             });
+            // clear the points for sensor one
+            $('#clear_master_points').click(function(){
+                $('input[name=master_point1X]').val('');
+                $('input[name=master_point1Y]').val('');
+                $('input[name=master_point2X]').val('');
+                $('input[name=master_point2Y]').val('');
+                sensorOnePoints.splice(0,sensorOnePoints.length); // clear all the points for sensor one
+                $('#status').html("<span class='green_status'>Reference Sensor Points Cleared!</span>");
+                $('.green_status').fadeIn(600);
+            });
+
+            // clear the points for sensor one
+            $('#clear_sensorTwo_points').click(function(){
+                $('input[name=sensor_point1X]').val('');
+                $('input[name=sensor_point1Y]').val('');
+                $('input[name=sensor_point2X]').val('');
+                $('input[name=sensor_point2Y]').val('');
+                sensorTwoPoints.splice(0,sensorTwoPoints.length); // clear all the points for sensor one
+                $('#status').html("<span class='green_status'>Sensor Two Points Cleared!</span>");
+                $('.green_status').fadeIn(600);
+            });
         });
+
+
 
 
 
@@ -339,6 +363,14 @@
         if(canvasID == "cnvSensorOne"){
             if(sensorOnePoints.length < 2 && z > 0){
                 sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
+                $('#status').html("<span class='green_status'>Point saved!</span>");
+                $('.green_status').fadeIn(600);
+            }else if(sensorOnePoints.length >= 2){
+                $('#status').html("<span class='red_status'>Enough Points.</span>");
+                $('.red_status').fadeIn(600);
+            }else if(z<=0){
+                $('#status').html("<span class='red_status'>Depth is out of range, please choose another point!</span>");
+                $('.red_status').fadeIn(600);
             }
             //$('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
             $( 'input[name=master_point1X]' ).val(JSON.stringify(Math.round(sensorOnePoints[0].X*ROUND_RATIO)/ROUND_RATIO));
@@ -349,19 +381,24 @@
         else if(canvasID == "cnvSensorTwo"){
             if(sensorTwoPoints.length < 2 && z > 0){
                 sensorTwoPoints.push({X: xInMM, Y: y, Z: z >>> 3});
+                $('#status').html("<span class='green_status'>Point saved!</span>");
+                $('.green_status').fadeIn(600);
+            }else if(sensorTwoPoints.length >= 2){
+                $('#status').html("<span class='red_status'>Enough Points.</span>");
+                $('.red_status').fadeIn(600);
+            }else if(z<=0){
+                $('#status').html("<span class='red_status'>Depth is out of range, please choose another point!</span>");
+                $('.red_status').fadeIn(600);
             }
             //$('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
             $( 'input[name=sensor_point1X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].X*ROUND_RATIO)/ROUND_RATIO));
             $( 'input[name=sensor_point1Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].Y*ROUND_RATIO)/ROUND_RATIO));
             $( 'input[name=sensor_point2X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].X*ROUND_RATIO)/ROUND_RATIO));
             $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Y*ROUND_RATIO)/ROUND_RATIO));
+
         }
-        if(z == 0){
-            $('#status').html("Depth is out of range, please choose another point!");
-        }
-        else{
-            $('#status').html("Point saved!");
-        }
+
+
     }
 
     function setup(){
@@ -380,6 +417,7 @@
                     sensors[key] = data[key];
                     var option = document.createElement("option");
                     option.text = data[key].socketID;
+                    $('select[name=referenceSensorList] option:eq(0)').attr('selected', 'selected');
                     if(data[key].isCalibrated == true){
                         var option2 = document.createElement("option");
                         option2.text = data[key].socketID;
@@ -471,7 +509,8 @@
             }
             calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
             calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
-            $('#status').html('CLICKED BUTTON');
+            $('#status').html('<span class="normal_status">CLICKED BUTTON</span>');
+            $(".normal_status").fadeIn(600);
             io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
         });
 
@@ -489,12 +528,18 @@
             if(sensorOnePoints.length == 2 && sensorTwoPoints.length == sensorOnePoints.length){
                 io.emit("calibrateSensors", {referenceSensorID: calibrationFrames["reference"], uncalibratedSensorID: calibrationFrames["uncalibrated"],
                     sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){
-
-                    $('#status').html(JSON.stringify(data))
+                if(data.degree!=null){
+                    $('#status').html('<span class="green_status"> Calibration Success! Angle between sensors: '+JSON.stringify(Math.round(data.degree * ROUND_RATIO)/ROUND_RATIO)+'/<span>')
+                    $('.green_status').fadeIn(800);
+                }else{
+                    $('#status').html('<span class="red_status"> Calibration Failed! Please reselect the points./<span>')
+                    $('.red_status').fadeIn(800);
+                }
                 })
             }
             else{
-                $('#status').html('Error: There are not enough points for calibration.');
+                $('#status').html('<span class="red_status">Error: There are not enough points for calibration.</span>');
+                $('.red_status').fadeIn(600);
             }
         })
     });
@@ -518,10 +563,10 @@
                     <tr>
                         <td>
                             <fieldset class="master">
-                                <legend>Master References</legend>
+                                <legend>References Sensor</legend>
                                 <div class="calibration_wrap">
                                     <h5>Please Select a master reference:</h5>
-                                    <select id="referenceSensorList" size="5"></select>
+                                    <select id="referenceSensorList" size="5" name="referenceSensorList"></select>
                                     <div class="canvas_fake"> </div>
 
                                     <!--This is where the data from the server is added-->
@@ -533,16 +578,16 @@
                                 </div>
                                 <fieldset class="sub_field">
                                     <legend>Points Selected</legend>
-
                                     <!--<div class="pointsStatus" id="sensorOneStatus"></div>-->
                                     <div class="points">
-                                        Master Point1    X:<input type="text" name="master_point1X" value="0.52">
-                                        Y:<input type="text" name="master_point1Y" value="0.38"></br>
+                                        Master Point1    X:<input type="text" name="master_point1X" value="">
+                                        Y:<input type="text" name="master_point1Y" value=""></br>
                                     </div>
                                     <div class="points">
-                                        Master Point2 X:<input type="text" name="master_point2X" value="0.52">
-                                        Y:<input type="text" name="master_point2Y" value="0.38"></br>
+                                        Master Point2 X:<input type="text" name="master_point2X" value="">
+                                        Y:<input type="text" name="master_point2Y" value=""></br>
                                     </div>
+                                    <div class="button" id="clear_master_points"> Clear Points </div>
                                 </fieldset>
                             </fieldset>
 
@@ -557,20 +602,21 @@
                                     <!--This is where the data from the server is added-->
 
                                     <canvas id="cnvSensorTwo" width="700" height="600"
-                                            style="position: absolute;left: 814px;top: 174px;z-index: 4;"></canvas>
+                                            style="position: absolute;left: 725px;top: 174px;z-index: 4;"></canvas>
 
 
                                     <fieldset class="sub_field">
                                         <legend>Points Selected</legend>
                                         <!--<div class="pointsStatus" id="sensorTwoStatus" ></div> <!--This is where the data from the server is added-->
                                         <div class="points">
-                                            Sensor Point1   X:<input type="text" name="sensor_point1X" value="0.52">
-                                            Y:<input type="text" name="sensor_point1Y" value="0.38"></br>
+                                            Sensor Point1   X:<input type="text" name="sensor_point1X" value="">
+                                            Y:<input type="text" name="sensor_point1Y" value=""></br>
                                         </div>
                                         <div class="points">
-                                            Sensor Point2 X:<input type="text" name="sensor_point2X" value="0.52">
-                                            Y:<input type="text" name="sensor_point2Y" value="0.38"></br>
+                                            Sensor Point2 X:<input type="text" name="sensor_point2X" value="">
+                                            Y:<input type="text" name="sensor_point2Y" value=""></br>
                                         </div>
+                                        <div class="button" id="clear_sensorTwo_points"> Clear Points </div>
                                     </fieldset>
                                 </div>
                             </fieldset>
@@ -578,12 +624,13 @@
                     </tr>
                 </table>
             </form>
-            <div class="button" id="calibrate"> Calibrate! </div>
+
             <!--<input id="calibrate" type="button" value="Calibrate!">-->
             <div class="status_wrap">
-                <h1>status:</h1>
+                <h1>status log:</h1>
                 <div id="status"></div> <!--This is where the data from the server is added-->
             </div>
+            <div class="button" id="calibrate"> Calibrate! </div>
             <div id="calibration_bottom"> </div>
         </section>
         <nav id="mode_selection">
