@@ -1,5 +1,7 @@
 <!DOCTYPE html>
+<!--
 <html>
+
 <head>
     <title>Super Cool SOD Visualizer</title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -86,63 +88,46 @@
             var ctxSensors = cSensors.getContext("2d");
             ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
             io.emit('getSensorsFromServer', {}, function(data){
-                data.forEach((function(sensor){
-                    var sensorX = 0; //get this from sensor list later on
-                    var sensorY = 0; //get this from sensor list later on
-                    var sensorRotationAngle = 0; //get this from sensor list later on
-                    var sensorFOV = sensor.FOV; //get this from sensor list later on
+                for(var key in data){
+                    if(data.hasOwnProperty(key)){
+                        var sensorX = 0; //get this from sensor list later on
+                        var sensorY = 0; //get this from sensor list later on
+                        var sensorRotationAngle = 0; //get this from sensor list later on
+                        var sensorFOV = data[key].FOV; //get this from sensor list later on
 
-                    //// radius value should be taken from sensor
-                    var radius = sensor.rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
-
-
-                    var positionX = shiftXToGridOrigin(sensorX);
-                    var positionY = shiftXToGridOrigin(sensorY);
-                    var startAngle = (90-(sensorFOV/2))*Math.PI/180;//0.75;    // 90 as the Z orientation of sensor
-                    var endAngle = (90+(sensorFOV/2))*Math.PI/180;
-                    var antiClockwise = false;
-                    ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
-                    ctxSensors.beginPath();
-                    ctxSensors.arc(positionX, positionY, radius, startAngle, endAngle, antiClockwise);
-                    ctxSensors.lineTo(positionX, positionY);
-                    ctxSensors.closePath();
-
-                    //Calculate polygon for FOV indicator on visualizer
-                    /*
-                    var viewPoint1X = (radius)*(Math.sin((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
-                    var viewPoint1Y = (radius)*(Math.cos((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
-                    var viewPoint2X = (radius)*(Math.sin((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
-                    var viewPoint2Y = (radius)*(Math.cos((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
-
-                    //Get Context for drawing on HTML5 Canvas
+                        //// radius value should be taken from sensor
+                        var radius = data[key].rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
 
 
-                    //draw view polygon
-                    ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
-                    ctxSensors.beginPath();
-                    ctxSensors.moveTo(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY));  //move to Kinect coordinates
-                    ctxSensors.lineTo(shiftXToGridOrigin(viewPoint1X), shiftYToGridOrigin(viewPoint1Y));
-                    ctxSensors.lineTo(shiftXToGridOrigin(viewPoint2X), shiftYToGridOrigin(viewPoint2Y));
-                    ctxSensors.closePath();
-                    */
-                    ctxSensors.fill();
+                        var positionX = shiftXToGridOrigin(sensorX);
+                        var positionY = shiftXToGridOrigin(sensorY);
+                        var startAngle = (90-(sensorFOV/2))*Math.PI/180;//0.75;    // 90 as the Z orientation of sensor
+                        var endAngle = (90+(sensorFOV/2))*Math.PI/180;
+                        var antiClockwise = false;
+                        ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
+                        ctxSensors.beginPath();
+                        ctxSensors.arc(positionX, positionY, radius, startAngle, endAngle, antiClockwise);
+                        ctxSensors.lineTo(positionX, positionY);
+                        ctxSensors.closePath();
 
-                    //draw circle for sensor on visualizer
-                    ctxSensors.beginPath();
+                        ctxSensors.fill();
 
-                    ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
-                    ctxSensors.closePath();
-                    ctxSensors.lineWidth = 1;
-                    ctxSensors.fillStyle = '#3370d4';
-                    ctxSensors.fill();
-                    ctxSensors.strokeStyle = '#292929';
-                    ctxSensors.stroke();
+                        //draw circle for sensor on visualizer
+                        ctxSensors.beginPath();
 
-                    ctxSensors.font = "20px Arial";
-                    ctxSensors.fillStyle = '#ffffff';
-                    ctxSensors.fillText('K'+data.indexOf(sensor),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+                        ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
+                        ctxSensors.closePath();
+                        ctxSensors.lineWidth = 1;
+                        ctxSensors.fillStyle = '#3370d4';
+                        ctxSensors.fill();
+                        ctxSensors.strokeStyle = '#292929';
+                        ctxSensors.stroke();
 
-                }))
+                        ctxSensors.font = "20px Arial";
+                        ctxSensors.fillStyle = '#ffffff';
+                        ctxSensors.fillText('K'+data.keys.indexOf(key),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+                    }
+                }
             });
         }
 
@@ -163,7 +148,7 @@
                     ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
                     ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
                     ctx.fill();
-                    //$('body').append('<p>New visitor, hooray! ' + data +'</p>')
+                    $('#devices').html("x:" + Math.round(person.Location.X*ROUND_RATIO)/ROUND_RATIO + "     z:" + Math.round(person.Location.Z*ROUND_RATIO)/ROUND_RATIO)
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "20px Arial";
                     ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
@@ -315,7 +300,7 @@
             <header>Super Cool SOD Visualizer</header>
             <div id="calibration_flip">Calibration Mode!</div>
             <section id="calibration_section">
-                <div id="getImage">Get Image</div> <!-- Get Image button -->
+                <div id="getImage">Get Image</div>
                 <form>
                     <table>
                     <tr>
@@ -394,30 +379,654 @@
         </section>
         <section id="overview">
             <form>
-                <!--<input type="text" id="message" /> <!--text form to send data to the server-->
-                <div id="contentHeader" >Overview</div> <!--This is where the data from the server is added-->
+                <!--<input type="text" id="message" />
+                <div id="contentHeader" >Overview</div>
 
                 <fieldset id="clients">
                     <legend> Clients </legend>
-                </fieldset>  <!--This is where the data from the server is added-->
+                </fieldset>
                 <input id="getPoints" type="button" value="getPoints">
                 <fieldset id="sensors" >
                     <legend> Sensors </legend>
-                </fieldset> <!--This is where the data from the server is added-->
+                </fieldset>
                 <fieldset id="people">
                     <legend> Sensors </legend>
-                </fieldset> <!--This is where the data from the server is added-->
+                </fieldset>
 
                 <fieldset id="devices">
                     <legend> Devices </legend>
-                </fieldset> <!--This is where the data from the server is added-->
+                </fieldset>
 
             </form>
         </section>
         <div class="status_wrap">
             <h1>status:</h1>
-            <div id="status"></div> <!--This is where the data from the server is added-->
+            <div id="status"></div>
+
+
+
+
+
         </div>
-    </div><!-- closing page wrap -->
+    </div>
+</body>
+</html>
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Super Cool SOD Visualizer</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<link href="/style" rel="stylesheet"  />
+<script type="text/javascript">
+var cameraHeightInPixels = 320;
+var cameraWidthInPixels = 480;
+var cameraFOV = 57;
+var minorGridLineWidth = 10;
+var majorGridLineWidth = 50;
+var pixelsPerMeter = majorGridLineWidth;
+var ROUND_RATIO  = 10;
+
+function drawGrid() {
+    var cnv = document.getElementById("cnvBG");
+
+    var gridOptions = {
+        minorLines: {
+            separation: minorGridLineWidth,
+            color: '#EEEEEE'
+        },
+        majorLines: {
+            separation: majorGridLineWidth,
+            color: '#BBBBBB'
+        }
+    };
+
+    drawGridLines(cnv, gridOptions.minorLines);
+    drawGridLines(cnv, gridOptions.majorLines);
+
+    return;
+}
+
+function drawGridLines(cnv, lineOptions) {
+    var iWidth = cnv.width;
+    var iHeight = cnv.height;
+    var ctx = cnv.getContext('2d');
+
+    ctx.strokeStyle = lineOptions.color;
+    ctx.strokeWidth = 1;
+
+    ctx.beginPath();
+
+    var iCount = null;
+    var i = null;
+    var x = null;
+    var y = null;
+
+    iCount = Math.floor(iWidth / lineOptions.separation);
+
+    for (i = 1; i <= iCount; i++) {
+        x = (i * lineOptions.separation);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, iHeight);
+        ctx.stroke();
+    }
+
+    iCount = Math.floor(iHeight / lineOptions.separation);
+
+    for (i = 1; i <= iCount; i++) {
+        y = (i * lineOptions.separation);
+        ctx.moveTo(0, y);
+        ctx.lineTo(iWidth, y);
+        ctx.stroke();
+    }
+
+    ctx.closePath();
+    return;
+}
+
+function shiftXToGridOrigin(x){
+    return (x + ((document.getElementById("cnv").width)/2));
+}
+
+function shiftYToGridOrigin(z){
+    return (z + ((document.getElementById("cnv").height)/2));
+}
+
+io = io.connect()
+
+function updateCanvasWithSensors(){
+    var cSensors = document.getElementById("cnvSensors");
+    var ctxSensors = cSensors.getContext("2d");
+    ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
+    io.emit('getSensorsFromServer', {}, function(data){
+        data.forEach((function(sensor){
+            var sensorX = 0; //get this from sensor list later on
+            var sensorY = 0; //get this from sensor list later on
+            var sensorRotationAngle = 0; //get this from sensor list later on
+            var sensorFOV = sensor.FOV; //get this from sensor list later on
+
+            //// radius value should be taken from sensor
+            var radius = sensor.rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
+
+
+            var positionX = shiftXToGridOrigin(sensorX);
+            var positionY = shiftXToGridOrigin(sensorY);
+            var startAngle = (90-(sensorFOV/2))*Math.PI/180;//0.75;    // 90 as the Z orientation of sensor
+            var endAngle = (90+(sensorFOV/2))*Math.PI/180;
+            var antiClockwise = false;
+            ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
+            ctxSensors.beginPath();
+            ctxSensors.arc(positionX, positionY, radius, startAngle, endAngle, antiClockwise);
+            ctxSensors.lineTo(positionX, positionY);
+            ctxSensors.closePath();
+
+            //Calculate polygon for FOV indicator on visualizer
+            /*
+             var viewPoint1X = (radius)*(Math.sin((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
+             var viewPoint1Y = (radius)*(Math.cos((sensorRotationAngle + (sensorFOV/2))*Math.PI/180));
+             var viewPoint2X = (radius)*(Math.sin((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
+             var viewPoint2Y = (radius)*(Math.cos((sensorRotationAngle - (sensorFOV/2))*Math.PI/180));
+
+             //Get Context for drawing on HTML5 Canvas
+
+
+             //draw view polygon
+             ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
+             ctxSensors.beginPath();
+             ctxSensors.moveTo(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY));  //move to Kinect coordinates
+             ctxSensors.lineTo(shiftXToGridOrigin(viewPoint1X), shiftYToGridOrigin(viewPoint1Y));
+             ctxSensors.lineTo(shiftXToGridOrigin(viewPoint2X), shiftYToGridOrigin(viewPoint2Y));
+             ctxSensors.closePath();
+             */
+            ctxSensors.fill();
+
+            //draw circle for sensor on visualizer
+            ctxSensors.beginPath();
+
+            ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
+            ctxSensors.closePath();
+            ctxSensors.lineWidth = 1;
+            ctxSensors.fillStyle = '#3370d4';
+            ctxSensors.fill();
+            ctxSensors.strokeStyle = '#292929';
+            ctxSensors.stroke();
+
+            ctxSensors.font = "20px Arial";
+            ctxSensors.fillStyle = '#ffffff';
+            ctxSensors.fillText('K'+data.indexOf(sensor),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+
+        }))
+    });
+}
+
+function updateCanvasWithPeople(){
+    io.emit('getPeopleFromServer', {}, function(data){
+        //draw kinect position (0,0) for single kinect
+        var c = document.getElementById("cnv");
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+
+        data.forEach(function(person){
+
+            var xInMeters = person.Location.X*majorGridLineWidth;
+            var yInMeters = person.Location.Y*majorGridLineWidth;
+            var zInMeters = person.Location.Z*majorGridLineWidth;
+            ctx.fillStyle = "#c82124"; //red
+            ctx.beginPath();
+            ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
+            ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
+            ctx.fill();
+            //$('body').append('<p>New visitor, hooray! ' + data +'</p>')
+            ctx.fillStyle = "#ffffff"; //white
+            ctx.font = "20px Arial";
+            ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
+        })
+    });
+}
+
+function printPersonID(ID)
+{
+    var htmlString= "";
+    htmlString += '<table>';
+    ID.forEach(function(IDInfo){
+        htmlString += '<tr><td>' + IDInfo.value + '</td><td>'+IDInfo.originatingSocket +'</td></tr>';
+    });
+    htmlString += '</table>';
+    return htmlString;
+}
+function updateContentWithObjects(){
+
+    io.emit('getClientsFromServer', {}, function(data){
+        var htmlString = ""
+        for(var key in data){
+            if(data.hasOwnProperty(key)){
+                htmlString += ('<tr>' +
+                        '<td>' + data[key].clientType + '</td>' +
+                        '<td>' + data[key].socketID + '</td>' +
+                        '</tr>')
+            }
+        }
+        $('#clients').html('<legend>Clients</legend><table id="client_table"><tr>' +
+                '<th>Type</td>' +
+                '<th>socketID</td>' +
+                '</tr>' + htmlString + '</table>')
+    });
+
+    io.emit('getSensorsFromServer', {}, function(data){
+        var htmlString = ""
+        for(var key in data){
+            if(data.hasOwnProperty(key)){
+                htmlString += ('<tr>' +
+                        '<td>' + data[key].sensorType + '</td>' +
+                        '<td>' + data[key].socketID + '</td>' +
+                        '<td>' + data[key].FOV + '</td>' +
+                        '<td>' + data[key].isCalibrated + '</td>' +
+                        '</tr>')
+            }
+        };
+        $('#sensors').html('<legend>Sensors</legend><table style="width:100%"><tr>' +
+                '<th>Type</th>' +
+                '<th>socketID</th>' +
+                '<th>FOV</th>' +
+                '<th>Calibrated</th>' +
+                '</tr>' + htmlString + '</table>')
+    });
+
+    io.emit('getPeopleFromServer', {}, function(data){
+        var htmlString = ""
+        data.forEach(function(person){
+            htmlString += ('<tr>' +
+                    '<td>'+printPersonID(person.ID)//JSON.stringify(person.ID)
+                    +'</td>' +
+                    '<td><table class="location">' +
+                    '<tr><td>'+Math.round(person.Location.X*ROUND_RATIO)/ROUND_RATIO+'</td>'
+                    + '<td>'+Math.round(person.Location.Y*ROUND_RATIO)/ROUND_RATIO+'</td>'
+                    + '<td>'+Math.round(person.Location.Z*ROUND_RATIO)/ROUND_RATIO+'</td></tr>'
+                    + '</table></td>' + //JSON.stringify(person.Location)
+                    '<td>' + person.PairingState + '</td>' +
+                    '<td>' + person.OwnedDeviceID + '</td>' +
+                    '<td>' + person.Orientation + '</td>' +
+                    '<td>' + Math.round(person.orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
+                    '<td>' + Math.round(person.distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
+                    '</tr>')
+        });
+        $('#people').html('<legend>People</legend><table style="width:100%"><tr>' +
+                '<th style="width:150px"><table><tr><td colspan="2">Person</td></tr><tr><td>ID</td><td>OriginatingSocket</td></tr></table></th>' +
+                '<th><table><tr><td colspan="3">Location</td></tr>' + '<tr><th style="width:15px">X</th>' +
+                '<th style="width:15px">Y</th><th style="15px">Z</th></tr>'+
+                '</table></th>' +
+                '<th style="width:100px">Pairing State</th>' +
+                '<th style="width:100px">Paired Device</th>' +
+                '<th style="width:100px">Orientation</th>' +
+                '<th style="width:100px">Orientation to Sensor</th>' +
+                '<th style="width:100px">Distance to Sensor</th>' +
+                '</tr>' + htmlString + '</table>')
+    });
+    io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
+        var htmlString= "";
+        if(!jQuery.isEmptyObject(data)){
+            data.forEach(function(device){
+                htmlString+='<tr><td>' +device.ID+'</td>'+
+                        '<td><table><tr><td>'+device.Location.X+'</td>'+'<td>'+device.Location.Y+'</td>'+'<td>'+device.Location.Z+'</td></tr></table></td>'+
+                        '<td>'+Math.round(device.Orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+device.PairingState+'</td>'+
+                        '<td>'+device.OwnerID+'</td>'+
+                        '</tr>'
+            })
+            $('#devices').html('<legend>Devices</legend>' +
+                    '<table>' +
+                    '<tr><th>ID</th><th><table><tr><td colspan="3">Location</td></tr>' + '<tr><th style="width:15px">X</th>' +
+                    '<th style="width:15px">Y</th><th style="15px">Z</th></tr>'+
+                    '</table></th> <th>Orientation</th>'+
+                    '<th>Pairing State</th>'+
+                    '<th>OwnerID</th>'+
+                    '</tr>'+
+                    '' +htmlString+
+                    '</table>'); /*appending the data on the page using Jquery */
+        }else
+        {/* is Empty*/};
+    });
+}
+
+io.on("webMessageEvent",function(message){
+    $('#status').html('GOT MESSAGE');
+    $('#status').append('<div >'+JSON.stringify(message)+'</div>'); /*appending the data on the page using Jquery */
+});
+io.on("connect", function(){
+    io.emit("registerWebClient", {});
+});
+
+io.on("refreshWebClientSensors", function(){
+    updateCanvasWithSensors();
+});
+
+$(function(){
+    $('#getPoints').click(function(){ /*listening to the button click using Jquery listener*/
+        io.emit('calibrateSensors', {}, function(){
+            //$('#status').html('');
+            //$('#status').append('<div >'+data+'</div>'); /*appending the data on the page using Jquery */
+        });
+    });
+});
+io.emit("registerWebClient", {});
+setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
+setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for sensors, people, and devices and display to the side
+
+
+
+// calibration section: button events
+$(document).ready(function(){
+    $("#calibration_flip").click(function(){
+        $("#calibration_section").slideToggle("slow");
+    });
+});
+
+
+
+</script>
+
+
+
+<script type="text/javascript">
+
+    var calibrationFrames = {};
+    var sensorOnePoints = [];
+    var sensorTwoPoints = [];
+    var sensors = {};
+    var depthArrays = {};
+
+
+    function getPosition(canvasID, sid, event)
+    {
+        var rect = document.getElementById(canvasID).getBoundingClientRect();
+        var xInPixels = event.x - rect.left;
+        var y = event.y - rect.top;
+        var z = depthArrays[sid][xInPixels+(y*sensors[sid].frameWidth)];
+        if(sensors[sid].sensorType == "Kinect2"){
+            z = z*10;
+        }
+
+        var xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2))
+        console.log(xInMM);
+
+        if(canvasID == "cnvSensorOne"){
+            if(sensorOnePoints.length < 2 && z > 0){
+                sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
+            }
+            $('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
+        }
+        else if(canvasID == "cnvSensorTwo"){
+            if(sensorTwoPoints.length < 2 && z > 0){
+                sensorTwoPoints.push({X: xInMM, Y: y, Z: z >>> 3});
+            }
+            $('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
+        }
+        if(z == 0){
+            $('#status').html("Depth is out of range, please choose another point!");
+        }
+        else{
+            $('#status').html("Point saved!");
+        }
+    }
+
+    function setup(){
+        //
+    }
+
+    function refreshSensors(){
+        $("#referenceSensorList").empty();
+        $("#uncalibratedSensorList").empty();
+        io.emit('getSensorsFromServer', {}, function(data){
+            sensors = {};
+            var referenceSensorList = document.getElementById("referenceSensorList")
+            var uncalibratedSensorList = document.getElementById("uncalibratedSensorList")
+            for(var key in data){
+                if(data.hasOwnProperty(key)){
+                    sensors[key] = data[key];
+                    var option = document.createElement("option");
+                    option.text = data[key].socketID;
+                    if(data[key].isCalibrated == true){
+                        var option2 = document.createElement("option");
+                        option2.text = data[key].socketID;
+                        referenceSensorList.add(option2);
+                    }
+                    uncalibratedSensorList.add(option);
+                }
+            }
+        });
+    }
+
+    //io = io.connect()
+    io.on("connect", function(){
+        io.emit("registerWebClient", {});
+    });
+
+    io.on("anything", function(data){
+        $('#status').html("MESSAGE RECEIVED: " + data);
+    })
+
+    io.on("setCalibrationFrame", function(data){
+        if(calibrationFrames["reference"] == data.sourceID || calibrationFrames["uncalibrated"] == data.sourceID){
+            depthArrays[data.sourceID] = data.payload;
+            if(sensors[data.sourceID].sensorType == "Kinect1"){
+                var depthMultiplier = 7000;
+            }
+            else{
+                var depthMultiplier = 5;
+            }
+            if(calibrationFrames["reference"] == data.sourceID){
+                canvas = document.getElementById("cnvSensorOne");
+                var ctx = canvas.getContext("2d");
+                var bytearray = new Uint8Array(data.payload);
+                var imgdata = ctx.getImageData(0,0, sensors[data.sourceID].frameWidth, sensors[data.sourceID].frameHeight);
+                ctx.canvas.width = sensors[data.sourceID].frameWidth;
+                ctx.canvas.height = sensors[data.sourceID].frameHeight;
+                var imgdatalen = imgdata.data.length;
+                for(var i=0;i<(imgdatalen/4);i++){
+                    var depth = (data.payload[i]>>>3)*255/depthMultiplier;
+
+                    imgdata.data[4*i] = depth;
+                    imgdata.data[4*i+1] = depth;
+                    imgdata.data[4*i+2] = depth;
+                    imgdata.data[4*i+3] = 255;
+                }
+                ctx.putImageData(imgdata,0,0)
+                canvas.addEventListener("mousedown", function(event){
+                    getPosition("cnvSensorOne", data.sourceID, event);
+                }, false);
+                $('#sensorOneStatus').html(depthMultiplier);
+            }
+            else if(calibrationFrames["uncalibrated"] == data.sourceID){
+                canvas = document.getElementById("cnvSensorTwo");
+                var ctx = canvas.getContext("2d");
+                var bytearray = new Uint8Array(data.payload);
+                var imgdata = ctx.getImageData(0,0, sensors[data.sourceID].frameWidth, sensors[data.sourceID].frameHeight);
+                ctx.canvas.width = sensors[data.sourceID].frameWidth;
+                ctx.canvas.height = sensors[data.sourceID].frameHeight;
+                var imgdatalen = imgdata.data.length;
+                for(var i=0;i<(imgdatalen/4);i++){
+                    var depth = (data.payload[i]>>>3)*255/depthMultiplier;
+
+                    imgdata.data[4*i] = depth;
+                    imgdata.data[4*i+1] = depth;
+                    imgdata.data[4*i+2] = depth;
+                    imgdata.data[4*i+3] = 255;
+                }
+                ctx.putImageData(imgdata,0,0)
+                canvas.addEventListener("mousedown", function(event){
+                    getPosition("cnvSensorTwo", data.sourceID, event);
+                }, false);
+                $('#sensorTwoStatus').html(depthMultiplier);
+            }
+        }
+
+    });
+
+    $(function(){
+        $('#refreshSensors').click(function(){
+            refreshSensors();
+        })
+        $('#getCalibrationFrames').click(function(){ /*listening to the button click using Jquery listener*/
+            var e1 = document.getElementById("referenceSensorList");
+            var e2 = document.getElementById("uncalibratedSensorList");
+            while(calibrationFrames.length > 0){
+                calibrationFrames.pop();
+            }
+            calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
+            calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
+            $('#status').html('CLICKED BUTTON');
+            io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
+        });
+
+        $('#resetPointsOne').click(function(){
+            sensorOnePoints = [];
+            $('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
+        })
+
+        $('#resetPointsTwo').click(function(){
+            sensorTwoPoints = [];
+            $('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
+        })
+
+        $('#calibrate').click(function(){
+            if(sensorOnePoints.length == 2 && sensorTwoPoints.length == sensorOnePoints.length){
+                io.emit("calibrateSensors", {referenceSensorID: calibrationFrames["reference"], uncalibratedSensorID: calibrationFrames["uncalibrated"],
+                    sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){
+
+                    $('#status').html(JSON.stringify(data))
+                })
+            }
+            else{
+                $('#status').html('Error: There are not enough points for calibration.');
+            }
+        })
+    });
+    io.emit("registerWebClient", {});
+
+
+
+</script>
+
+</head>
+<body onload="setup(), refreshSensors();drawGrid(); updateCanvasWithSensors();">
+<div id="page-wrap">
+    <section id="top">
+        <header>Super Cool SOD Visualizer</header>
+
+        <section id="calibration_section">
+            <div id = "getCalibrationFrames"> Get Image!</div>
+            <!--<input id="getCalibrationFrames" type="button" value="Get Calibration Frames"> <!-- Get Image button -->
+            <form>
+                <table>
+                    <tr>
+                        <td>
+                            <fieldset class="master">
+                                <legend>Master References</legend>
+                                <div class="calibration_wrap">
+                                    <h5>Please Select a master reference:</h5>
+                                    <select id="referenceSensorList" size="5"></select>
+                                    <div class="canvas_fake"> </div>
+
+                                    <!--This is where the data from the server is added-->
+
+                                    <canvas id="cnvSensorOne" width="640" height="480"
+                                            style="position: absolute;left: 26px;top: 185px;z-index: 4;"></canvas>
+
+
+                                </div>
+                                <fieldset class="sub_field">
+                                    <legend>Points Selected</legend>
+
+                                    <div class="pointsStatus" id="sensorOneStatus"></div>
+                                    <div class="points">
+                                        Master Point1    X:<input type="text" name="master_point1X" value="0.52">
+                                        Y:<input type="text" name="master_point1Y" value="0.38"></br>
+                                    </div>
+                                    <div class="points">
+                                        Master Point2 X:<input type="text" name="master_point2X" value="0.52">
+                                        Y:<input type="text" name="master_point2Y" value="0.38"></br>
+                                    </div>
+                                </fieldset>
+                            </fieldset>
+
+                        </td>
+                        <td>
+                            <fieldset class="master">
+                                <legend>Sensors Being Calibrated</legend>
+                                <div class="calibration_wrap">
+                                    <h5>Please Select a Sensor:</h5>
+                                    <select id="uncalibratedSensorList" size="5"></select>
+                                    <div class="canvas_fake"> </div>
+                                    <!--This is where the data from the server is added-->
+
+                                    <canvas id="cnvSensorTwo" width="700" height="600"
+                                            style="position: absolute;left: 814px;top: 174px;z-index: 4;"></canvas>
+
+
+                                    <fieldset class="sub_field">
+                                        <legend>Points Selected</legend>
+                                        <div class="pointsStatus" id="sensorTwoStatus" ></div> <!--This is where the data from the server is added-->
+                                        <div class="points">
+                                            Sensor Point1   X:<input type="text" name="sensor_point1X" value="0.52">
+                                            Y:<input type="text" name="sensor_point1Y" value="0.38"></br>
+                                        </div>
+                                        <div class="points">
+                                            Sensor Point2 X:<input type="text" name="sensor_point2X" value="0.52">
+                                            Y:<input type="text" name="sensor_point2Y" value="0.38"></br>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            <div class="button" id="calibrate"> Calibrate! </div>
+            <!--<input id="calibrate" type="button" value="Calibrate!">-->
+            <div class="status_wrap">
+                <h1>status:</h1>
+                <div id="status"></div> <!--This is where the data from the server is added-->
+            </div>
+            <div id="calibration_bottom"> </div>
+        </section>
+        <nav id="mode_selection">
+            <ul>
+                <li><a href="#" id="userMode">User</a></li>
+                <li><a href="#" id="devMode">Developer</a></li>
+            </ul>
+        </nav>
+    </section>
+    <section id="canvas">
+
+        <canvas id="cnv" width="800" height="800" ></canvas>
+        <canvas id="cnvSensors" width="800" height="800"></canvas>
+        <canvas id="cnvBG" width="800" height="800"</canvas>
+    </section>
+    <section id="overview">
+        <div class="button" id="calibration_flip">Calibration Mode!</div>
+        <form>
+            <!--<input type="text" id="message" /> <!--text form to send data to the server-->
+            <div id="contentHeader" >Overview</div> <!--This is where the data from the server is added-->
+
+            <fieldset id="clients">
+                <legend> Clients </legend>
+            </fieldset>  <!--This is where the data from the server is added-->
+            <input id="getPoints" type="button" value="getPoints">
+            <fieldset id="sensors" >
+                <legend> Sensors </legend>
+            </fieldset> <!--This is where the data from the server is added-->
+            <fieldset id="people">
+                <legend> Sensors </legend>
+            </fieldset> <!--This is where the data from the server is added-->
+
+            <fieldset id="devices">
+                <legend> Devices </legend>
+            </fieldset> <!--This is where the data from the server is added-->
+
+        </form>
+    </section>
+
+
+</div><!-- closing page wrap -->
 </body>
 </html>

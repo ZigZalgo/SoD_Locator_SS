@@ -3,20 +3,21 @@ var util = require('./util');
 
 exports.DEFAULT_FIELD_OF_VIEW = 25.0;
 exports.KINECT_VIEW_RANGE = 28.5;               // not being used yet
-exports.ROUND_RATIO         = 1000000000;         // the round ratio for dealing with not accurate calculation
+exports.ROUND_RATIO         = 150;         // the round ratio for dealing with not accurate calculation
 
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
 
 
+
 /*
-    take a location from sub-kinect and translate to the location to the MASTER kinect
-@param:
-    location        -- the location of a point from the sub-kinect
-    translateRules  -- the rules each sub-kinect has for translate the points in its plane to the MASTER-kinect
-@return:
-    rotatedPoint    -- the translated location of point in the subKinect to the MASTER kinect
-*/
+ take a location from sub-kinect and translate to the location to the MASTER kinect
+ @param:
+ location        -- the location of a point from the sub-kinect
+ translateRules  -- the rules each sub-kinect has for translate the points in its plane to the MASTER-kinect
+ @return:
+ rotatedPoint    -- the translated location of point in the subKinect to the MASTER kinect
+ */
 exports.translateToCoordinateSpace = function(location,translateRules)
 {
     var vectorToStartingPoint = this.getVector(translateRules.startingLocation,location);
@@ -28,19 +29,19 @@ exports.translateToCoordinateSpace = function(location,translateRules)
 
 
 /*
-    Get translation rule for a sensor which is not from the master Kinect when doing calibration
-    Since we are only considering 2D situation, Use dot product to get the angle between two sensor
+ Get translation rule for a sensor which is not from the master Kinect when doing calibration
+ Since we are only considering 2D situation, Use dot product to get the angle between two sensor
  @param:
-    startingLocation1   -- The location of the starting point observed by the MASTER kinect
-    endingLocation1     -- The location of the ending point observed by the MASTER kinect
-    startingLocation2   -- The location of the starting point observed by the sub-kinect
-    endingLocation2     -- The location of the ending point observed by the sub-kinect
+ startingLocation1   -- The location of the starting point observed by the MASTER kinect
+ endingLocation1     -- The location of the ending point observed by the MASTER kinect
+ startingLocation2   -- The location of the starting point observed by the sub-kinect
+ endingLocation2     -- The location of the ending point observed by the sub-kinect
  @return:
-    translationRules    -- returns an object contains:
-        * angle           -- the angle between two sensors ("+" as clockwise, "-" as counter-clockwise)
-        * x.Distance      -- the x distance between the point from sub-kinect to MASTER-kinect
-        * z.Distance      -- the z distance between the point from sub-kinect to MASTER-kinect
-        * startingLocation-- contains the location of the startingPoint of the sub-kinect
+ translationRules    -- returns an object contains:
+ * angle           -- the angle between two sensors ("+" as clockwise, "-" as counter-clockwise)
+ * x.Distance      -- the x distance between the point from sub-kinect to MASTER-kinect
+ * z.Distance      -- the z distance between the point from sub-kinect to MASTER-kinect
+ * startingLocation-- contains the location of the startingPoint of the sub-kinect
  */
 exports.getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
     console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
@@ -56,7 +57,7 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
 
     function fixSign(degreeBetweenVectors, rotatedVector2, counterRotatedVector2)
     {
-        if(Math.abs(rotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < (1/util.ROUND_RATIO) && Math.abs(rotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
+        if(Math.abs(rotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(rotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
             return {
                 degree:degreeBetweenVectors,
@@ -65,7 +66,7 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
                 startingLocation:startingLocation2
             };
         }
-        else if(Math.abs(counterRotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < (1/util.ROUND_RATIO) && Math.abs(counterRotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
+        else if(Math.abs(counterRotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(counterRotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
             return {
                 degree:-degreeBetweenVectors,
@@ -76,13 +77,14 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
         }else
         {
             return {
-                degree:-degreeBetweenVectors,
+                degree:NaN,
                 xDistance: startingLocation1.X - startingLocation2.X,
                 zDistance: startingLocation1.Z - startingLocation2.Z,
                 startingLocation:startingLocation2
             };
         }
     }
+
 }
 
 
@@ -118,14 +120,14 @@ exports.getDegreeOfTwoVectors = function(vector1,vector2){
 }
 
 /*
-    Matrix CLOCKWISE transformation ,
+ Matrix CLOCKWISE transformation ,
  given point(x,y) and rotation angle A, return (x',y') after transformation.
  @param:
-    personLocation   -- location contains x,y,z value of a point, we are going to use x,z since
-        we are dealing with 2D-dimension
-    angle            -- Rotation angle
+ personLocation   -- location contains x,y,z value of a point, we are going to use x,z since
+ we are dealing with 2D-dimension
+ angle            -- Rotation angle
  @return:
-    returnLocation   -- location after transformation
+ returnLocation   -- location after transformation
  */
 exports.matrixTransformation = function(personLocation,angle){
     var returnLocation = {X:0,Y:0,Z:0};

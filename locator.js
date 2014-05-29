@@ -24,7 +24,7 @@ exports.registerSensor = function(sensor){
     console.log("registering server from locator.js");
     console.log("REFERENCE IS: " + sensorsReference)
     if(sensorsReference == null){
-        sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0};
+        sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0, StartingLocation: {X: 0, Y: 0, Z: 0}};
         sensor.isCalibrated = true;
         sensorsReference = sensor;
         console.log("setting default reference")
@@ -269,7 +269,7 @@ exports.cleanUpSensor = function(socketID){
     if(sensorsReference.socketID){
         if(Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)}).length > 0){
             sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]].isCalibrated = true;
-            sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]].calibration = {Rotation: 0, TransformX: 0, TransformY: 0};
+            sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]].calibration = {Rotation: 0, TransformX: 0, TransformY: 0, StartingLocation: {X: 0, Y: 0, Z: 0}};
             sensorsReference = sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]];
         }
         else{

@@ -141,7 +141,12 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('calibrateSensors', function (request, fn){
+        var translateRule = locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints);
         frontend.clients[request.uncalibratedSensorID].emit('setTranslateRule', locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints))
+        locator.sensors[request.uncalibratedSensorID].calibration =
+        {Rotation: translateRule.degree, TransformX: translateRule.xDistance, TransformY: translateRule.zDistance, StartingLocation: translateRule.startingLocation};
+        locator.sensors[request.uncalibratedSensorID].isCalibrated = true;
+
         fn(locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints));
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....

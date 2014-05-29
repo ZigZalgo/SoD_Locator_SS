@@ -49,7 +49,7 @@ function Sensor(socket){
         this.sensorType = "";
         this.FOV = 0;
         this.LastUpdated = new Date();
-        this.calibration = {Rotation: null, TransformX: null, TransformY: null};
+        this.calibration = {Rotation: null, TransformX: null, TransformY: null, StartingLocation: {X: 0, Y: 0, Z: 0}};
         this.isCalibrated = false;
     }
     catch(err){
