@@ -77,7 +77,7 @@ exports.updatePersons = function(receivedPerson, socket){
             }
         }
         catch(err){
-            console.log(err)
+            console.log("Error updating person: " + err)
             //if null or cannot read for some other reason... remove null
             if(persons[returnedID] == null){
                 persons.splice(returnedID, 1)
@@ -100,7 +100,6 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
 
     if(devices[deviceSocketID] != undefined && util.findWithAttr(persons, "uniquePersonID", uniquePersonID) != undefined){
         var returnedIndex = util.findWithAttr(persons, "uniquePersonID", uniquePersonID);
-        console.log(returnedIndex);
         if(devices[deviceSocketID].PairingState == "unpaired" && persons[returnedIndex].PairingState == "unpaired"){
             devices[deviceSocketID].OwnerID = persons[returnedIndex].ID; //fix this after fixing personID
             devices[deviceSocketID].PairingState = "paired";
@@ -147,7 +146,7 @@ exports.printPersons = function(){
         });
     }
     catch(err){
-        console.log(err);
+        console.log("Error printing people: " + err);
         return false;
     }
 	console.log("///////////////////////////////////////////////////////////////");
@@ -185,7 +184,7 @@ exports.printDevices = function(){
         }
     }
     catch(err){
-        console.log(err);
+        console.log("Error printing devices: " + err);
         return false;
     }
     console.log("///////////////////////////////////////////////////////////////");
@@ -273,9 +272,7 @@ exports.cleanUpSensor = function(socketID){
         }
     }
     else{
-        console.log("1.  " + JSON.stringify(sensorsReference))
-        console.log("2.  " + JSON.stringify(sensors[socketID]))
-        console.log("all good, removed sensor is not reference");
+        console.log("All good, removed sensor is not reference");
     }
 }
 
@@ -364,7 +361,7 @@ exports.getDevicesInFront = function(observerSocketID){
              return returnDevices;
     }
     catch(err){
-        console.log(err);
+        console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
     }
 
 	// // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
@@ -392,7 +389,7 @@ exports.getDevicesInFront = function(observerSocketID){
         })
     }
     catch(err){
-        console.log(err);
+        console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
     }
 }
 

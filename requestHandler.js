@@ -70,7 +70,7 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
-        console.log(request.selection);
+        //console.log("Get Devices with Selection: " + request.selection);
         switch(request.selection){
             case 'all':
                 fn(locator.devices);
@@ -101,7 +101,6 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('personUpdate', function(persons, fn){
-        //console.log("personUpdate reeceived");
         //get persons from body, call update function for each person
         if(persons!=null){
             locator.removeIDsNoLongerTracked(socket, persons);
