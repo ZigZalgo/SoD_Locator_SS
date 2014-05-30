@@ -150,7 +150,7 @@
                     ctx.fill();
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "20px Arial";
-                    ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
+                    ctx.fillText(person.uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
                 })
             });
         }
@@ -209,7 +209,7 @@
                 var htmlString = ""
                 data.forEach(function(person){
                     htmlString += ('<tr>' +
-                            '<td>'+printPersonID(person.ID)//JSON.stringify(person.ID)
+                            '<td>'+person.uniquePersonID//JSON.stringify(person.ID)
                             +'</td>' +
                             '<td><table class="location">' +
                                 '<tr><td>'+Math.round(person.Location.X*ROUND_RATIO)/ROUND_RATIO+'</td>'

@@ -18,7 +18,9 @@ exports.handleRequest = function (socket){
     socket.on('registerDevice', function(deviceInfo, fn){ //changes this to stationary devices, or merge with iosAPI's "sendDeviceInfoToServer"
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         locator.registerDevice(socket, deviceInfo);
-        fn(({"status": 'success'}));
+        if(fn != undefined){
+            fn(({"status": 'success'}));
+        }
     });
 
     socket.on('registerSensor', function(sensorInfo){

@@ -1,0 +1,72 @@
+<html>
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+
+    function pair(){
+        var lstDevices = document.getElementById("lstDevices")
+        var lstPeople = document.getElementById("lstPeople")
+
+        io.emit('forcePairRequest', {personID:lstPeople.options[lstPeople.selectedIndex].text, deviceSocketID: lstDevices.options[lstDevices.selectedIndex].text}, function(data){
+            $('#status').html(JSON.stringify(data));
+        });
+    }
+
+    function refreshDevicesAndPeople(){
+        $("#lstDevices").empty();
+        $("#lstPeople").empty();
+        io.emit('getDevicesFromServer', {}, function(data){
+            var lstDevices = document.getElementById("lstDevices")
+            for(var key in data){
+                if(data.hasOwnProperty(key)){
+                    var option = document.createElement("option");
+                    option.text = data[key].socketID;
+                    lstDevices.add(option);
+                }
+            }
+        });
+
+        io.emit('getPeopleFromServer', {}, function(data){
+            var lstDevices = document.getElementById("lstDevices")
+            data.forEach(function(person){
+                var option = document.createElement("option");
+                option.text = data.indexOf(person) + ": " + JSON.stringify(person.ID);
+                lstPeople.add(option);
+            })
+        });
+    }
+
+    $(function(){
+        $('#btnRefresh').click(function(){
+            refreshDevicesAndPeople();
+        })
+        $('#btnPair').click(function(){
+            pair();
+        })
+    })
+
+    io = io.connect()
+    io.on('connect', function () {
+        console.log("socket connected");
+        io.emit("registerWebClient", {});
+    });
+
+</script>
+</head>
+<body>
+<div>
+    <span>Pairing Page</span>
+</div>
+<form>
+    <select id="lstDevices" size="10"></select>
+    <select id="lstPeople" size="10"></select>
+    <input id="btnRefresh" type="button" value="Refresh">
+    <input id="btnPair" type="button" value="Try To Pair">
+</form>
+
+<div id="status" style="height: 200px;"></div> <!--This is where the data from the server is added-->
+
+
+</body>
+</html>

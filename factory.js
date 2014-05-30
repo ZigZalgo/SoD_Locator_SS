@@ -1,5 +1,7 @@
 var util = require('./util');
 
+var uniquePersonCounter = 0;
+
 // TODO: TEST again, modified...
 function Person(){
     this.ID = null;
@@ -18,6 +20,7 @@ function Person(id, location, socket){
         }
         this.ID = {};
         this.ID[id] = socket.id;
+        this.uniquePersonID = uniquePersonCounter++;
         this.Location = location;
         this.Location.X = location.X.toFixed(3);
         this.Location.Y = location.Y.toFixed(3);

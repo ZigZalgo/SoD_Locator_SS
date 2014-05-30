@@ -44,14 +44,19 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
     for(var i = 0; i <= persons.length; i++){
         if(i < persons.length){
             for(var key in persons[i].ID){
-                if(persons[i].ID[key] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", persons[i].ID[key]) == undefined){
+                console.log("delete condition: " + (persons[i].ID[key] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", key) == undefined))
+                if(persons[i].ID[key] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", key) == undefined){
+                    console.log("DELETING")
                     delete persons[i].ID[key];
                 }
             }
         }
         else{
             persons.forEach(function(person){
+                console.log("Checking for empty ID lists")
+                console.log(JSON.stringify(person));
                 if(Object.keys(person.ID).length === 0){
+                    console.log("removing at index: " + persons.indexOf(person))
                     persons.splice(persons.indexOf(person), 1);
                 }
             })
@@ -60,7 +65,9 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 }
 
 exports.updatePersons = function(receivedPerson, socket){
-    if(persons.filter(function(person){return (person.ID[receivedPerson.Person_ID] != undefined)}).length > 0){
+    if(persons.filter(function(person){
+        return (person.ID[receivedPerson.Person_ID] != undefined)}).length > 0){
+        console.log('persons found')
         var returnedID = persons.indexOf(persons.filter(function(person){return (person.ID[receivedPerson.Person_ID] != undefined)})[0]);
         try{
             persons[returnedID].Location.X = receivedPerson.Location.X.toFixed(3);
@@ -84,41 +91,47 @@ exports.updatePersons = function(receivedPerson, socket){
     }
     else{
         //person was not found
+        console.log('person not found')
         if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
+            console.log(receivedPerson.Person_ID)
             var person = new factory.Person(receivedPerson.Person_ID, receivedPerson.Location, socket);
             person.LastUpdated = new Date();
             persons.push(person);
+            console.log("pushing: " + JSON.stringify(person))
         }
     }
 };
 
-exports.pairDevice = function(deviceSocketID, personID, socket){
-    var personIndex = util.findWithAttr(persons, "ID", personID);
+exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
-                    "\nPerson ID: " + personID +
-                    "\nPerson Index: " + personIndex + "\n\n";
-    if(devices[deviceSocketID] != undefined && personIndex != undefined){
-        if(devices[deviceSocketID].PairingState == "unpaired" && persons[personIndex].PairingState == "unpaired"){
-            devices[deviceSocketID].OwnerID = persons[personIndex].ID;
-            devices[deviceSocketID].PairingState = "paired";
-            persons[personIndex].OwnedDeviceID = deviceSocketID;
-            persons[personIndex].PairingState = "paired";
-            statusMsg += "\n Pairing successful.";
-        }
-        else{
-            statusMsg += "\nPairing attempt unsuccessful";
-            if(devices[deviceSocketID].PairingState != "unpaired"){
-                statusMsg += "Device unavailable for pairing.";
+        "\nPerson ID: " + uniquePersonID;
+
+    if(devices[deviceSocketID] != undefined){
+        var returnedIndex = util.findWithAttr(persons, "uniquePersonID", uniquePersonID);
+        console.log(returnedIndex);
+        if(util.findWithAttr(persons, "uniquePersonID", uniquePersonID) != undefined){
+            if(devices[deviceSocketID].PairingState == "unpaired" && person.PairingState == "unpaired"){
+                devices[deviceSocketID].OwnerID = persons[personIndex].ID; //fix this after fixing personID
+                devices[deviceSocketID].PairingState = "paired";
+                persons[returnedIndex].OwnedDeviceID = deviceSocketID;
+                persons[returnedIndex].PairingState = "paired";
+                statusMsg += "\n Pairing successful.";
             }
-            if(persons[personIndex].PairingState != "unpaired"){
-                statusMsg += "Person unavailable for pairing.";
+            else{
+                statusMsg += "\nPairing attempt unsuccessful";
+                if(devices[deviceSocketID].PairingState != "unpaired"){
+                    statusMsg += "Device unavailable for pairing.";
+                }
+                if(persons[returnedIndex].PairingState != "unpaired"){
+                    statusMsg += "Person unavailable for pairing.";
+                }
             }
         }
     }
     else{
-        statusMsg += "Pairing attempt unsuccessful. One or both objects were not found.";
+            statusMsg += "Pairing attempt unsuccessful. One or both objects were not found.";
     }
-    socket.send(JSON.stringify({"status": statusMsg, "ownerID": personID}));
+    socket.send(JSON.stringify({"status": statusMsg, "ownerID": uniquePersonID}));
 }
 
 //tested
@@ -236,18 +249,21 @@ exports.cleanUpSensor = function(socketID){
         console.log("Persons[] length: " + persons.length);
         console.log("i value: " + i);
         if(i < persons.length){
-            while(util.findWithAttr(persons[i].ID, "originatingSocket", socketID) != undefined){
-                console.log("Person " + i + "has ID with socket being removed.");
-                persons[i].ID.splice(util.findWithAttr(persons[i].ID, "originatingSocket", socketID), 1);
+            for(var key in persons[i].ID){
+                if(persons[i].ID.hasOwnProperty(key)){
+                    if(persons[i].ID[key] == socketID){
+                        console.log("Person " + i + "has ID with socket being removed.");
+                        delete persons[i].ID[key];
+                    }
+                }
             }
         }
         else{
             for(var j = persons.length-1; j >= 0; j--){
                 console.log(JSON.stringify(persons))
-                if(persons[j].ID.length <= 0){
+                if(Object.keys(persons[j].ID).length <= 0){
                     persons.splice(j, 1);
                 }
-
             }
         }
     }

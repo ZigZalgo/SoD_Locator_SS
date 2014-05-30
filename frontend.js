@@ -32,6 +32,9 @@ app.get('/style', function (req, res) {
 app.get('/calibrate', function (req, res) {
     res.sendfile(__dirname + '/view/calibrate.html');
 });
+app.get('/pair', function (req, res) {
+    res.sendfile(__dirname + '/view/pair.html');
+});
 
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });
