@@ -15,9 +15,10 @@ exports.handleRequest = function (socket){
         fn(locator.getDevicesInFront(device.ID));
     });
 
-    socket.on('registerDevice', function(device){ //changes this to stationary devices, or merge with iosAPI's "sendDeviceInfoToServer"
-        device.stationary = true;
-        locator.devices.push(device);
+    socket.on('registerDevice', function(deviceInfo, fn){ //changes this to stationary devices, or merge with iosAPI's "sendDeviceInfoToServer"
+        frontend.clients[socket.id].clientType = deviceInfo.deviceType;
+        locator.registerDevice(socket, deviceInfo);
+        fn(({"status": 'success'}));
     });
 
     socket.on('registerSensor', function(sensorInfo){
@@ -36,33 +37,21 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('setPairingState', function (data) {
-        locator.setPairingState(data.additionalInfo.deviceID);
+        locator.setPairingState(socket.id);
     });
 
-    socket.on('unpairDevice', function (request) {
-        locator.unpairDevice(request.additionalInfo.deviceID, request.additionalInfo.personID);
-    });
-
-    socket.on('sendOrientation', function (request) {
-        var device = new factory.Device();
-        device.Orientation = request.additionalInfo.orientation;
-        device.ID = request.additionalInfo.deviceID;
+    socket.on('updateOrientation', function (request) {
+        var device = new factory.Device(socket);
+        device.Orientation = request.orientation;
         locator.updateDeviceOrientation(device);
     });
 
     socket.on('unpairDevice', function (request) {
-        locator.unpairDevice(request.additionalInfo.deviceID, request.additionalInfo.personID);
+        locator.unpairDevice(socket.id, request.personID);
     });
 
     socket.on('unpairAllPeople', function (request, fn) {
         locator.unpairAllPeople();
-        fn(({"status": 'success'}));
-    });
-
-    socket.on('sendDeviceInfoToServer', function (data, fn) {
-        console.log("Got request to init device");
-        console.log(data);
-        locator.initDevice(data.additionalInfo.deviceID, data.additionalInfo.height, data.additionalInfo.width);
         fn(({"status": 'success'}));
     });
 
@@ -79,25 +68,23 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
-        locator.purgeInactiveDevices();
-        console.log(request.additionalInfo.selection);
-        switch(request.additionalInfo.selection){
+        console.log(request.selection);
+        switch(request.selection){
             case 'all':
-                fn((locator.devices));
+                fn(locator.devices);
                 break;
             case 'inView':
                 console.log("GETTING ALL DEVICES IN VIEW");
-                fn(locator.getDevicesInFront(request.additionalInfo.deviceID));
+                fn(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
                 break;
             default:
-                fn((locator.devices));
+                fn(locator.devices);
         }
     });
 
     socket.on('forcePairRequest', function (request, fn) {
-        var deviceID = request.additionalInfo.deviceID;
-        var personID = request.additionalInfo.personID;
-        locator.pairDevice(deviceID, personID, socket);
+        var personID = request.personID;
+        locator.pairDevice(socket.id, personID, socket);
         fn(({"status": 'success'}));
     });
 

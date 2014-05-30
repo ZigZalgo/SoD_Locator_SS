@@ -93,23 +93,22 @@ exports.updatePersons = function(receivedPerson, socket){
     }
 };
 
-exports.pairDevice = function(deviceID, personID, socket){
+exports.pairDevice = function(deviceSocketID, personID, socket){
     var personIndex = util.findWithAttr(persons, "ID", personID);
-    var statusMsg = "Device ID: " + deviceID +
-                    "\nDevice Index: " + deviceIndex +
+    var statusMsg = "Device Socket ID: " + deviceSocketID +
                     "\nPerson ID: " + personID +
                     "\nPerson Index: " + personIndex + "\n\n";
-    if(deviceIndex != undefined && personIndex != undefined){
-        if(devices[deviceID].PairingState == "unpaired" && persons[personIndex].PairingState == "unpaired"){
-            devices[deviceID].OwnerID = persons[personIndex].ID;
-            devices[deviceID].PairingState = "paired";
+    if(devices[deviceSocketID] != undefined && personIndex != undefined){
+        if(devices[deviceSocketID].PairingState == "unpaired" && persons[personIndex].PairingState == "unpaired"){
+            devices[deviceSocketID].OwnerID = persons[personIndex].ID;
+            devices[deviceSocketID].PairingState = "paired";
             persons[personIndex].OwnedDeviceID = deviceID;
             persons[personIndex].PairingState = "paired";
             statusMsg += "\n Pairing successful.";
         }
         else{
             statusMsg += "\nPairing attempt unsuccessful";
-            if(devices[deviceID].PairingState != "unpaired"){
+            if(devices[deviceSocketID].PairingState != "unpaired"){
                 statusMsg += "Device unavailable for pairing.";
             }
             if(persons[personIndex].PairingState != "unpaired"){
@@ -153,30 +152,19 @@ exports.printPersons = function(){
     return true;
 }
 
-exports.purgeInactiveDevices = function(){
-    for(var key in devices){
-        if(devices.hasOwnProperty(key)){
-            var timeDifference = (new Date() - devices[key].LastUpdated);
-            if(timeDifference > 3000 && devices[key].stationary == false){
-                delete devices[key];
-            }
-        }
+exports.setPairingState = function(deviceSocketID){
+    if(devices[deviceSocketID] != null){
+        devices[deviceSocketID].PairingState = "pairing";
     }
 }
 
-exports.setPairingState = function(deviceID){
-    if(devices[deviceID] != null){
-        devices[deviceID].PairingState = "pairing";
-    }
-}
-
-exports.unpairDevice = function(deviceID, personID){
-    if(devices[deviceID] != undefined){
-        devices[deviceID].PairingState = "unpaired";
-        devices[deviceID].OwnerID = null;
-        devices[deviceID].Location.X = null;
-        devices[deviceID].Location.Y = null;
-        devices[deviceID].Location.Z = null;
+exports.unpairDevice = function(deviceSocketID, personID){
+    if(devices[deviceSocketID] != undefined){
+        devices[deviceSocketID].PairingState = "unpaired";
+        devices[deviceSocketID].OwnerID = null;
+        devices[deviceSocketID].Location.X = null;
+        devices[deviceSocketID].Location.Y = null;
+        devices[deviceSocketID].Location.Z = null;
     }
     if(util.findWithAttr(persons, 'ID', personID) != undefined){
         persons[util.findWithAttr(persons, "ID", personID)].PairingState = "unpaired";
@@ -205,27 +193,25 @@ exports.printDevices = function(){
 // TODO: implement!
 // TODO: test!
 exports.updateDeviceOrientation = function(device){
-    this.purgeInactiveDevices();
-    if(devices[device.ID] != undefined){
+    if(devices[device.socketID] != undefined){
         try{
-            devices[device.ID].Orientation = device.Orientation;
-            devices[device.ID].LastUpdated = new Date();
+            devices[device.socketID].LastUpdated = new Date();
 
-            if(devices[device.ID].OwnerID != null){
-                persons[util.findWithAttr(persons, "ID", devices[device.ID].OwnerID)].Orientation = device.Orientation;
+            if(devices[device.socketID].OwnerID != null){
+                persons[util.findWithAttr(persons, "ID", devices[device.socketID].OwnerID)].Orientation = device.Orientation;
             }
         }
         catch(err){
             //if null or cannot read for some other reason... remove null
-            if(devices[device.ID] == null){
-                delete devices[device.ID]
+            if(devices[device.socketID] == null){
+                delete devices[device.socketID]
             }
         }
     }
     else{
-        if(device.ID != undefined && device.Orientation != undefined){
+        if(device.Orientation != undefined){
             device.LastUpdated = new Date();
-            devices.push(device);
+            devices[device.socketID] = device;
         }
     }
 }
@@ -289,32 +275,31 @@ exports.cleanUpSensor = function(socketID){
     }
 }
 
-exports.initDevice = function(deviceID, height, width){
-    if(devices[deviceID] != undefined){
-        devices[deviceID].Height = height;
-        devices[deviceID].Width = width;
+exports.registerDevice = function(socket, deviceInfo){
+    if(devices[socket.id] != undefined){
+        devices[socket.id].Height = deviceInfo.height;
+        devices[socket.id].Width = deviceInfo.width;
         console.log("Device initiated late, updating height and width");
     }
     else{
-        var device = new factory.Device();
-        device.ID = deviceID;
-        device.Height = height;
-        device.Width = width;
+        var device = new factory.Device(socket);
+        device.Height = deviceInfo.height;
+        device.Width = deviceInfo.width;
         device.LastUpdated = new Date();
-        devices[device.ID] = device;
-        console.log("Initiating device");
+        devices[socket.id] = device;
+        console.log("Registering device: " + JSON.stringify(device));
     }
 }
 
 // TODO: implement!
 // TODO: test!
-exports.getDevicesInView = function(observer, devicesInFront){
+exports.getDevicesInView = function(observerSocketID, devicesInFront){
     console.log("GetDevicesInView was called");
 	// TODO: test
-    console.log(observer);
+    console.log(devices[observerSocketID]);
 	//var returnDevices = {};
-    var returnDevices = {};
-    var observerLineOfSight = factory.makeLineUsingOrientation(observer.Location, observer.Orientation);
+    var returnDevices = [];
+    var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].Location, devices[observerSocketID].Orientation);
     for(var i = 0; i <= devicesInFront.length; i++){
         if(i == devicesInFront.length){
             return returnDevices;
@@ -335,10 +320,10 @@ exports.getDevicesInView = function(observer, devicesInFront){
                     console.log("intersection points not empty");
                     //this.continue;
                     var nearestPoint = intersectionPoints[0];
-                    var shortestDistance = util.distanceBetweenPoints(observer.Location, nearestPoint);
+                    var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].Location, nearestPoint);
 
                     intersectionPoints.forEach(function(point){
-                        var distance = util.distanceBetweenPoints(observer.Location, point);
+                        var distance = util.distanceBetweenPoints(devices[observerSocketID].Location, point);
                         if(distance < shortestDistance){
                             nearestPoint = point;
                             shortestDistance = distance;
@@ -359,10 +344,10 @@ exports.getDevicesInView = function(observer, devicesInFront){
 
 // TODO: implement!
 // TODO: test!
-exports.getDevicesInFront = function(observerID){
+exports.getDevicesInFront = function(observerSocketID){
 	// TODO: implement!
 	// List<Device> returnDevices = new List<Device>();
-    var observer = devices[observerID];
+    var observer = devices[observerSocketID];
     var returnDevices = {};
 
 	// //(CB - Should we throw an exception here? Rather then just returning an empty list?)

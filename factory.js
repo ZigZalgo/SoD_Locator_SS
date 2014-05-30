@@ -60,9 +60,11 @@ function Sensor(socket){
 exports.Sensor = Sensor;
 
 // TODO: TEST
-function Device(){
+function Device(socket){
     try{
         this.ID = null;
+        this.socketID = socket.id;
+        this.deviceType
         this.Location = {X: null, Y: null, Z:null};
         this.Orientation = null;
         this.FOV = util.DEFAULT_FIELD_OF_VIEW;
@@ -72,7 +74,7 @@ function Device(){
         this.PairingState = "unpaired";
         this.IntersectionPoint = {X: 0, Y: 0};
         this.LastUpdated = new Date();
-        this.stationary = false;
+        this.Stationary = false;
     }
     catch(err){
     }

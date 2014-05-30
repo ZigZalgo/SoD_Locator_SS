@@ -148,7 +148,6 @@
                     ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
                     ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
                     ctx.fill();
-                    $('#devices').html("x:" + Math.round(person.Location.X*ROUND_RATIO)/ROUND_RATIO + "     z:" + Math.round(person.Location.Z*ROUND_RATIO)/ROUND_RATIO)
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "20px Arial";
                     ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
@@ -236,13 +235,16 @@
             });
             io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
                 var htmlString= "";
-                data.forEach(function(device){
-                    htmlString+='<tr><td>' +device.ID+'</td>'+
-                            '<td><table><tr><td>'+device.Location.X+'</td>'+'<td>'+device.Location.Y+'</td>'+'<td>'+device.Location.Z+'</td></tr></table></td>'+
-                            '<td>'+Math.round(device.Orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+device.PairingState+'</td>'+
-                            '<td>'+device.OwnerID+'</td>'+
-                            '</tr>'
-                })
+                for(var key in data){
+                    if(data.hasOwnProperty(key)){
+                        htmlString+='<tr><td>' +data[key].ID+'</td>'+
+                                '<td><table><tr><td>'+data[key].Location.X+'</td>'+'<td>'+data[key].Location.Y+'</td>'+'<td>'+data[key].Location.Z+'</td></tr></table></td>'+
+                                '<td>'+Math.round(data[key].Orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+data[key].PairingState+'</td>'+
+                                '<td>'+data[key].OwnerID+'</td>'+
+                                '</tr>'
+                    }
+                }
+
                 $('#devices').html('<legend>Devices</legend>' +
                         '<table>' +
                         '<tr><th>ID</th><th><table><tr><td colspan="3">Location</td></tr>' + '<tr><th style="width:15px">X</th>' +
