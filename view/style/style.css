@@ -7,7 +7,7 @@ html,body,div,span,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,font,img,ul,li{
     font-size:100%;
     vertical-align:baseline;
     background: transparent;}
-ol,ul	{list-style:none;}
+ol,ul   {list-style:none;}
 /* END reset */
 
 section,aside,nav,footer{display:block;}
@@ -374,6 +374,28 @@ section#calibration_section .calibration_wrap{
     border-radius: 10px;
     box-shadow: 2px 2px 5px #888888;
 }
+
+
+
+.get_unpaired_people{
+
+    color:white;
+    margin: 0px 2px;
+    background: #d05a47;
+    padding: 1px 3px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+    box-shadow: 0px 1px 3px #888888;
+}
+
+.get_unpaired_people:hover{
+    color:#292929;
+    cursor:pointer;
+    box-shadow:none;
+}
+
+
 /* END button */
 
 /* status box*/
@@ -398,7 +420,7 @@ section#calibration_section .calibration_wrap{
     margin:2px;
 }
 
-#status{
+.status{
     vertical-align:middle;
     padding-left: 10px;
     padding-top:10px;
