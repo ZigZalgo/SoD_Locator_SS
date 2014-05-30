@@ -1,6 +1,7 @@
 var util = require('./util');
 
 var uniquePersonCounter = 0;
+var uniqueDeviceCounter = 0;
 
 // TODO: TEST again, modified...
 function Person(){
@@ -67,7 +68,8 @@ function Device(socket){
     try{
         this.ID = null;
         this.socketID = socket.id;
-        this.deviceType
+        this.uniqueDeviceID = uniqueDeviceCounter++;
+        this.deviceType = "Not specified";
         this.Location = {X: null, Y: null, Z:null};
         this.Orientation = null;
         this.FOV = util.DEFAULT_FIELD_OF_VIEW;

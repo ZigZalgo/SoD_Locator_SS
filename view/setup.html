@@ -15,7 +15,8 @@ var minorGridLineWidth = 10;
 var majorGridLineWidth = 50;
 var pixelsPerMeter = majorGridLineWidth;
 var ROUND_RATIO  = 10;
-var unpaired_people = [];
+var unpaired_people = {};
+var uniqueDeviceIDToSocketID = {}
 
 
 function drawGrid() {
@@ -229,7 +230,7 @@ function updateContentWithObjects(){
             }
         });
         $('#people').html('<legend>People</legend><table style="width:100%"><tr>' +
-                '<th style="width:150px"><table><tr><td colspan="2">Person</td></tr><tr><td>ID</td><td>OriginatingSocket</td></tr></table></th>' +
+                '<th style="width:100px">uniquePersonID</th>' +
                 '<th>Location</th>' +
                 '<th style="width:100px">Pairing State</th>' +
                 '<th style="width:100px">Paired Device</th>' +
@@ -254,11 +255,12 @@ function updateContentWithObjects(){
     }
 
     io.emit('getPeopleFromServer',{},function(data){
-        unpaired_people.splice(0,unpaired_people.length);
+        unpaired_people = {};
         for(var key in data){
             if(data[key].PairingState == 'unpaired'){
                 var jsonKey = jQuery.parseJSON( key );
-                unpaired_people.push({index:key,personID:firstKey(data[key].ID)});//data[key].ID);
+                unpaired_people[data[key].uniquePersonID] = data[key];
+                //unpaired_people.push({index:key,personID:firstKey(data[key].ID)});//data[key].ID);
             }
         }
     });
@@ -271,17 +273,20 @@ function updateContentWithObjects(){
             if(state == 'unpaired'){
 
                 for(var key in unpaired_people){
-                    return_html+= '<span class="get_unpaired_people">'+ unpaired_people[key].index + '</span>';
+                    if(unpaired_people.hasOwnProperty(key)){
+                        return_html+= '<span class="get_unpaired_people">'+ unpaired_people[key].uniquePersonID + '</span>';
+                    }
                 }
                 return return_html;
             }else{
-                return_html = state;
+                return state;
             }
         }
 
         for(var key in data){
+            uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
-                htmlString+='<tr><td>' +data[key].ID+'</td>'+
+                htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+
                         '<td>('+data[key].Location.X+', '+data[key].Location.Y+', '+data[key].Location.Z+')</td>'+
                         '<td>'+Math.round(data[key].Orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].PairingState)+'</td>'+
                         '<td>'+data[key].OwnerID+'</td>'+
@@ -291,7 +296,7 @@ function updateContentWithObjects(){
 
         $('#devices').html('<legend>Devices</legend>' +
                 '<table id = "device_table">' +
-                '<tr><th>ID</th><th>Location</th> <th>Orientation</th>'+
+                '<tr><th>uniqueDeviceID</th><th>Location</th> <th>Orientation</th>'+
                 '<th>Pairing State</th>'+
                 '<th>OwnerID</th>'+
                 '</tr>'+
@@ -360,11 +365,10 @@ $(document).ready(function(){
         //console.log($(this).text());
         //console.log("id: " +unpaired_people[$(this).text()].personID);
         //alert("what ???\t"+$("td:first",$(this).parents('tr')).text()); // get the ID of the device
-        var deviceID = $("td:first",$(this).parents('tr')).text();
-        var personID = unpaired_people[$(this).text()].personID;
-        console.log("Selected Device: " + deviceID + "\tpersonID: "+ personID);
+        var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
+        console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ unpaired_people[$(this).text()].uniquePersonID);
         //alert( $(this).text() );
-        io.emit("forcePairRequest",{deviceSocketID:deviceID,personID: personID},function(callback){
+        io.emit("forcePairRequest",{deviceSocketID:deviceID, uniquePersonID: unpaired_people[$(this).text()].uniquePersonID},function(callback){
             console.log(JSON.stringify(callback));
         });
     })//referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text}

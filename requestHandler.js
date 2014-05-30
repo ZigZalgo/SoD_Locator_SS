@@ -85,12 +85,11 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('forcePairRequest', function (request, fn) {
-        var personID = request.personID;
         if(request.deviceSocketID != undefined){
-            locator.pairDevice(request.deviceSocketID, personID, socket);
+            locator.pairDevice(request.deviceSocketID, request.uniquePersonID, socket);
         }
         else{
-            locator.pairDevice(socket.id, personID, socket);
+            locator.pairDevice(socket.id, request.uniquePersonID, socket);
         }
 
         fn(({"status": 'success'}));

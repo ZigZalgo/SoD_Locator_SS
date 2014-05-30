@@ -44,19 +44,14 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
     for(var i = 0; i <= persons.length; i++){
         if(i < persons.length){
             for(var key in persons[i].ID){
-                console.log("delete condition: " + (persons[i].ID[key] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", key) == undefined))
                 if(persons[i].ID[key] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", key) == undefined){
-                    console.log("DELETING")
                     delete persons[i].ID[key];
                 }
             }
         }
         else{
             persons.forEach(function(person){
-                console.log("Checking for empty ID lists")
-                console.log(JSON.stringify(person));
                 if(Object.keys(person.ID).length === 0){
-                    console.log("removing at index: " + persons.indexOf(person))
                     persons.splice(persons.indexOf(person), 1);
                 }
             })
@@ -65,24 +60,24 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 }
 
 exports.updatePersons = function(receivedPerson, socket){
-    if(persons.filter(function(person){
-        return (person.ID[receivedPerson.Person_ID] != undefined)}).length > 0){
-        console.log('persons found')
+    if(persons.filter(function(person){return (person.ID[receivedPerson.Person_ID] != undefined)}).length > 0){
+        //person found
         var returnedID = persons.indexOf(persons.filter(function(person){return (person.ID[receivedPerson.Person_ID] != undefined)})[0]);
         try{
             persons[returnedID].Location.X = receivedPerson.Location.X.toFixed(3);
             persons[returnedID].Location.Y = receivedPerson.Location.Y.toFixed(3);
             persons[returnedID].Location.Z = receivedPerson.Location.Z.toFixed(3);
-            persons[returnedID].distanceToKinect = util.getDistanceToKinect(location.X, location.Z).toFixed(3);
-            persons[returnedID].orientationToKinect = util.getPersonOrientation(location.X, location.Z).toFixed(3);
+            //persons[returnedID].distanceToKinect = util.getDistanceToKinect(Location.X, location.Z).toFixed(3);
+            //persons[returnedID].orientationToKinect = util.getPersonOrientation(location.X, location.Z).toFixed(3);
             persons[returnedID].LastUpdated = new Date();
-            if(persons[returnedID].OwnedDeviceID != null){
+            if(persons[persons.indexOf(persons.filter(function(person){return (person.ID[receivedPerson.Person_ID] != undefined)})[0])].OwnedDeviceID != null){
                 devices[persons[returnedID].OwnedDeviceID].Location.X = receivedPerson.Location.X.toFixed(3);
                 devices[persons[returnedID].OwnedDeviceID].Location.Y = receivedPerson.Location.Y.toFixed(3);
                 devices[persons[returnedID].OwnedDeviceID].Location.Z = receivedPerson.Location.Z.toFixed(3);
             }
         }
         catch(err){
+            console.log(err)
             //if null or cannot read for some other reason... remove null
             if(persons[returnedID] == null){
                 persons.splice(returnedID, 1)
@@ -91,13 +86,10 @@ exports.updatePersons = function(receivedPerson, socket){
     }
     else{
         //person was not found
-        console.log('person not found')
         if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
-            console.log(receivedPerson.Person_ID)
             var person = new factory.Person(receivedPerson.Person_ID, receivedPerson.Location, socket);
             person.LastUpdated = new Date();
             persons.push(person);
-            console.log("pushing: " + JSON.stringify(person))
         }
     }
 };
@@ -106,25 +98,23 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         "\nPerson ID: " + uniquePersonID;
 
-    if(devices[deviceSocketID] != undefined){
+    if(devices[deviceSocketID] != undefined && util.findWithAttr(persons, "uniquePersonID", uniquePersonID) != undefined){
         var returnedIndex = util.findWithAttr(persons, "uniquePersonID", uniquePersonID);
         console.log(returnedIndex);
-        if(util.findWithAttr(persons, "uniquePersonID", uniquePersonID) != undefined){
-            if(devices[deviceSocketID].PairingState == "unpaired" && person.PairingState == "unpaired"){
-                devices[deviceSocketID].OwnerID = persons[personIndex].ID; //fix this after fixing personID
-                devices[deviceSocketID].PairingState = "paired";
-                persons[returnedIndex].OwnedDeviceID = deviceSocketID;
-                persons[returnedIndex].PairingState = "paired";
-                statusMsg += "\n Pairing successful.";
+        if(devices[deviceSocketID].PairingState == "unpaired" && persons[returnedIndex].PairingState == "unpaired"){
+            devices[deviceSocketID].OwnerID = persons[returnedIndex].ID; //fix this after fixing personID
+            devices[deviceSocketID].PairingState = "paired";
+            persons[returnedIndex].OwnedDeviceID = deviceSocketID;
+            persons[returnedIndex].PairingState = "paired";
+            statusMsg += "\n Pairing successful.";
+        }
+        else{
+            statusMsg += "\nPairing attempt unsuccessful";
+            if(devices[deviceSocketID].PairingState != "unpaired"){
+                statusMsg += "Device unavailable for pairing.";
             }
-            else{
-                statusMsg += "\nPairing attempt unsuccessful";
-                if(devices[deviceSocketID].PairingState != "unpaired"){
-                    statusMsg += "Device unavailable for pairing.";
-                }
-                if(persons[returnedIndex].PairingState != "unpaired"){
-                    statusMsg += "Person unavailable for pairing.";
-                }
+            if(persons[returnedIndex].PairingState != "unpaired"){
+                statusMsg += "Person unavailable for pairing.";
             }
         }
     }
@@ -246,8 +236,7 @@ exports.cleanUpSensor = function(socketID){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
     delete sensors[socketID];
     for(var i = 0; i <= persons.length; i++){
-        console.log("Persons[] length: " + persons.length);
-        console.log("i value: " + i);
+
         if(i < persons.length){
             for(var key in persons[i].ID){
                 if(persons[i].ID.hasOwnProperty(key)){
@@ -312,13 +301,13 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
     console.log("devicesInFront: " + JSON.stringify(devicesInFront));
     console.log("GetDevicesInView was called");
 	// TODO: test
-    console.log(devices[observerSocketID]);
+    //console.log(devices[observerSocketID]);
 	//var returnDevices = {};
     var returnDevices = [];
     var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].Location, devices[observerSocketID].Orientation);
     for(var i = 0; i <= devicesInFront.length; i++){
         if(i == devicesInFront.length){
-            console.log("returning devicesInView!")
+            console.log("returning devicesInView!/n" + JSON.stringify(returnDevices))
             return returnDevices;
         }
         else{
