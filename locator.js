@@ -43,15 +43,15 @@ exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
 exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
     for(var i = 0; i <= persons.length; i++){
         if(i < persons.length){
-            persons[i].ID.forEach(function(trackedID){
-                if(trackedID.originatingSocket == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", trackedID.value) == undefined){
-                    persons[i].ID.splice(persons[i].ID.indexOf(trackedID), 1);
+            for(var key in persons[i].ID){
+                if(persons[i].ID[key] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", persons[i].ID[key]) == undefined){
+                    delete persons[i].ID[key];
                 }
-            })
+            }
         }
         else{
             persons.forEach(function(person){
-                if(person.ID.length <= 0){
+                if(Object.keys(person.ID).length === 0){
                     persons.splice(persons.indexOf(person), 1);
                 }
             })
@@ -60,9 +60,8 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 }
 
 exports.updatePersons = function(receivedPerson, socket){
-    if(util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id}) != undefined){
-        //person already exists in database
-        var returnedID = util.findWithAttrWeak(persons, "ID", {value: receivedPerson.Person_ID, originatingSocket: socket.id});
+    if(persons.filter(function(person){return (person.ID[receivedPerson.Person_ID] != undefined)}).length > 0){
+        var returnedID = persons.indexOf(persons.filter(function(person){return (person.ID[receivedPerson.Person_ID] != undefined)})[0]);
         try{
             persons[returnedID].Location.X = receivedPerson.Location.X.toFixed(3);
             persons[returnedID].Location.Y = receivedPerson.Location.Y.toFixed(3);
@@ -102,7 +101,7 @@ exports.pairDevice = function(deviceSocketID, personID, socket){
         if(devices[deviceSocketID].PairingState == "unpaired" && persons[personIndex].PairingState == "unpaired"){
             devices[deviceSocketID].OwnerID = persons[personIndex].ID;
             devices[deviceSocketID].PairingState = "paired";
-            persons[personIndex].OwnedDeviceID = deviceID;
+            persons[personIndex].OwnedDeviceID = deviceSocketID;
             persons[personIndex].PairingState = "paired";
             statusMsg += "\n Pairing successful.";
         }

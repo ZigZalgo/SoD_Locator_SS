@@ -16,8 +16,8 @@ function Person(id, location, socket){
             var err = new Error("X, Y, or Z is null")
             this.emit('error', err);
         }
-        this.ID = [];
-        this.ID.push({value: id, originatingSocket: socket.id});
+        this.ID = {};
+        this.ID[id] = socket.id;
         this.Location = location;
         this.Location.X = location.X.toFixed(3);
         this.Location.Y = location.Y.toFixed(3);

@@ -125,7 +125,7 @@
 
                         ctxSensors.font = "20px Arial";
                         ctxSensors.fillStyle = '#ffffff';
-                        ctxSensors.fillText('K'+data.keys.indexOf(key),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+                        ctxSensors.fillText('K'+Object.keys(data).indexOf(key),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
                     }
                 }
             });
@@ -159,9 +159,11 @@
         {
             var htmlString= "";
             htmlString += '<table>';
-            ID.forEach(function(IDInfo){
-                htmlString += '<tr><td>' + IDInfo.value + '</td><td>'+IDInfo.originatingSocket +'</td></tr>';
-            });
+            for(var key in ID){
+                if(ID.hasOwnProperty(key)){
+                    htmlString += '<tr><td>' + key + '</td><td>'+ID[key] +'</td></tr>';
+                }
+            }
             htmlString += '</table>';
             return htmlString;
         }
@@ -646,7 +648,7 @@
 
         <canvas id="cnv" width="800" height="800" ></canvas>
         <canvas id="cnvSensors" width="800" height="800"></canvas>
-        <canvas id="cnvBG" width="800" height="800"</canvas>
+        <canvas id="cnvBG" width="800" height="800"></canvas>
     </section>
     <section id="overview">
         <div class="button" id="calibration_flip">Calibration Mode!</div>
@@ -662,7 +664,7 @@
                 <legend> Sensors </legend>
             </fieldset> <!--This is where the data from the server is added-->
             <fieldset id="people">
-                <legend> Sensors </legend>
+                <legend> People </legend>
             </fieldset> <!--This is where the data from the server is added-->
 
             <fieldset id="devices">
