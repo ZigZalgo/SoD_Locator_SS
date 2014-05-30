@@ -294,6 +294,7 @@ exports.registerDevice = function(socket, deviceInfo){
 // TODO: implement!
 // TODO: test!
 exports.getDevicesInView = function(observerSocketID, devicesInFront){
+    console.log("devicesInFront: " + JSON.stringify(devicesInFront));
     console.log("GetDevicesInView was called");
 	// TODO: test
     console.log(devices[observerSocketID]);
@@ -302,6 +303,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
     var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].Location, devices[observerSocketID].Orientation);
     for(var i = 0; i <= devicesInFront.length; i++){
         if(i == devicesInFront.length){
+            console.log("returning devicesInView!")
             return returnDevices;
         }
         else{
@@ -348,7 +350,7 @@ exports.getDevicesInFront = function(observerSocketID){
 	// TODO: implement!
 	// List<Device> returnDevices = new List<Device>();
     var observer = devices[observerSocketID];
-    var returnDevices = {};
+    var returnDevices = [];
 
 	// //(CB - Should we throw an exception here? Rather then just returning an empty list?)
     try{

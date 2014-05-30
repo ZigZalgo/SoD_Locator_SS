@@ -74,7 +74,7 @@ exports.handleRequest = function (socket){
                 fn(locator.devices);
                 break;
             case 'inView':
-                console.log("GETTING ALL DEVICES IN VIEW");
+                console.log("GETTING ALL DEVICES IN VIEW: " + locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
                 fn(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
                 break;
             default:
@@ -84,7 +84,13 @@ exports.handleRequest = function (socket){
 
     socket.on('forcePairRequest', function (request, fn) {
         var personID = request.personID;
-        locator.pairDevice(socket.id, personID, socket);
+        if(request.deviceID != undefined){
+            locator.pairDevice(request.deviceID, personID, socket);
+        }
+        else{
+            locator.pairDevice(socket.id, personID, socket);
+        }
+
         fn(({"status": 'success'}));
     });
 
