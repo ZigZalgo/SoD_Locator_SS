@@ -141,20 +141,21 @@ function updateCanvasWithPeople(){
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height);
 
-        data.forEach(function(person){
-
-            var xInMeters = person.Location.X*majorGridLineWidth;
-            var yInMeters = person.Location.Y*majorGridLineWidth;
-            var zInMeters = person.Location.Z*majorGridLineWidth;
-            ctx.fillStyle = "#c82124"; //red
-            ctx.beginPath();
-            ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
-            ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
-            ctx.fill();
-            ctx.fillStyle = "#ffffff"; //white
-            ctx.font = "20px Arial";
-            ctx.fillText(data.indexOf(person),shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
-        })
+        for(var key in data){
+            if(data.hasOwnProperty(key)){
+                var xInMeters = data[key].Location.X*majorGridLineWidth;
+                var yInMeters = data[key].Location.Y*majorGridLineWidth;
+                var zInMeters = data[key].Location.Z*majorGridLineWidth;
+                ctx.fillStyle = "#c82124"; //red
+                ctx.beginPath();
+                ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
+                ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
+                ctx.fill();
+                ctx.fillStyle = "#ffffff"; //white
+                ctx.font = "20px Arial";
+                ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
+            }
+        }
     });
 }
 
@@ -210,25 +211,27 @@ function updateContentWithObjects(){
 
     io.emit('getPeopleFromServer', {}, function(data){
         var htmlString = ""
-        data.forEach(function(person){
-            //console.log(jQuery.isEmptyObject(person.ID));
-            if(!jQuery.isEmptyObject(person.ID)){
-                htmlString += ('<tr>' +
-                        '<td>'+person.uniquePersonID//JSON.stringify(person.ID)
-                        +'</td>' +
-                        '<td>' +
-                        '('+Math.round(person.Location.X*ROUND_RATIO)/ROUND_RATIO+', '
-                        +Math.round(person.Location.Y*ROUND_RATIO)/ROUND_RATIO+', '
-                        +Math.round(person.Location.Z*ROUND_RATIO)/ROUND_RATIO+')'
-                        + //JSON.stringify(person.Location)
-                        '<td>' + person.PairingState + '</td>' +
-                        '<td>' + person.OwnedDeviceID + '</td>' +
-                        '<td>' + person.Orientation + '</td>' +
-                        '<td>' + Math.round(person.orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
-                        '<td>' + Math.round(person.distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
-                        '</tr>')
+        for(var key in data){
+            if(data.hasOwnProperty(key)){
+                if(!jQuery.isEmptyObject(data[key].ID)){
+                    htmlString += ('<tr>' +
+                            '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
+                            +'</td>' +
+                            '<td>' +
+                            '('+Math.round(data[key].Location.X*ROUND_RATIO)/ROUND_RATIO+', '
+                            +Math.round(data[key].Location.Y*ROUND_RATIO)/ROUND_RATIO+', '
+                            +Math.round(data[key].Location.Z*ROUND_RATIO)/ROUND_RATIO+')'
+                            + //JSON.stringify(person.Location)
+                            '<td>' + data[key].PairingState + '</td>' +
+                            '<td>' + data[key].OwnedDeviceID + '</td>' +
+                            '<td>' + data[key].Orientation + '</td>' +
+                            '<td>' + Math.round(data[key].orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
+                            '<td>' + Math.round(data[key].distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
+                            '</tr>')
+                }
             }
-        });
+        }
+
         $('#people').html('<legend>People</legend><table style="width:100%"><tr>' +
                 '<th style="width:100px">uniquePersonID</th>' +
                 '<th>Location</th>' +
@@ -258,8 +261,7 @@ function updateContentWithObjects(){
         unpaired_people = {};
         for(var key in data){
             if(data[key].PairingState == 'unpaired'){
-                var jsonKey = jQuery.parseJSON( key );
-                unpaired_people[data[key].uniquePersonID] = data[key];
+                unpaired_people[key] = data[key];
                 //unpaired_people.push({index:key,personID:firstKey(data[key].ID)});//data[key].ID);
             }
         }
@@ -366,9 +368,9 @@ $(document).ready(function(){
         //console.log("id: " +unpaired_people[$(this).text()].personID);
         //alert("what ???\t"+$("td:first",$(this).parents('tr')).text()); // get the ID of the device
         var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
-        console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ unpaired_people[$(this).text()].uniquePersonID);
+        console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ $(this).text());
         //alert( $(this).text() );
-        io.emit("forcePairRequest",{deviceSocketID:deviceID, uniquePersonID: unpaired_people[$(this).text()].uniquePersonID},function(callback){
+        io.emit("forcePairRequest",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
             console.log(JSON.stringify(callback));
         });
     })//referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text}

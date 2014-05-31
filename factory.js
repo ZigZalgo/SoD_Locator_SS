@@ -26,8 +26,6 @@ function Person(id, location, socket){
         this.Location.X = location.X.toFixed(3);
         this.Location.Y = location.Y.toFixed(3);
         this.Location.Z = location.Z.toFixed(3);
-        this.orientationToKinect = util.getPersonOrientation(location.X,location.Z).toFixed(3);
-        this.distanceToKinect = util.getDistanceToKinect(location.X,location.Z).toFixed(3);
         this.Orientation = null;
         this.OwnedDeviceID = null;
         this.PairingState = "unpaired";

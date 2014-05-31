@@ -87,6 +87,7 @@ exports.handleRequest = function (socket){
     socket.on('forcePairRequest', function (request, fn) {
         if(request.deviceSocketID != undefined){
             locator.pairDevice(request.deviceSocketID, request.uniquePersonID, socket);
+            console.log("UNIQUEPERSONID: " + request.uniquePersonID)
         }
         else{
             locator.pairDevice(socket.id, request.uniquePersonID, socket);
