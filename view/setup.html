@@ -27,7 +27,9 @@
             $('.status').html('<span class="normal_status">OverView</span>');
             $('.normal_status').fadeIn(600);
         });
-
+        $('#refreshSensors').on('click',function(){
+            refreshSensors();
+        })
 
 
     // clear the points for sensor one
@@ -86,6 +88,7 @@
             </ul>
         </nav>
         <section id="calibration_section">
+            <div class="button" id = "refreshSensors">Refresh Sensors</div>
             <div id = "getCalibrationFrames"> Get Image!</div>
             <!--<input id="getCalibrationFrames" type="button" value="Get Calibration Frames"> <!-- Get Image button -->
             <form>

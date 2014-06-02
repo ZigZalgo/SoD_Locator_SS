@@ -205,7 +205,7 @@ section#calibration_section{
     position:relative;;
     top:-40px;
     left:0px;
-    height:1080px;
+    height:auto;
 }
 section#calibration_section form{
     height:788px;
@@ -230,6 +230,7 @@ section#calibration_section fieldset.master{
 section#calibration_section h5{
     color:#1656bf;
 }
+
 section#calibration_section fieldset.master legend{
     font-family:"Agency FB",DinRound, Sans-Serif;
     padding:10px 20px;
@@ -404,6 +405,14 @@ section#calibration_section .calibration_wrap{
     color:#292929;
     cursor:pointer;
     box-shadow:none;
+}
+
+
+
+#refreshSensors{
+    width:160px;
+    position: relative;
+    top: 50px;
 }
 
 
