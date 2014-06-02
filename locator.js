@@ -21,7 +21,6 @@ exports.start = function(){
 
 exports.registerSensor = function(sensor){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
-    console.log("registering server from locator.js");
     console.log("REFERENCE IS: " + sensorsReference)
     if(sensorsReference == null){
         sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0, StartingLocation: {X: 0, Y: 0, Z: 0}};
@@ -45,22 +44,19 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
         if(persons.hasOwnProperty(key)){
             for(var IDkey in persons[key].ID){
                 if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", IDkey) == undefined){
-                    console.log("ID BEING REMOVED?!")
                     delete persons[key].ID[IDkey];
                 }
             }
         }
         if(Object.keys(persons).indexOf(key) == Object.keys(persons).length - 1){
-            console.log("first entry point");
             locator.removeUntrackedPeople();
         }
     }
 }
 
 exports.updatePersons = function(receivedPerson, socket){
-    console.log("Updating persons");
     if(Object.keys(persons).length == 0){
-        console.log("TRIGGERING INSTANT ADD");
+        //nobody being tracked, add new person
         if(Object.keys(persons).indexOf(key) == Object.keys(persons).length - 1){
             //person was not found
             if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
@@ -72,14 +68,12 @@ exports.updatePersons = function(receivedPerson, socket){
         }
     }
     else{
-        console.log("People list not empty")
+        //there are people being tracked, see if they match
         var counter = Object.keys(persons).length;
         for(var key in persons){
             counter --;
             if(persons.hasOwnProperty(key)){
-                console.log(receivedPerson.Person_ID + " vs " + key);
                 if(persons[key].ID[receivedPerson.Person_ID] != undefined){
-                    console.log('person found')
                     //person found
                     try{
                         persons[key].Location.X = receivedPerson.Location.X.toFixed(3);
@@ -107,9 +101,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
                             var person = new factory.Person(receivedPerson.Person_ID, receivedPerson.Location, socket);
                             person.LastUpdated = new Date();
-                            console.log("IS THIS A NUMBER:   " + person.uniquePersonID)
                             persons[person.uniquePersonID] = person;
-                            console.log("THIS PERSON: " + JSON.stringify(persons[person.uniquePersonID]))
                         }
                     }
                 }
@@ -122,13 +114,8 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         "\nPerson ID: " + uniquePersonID;
 
-    console.log("Point A")
-    console.log(devices[deviceSocketID])
-    console.log(persons[uniquePersonID])
     if(devices[deviceSocketID] != undefined && persons[uniquePersonID] != undefined){
-        console.log("Point B")
         if(devices[deviceSocketID].PairingState == "unpaired" && persons[uniquePersonID].PairingState == "unpaired"){
-            console.log("Point C")
             devices[deviceSocketID].OwnerID = uniquePersonID;
             devices[deviceSocketID].PairingState = "paired";
             persons[uniquePersonID].OwnedDeviceID = deviceSocketID;
@@ -136,7 +123,6 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
             statusMsg += "\n Pairing successful.";
         }
         else{
-            console.log("Point D")
             statusMsg += "\nPairing attempt unsuccessful";
             if(devices[deviceSocketID].PairingState != "unpaired"){
                 statusMsg += "Device unavailable for pairing.";
@@ -220,6 +206,7 @@ exports.printDevices = function(){
 exports.updateDeviceOrientation = function(device){
     if(devices[device.socketID] != undefined){
         try{
+            devices[device.socketID].Orientation = device.Orientation;
             devices[device.socketID].LastUpdated = new Date();
 
             if(devices[device.socketID].OwnerID != null){
@@ -242,7 +229,6 @@ exports.updateDeviceOrientation = function(device){
 }
 
 exports.unpairAllPeople = function(){
-    console.log("UNPAIRING ALL PEOPLE");
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
             try{
@@ -260,11 +246,9 @@ exports.unpairAllPeople = function(){
 }
 
 exports.removeUntrackedPeople = function(){
-    console.log("REMOVING UNTRACKED PEOPLE")
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
             if(Object.keys(persons[key].ID).length === 0){
-                console.log("DELETING KEYS")
                 delete persons[key];
             }
         }
@@ -280,14 +264,12 @@ exports.cleanUpSensor = function(socketID){
             for(var IDkey in persons[key].ID){
                 if(persons[key].ID.hasOwnProperty(IDkey)){
                     if(persons[key].ID[IDkey] == socketID){
-                        console.log("Person " + i + "has ID with socket being removed.");
                         delete persons[key].ID[IDkey];
                     }
                 }
             }
         }
         if(counter == 0){
-            console.log("second entry point");
             locator.removeUntrackedPeople();
         }
     }
@@ -338,11 +320,11 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
 	// TODO: test
     //console.log(devices[observerSocketID]);
 	//var returnDevices = {};
-    var returnDevices = [];
+    var returnDevices = {};
     var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].Location, devices[observerSocketID].Orientation);
     for(var i = 0; i <= devicesInFront.length; i++){
         if(i == devicesInFront.length){
-            console.log("returning devicesInView!/n" + JSON.stringify(returnDevices))
+            console.log("returning devicesInView!\n" + JSON.stringify(returnDevices))
             return returnDevices;
         }
         else{
@@ -376,7 +358,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
                     devices[devicesInFront[i]].IntersectionPoint.X = ratioOnScreen.X;
                     devices[devicesInFront[i]].IntersectionPoint.Y = ratioOnScreen.Y;
                     console.log("Pushed a target for sending!");
-                    returnDevices.push(devices[devicesInFront[i]]);
+                    returnDevices[devicesInFront[i]] = devices[devicesInFront[i]];
                 }
             }
         }

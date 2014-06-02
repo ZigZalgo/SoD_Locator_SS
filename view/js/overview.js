@@ -8,6 +8,7 @@ var ROUND_RATIO  = 10;
 var unpaired_people = {};
 var uniqueDeviceIDToSocketID = {}
 
+io = io.connect()
 
 function drawGrid() {
     var cnv = document.getElementById("cnvBG");
@@ -74,8 +75,6 @@ function shiftYToGridOrigin(z){
     return (z + ((document.getElementById("cnv").height)/2));
 }
 
-io = io.connect()
-
 function updateCanvasWithSensors(){
     var cSensors = document.getElementById("cnvSensors");
     var ctxSensors = cSensors.getContext("2d");
@@ -88,22 +87,7 @@ function updateCanvasWithSensors(){
                 var sensorRotationAngle = 0; //get this from sensor list later on
                 var sensorFOV = data[key].FOV; //get this from sensor list later on
 
-                //// radius value should be taken from sensor
-                var radius = data[key].rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
-
-
-                var positionX = shiftXToGridOrigin(sensorX);
-                var positionY = shiftXToGridOrigin(sensorY);
-                var startAngle = (90-(sensorFOV/2))*Math.PI/180;//0.75;    // 90 as the Z orientation of sensor
-                var endAngle = (90+(sensorFOV/2))*Math.PI/180;
-                var antiClockwise = false;
-                ctxSensors.fillStyle = "rgba(0, 0, 0, 0.2)";
-                ctxSensors.beginPath();
-                ctxSensors.arc(positionX, positionY, radius, startAngle, endAngle, antiClockwise);
-                ctxSensors.lineTo(positionX, positionY);
-                ctxSensors.closePath();
-
-                ctxSensors.fill();
+                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)", data[key].FOV);
 
                 //draw circle for sensor on visualizer
                 ctxSensors.beginPath();
@@ -122,6 +106,21 @@ function updateCanvasWithSensors(){
             }
         }
     });
+}
+
+function drawView(context, X, Y, rangeInMM, fillStyle, FOV){
+    var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
+    var positionX = shiftXToGridOrigin(X);
+    var positionY = shiftXToGridOrigin(Y);
+    var startAngle = (90-(FOV/2))*Math.PI/180;
+    var endAngle = (90+(FOV/2))*Math.PI/180;
+    var antiClockwise = false;
+    context.fillStyle = fillStyle;
+    context.beginPath();
+    context.arc(positionX, positionY, radius, startAngle, endAngle, antiClockwise);
+    context.lineTo(positionX, positionY);
+    context.closePath();
+    context.fill();
 }
 
 function updateCanvasWithPeople(){
