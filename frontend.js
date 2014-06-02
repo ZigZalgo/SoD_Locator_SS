@@ -16,11 +16,12 @@ exports.clients = clients;
 server.listen(3000);
 
 requestHandler.start();
-
+/*
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/index.html');
-});
-app.get('/setup', function (req, res) {
+}); */
+
+app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/setup.html');
 });
 app.get('/user', function (req, res) {
@@ -29,11 +30,12 @@ app.get('/user', function (req, res) {
 app.get('/style', function (req, res) {
     res.sendfile(__dirname + '/view/style/style.css');
 });
-app.get('/calibrate', function (req, res) {
-    res.sendfile(__dirname + '/view/calibrate.html');
+
+app.get('/overviewJS', function (req, res) {
+    res.sendfile(__dirname + '/view/js/overview.js');
 });
-app.get('/pair', function (req, res) {
-    res.sendfile(__dirname + '/view/pair.html');
+app.get('/calibrateJS', function (req, res) {
+    res.sendfile(__dirname + '/view/js/calibrate.js');
 });
 
 io.sockets.on('connection', function (socket) {
