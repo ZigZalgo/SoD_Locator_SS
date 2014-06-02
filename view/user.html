@@ -126,9 +126,9 @@
 
                 data.forEach(function(person){
 
-                    var xInMeters = person.Location.X*majorGridLineWidth;
-                    var yInMeters = person.Location.Y*majorGridLineWidth;
-                    var zInMeters = person.Location.Z*majorGridLineWidth;
+                    var xInMeters = person.location.X*majorGridLineWidth;
+                    var yInMeters = person.location.Y*majorGridLineWidth;
+                    var zInMeters = person.location.Z*majorGridLineWidth;
 
                     ctx.beginPath();
                     ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
@@ -182,10 +182,10 @@
                 data.forEach(function(person){
                     htmlString += ('<tr>' +
                             '<td>' + JSON.stringify(person.ID) + '</td>' +
-                            '<td>' + JSON.stringify(person.Location) + '</td>' +
-                            '<td>' + person.PairingState + '</td>' +
-                            '<td>' + person.OwnedDeviceID + '</td>' +
-                            '<td>' + person.Orientation + '</td>' +
+                            '<td>' + JSON.stringify(person.location) + '</td>' +
+                            '<td>' + person.pairingState + '</td>' +
+                            '<td>' + person.ownedDeviceID + '</td>' +
+                            '<td>' + person.orientation + '</td>' +
                             '<td>' + person.orientationToKinect + '</td>' +
                             '<td>' + person.distanceToKinect + '</td>' +
                             '</tr>')

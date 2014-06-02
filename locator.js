@@ -43,7 +43,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
             for(var IDkey in persons[key].ID){
-                if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "Person_ID", IDkey) == undefined){
+                if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
                     delete persons[key].ID[IDkey];
                 }
             }
@@ -59,9 +59,9 @@ exports.updatePersons = function(receivedPerson, socket){
         //nobody being tracked, add new person
         if(Object.keys(persons).indexOf(key) == Object.keys(persons).length - 1){
             //person was not found
-            if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
-                var person = new factory.Person(receivedPerson.Person_ID, receivedPerson.Location, socket);
-                person.LastUpdated = new Date();
+            if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
+                var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+                person.lastUpdated = new Date();
                 persons[person.uniquePersonID] = person;
                 console.log(persons[person.uniquePersonID])
             }
@@ -73,17 +73,17 @@ exports.updatePersons = function(receivedPerson, socket){
         for(var key in persons){
             counter --;
             if(persons.hasOwnProperty(key)){
-                if(persons[key].ID[receivedPerson.Person_ID] != undefined){
+                if(persons[key].ID[receivedPerson.ID] != undefined){
                     //person found
                     try{
-                        persons[key].Location.X = receivedPerson.Location.X.toFixed(3);
-                        persons[key].Location.Y = receivedPerson.Location.Y.toFixed(3);
-                        persons[key].Location.Z = receivedPerson.Location.Z.toFixed(3);
-                        persons[key].LastUpdated = new Date();
-                        if(persons[key].OwnedDeviceID != null){
-                            devices[persons[key].OwnedDeviceID].Location.X = receivedPerson.Location.X.toFixed(3);
-                            devices[persons[key].OwnedDeviceID].Location.Y = receivedPerson.Location.Y.toFixed(3);
-                            devices[persons[key].OwnedDeviceID].Location.Z = receivedPerson.Location.Z.toFixed(3);
+                        persons[key].location.X = receivedPerson.location.X.toFixed(3);
+                        persons[key].location.Y = receivedPerson.location.Y.toFixed(3);
+                        persons[key].location.Z = receivedPerson.location.Z.toFixed(3);
+                        persons[key].lastUpdated = new Date();
+                        if(persons[key].ownedDeviceID != null){
+                            devices[persons[key].ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
+                            devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
+                            devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                         }
                     }
                     catch(err){
@@ -98,9 +98,9 @@ exports.updatePersons = function(receivedPerson, socket){
                 else{
                     if(counter == 0){
                         //person was not found
-                        if(receivedPerson.Person_ID != undefined && receivedPerson.Location != undefined){ //if provided an ID and a location, update
-                            var person = new factory.Person(receivedPerson.Person_ID, receivedPerson.Location, socket);
-                            person.LastUpdated = new Date();
+                        if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
+                            var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+                            person.lastUpdated = new Date();
                             persons[person.uniquePersonID] = person;
                         }
                     }
@@ -115,19 +115,19 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
         "\nPerson ID: " + uniquePersonID;
 
     if(devices[deviceSocketID] != undefined && persons[uniquePersonID] != undefined){
-        if(devices[deviceSocketID].PairingState == "unpaired" && persons[uniquePersonID].PairingState == "unpaired"){
+        if(devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
             devices[deviceSocketID].OwnerID = uniquePersonID;
-            devices[deviceSocketID].PairingState = "paired";
+            devices[deviceSocketID].pairingState = "paired";
             persons[uniquePersonID].OwnedDeviceID = deviceSocketID;
-            persons[uniquePersonID].PairingState = "paired";
+            persons[uniquePersonID].pairingState = "paired";
             statusMsg += "\n Pairing successful.";
         }
         else{
             statusMsg += "\nPairing attempt unsuccessful";
-            if(devices[deviceSocketID].PairingState != "unpaired"){
+            if(devices[deviceSocketID].pairingState != "unpaired"){
                 statusMsg += "Device unavailable for pairing.";
             }
-            if(persons[uniquePersonID].PairingState != "unpaired"){
+            if(persons[uniquePersonID].pairingState != "unpaired"){
                 statusMsg += "Person unavailable for pairing.";
             }
         }
@@ -164,22 +164,22 @@ exports.printPersons = function(){
 
 exports.setPairingState = function(deviceSocketID){
     if(devices[deviceSocketID] != null){
-        devices[deviceSocketID].PairingState = "pairing";
+        devices[deviceSocketID].pairingState = "pairing";
     }
 }
 
 exports.unpairDevice = function(deviceSocketID){
     if(devices[deviceSocketID] != undefined){
         if(devices[deviceSocketID].OwnerID != null){
-            persons[devices[deviceSocketID].OwnerID].PairingState = "unpaired";
+            persons[devices[deviceSocketID].OwnerID].pairingState = "unpaired";
             persons[devices[deviceSocketID].OwnerID].OwnedDeviceID = null;
-            persons[devices[deviceSocketID].OwnerID].Orientation = null;
+            persons[devices[deviceSocketID].OwnerID].orientation = null;
         }
 
-        devices[deviceSocketID].PairingState = "unpaired";
-        devices[deviceSocketID].Location.X = null;
-        devices[deviceSocketID].Location.Y = null;
-        devices[deviceSocketID].Location.Z = null;
+        devices[deviceSocketID].pairingState = "unpaired";
+        devices[deviceSocketID].location.X = null;
+        devices[deviceSocketID].location.Y = null;
+        devices[deviceSocketID].location.Z = null;
         devices[deviceSocketID].OwnerID = null;
     }
 }
@@ -206,11 +206,11 @@ exports.printDevices = function(){
 exports.updateDeviceOrientation = function(device){
     if(devices[device.socketID] != undefined){
         try{
-            devices[device.socketID].Orientation = device.Orientation;
-            devices[device.socketID].LastUpdated = new Date();
+            devices[device.socketID].orientation = device.orientation;
+            devices[device.socketID].lastUpdated = new Date();
 
             if(devices[device.socketID].OwnerID != null){
-                persons[devices[device.socketID].OwnerID].Orientation = device.Orientation;
+                persons[devices[device.socketID].OwnerID].orientation = device.orientation;
             }
         }
         catch(err){
@@ -221,8 +221,8 @@ exports.updateDeviceOrientation = function(device){
         }
     }
     else{
-        if(device.Orientation != undefined){
-            device.LastUpdated = new Date();
+        if(device.orientation != undefined){
+            device.lastUpdated = new Date();
             devices[device.socketID] = device;
         }
     }
@@ -233,7 +233,7 @@ exports.unpairAllPeople = function(){
         if(persons.hasOwnProperty(key)){
             try{
                 if(persons[key] != null){
-                    persons[key].PairingState = 'unpaired';
+                    persons[key].pairingState = 'unpaired';
                     persons[key].OwnedDeviceID = null;
                 }
             }
@@ -298,15 +298,22 @@ exports.cleanUpSensor = function(socketID){
 
 exports.registerDevice = function(socket, deviceInfo){
     if(devices[socket.id] != undefined){
-        devices[socket.id].Height = deviceInfo.height;
-        devices[socket.id].Width = deviceInfo.width;
+        devices[socket.id].height = deviceInfo.height;
+        devices[socket.id].width = deviceInfo.width;
+
         console.log("Device initiated late, updating height and width");
     }
     else{
         var device = new factory.Device(socket);
-        device.Height = deviceInfo.height;
-        device.Width = deviceInfo.width;
-        device.LastUpdated = new Date();
+        device.height = deviceInfo.height;
+        device.width = deviceInfo.width;
+        device.lastUpdated = new Date();
+        if(deviceInfo.stationary == true){
+            console.log("stationary device registered")
+            console.log(JSON.stringify(deviceInfo))
+            console.log(deviceInfo)
+            device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
+        }
         devices[socket.id] = device;
         console.log("Registering device: " + JSON.stringify(device));
     }
@@ -321,7 +328,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
     //console.log(devices[observerSocketID]);
 	//var returnDevices = {};
     var returnDevices = {};
-    var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].Location, devices[observerSocketID].Orientation);
+    var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].location, devices[observerSocketID].orientation);
     for(var i = 0; i <= devicesInFront.length; i++){
         if(i == devicesInFront.length){
             console.log("returning devicesInView!\n" + JSON.stringify(returnDevices))
@@ -343,10 +350,10 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
                     console.log("intersection points not empty");
                     //this.continue;
                     var nearestPoint = intersectionPoints[0];
-                    var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].Location, nearestPoint);
+                    var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].location, nearestPoint);
 
                     intersectionPoints.forEach(function(point){
-                        var distance = util.distanceBetweenPoints(devices[observerSocketID].Location, point);
+                        var distance = util.distanceBetweenPoints(devices[observerSocketID].location, point);
                         if(distance < shortestDistance){
                             nearestPoint = point;
                             shortestDistance = distance;
@@ -375,7 +382,7 @@ exports.getDevicesInFront = function(observerSocketID){
 
 	// //(CB - Should we throw an exception here? Rather then just returning an empty list?)
     try{
-        if (observer.Location == null || observer.Orientation == null)
+        if (observer.location == null || observer.orientation == null)
              return returnDevices;
          if (observer.FOV == 0.0)
              return returnDevices;
@@ -387,22 +394,22 @@ exports.getDevicesInFront = function(observerSocketID){
 	// // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
 	// // We will use angles to represent these vectors.
     try{
-        var leftFieldOfView = util.normalizeAngle(observer.Orientation + 30);
-        var rightFieldOfView = util.normalizeAngle(observer.Orientation - 30);
+        var leftFieldOfView = util.normalizeAngle(observer.orientation + 30);
+        var rightFieldOfView = util.normalizeAngle(observer.orientation - 30);
 
         return Object.keys(devices).filter(function(key){
-            //var angle = util.normalizeAngle(Math.atan2(devices[key].Location.Y - observer.Location.Y, devices[key].Location.X - observer.Location.X) * 180 / Math.PI);
-            if(devices[key] != observer && devices[key].Location != undefined){
+            //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
+            if(devices[key] != observer && devices[key].location != undefined){
                 if (leftFieldOfView > rightFieldOfView &&
-                    (util.normalizeAngle(Math.atan2(devices[key].Location.Y - observer.Location.Y, devices[key].Location.X - observer.Location.X) * 180 / Math.PI)) < leftFieldOfView &&
-                    (util.normalizeAngle(Math.atan2(devices[key].Location.Y - observer.Location.Y, devices[key].Location.X - observer.Location.X) * 180 / Math.PI)) > rightFieldOfView){
+                    (util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
+                    (util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
                     return true;
                 }
             }
             else if (leftFieldOfView < rightFieldOfView)
             {
-                if ((util.normalizeAngle(Math.atan2(devices[key].Location.Y - observer.Location.Y, devices[key].Location.X - observer.Location.X) * 180 / Math.PI)) < leftFieldOfView ||
-                    (util.normalizeAngle(Math.atan2(devices[key].Location.Y - observer.Location.Y, devices[key].Location.X - observer.Location.X) * 180 / Math.PI)) > rightFieldOfView){
+                if ((util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                    (util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
                     return true;
                 }
             }
@@ -426,7 +433,7 @@ exports.GetNearestDeviceInView = function(observer){
 exports.GetDevicesWithinRange = function(observer, distance){
 	// TODO: test
     var returnDevices = {};
-    if(observer.Location == null){
+    if(observer.location == null){
         return returnDevices;
     }
 
@@ -434,7 +441,7 @@ exports.GetDevicesWithinRange = function(observer, distance){
         if(device == observer){
            //this.continue /////is this necessary, if it's an else if?
         }
-        else if(device.Location != null && util.distanceBetweenPoints((observer.Location, device.Location) < distance)){
+        else if(device.location != null && util.distanceBetweenPoints((observer.location, device.location) < distance)){
             returnDevices.push(device);
         }
     });
@@ -461,7 +468,7 @@ exports.FindNearestDevice = function(observer, deviceList){
         var nearest = null;
 
         deviceList.forEach(function(device){
-           if(device != observer && device.Location != null){//!=null equivalent to .HasValue?
+           if(device != observer && device.location != null){//!=null equivalent to .HasValue?
                nearest = device;
            }
         });
@@ -470,8 +477,8 @@ exports.FindNearestDevice = function(observer, deviceList){
         }
 
         deviceList.forEach(function(device){
-           if(device != observer && device.Location != null &&
-                        util.distanceBetweenPoints(device.Location, observer.Location) < util.distanceBetweenPoints(nearest.Location, observer.Location)){
+           if(device != observer && device.location != null &&
+                        util.distanceBetweenPoints(device.location, observer.location) < util.distanceBetweenPoints(nearest.location, observer.location)){
               nearest = device;
            }
         });

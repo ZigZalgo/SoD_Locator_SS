@@ -7,45 +7,45 @@ var assert = chai.assert;
 // makePerson
 describe("factory.makePerson()", function(){
     // regular make case
-    it("should return 'Person' if passed 'Person.ID' and 'Person.Location'", function(){
+    it("should return 'Person' if passed 'Person.ID' and 'Person.location'", function(){
         var Person = {ID: 5,
-            Location: {X: 10, Y: 20, Z: 30},
-            Orientation: null,
-            OwnedDeviceID: null,
-            TrackedBy: []
+            location: {X: 10, Y: 20, Z: 30},
+            orientation: null,
+            ownedDeviceID: null,
+            trackedBy: []
         };
-        assert.deepEqual(factory.makePerson(Person.ID, Person.Location), Person)
+        assert.deepEqual(factory.makePerson(Person.ID, Person.location), Person)
     });
 
     // null id case
-    it("should return 'Person' if passed 'null' and 'Person.Location'", function(){
+    it("should return 'Person' if passed 'null' and 'Person.location'", function(){
         var Person = {ID: null,
-            Location: {X: 10, Y: 20, Z: 30},
-            Orientation: null,
-            OwnedDeviceID: null,
-            TrackedBy: []
+            location: {X: 10, Y: 20, Z: 30},
+            orientation: null,
+            ownedDeviceID: null,
+            trackedBy: []
         };
-        assert.deepEqual(factory.makePerson(Person.ID, Person.Location), Person)
+        assert.deepEqual(factory.makePerson(Person.ID, Person.location), Person)
     });
 
     // null location case 1
     it("should return 'false' if passed 'Person.ID' and 'null'", function(){
         var Person = {ID: 5,
-            Location: null,
-            Orientation: null,
-            OwnedDeviceID: null,
-            TrackedBy: []
+            location: null,
+            orientation: null,
+            ownedDeviceID: null,
+            trackedBy: []
         };
-        assert.deepEqual(factory.makePerson(Person.ID, Person.Location), false)
+        assert.deepEqual(factory.makePerson(Person.ID, Person.location), false)
     });
 
     // null location case 2
     it("should return 'false' if passed 'Person.ID' and '{X: 10, Y: null, Z: 30}'", function(){
         var Person = {ID: 5,
-            Location: {X: 10, Y: null, Z: 30},
-            Orientation: null,
-            OwnedDeviceID: null,
-            TrackedBy: []
+            location: {X: 10, Y: null, Z: 30},
+            orientation: null,
+            ownedDeviceID: null,
+            trackedBy: []
         };
         assert.equal(factory.makePerson(Person.ID, {X: 10, Y: null, Z: 30}), false)
     });
@@ -56,8 +56,8 @@ describe("factory.makeDevice()", function(){
     // redundant test case... just checks to see it actually makes an object with the properties of a Device
     it("should return 'Device' if passed ''", function(){
         var Device = {ID: null,
-                    Location: {X: null, Y: null, Z: null},
-                    Orientation: null,
+                    location: {X: null, Y: null, Z: null},
+                    orientation: null,
                     FOV: util.DEFAULT_FIELD_OF_VIEW,
                     Height: null,
                     Width: null,

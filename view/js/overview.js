@@ -132,9 +132,9 @@ function updateCanvasWithPeople(){
 
         for(var key in data){
             if(data.hasOwnProperty(key)){
-                var xInMeters = data[key].Location.X*majorGridLineWidth;
-                var yInMeters = data[key].Location.Y*majorGridLineWidth;
-                var zInMeters = data[key].Location.Z*majorGridLineWidth;
+                var xInMeters = data[key].location.X*majorGridLineWidth;
+                var yInMeters = data[key].location.Y*majorGridLineWidth;
+                var zInMeters = data[key].location.Z*majorGridLineWidth;
                 ctx.fillStyle = "#c82124"; //red
                 ctx.beginPath();
                 ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
@@ -207,13 +207,13 @@ function updateContentWithObjects(){
                         '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
                         +'</td>' +
                         '<td>' +
-                        '('+Math.round(data[key].Location.X*ROUND_RATIO)/ROUND_RATIO+', '
-                        +Math.round(data[key].Location.Y*ROUND_RATIO)/ROUND_RATIO+', '
-                        +Math.round(data[key].Location.Z*ROUND_RATIO)/ROUND_RATIO+')'
-                        + //JSON.stringify(person.Location)
-                        '<td>' + data[key].PairingState + '</td>' +
-                        '<td>' + data[key].OwnedDeviceID + '</td>' +
-                        '<td>' + data[key].Orientation + '</td>' +
+                        '('+Math.round(data[key].location.X*ROUND_RATIO)/ROUND_RATIO+', '
+                        +Math.round(data[key].location.Y*ROUND_RATIO)/ROUND_RATIO+', '
+                        +Math.round(data[key].location.Z*ROUND_RATIO)/ROUND_RATIO+')'
+                        + //JSON.stringify(person.location)
+                        '<td>' + data[key].pairingState + '</td>' +
+                        '<td>' + data[key].ownedDeviceID + '</td>' +
+                        '<td>' + data[key].orientation + '</td>' +
                         //'<td>' + Math.round(data[key].orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
                         //'<td>' + Math.round(data[key].distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
                         '</tr>')
@@ -223,11 +223,11 @@ function updateContentWithObjects(){
 
         $('#people').html('<legend>People</legend><table style="width:100%"><tr>' +
             '<th style="width:100px">uniquePersonID</th>' +
-            '<th>Location</th>' +
+            '<th>location</th>' +
             '<th style="width:100px">Pairing State</th>' +
             '<th style="width:100px">Paired Device</th>' +
-            '<th style="width:100px">Orientation</th>' +
-            //'<th style="width:100px">Orientation to Sensor</th>' +
+            '<th style="width:100px">orientation</th>' +
+            //'<th style="width:100px">orientation to Sensor</th>' +
             //'<th style="width:100px">Distance to Sensor</th>' +
             '</tr>' + htmlString + '</table>')
     });
@@ -248,7 +248,7 @@ function updateContentWithObjects(){
     io.emit('getPeopleFromServer',{},function(data){
         unpaired_people = {};
         for(var key in data){
-            if(data[key].PairingState == 'unpaired'){
+            if(data[key].pairingState == 'unpaired'){
                 unpaired_people[key] = data[key];
                 //unpaired_people.push({index:key,personID:firstKey(data[key].ID)});//data[key].ID);
             }
@@ -277,16 +277,16 @@ function updateContentWithObjects(){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
                 htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+
-                    '<td>('+data[key].Location.X+', '+data[key].Location.Y+', '+data[key].Location.Z+')</td>'+
-                    '<td>'+Math.round(data[key].Orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].PairingState)+'</td>'+
-                    '<td>'+data[key].OwnerID+'</td>'+
+                    '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
+                    '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
+                    '<td>'+data[key].ownerID+'</td>'+
                     '</tr>'
             }
         }
 
         $('#devices').html('<legend>Devices</legend>' +
             '<table id = "device_table">' +
-            '<tr><th>uniqueDeviceID</th><th>Location</th> <th>Orientation</th>'+
+            '<tr><th>uniqueDeviceID</th><th>location</th> <th>orientation</th>'+
             '<th>Pairing State</th>'+
             '<th>OwnerID</th>'+
             '</tr>'+

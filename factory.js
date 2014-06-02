@@ -6,11 +6,11 @@ var uniqueDeviceCounter = 0;
 // TODO: TEST again, modified...
 function Person(){
     this.ID = null;
-    this.Location = null;
-    this.Orientation = null;
+    this.location = null;
+    this.orientation = null;
     this.orientationToKinect=null;
-    this.OwnedDeviceID = null;
-    this.TrackedBy = [];
+    this.ownedDeviceID = null;
+    this.trackedBy = [];
 }
 
 function Person(id, location, socket){
@@ -22,15 +22,15 @@ function Person(id, location, socket){
         this.ID = {};
         this.ID[id] = socket.id;
         this.uniquePersonID = uniquePersonCounter++;
-        this.Location = location;
-        this.Location.X = location.X.toFixed(3);
-        this.Location.Y = location.Y.toFixed(3);
-        this.Location.Z = location.Z.toFixed(3);
-        this.Orientation = null;
-        this.OwnedDeviceID = null;
-        this.PairingState = "unpaired";
-        this.LastUpdatedBy = socket.id;
-        this.LastUpdated = new Date();
+        this.location = location;
+        this.location.X = location.X.toFixed(3);
+        this.location.Y = location.Y.toFixed(3);
+        this.location.Z = location.Z.toFixed(3);
+        this.orientation = null;
+        this.ownedDeviceID = null;
+        this.pairingState = "unpaired";
+        this.lastUpdatedBy = socket.id;
+        this.lastUpdated = new Date();
     }
     catch(err){
         return false;
@@ -50,7 +50,7 @@ function Sensor(socket){
         this.socketID = socket.id;
         this.sensorType = "";
         this.FOV = 0;
-        this.LastUpdated = new Date();
+        this.lastUpdated = new Date();
         this.calibration = {Rotation: null, TransformX: null, TransformY: null, StartingLocation: {X: 0, Y: 0, Z: 0}};
         this.isCalibrated = false;
     }
@@ -68,16 +68,16 @@ function Device(socket){
         this.socketID = socket.id;
         this.uniqueDeviceID = uniqueDeviceCounter++;
         this.deviceType = "Not specified";
-        this.Location = {X: null, Y: null, Z:null};
-        this.Orientation = null;
+        this.location = {X: null, Y: null, Z:null};
+        this.orientation = null;
         this.FOV = util.DEFAULT_FIELD_OF_VIEW;
-        this.Height = null;
-        this.Width =  null;
-        this.OwnerID = null;
-        this.PairingState = "unpaired";
-        this.IntersectionPoint = {X: 0, Y: 0};
-        this.LastUpdated = new Date();
-        this.Stationary = false;
+        this.height = null;
+        this.width =  null;
+        this.ownerID = null;
+        this.pairingState = "unpaired";
+        this.intersectionPoint = {X: 0, Y: 0};
+        this.lastUpdated = new Date();
+        this.stationary = false;
     }
     catch(err){
     }

@@ -309,7 +309,7 @@ exports.getCornersOfShape = function(device){
 	var returnPoints = [];
 	var intPoints = [];
 	try{
-		var deviceLocation = device.Location;
+		var deviceLocation = device.location;
 		
 		intPoints.push(factory.make2DPoint(deviceLocation.X + device.Width / 2, deviceLocation.Z + device.Height / 2));
 		intPoints.push(factory.make2DPoint(deviceLocation.X + device.Width / 2, deviceLocation.Z - device.Height / 2));
@@ -325,12 +325,12 @@ exports.getCornersOfShape = function(device){
 
 	var angle = 0; 
 	
-	if(device.Orientation != null){
+	if(device.orientation != null){
 		// This will help when we consider sending to moving devices that change its 
 		// orientation dynamically. The choice of 270 is for consistency with the 
 		// current code that handles the special case of a tabletop facing away 
 		// from the kinect
-		angle = device.Orientation - 90;
+		angle = device.orientation - 90;
 		angle = angle * DEGREES_TO_RADIANS;		
 	}
 	

@@ -44,7 +44,7 @@ exports.handleRequest = function (socket){
 
     socket.on('updateOrientation', function (request) {
         var device = new factory.Device(socket);
-        device.Orientation = request.orientation;
+        device.orientation = request.orientation;
         locator.updateDeviceOrientation(device);
     });
 

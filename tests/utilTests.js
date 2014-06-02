@@ -273,7 +273,7 @@ describe("util.getCornersOfShape()", function(){
 		var device = factory.makeDevice();
 		device.Width = 2;
 		device.Height = 2;
-		device.Location = {X: 0, Y: 0, Z:0};
+		device.location = {X: 0, Y: 0, Z:0};
 		
 		var expected = [{X: 1, Y: 1},{X: 1, Y: -1},{X: -1, Y: -1},{X: -1, Y: 1}];
 		
@@ -285,8 +285,8 @@ describe("util.getCornersOfShape()", function(){
 		var device = factory.makeDevice();
 		device.Width = 1;
 		device.Height = 2;
-		device.Location = {X: 3, Y: 0, Z:4};
-		device.Orientation = 90;
+		device.location = {X: 3, Y: 0, Z:4};
+		device.orientation = 90;
 		
 		var expected = [{X: 3.5, Y: 5},{X: 3.5, Y: 3},{X: 2.5, Y: 3},{X: 2.5, Y: 5}];
 		
@@ -298,8 +298,8 @@ describe("util.getCornersOfShape()", function(){
 		var device = factory.makeDevice();
 		device.Width = 1;
 		device.Height = 2;
-		device.Location = {X: 3, Y: 0, Z:4};
-		device.Orientation = 0;
+		device.location = {X: 3, Y: 0, Z:4};
+		device.orientation = 0;
 		
 		var expected = [{X: 4, Y: 3.5},{X: 2, Y: 3.5},{X: 2, Y: 4.5},{X: 4, Y: 4.5}];
 		
@@ -309,7 +309,7 @@ describe("util.getCornersOfShape()", function(){
 	// device without location case
 	it("should return 'expected', if passed 'device'", function(){	
 		var device = factory.makeDevice();
-		device.Location = null;		
+		device.location = null;
 		var expected = [];		
 		assert.deepEqual(util.getCornersOfShape(device), expected);		
 	});	
@@ -317,7 +317,7 @@ describe("util.getCornersOfShape()", function(){
 	// width & height not specified case
 	it("should return 'expected', if passed 'device'", function(){	
 		var device = factory.makeDevice();
-		device.Location = {X: 3, Y: 0, Z:4};		
+		device.location = {X: 3, Y: 0, Z:4};
 		var expected = [{X: 3, Y: 4},{X: 3, Y: 4},{X: 3, Y: 4},{X: 3, Y: 4}];		
 		assert.deepEqual(util.getCornersOfShape(device), expected);		
 	});		
@@ -330,7 +330,7 @@ describe("util.getLinesOfShape()", function(){
 		var device = factory.makeDevice();
 		device.Width = 2;
 		device.Height = 2;
-		device.Location = {X: 0, Y: 0, Z:0};
+		device.location = {X: 0, Y: 0, Z:0};
 		
 		var expected = [];
 		expected.push(factory.makeLineUsingPoints({X: 1, Y: 1},{X: 1, Y: -1}));		
@@ -344,7 +344,7 @@ describe("util.getLinesOfShape()", function(){
 	// device without location case
 	it("should return 'expected', if passed 'device'", function(){	
 		var device = factory.makeDevice();
-		device.Location = null;		
+		device.location = null;
 		var expected = [];		
 		assert.deepEqual(util.getLinesOfShape(device), expected);		
 	});
@@ -352,7 +352,7 @@ describe("util.getLinesOfShape()", function(){
 	// width & height not specified case
 	it("should return 'expected', if passed 'device'", function(){	
 		var device = factory.makeDevice();
-		device.Location = {X: 3, Y: 0, Z:4};		
+		device.location = {X: 3, Y: 0, Z:4};
 		
 		var expected = [];		
 		expected.push(factory.makeLineUsingPoints({X: 3, Y: 4},{X: 3, Y: 4}));
@@ -368,8 +368,8 @@ describe("util.getLinesOfShape()", function(){
 		var device = factory.makeDevice();
 		device.Width = 1;
 		device.Height = 2;
-		device.Location = {X: 3, Y: 0, Z:4};
-		device.Orientation = 0;
+		device.location = {X: 3, Y: 0, Z:4};
+		device.orientation = 0;
 		
 		var expected = [];
 		expected.push(factory.makeLineUsingPoints({X: 4, Y: 3.5}, {X: 2, Y: 3.5}));
@@ -389,7 +389,7 @@ describe("util.GetRatioPositionOnScreen()", function(){
 		var device = factory.makeDevice();
 		device.Width = 2;
 		device.Height = 2;
-		device.Location = {X: 0, Y: 0, Z:0};
+		device.location = {X: 0, Y: 0, Z:0};
 						
 		assert.deepEqual(util.GetRatioPositionOnScreen(device, intersection), {X: 0.5, Y: 0});		
 	});
@@ -400,7 +400,7 @@ describe("util.GetRatioPositionOnScreen()", function(){
 		var device = factory.makeDevice();
 		device.Width = 2;
 		device.Height = 2;
-		device.Location = null;
+		device.location = null;
 						
 		assert.deepEqual(util.GetRatioPositionOnScreen(device, intersection), {X: -1, Y: -1});		
 	});	
@@ -411,7 +411,7 @@ describe("util.GetRatioPositionOnScreen()", function(){
 		var device = factory.makeDevice();
 		device.Width = 2;
 		device.Height = 2;
-		device.Location = {X: 0, Y: 0, Z:0};
+		device.location = {X: 0, Y: 0, Z:0};
 						
 		assert.deepEqual(util.GetRatioPositionOnScreen(device, intersection), {X: 1, Y: 0});		
 	});
@@ -422,7 +422,7 @@ describe("util.GetRatioPositionOnScreen()", function(){
 		var device = factory.makeDevice();
 		device.Width = 2;
 		device.Height = 2;
-		device.Location = {X: 0, Y: 0, Z:0};
+		device.location = {X: 0, Y: 0, Z:0};
 						
 		assert.deepEqual(util.GetRatioPositionOnScreen(device, intersection), {X: -1, Y: -1});		
 	});	
@@ -433,7 +433,7 @@ describe("util.GetRatioPositionOnScreen()", function(){
 		var device = factory.makeDevice();
 		device.Width = 2;
 		device.Height = 2;
-		device.Location = {X: 0, Y: 0, Z:0};				
+		device.location = {X: 0, Y: 0, Z:0};
 		
 		assert.deepEqual(util.GetRatioPositionOnScreen(device, intersection), {X: 0, Y: 0.09999999999999998});		
 	});
