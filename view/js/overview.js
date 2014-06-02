@@ -29,7 +29,6 @@ function drawGrid() {
 
     return;
 }
-
 function drawGridLines(cnv, lineOptions) {
     var iWidth = cnv.width;
     var iHeight = cnv.height;
@@ -75,39 +74,6 @@ function shiftYToGridOrigin(z){
     return (z + ((document.getElementById("cnv").height)/2));
 }
 
-function updateCanvasWithSensors(){
-    var cSensors = document.getElementById("cnvSensors");
-    var ctxSensors = cSensors.getContext("2d");
-    ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
-    io.emit('getSensorsFromServer', {}, function(data){
-        for(var key in data){
-            if(data.hasOwnProperty(key)){
-                var sensorX = 0; //get this from sensor list later on
-                var sensorY = 0; //get this from sensor list later on
-                var sensorRotationAngle = 0; //get this from sensor list later on
-                var sensorFOV = data[key].FOV; //get this from sensor list later on
-
-                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)", data[key].FOV);
-
-                //draw circle for sensor on visualizer
-                ctxSensors.beginPath();
-
-                ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
-                ctxSensors.closePath();
-                ctxSensors.lineWidth = 1;
-                ctxSensors.fillStyle = '#3370d4';
-                ctxSensors.fill();
-                ctxSensors.strokeStyle = '#292929';
-                ctxSensors.stroke();
-
-                ctxSensors.font = "20px Arial";
-                ctxSensors.fillStyle = '#ffffff';
-                ctxSensors.fillText('K'+Object.keys(data).indexOf(key),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
-            }
-        }
-    });
-}
-
 function drawView(context, X, Y, rangeInMM, fillStyle, FOV){
     var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
     var positionX = shiftXToGridOrigin(X);
@@ -121,31 +87,6 @@ function drawView(context, X, Y, rangeInMM, fillStyle, FOV){
     context.lineTo(positionX, positionY);
     context.closePath();
     context.fill();
-}
-
-function updateCanvasWithPeople(){
-    io.emit('getPeopleFromServer', {}, function(data){
-        //draw kinect position (0,0) for single kinect
-        var c = document.getElementById("cnv");
-        var ctx = c.getContext("2d");
-        ctx.clearRect(0, 0, c.width, c.height);
-
-        for(var key in data){
-            if(data.hasOwnProperty(key)){
-                var xInMeters = data[key].location.X*majorGridLineWidth;
-                var yInMeters = data[key].location.Y*majorGridLineWidth;
-                var zInMeters = data[key].location.Z*majorGridLineWidth;
-                ctx.fillStyle = "#c82124"; //red
-                ctx.beginPath();
-                ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
-                ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
-                ctx.fill();
-                ctx.fillStyle = "#ffffff"; //white
-                ctx.font = "20px Arial";
-                ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
-            }
-        }
-    });
 }
 
 function printPersonID(ID)
@@ -180,8 +121,34 @@ function updateContentWithObjects(){
 
     io.emit('getSensorsFromServer', {}, function(data){
         var htmlString = ""
+        var cSensors = document.getElementById("cnvSensors");
+        var ctxSensors = cSensors.getContext("2d");
+        ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
         for(var key in data){
             if(data.hasOwnProperty(key)){
+                var sensorX = 0; //get this from sensor list later on
+                var sensorY = 0; //get this from sensor list later on
+                var sensorRotationAngle = 0; //get this from sensor list later on
+                var sensorFOV = data[key].FOV; //get this from sensor list later on
+
+                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)", data[key].FOV);
+
+                //draw circle for sensor on visualizer
+                ctxSensors.beginPath();
+
+                ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
+                ctxSensors.closePath();
+                ctxSensors.lineWidth = 1;
+                ctxSensors.fillStyle = '#3370d4';
+                ctxSensors.fill();
+                ctxSensors.strokeStyle = '#292929';
+                ctxSensors.stroke();
+
+                ctxSensors.font = "20px Arial";
+                ctxSensors.fillStyle = '#ffffff';
+                ctxSensors.fillText('K'+Object.keys(data).indexOf(key),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+
+
                 htmlString += ('<tr>' +
                     '<td>' + data[key].sensorType + '</td>' +
                     '<td>' + data[key].socketID + '</td>' +
@@ -200,8 +167,29 @@ function updateContentWithObjects(){
 
     io.emit('getPeopleFromServer', {}, function(data){
         var htmlString = ""
+        var c = document.getElementById("cnv");
+        var ctx = c.getContext("2d");
+        var ctx1 = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
         for(var key in data){
             if(data.hasOwnProperty(key)){
+                var xInMeters = data[key].location.X*majorGridLineWidth;
+                var yInMeters = data[key].location.Y*majorGridLineWidth;
+                var zInMeters = data[key].location.Z*majorGridLineWidth;
+                ctx.beginPath();
+                ctx.fillStyle = "#c82124"; //red
+                ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
+                ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
+                ctx.fill();
+                if(data[key].pairingState == 'paired'){
+                    //console.log("Life is tough bro!");
+                    ctx.strokeStyle = "#2cd72A";
+                    ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = "#ffffff"; //white
+                ctx.font = "20px Arial";
+                ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
                 if(!jQuery.isEmptyObject(data[key].ID)){
                     htmlString += ('<tr>' +
                         '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
@@ -214,8 +202,6 @@ function updateContentWithObjects(){
                         '<td>' + data[key].pairingState + '</td>' +
                         '<td>' + data[key].ownedDeviceID + '</td>' +
                         '<td>' + data[key].orientation + '</td>' +
-                        //'<td>' + Math.round(data[key].orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
-                        //'<td>' + Math.round(data[key].distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
                         '</tr>')
                 }
             }
@@ -273,6 +259,8 @@ function updateContentWithObjects(){
             }
         }
 
+
+
         for(var key in data){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
@@ -303,11 +291,11 @@ io.on("webMessageEvent",function(message){
 io.on("connect", function(){
     io.emit("registerWebClient", {});
 });
-
+/*
 io.on("refreshWebClientSensors", function(){
     updateCanvasWithSensors();
 });
-
+*/
 $(function(){
     $('#getPoints').click(function(){ /*listening to the button click using Jquery listener*/
         io.emit('calibrateSensors', {}, function(){
@@ -317,8 +305,8 @@ $(function(){
     });
 });
 io.emit("registerWebClient", {});
-setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
-setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for sensors, people, and devices and display to the side
+//setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
+setInterval(function() {updateContentWithObjects(); }, 200); //poll server for sensors, people, and devices and display to the side
 
 
 
