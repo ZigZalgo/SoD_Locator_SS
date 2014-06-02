@@ -42,7 +42,7 @@ function getPosition(canvasID, sid, event)
     if(canvasID == "cnvSensorOne"){
         if(sensorOnePoints.length < 2 && z > 0){
             sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
-            $('.').html("<span class='green_status'>Point saved!</span>");
+            $('.status').html("<span class='green_status'>Point saved!</span>");
             $('.green_status').fadeIn(600);
         }else if(sensorOnePoints.length >= 2){
             $('.status').html("<span class='red_status'>Enough Points.</span>");

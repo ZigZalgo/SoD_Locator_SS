@@ -215,8 +215,8 @@ function updateContentWithObjects(){
                         '<td>' + data[key].PairingState + '</td>' +
                         '<td>' + data[key].OwnedDeviceID + '</td>' +
                         '<td>' + data[key].Orientation + '</td>' +
-                        '<td>' + Math.round(data[key].orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
-                        '<td>' + Math.round(data[key].distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
+                        //'<td>' + Math.round(data[key].orientationToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
+                        //'<td>' + Math.round(data[key].distanceToKinect*ROUND_RATIO)/ROUND_RATIO + '</td>' +
                         '</tr>')
                 }
             }
@@ -244,7 +244,6 @@ function updateContentWithObjects(){
                 break;
             }
         }
-        //return first;
     }
 
     io.emit('getPeopleFromServer',{},function(data){
