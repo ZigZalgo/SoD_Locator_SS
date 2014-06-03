@@ -81,7 +81,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[key].location.Z = receivedPerson.location.Z.toFixed(3);
                         persons[key].lastUpdated = new Date();
                         if(persons[key].ownedDeviceID != null){
-                            console.log("Updating person's device?")
+                            //console.log("Updating person's device?")
                             devices[persons[key].ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
@@ -220,9 +220,11 @@ exports.updateDeviceOrientation = function(device){
         try{
             devices[device.socketID].orientation = device.orientation;
             devices[device.socketID].lastUpdated = new Date();
+            console.log("OwnerID: "+ devices[device.socketID].OwnerID + "\tdevice.orientation: "+ device.orientation);
+            if(devices[device.socketID].ownerID != null){
+                //console.log("OwnerID: "+ devices[device.socketID].OwnerID + "\tdevice.orientation: "+ device.orientation);
+                persons[devices[device.socketID].ownerID].orientation = device.orientation;
 
-            if(devices[device.socketID].OwnerID != null){
-                persons[devices[device.socketID].OwnerID].orientation = device.orientation;
             }
         }
         catch(err){

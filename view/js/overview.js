@@ -74,12 +74,12 @@ function shiftYToGridOrigin(z){
     return (z + ((document.getElementById("cnv").height)/2));
 }
 
-function drawView(context, X, Y, rangeInMM, fillStyle, FOV){
+function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
     var positionX = shiftXToGridOrigin(X);
     var positionY = shiftXToGridOrigin(Y);
-    var startAngle = (90-(FOV/2))*Math.PI/180;
-    var endAngle = (90+(FOV/2))*Math.PI/180;
+    var startAngle = (orientation-(FOV/2))*Math.PI/180;
+    var endAngle = (orientation+(FOV/2))*Math.PI/180;
     var antiClockwise = false;
     context.fillStyle = fillStyle;
     context.beginPath();
@@ -102,13 +102,15 @@ function printPersonID(ID)
     return htmlString;
 }
 
-function drawStationaryDevice(context, X, Y, width, height){
+function drawStationaryDevice(contextStationary, X, Y, width, height){
+
+
     var xInMeters = X*majorGridLineWidth;
     var yInMeters = Y*majorGridLineWidth;
-    context.beginPath();
-    context.rect(shiftXToGridOrigin(xInMeters), shiftYToGridOrigin(yInMeters), width, height);
-    context.fillStyle = "rgba(0, 255, 0, 0.2)";
-    context.fill();
+    contextStationary.beginPath();
+    contextStationary.rect(shiftXToGridOrigin(xInMeters), shiftYToGridOrigin(yInMeters), width, height);
+    contextStationary.fillStyle = "rgba(0, 255, 0, 0.2)";
+    contextStationary.fill();
     //context.lineWidth = 7;
     //context.strokeStyle = 'black';
     //context.stroke();
@@ -144,7 +146,7 @@ function updateContentWithObjects(){
                 var sensorRotationAngle = 0; //get this from sensor list later on
                 var sensorFOV = data[key].FOV; //get this from sensor list later on
 
-                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)", data[key].FOV);
+                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)", 90,data[key].FOV);
 
                 //draw circle for sensor on visualizer
                 ctxSensors.beginPath();
@@ -199,6 +201,10 @@ function updateContentWithObjects(){
                         ctx.strokeStyle = "#2cd72A";
                         ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
                         ctx.stroke();
+                    }
+
+                    if(data[key].orientation != null){
+                        drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",data[key].orientation, 45); // manually set the range of view to 1000 and FOV of a person to 45 for now
                     }
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "20px Arial";
@@ -282,9 +288,9 @@ function updateContentWithObjects(){
                     '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
                     '<td>'+data[key].ownerID+'</td>'+
                     '</tr>'
-
-                if(data[key].stationary = true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
-                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
+                var ctxStationary = document.getElementById('cnvStationary').getContext('2d');
+                if(data[key].stationary == true && (data[key].location.X) != null && data[key].location.Y != null && data[key].location.Z != null){
+                    drawStationaryDevice(ctxStationary, data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
                 }
             }
         }
@@ -314,7 +320,7 @@ io.on("refreshStationaryLayer",function(){
     io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
         for(var key in data){
             if(data.hasOwnProperty(key)){
-               if(data[key].stationary = true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
+               if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
                     drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
                 }
             }
