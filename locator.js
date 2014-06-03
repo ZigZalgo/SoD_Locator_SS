@@ -170,28 +170,34 @@ exports.setPairingState = function(deviceSocketID){
 
 exports.unpairDevice = function(deviceSocketID){
     if(devices[deviceSocketID] != undefined){
-        if(devices[deviceSocketID].OwnerID != null){
+        if(devices[deviceSocketID].ownerID != null){
             try{
                 persons[devices[deviceSocketID].OwnerID].pairingState = "unpaired";
-                persons[devices[deviceSocketID].OwnerID].OwnedDeviceID = null;
+                persons[devices[deviceSocketID].OwnerID].ownedDeviceID = null;
                 persons[devices[deviceSocketID].OwnerID].orientation = null;
             }
             catch(err){
                 console.log(err + "\tError unpairing device > removing person associations > most likely person does not exist?")
             }
-
         }
         try{
             devices[deviceSocketID].pairingState = "unpaired";
             devices[deviceSocketID].location.X = null;
             devices[deviceSocketID].location.Y = null;
             devices[deviceSocketID].location.Z = null;
-            devices[deviceSocketID].OwnerID = null;
+            devices[deviceSocketID].ownerID = null;
         }
         catch(err){
             console.log(err + "\tError resetting pairing state of device, possibly device is not tracked anymore?")
         }
 
+    }
+}
+exports.unpairAllDevices = function(){
+    for(var key in devices){
+        if(devices.hasOwnProperty(key)){
+            locator.unpairDevice(key);
+        }
     }
 }
 
@@ -214,27 +220,28 @@ exports.printDevices = function(){
 
 // TODO: implement!
 // TODO: test!
-exports.updateDeviceOrientation = function(device){
-    if(devices[device.socketID] != undefined){
+exports.updateDeviceOrientation = function(orientation, socket){
+    if(devices[socket.id] != undefined){
         try{
-            devices[device.socketID].orientation = device.orientation;
-            devices[device.socketID].lastUpdated = new Date();
-            if(devices[device.socketID].ownerID != null){
-                persons[devices[device.socketID].ownerID].orientation = device.orientation;
-
+            devices[socket.id].orientation = orientation;
+            devices[socket.id].lastUpdated = new Date();
+            if(devices[socket.id].ownerID != null){
+                persons[devices[socket.id].ownerID].orientation = orientation;
             }
         }
         catch(err){
             //if null or cannot read for some other reason... remove null
-            if(devices[device.socketID] == null){
-                delete devices[device.socketID]
+            if(devices[socket.id] == null){
+                delete devices[socket.id]
             }
         }
     }
     else{
-        if(device.orientation != undefined){
+        if(orientation != undefined){
+            var device = new factory.Device(socket);
+            device.orientation = orientation;
             device.lastUpdated = new Date();
-            devices[device.socketID] = device;
+            devices[socket.id] = device;
         }
     }
 }
@@ -242,15 +249,32 @@ exports.updateDeviceOrientation = function(device){
 exports.unpairAllPeople = function(){
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
-            try{
-                if(persons[key] != null){
-                    persons[key].pairingState = 'unpaired';
-                    persons[key].OwnedDeviceID = null;
-                }
-            }
-            catch(err){
-                console.log("Error unpairing all people: " + err);
-            }
+            locator.unpairPerson(key);
+        }
+
+    }
+}
+
+exports.unpairPerson = function(socketID){
+    try{
+        if(persons[socketID] != null){
+            console.log("Unpairing person with ID: " + socketID);
+            persons[socketID].pairingState = 'unpaired';
+            persons[socketID].ownedDeviceID = null;
+            persons[socketID].orientation = null;
+        }
+    }
+    catch(err){
+        console.log("Error unpairing persion: " + err);
+    }
+    if(persons[socketID].ownedDeviceID != null){
+        try{
+            devices[persons[socketID].ownedDeviceID].location = {X: null, Y: null, Z: null};
+            devices[persons[socketID].ownedDeviceID].pairingState = "unpaired";
+            devices[persons[socketID].ownedDeviceID].ownerID = null;
+        }
+        catch(err){
+            console.log(err + "\tError unpairing persons > removing device associations > most likely device does not exist?")
         }
 
     }
@@ -335,6 +359,7 @@ exports.registerDevice = function(socket, deviceInfo){
         var device = new factory.Device(socket);
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
+        device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
         if(deviceInfo.stationary == true){
             console.log("stationary device registered")

@@ -68,6 +68,8 @@ io.sockets.on('connection', function (socket) {
                     locator.cleanUpDevice(socket.id);
                     break;
                 default:
+                    if(locator.devices[socket.id] != null) locator.cleanUpDevice(socket.id);
+                    if(locator.sensors[socket.id] != null) locator.cleanUpSensor(socket.id);
                     break;
             }
             delete clients[socket.id];

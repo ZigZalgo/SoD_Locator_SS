@@ -43,18 +43,20 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('updateOrientation', function (request) {
-        var device = new factory.Device(socket);
-        device.orientation = request.orientation;
-        locator.updateDeviceOrientation(device);
+        locator.updateDeviceOrientation(request.orientation, socket);
     });
 
     socket.on('unpairDevice', function (request) {
         locator.unpairDevice(socket.id, request.personID);
     });
 
+    socket.on('unpairAllDevices', function (request) {
+        locator.unpairAllDevices();
+    });
+
     socket.on('unpairAllPeople', function (request, fn) {
         locator.unpairAllPeople();
-        fn(({"status": 'success'}));
+        fn({"status": 'success'});
     });
 
     socket.on('getPeopleFromServer', function (request, fn) {
@@ -87,7 +89,6 @@ exports.handleRequest = function (socket){
     socket.on('forcePairRequest', function (request, fn) {
         if(request.deviceSocketID != undefined){
             locator.pairDevice(request.deviceSocketID, request.uniquePersonID, socket);
-            console.log("UNIQUEPERSONID: " + request.uniquePersonID)
         }
         else{
             locator.pairDevice(socket.id, request.uniquePersonID, socket);
@@ -98,7 +99,6 @@ exports.handleRequest = function (socket){
 
     socket.on('broadcast', function (request, fn) {
         socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});
-        console.log("GOT A BROADCAST, relaying to: " + request.listener);
     });
 
     socket.on('personUpdate', function(persons, fn){
