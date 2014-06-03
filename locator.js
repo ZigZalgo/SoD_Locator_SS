@@ -219,9 +219,7 @@ exports.updateDeviceOrientation = function(device){
         try{
             devices[device.socketID].orientation = device.orientation;
             devices[device.socketID].lastUpdated = new Date();
-            //console.log("OwnerID: "+ devices[device.socketID].OwnerID + "\tdevice.orientation: "+ device.orientation);
             if(devices[device.socketID].ownerID != null){
-                //console.log("OwnerID: "+ devices[device.socketID].OwnerID + "\tdevice.orientation: "+ device.orientation);
                 persons[devices[device.socketID].ownerID].orientation = device.orientation;
 
             }

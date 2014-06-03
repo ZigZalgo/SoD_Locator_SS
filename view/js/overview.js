@@ -3,6 +3,8 @@ var cameraWidthInPixels = 480;
 var cameraFOV = 57;
 var minorGridLineWidth = 10;
 var majorGridLineWidth = 50;
+var RADIANS_TO_DEGREES = 180 / Math.PI;
+var DEGREES_TO_RADIANS = Math.PI / 180;
 var pixelsPerMeter = majorGridLineWidth;
 var ROUND_RATIO  = 10;
 var unpaired_people = {};
@@ -78,9 +80,10 @@ function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
     var positionX = shiftXToGridOrigin(X);
     var positionY = shiftXToGridOrigin(Y);
-    var startAngle = (orientation-(FOV/2))*Math.PI/180;
-    var endAngle = (orientation+(FOV/2))*Math.PI/180;
-    var antiClockwise = false;
+    var actualOrientation = 360 - orientation;
+    var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
+    var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
+    var antiClockwise = true;
     context.fillStyle = fillStyle;
     context.beginPath();
     context.arc(positionX, positionY, radius, startAngle, endAngle, antiClockwise);
@@ -159,7 +162,7 @@ function updateContentWithObjects(){
                 var sensorRotationAngle = 0; //get this from sensor list later on
                 var sensorFOV = data[key].FOV; //get this from sensor list later on
 
-                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)",90, data[key].FOV);
+                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)",270, data[key].FOV);
 
                 //draw circle for sensor on visualizer
                 ctxSensors.beginPath();
@@ -193,6 +196,13 @@ function updateContentWithObjects(){
             '</tr>' + htmlString + '</table>')
     });
 
+
+    function getPersonOrientation(personX,personZ){
+        var angleTowardsKinect = Math.atan2(personX,personZ);
+        var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+
+        return returnDegree;
+    }
     io.emit('getPeopleFromServer', {}, function(data){
         var htmlString = ""
         var c = document.getElementById("cnv");
@@ -215,8 +225,12 @@ function updateContentWithObjects(){
                         ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
                         ctx.stroke();
                     }
+
                 if(data[key].orientation != null){
-                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",data[key].orientation, 45); // manually set the range of view to 1000 and FOV of a person to 45 for now
+                    var orientationToSensor = getPersonOrientation(data[key].location.X,data[key].location.Z);
+                    //console.log(" personOrientationToSensor: " + orientationToSensor);
+                    console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor);
+                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",data[key].orientation+orientationToSensor+90, 30); // manually set the range of view to 1000 and FOV of a person to 45 for now
                 }
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "20px Arial";

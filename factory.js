@@ -53,6 +53,7 @@ function Sensor(socket){
         this.lastUpdated = new Date();
         this.calibration = {Rotation: null, TransformX: null, TransformY: null, StartingLocation: {X: 0, Y: 0, Z: 0}};
         this.isCalibrated = false;
+
     }
     catch(err){
         return false;
@@ -82,7 +83,6 @@ function Device(socket){
     catch(err){
     }
 }
-
 Device.prototype = {
 
 }
