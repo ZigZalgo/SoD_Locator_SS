@@ -14,14 +14,14 @@
     // calibration section:
     $(document).ready(function(){
         $("#calibration_flip").click(function(){
-            $("section#canvas").fadeOut("fast");
-            $("section#overview").fadeOut("fast");
+            $("section#canvas").hide();
+            $("section#overview").hide();
             $("#calibration_section").fadeIn("fast");
             $('.status').html('<span class="normal_status">Calibrate Mode!</span>');
             $('.normal_status').fadeIn(600);
         });
         $('#overview_flip').on('click',function(){
-            $("#calibration_section").fadeOut("fast");
+            $("#calibration_section").hide();
             $("section#canvas").fadeIn("fast");
             $("section#overview").fadeIn("fast");
             $('.status').html('<span class="normal_status">OverView</span>');

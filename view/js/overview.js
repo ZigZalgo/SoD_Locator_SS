@@ -230,7 +230,7 @@ function updateContentWithObjects(){
                     var orientationToSensor = getPersonOrientation(data[key].location.X,data[key].location.Z);
                     //console.log(" personOrientationToSensor: " + orientationToSensor);
                     console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor + " Sum up: " + (data[key].orientation+orientationToSensor+90));
-                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation+orientationToSensor+90), 30); // manually set the range of view to 1000 and FOV of a person to 45 for now
+                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation+orientationToSensor+90), 30);
                 }
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "19px Arial";
@@ -320,9 +320,6 @@ function updateContentWithObjects(){
                     '<td>'+data[key].ownerID+'</td>'+
                     '</tr>'
 
-                if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
-                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
-                }
             }
         }
 
