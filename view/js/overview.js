@@ -101,6 +101,19 @@ function printPersonID(ID)
     htmlString += '</table>';
     return htmlString;
 }
+
+function drawStationaryDevice(context, X, Y, width, height){
+    var xInMeters = X*majorGridLineWidth;
+    var yInMeters = Y*majorGridLineWidth;
+    context.beginPath();
+    context.rect(shiftXToGridOrigin(xInMeters), shiftYToGridOrigin(yInMeters), width, height);
+    context.fillStyle = "rgba(0, 255, 0, 0.2)";
+    context.fill();
+    //context.lineWidth = 7;
+    //context.strokeStyle = 'black';
+    //context.stroke();
+}
+
 function updateContentWithObjects(){
 
     io.emit('getClientsFromServer', {}, function(data){
@@ -174,35 +187,35 @@ function updateContentWithObjects(){
         for(var key in data){
             if(data.hasOwnProperty(key)){
                 var xInMeters = data[key].location.X*majorGridLineWidth;
-                var yInMeters = data[key].location.Y*majorGridLineWidth;
-                var zInMeters = data[key].location.Z*majorGridLineWidth;
-                ctx.beginPath();
-                ctx.fillStyle = "#c82124"; //red
-                ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
-                ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
-                ctx.fill();
-                if(data[key].pairingState == 'paired'){
-                    //console.log("Life is tough bro!");
-                    ctx.strokeStyle = "#2cd72A";
-                    ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
-                    ctx.stroke();
-                }
-                ctx.fillStyle = "#ffffff"; //white
-                ctx.font = "20px Arial";
-                ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
-                if(!jQuery.isEmptyObject(data[key].ID)){
-                    htmlString += ('<tr>' +
-                        '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
-                        +'</td>' +
-                        '<td>' +
-                        '('+Math.round(data[key].location.X*ROUND_RATIO)/ROUND_RATIO+', '
-                        +Math.round(data[key].location.Y*ROUND_RATIO)/ROUND_RATIO+', '
-                        +Math.round(data[key].location.Z*ROUND_RATIO)/ROUND_RATIO+')'
-                        + //JSON.stringify(person.location)
-                        '<td>' + data[key].pairingState + '</td>' +
-                        '<td>' + data[key].ownedDeviceID + '</td>' +
-                        '<td>' + data[key].orientation + '</td>' +
-                        '</tr>')
+                    var yInMeters = data[key].location.Y*majorGridLineWidth;
+                    var zInMeters = data[key].location.Z*majorGridLineWidth;
+                    ctx.beginPath();
+                    ctx.fillStyle = "#c82124"; //red
+                    ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
+                    ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
+                    ctx.fill();
+                    if(data[key].pairingState == 'paired'){
+                        //console.log("Life is tough bro!");
+                        ctx.strokeStyle = "#2cd72A";
+                        ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
+                        ctx.stroke();
+                    }
+                    ctx.fillStyle = "#ffffff"; //white
+                    ctx.font = "20px Arial";
+                    ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
+                    if(!jQuery.isEmptyObject(data[key].ID)){
+                        htmlString += ('<tr>' +
+                            '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
+                            +'</td>' +
+                            '<td>' +
+                            '('+Math.round(data[key].location.X*ROUND_RATIO)/ROUND_RATIO+', '
+                            +Math.round(data[key].location.Y*ROUND_RATIO)/ROUND_RATIO+', '
+                            +Math.round(data[key].location.Z*ROUND_RATIO)/ROUND_RATIO+')'
+                            + //JSON.stringify(person.location)
+                            '<td>' + data[key].pairingState + '</td>' +
+                            '<td>' + data[key].ownedDeviceID + '</td>' +
+                            '<td>' + data[key].orientation + '</td>' +
+                            '</tr>')
                 }
             }
         }
@@ -269,6 +282,10 @@ function updateContentWithObjects(){
                     '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
                     '<td>'+data[key].ownerID+'</td>'+
                     '</tr>'
+
+                if(data[key].stationary = true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
+                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
+                }
             }
         }
 
@@ -288,6 +305,23 @@ io.on("webMessageEvent",function(message){
     $('.status').html('GOT MESSAGE');
     $('.status').append('<div >'+JSON.stringify(message)+'</div>'); /*appending the data on the page using Jquery */
 });
+
+io.on("refreshStationaryLayer",function(){
+    var c = document.getElementById("cnvStationary");
+    var ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, c.width, c.height);
+
+    io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
+        for(var key in data){
+            if(data.hasOwnProperty(key)){
+               if(data[key].stationary = true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
+                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
+                }
+            }
+        }
+    });
+});
+
 io.on("connect", function(){
     io.emit("registerWebClient", {});
 });

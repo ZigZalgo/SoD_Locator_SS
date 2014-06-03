@@ -95,6 +95,11 @@ nav#mode_selection li{
 #cnvSensors{
     position: absolute; left: 0; top: 0; z-index: 2;
 }
+
+#cnvStationary{
+    position: absolute; left: 0; top: 0; z-index: 5;
+}
+
 #cnvBG{
     z-index:1;
     background: #ffffff ;

@@ -32,41 +32,36 @@
         })
 
 
-    // clear the points for sensor one
-    $('#clear_master_points').click(function(){
-    $('input[name=master_point1X]').val('');
-    $('input[name=master_point1Y]').val('');
-    $('input[name=master_point2X]').val('');
-    $('input[name=master_point2Y]').val('');
-    sensorOnePoints.splice(0,sensorOnePoints.length); // clear all the points for sensor one
-    $('.status').html("<span class='green_status'>Reference Sensor Points Cleared!</span>");
-    $('.green_status').fadeIn(600);
-    });
+        // clear the points for sensor one
+        $('#clear_master_points').click(function(){
+            $('input[name=master_point1X]').val('');
+            $('input[name=master_point1Y]').val('');
+            $('input[name=master_point2X]').val('');
+            $('input[name=master_point2Y]').val('');
+            sensorOnePoints.splice(0,sensorOnePoints.length); // clear all the points for sensor one
+            $('.status').html("<span class='green_status'>Reference Sensor Points Cleared!</span>");
+            $('.green_status').fadeIn(600);
+        });
 
-    // clear the points for sensor one
-    $('#clear_sensorTwo_points').click(function(){
-    $('input[name=sensor_point1X]').val('');
-    $('input[name=sensor_point1Y]').val('');
-    $('input[name=sensor_point2X]').val('');
-    $('input[name=sensor_point2Y]').val('');
-    sensorTwoPoints.splice(0,sensorTwoPoints.length); // clear all the points for sensor one
-    $('.status').html("<span class='green_status'>Sensor Two Points Cleared!</span>");
-    $('.green_status').fadeIn(600);
-    });
+        // clear the points for sensor one
+        $('#clear_sensorTwo_points').click(function(){
+            $('input[name=sensor_point1X]').val('');
+            $('input[name=sensor_point1Y]').val('');
+            $('input[name=sensor_point2X]').val('');
+            $('input[name=sensor_point2Y]').val('');
+            sensorTwoPoints.splice(0,sensorTwoPoints.length); // clear all the points for sensor one
+            $('.status').html("<span class='green_status'>Sensor Two Points Cleared!</span>");
+            $('.    green_status').fadeIn(600);
+        });
 
-    $('body').on('click','.get_unpaired_people',function(){
-    //console.log("Unpaired People: "+ JSON.stringify(unpaired_people));
-    //console.log($(this).text());
-    //console.log("id: " +unpaired_people[$(this).text()].personID);
-    //alert("what ???\t"+$("td:first",$(this).parents('tr')).text()); // get the ID of the device
-    var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
-    console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ $(this).text());
-    //alert( $(this).text() );
-    io.emit("forcePairRequest",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
-    console.log(JSON.stringify(callback));
-    });
-    })//referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text}
-    //request.deviceSocketID, personID, socket
+        $('body').on('click','.get_unpaired_people',function(){
+        var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
+            console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ $(this).text());
+            //alert( $(this).text() );
+            io.emit("forcePairRequest",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
+                console.log(JSON.stringify(callback));
+            });
+        })
     });
 
 
@@ -166,8 +161,8 @@
 
     </section>
     <section id="canvas">
-
         <canvas id="cnv" width="800" height="800" ></canvas>
+        <canvas id="cnvStationary" width="800" height="800" ></canvas>
         <canvas id="cnvSensors" width="800" height="800"></canvas>
         <canvas id="cnvBG" width="800" height="800"></canvas>
     </section>

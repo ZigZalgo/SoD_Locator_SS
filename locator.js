@@ -255,6 +255,21 @@ exports.removeUntrackedPeople = function(){
     }
 }
 
+exports.cleanUpDevice = function(socketID){
+    var personID = devices[socketID].ownerID;
+
+    console.log("CALLED CLEANUP DEVICE CODE")
+    if(devices[socketID].pairingState == "paired" && personID != null){
+        persons[personID].ownedDeviceID = null;
+        persons[personID].pairingState = "unpaired";
+        persons[personID].orientation = null;
+    }
+
+    console.log("DELETING DEVICE")
+    delete devices[socketID];
+    frontend.io.sockets.emit("refreshStationaryLayer", {});
+}
+
 exports.cleanUpSensor = function(socketID){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
     delete sensors[socketID];

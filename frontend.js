@@ -59,7 +59,8 @@ io.sockets.on('connection', function (socket) {
                     break;
                 case 'webClient':
                     break;
-                case 'device':
+                case 'table':
+                    locator.cleanUpDevice(socket.id);
                     break;
                 default:
                     break;
