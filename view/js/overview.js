@@ -233,8 +233,13 @@ function updateContentWithObjects(){
                     drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",orientationToSensor+90, 30); // manually set the range of view to 1000 and FOV of a person to 45 for now
                 }
                     ctx.fillStyle = "#ffffff"; //white
-                    ctx.font = "20px Arial";
-                    ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
+                    ctx.font = "19px Arial";
+                    if(data[key].uniquePersonID>=10)
+                    {
+                        ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-11,shiftYToGridOrigin(zInMeters)+7);
+                    }else{
+                        ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
+                    }
                     if(!jQuery.isEmptyObject(data[key].ID)){
                         htmlString += ('<tr>' +
                             '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
