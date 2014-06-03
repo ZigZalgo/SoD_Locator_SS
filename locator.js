@@ -5,7 +5,7 @@ var util = require('./util');
 var frontend = require('./frontend');
 var events = require("events");
 var EventEmitter = require("events").EventEmitter;
-	
+
 var persons = {};
 var devices = {};
 var sensors = {};
@@ -450,15 +450,21 @@ exports.getDevicesInFront = function(observerSocketID){
 	// // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
 	// // We will use angles to represent these vectors.
     try{
-        var leftFieldOfView = util.normalizeAngle(observer.orientation + 15);
-        var rightFieldOfView = util.normalizeAngle(observer.orientation - 15);
+        //get the angle to sens
+        var angleToSensor =util.getPersonOrientation(observer.location.X,observer.location.Z);
+        var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ 15);
+        var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- 15);
 
         console.log("Left FOV = " + leftFieldOfView)
         console.log("Right FOV = " + rightFieldOfView)
 
         return Object.keys(devices).filter(function(key){
             //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
+
+
             if(devices[key] != observer && devices[key].location != undefined){
+                console.log("Deivice Location:: \n" + JSON.stringify(devices[key].location))
+
                 console.log("Angle from observer to target: " + util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI))
                 console.log("Observer: \n" + JSON.stringify(observer))
                 console.log("Target: \n" + JSON.stringify(devices[key]))

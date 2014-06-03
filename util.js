@@ -280,12 +280,6 @@ exports.getLinesOfShape = function(device){
 exports.getPersonOrientation = function(personX,personZ){
     var angleTowardsKinect = Math.atan2(personX,personZ);
     var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
-    /*  Based on the assumption of X is not in meters
-    var XtoZ_ratio = Math.tan(KINECT_VIEW_RANGE*DEGREES_TO_RADIANS);
-    var Z = KINECT_X_MAX/XtoZ_ratio;
-    var angleTowardsKinect = Math.atan(personX/Z);                    // get the radiance of the person orientation
-    var returnDegree = angleTowardsKinect*RADIANS_TO_DEGREES;               // return degree for testing
-    */
     return returnDegree;
 }
 
