@@ -88,7 +88,6 @@ function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     context.closePath();
     context.fill();
 }
-
 function printPersonID(ID)
 {
     var htmlString= "";
@@ -102,18 +101,32 @@ function printPersonID(ID)
     return htmlString;
 }
 
-function drawStationaryDevice(contextStationary, X, Y, width, height){
-
-
+function drawStationaryDevice(context, X, Y, width, height){
     var xInMeters = X*majorGridLineWidth;
     var yInMeters = Y*majorGridLineWidth;
-    contextStationary.beginPath();
-    contextStationary.rect(shiftXToGridOrigin(xInMeters), shiftYToGridOrigin(yInMeters), width, height);
-    contextStationary.fillStyle = "rgba(0, 255, 0, 0.2)";
-    contextStationary.fill();
+    context.beginPath();
+    context.rect(shiftXToGridOrigin(xInMeters) - (width/2), shiftYToGridOrigin(yInMeters) - (height/2), width, height);
+    context.fillStyle = "rgba(0, 255, 0, 0.2)";
+    context.fill();
     //context.lineWidth = 7;
     //context.strokeStyle = 'black';
     //context.stroke();
+}
+
+function refreshStationaryLayer(){
+    var c = document.getElementById("cnvStationary");
+    var ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, c.width, c.height);
+
+    io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
+        for(var key in data){
+            if(data.hasOwnProperty(key)){
+                if(data[key].stationary = true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
+                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
+                }
+            }
+        }
+    });
 }
 
 function updateContentWithObjects(){
@@ -146,7 +159,7 @@ function updateContentWithObjects(){
                 var sensorRotationAngle = 0; //get this from sensor list later on
                 var sensorFOV = data[key].FOV; //get this from sensor list later on
 
-                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)", 90,data[key].FOV);
+                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)",90, data[key].FOV);
 
                 //draw circle for sensor on visualizer
                 ctxSensors.beginPath();
@@ -202,10 +215,9 @@ function updateContentWithObjects(){
                         ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
                         ctx.stroke();
                     }
-
-                    if(data[key].orientation != null){
-                        drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",data[key].orientation, 45); // manually set the range of view to 1000 and FOV of a person to 45 for now
-                    }
+                if(data[key].orientation != null){
+                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",data[key].orientation, 45); // manually set the range of view to 1000 and FOV of a person to 45 for now
+                }
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "20px Arial";
                     ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
@@ -288,9 +300,9 @@ function updateContentWithObjects(){
                     '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
                     '<td>'+data[key].ownerID+'</td>'+
                     '</tr>'
-                var ctxStationary = document.getElementById('cnvStationary').getContext('2d');
-                if(data[key].stationary == true && (data[key].location.X) != null && data[key].location.Y != null && data[key].location.Z != null){
-                    drawStationaryDevice(ctxStationary, data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
+
+                if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
+                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
                 }
             }
         }
@@ -313,19 +325,7 @@ io.on("webMessageEvent",function(message){
 });
 
 io.on("refreshStationaryLayer",function(){
-    var c = document.getElementById("cnvStationary");
-    var ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height);
-
-    io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
-        for(var key in data){
-            if(data.hasOwnProperty(key)){
-               if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
-                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
-                }
-            }
-        }
-    });
+    refreshStationaryLayer();
 });
 
 io.on("connect", function(){
@@ -347,7 +347,3 @@ $(function(){
 io.emit("registerWebClient", {});
 //setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
 setInterval(function() {updateContentWithObjects(); }, 200); //poll server for sensors, people, and devices and display to the side
-
-
-
-

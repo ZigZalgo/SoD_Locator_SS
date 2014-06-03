@@ -53,7 +53,6 @@ io.sockets.on('connection', function (socket) {
         if(clients[socket.id] != undefined){
             switch(clients[socket.id].clientType){
                 case 'sensor':
-                    socket.emit("refreshWebClientSensors", {});
                     console.log("CLEANING UP SENSOR")
                     locator.cleanUpSensor(socket.id);
                     break;

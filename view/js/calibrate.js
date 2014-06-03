@@ -114,6 +114,7 @@ function refreshSensors(){
 //io = io.connect()
 io.on("connect", function(){
     io.emit("registerWebClient", {});
+    refreshStationaryLayer();
 });
 
 io.on("anything", function(data){
