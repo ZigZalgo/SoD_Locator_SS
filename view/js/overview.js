@@ -124,7 +124,7 @@ function refreshStationaryLayer(){
     io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
         for(var key in data){
             if(data.hasOwnProperty(key)){
-                if(data[key].stationary = true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
+                if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
                     drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
                 }
             }

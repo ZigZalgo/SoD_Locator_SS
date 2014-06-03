@@ -362,9 +362,7 @@ exports.registerDevice = function(socket, deviceInfo){
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
         if(deviceInfo.stationary == true){
-            console.log("stationary device registered")
-            console.log(JSON.stringify(deviceInfo))
-            console.log(deviceInfo)
+            device.stationary = deviceInfo.stationary;
             device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
