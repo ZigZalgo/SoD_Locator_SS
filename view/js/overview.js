@@ -230,7 +230,7 @@ function updateContentWithObjects(){
                     var orientationToSensor = getPersonOrientation(data[key].location.X,data[key].location.Z);
                     //console.log(" personOrientationToSensor: " + orientationToSensor);
                     console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor);
-                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",data[key].orientation+orientationToSensor+90, 30); // manually set the range of view to 1000 and FOV of a person to 45 for now
+                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",orientationToSensor+90, 30); // manually set the range of view to 1000 and FOV of a person to 45 for now
                 }
                     ctx.fillStyle = "#ffffff"; //white
                     ctx.font = "20px Arial";
