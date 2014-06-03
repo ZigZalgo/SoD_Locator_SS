@@ -330,6 +330,7 @@ io.on("refreshStationaryLayer",function(){
 
 io.on("connect", function(){
     io.emit("registerWebClient", {});
+    refreshStationaryLayer();
 });
 /*
 io.on("refreshWebClientSensors", function(){
