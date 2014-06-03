@@ -172,9 +172,9 @@ exports.unpairDevice = function(deviceSocketID){
     if(devices[deviceSocketID] != undefined){
         if(devices[deviceSocketID].ownerID != null){
             try{
-                persons[devices[deviceSocketID].OwnerID].pairingState = "unpaired";
-                persons[devices[deviceSocketID].OwnerID].ownedDeviceID = null;
-                persons[devices[deviceSocketID].OwnerID].orientation = null;
+                persons[devices[deviceSocketID].ownerID].pairingState = "unpaired";
+                persons[devices[deviceSocketID].ownerID].ownedDeviceID = null;
+                persons[devices[deviceSocketID].ownerID].orientation = null;
             }
             catch(err){
                 console.log(err + "\tError unpairing device > removing person associations > most likely person does not exist?")
