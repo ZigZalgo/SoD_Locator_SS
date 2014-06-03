@@ -86,6 +86,36 @@ exports.handleRequest = function (socket){
         }
     });
 
+    socket.on('sendStringToDevicesWithSelection', function (request, fn) {
+        switch(request.selection){
+            case 'all':
+                for(var key in locator.devices){
+                    if(locator.devices.hasOwnProperty(key)){
+                        frontend.clients[key].emit("string", {data: request.data})
+                    }
+                }
+                fn(locator.devices);
+                break;
+            case 'inView':
+                console.log("SENDING " + JSON.stringify(request.data) + " TO ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
+                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
+                for(var key in devicesInView){
+                    if(devicesInView.hasOwnProperty(key)){
+                        frontend.clients[key].emit("string", {data: request.data})
+                    }
+                }
+                fn({status: "sent"});
+                break;
+            default:
+                for(var key in locator.devices){
+                    if(locator.devices.hasOwnProperty(key)){
+                        frontend.clients[key].emit("string", {data: request.data})
+                    }
+                }
+                fn({status: "sent"});
+        }
+    });
+
     socket.on('forcePairRequest', function (request, fn) {
         if(request.deviceSocketID != undefined){
             locator.pairDevice(request.deviceSocketID, request.uniquePersonID, socket);

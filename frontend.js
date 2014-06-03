@@ -27,6 +27,10 @@ app.get('/', function (req, res) {
 app.get('/user', function (req, res) {
     res.sendfile(__dirname + '/view/user.html');
 });
+app.get('/testing', function (req, res) {
+    res.sendfile(__dirname + '/view/testing.html');
+});
+
 app.get('/style', function (req, res) {
     res.sendfile(__dirname + '/view/style/style.css');
 });
@@ -37,6 +41,7 @@ app.get('/overviewJS', function (req, res) {
 app.get('/calibrateJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/calibrate.js');
 });
+
 
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });

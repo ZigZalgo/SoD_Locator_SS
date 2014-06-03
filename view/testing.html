@@ -1,0 +1,24 @@
+<html>
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+    io = io.connect()
+    io.on('connect', function () {
+        console.log("socket connected");
+        io.emit("registerWebClient", {});
+        io.emit("broadcast", {listener: "string", payload: "testdata"});
+    });
+
+</script>
+</head>
+<body>
+<div>
+    <span>Testing Page</span>
+</div>
+
+<div id="status" style="height: 200px;"></div> <!--This is where the data from the server is added-->
+
+
+</body>
+</html>
