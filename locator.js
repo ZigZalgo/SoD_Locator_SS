@@ -81,6 +81,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[key].location.Z = receivedPerson.location.Z.toFixed(3);
                         persons[key].lastUpdated = new Date();
                         if(persons[key].ownedDeviceID != null){
+                            console.log("Updating person's device?")
                             devices[persons[key].ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
@@ -116,9 +117,9 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
 
     if(devices[deviceSocketID] != undefined && persons[uniquePersonID] != undefined){
         if(devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
-            devices[deviceSocketID].OwnerID = uniquePersonID;
+            devices[deviceSocketID].ownerID = uniquePersonID;
             devices[deviceSocketID].pairingState = "paired";
-            persons[uniquePersonID].OwnedDeviceID = deviceSocketID;
+            persons[uniquePersonID].ownedDeviceID = deviceSocketID;
             persons[uniquePersonID].pairingState = "paired";
             statusMsg += "\n Pairing successful.";
         }
@@ -171,16 +172,27 @@ exports.setPairingState = function(deviceSocketID){
 exports.unpairDevice = function(deviceSocketID){
     if(devices[deviceSocketID] != undefined){
         if(devices[deviceSocketID].OwnerID != null){
-            persons[devices[deviceSocketID].OwnerID].pairingState = "unpaired";
-            persons[devices[deviceSocketID].OwnerID].OwnedDeviceID = null;
-            persons[devices[deviceSocketID].OwnerID].orientation = null;
+            try{
+                persons[devices[deviceSocketID].OwnerID].pairingState = "unpaired";
+                persons[devices[deviceSocketID].OwnerID].OwnedDeviceID = null;
+                persons[devices[deviceSocketID].OwnerID].orientation = null;
+            }
+            catch(err){
+                console.log(err + "\tError unpairing device > removing person associations > most likely person does not exist?")
+            }
+
+        }
+        try{
+            devices[deviceSocketID].pairingState = "unpaired";
+            devices[deviceSocketID].location.X = null;
+            devices[deviceSocketID].location.Y = null;
+            devices[deviceSocketID].location.Z = null;
+            devices[deviceSocketID].OwnerID = null;
+        }
+        catch(err){
+            console.log(err + "\tError resetting pairing state of device, possibly device is not tracked anymore?")
         }
 
-        devices[deviceSocketID].pairingState = "unpaired";
-        devices[deviceSocketID].location.X = null;
-        devices[deviceSocketID].location.Y = null;
-        devices[deviceSocketID].location.Z = null;
-        devices[deviceSocketID].OwnerID = null;
     }
 }
 
@@ -420,12 +432,12 @@ exports.getDevicesInFront = function(observerSocketID){
                     (util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
                     return true;
                 }
-            }
-            else if (leftFieldOfView < rightFieldOfView)
-            {
-                if ((util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
-                    (util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
-                    return true;
+                else if (leftFieldOfView < rightFieldOfView)
+                {
+                    if ((util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                        (util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
+                        return true;
+                    }
                 }
             }
         })

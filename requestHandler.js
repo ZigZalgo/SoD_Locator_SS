@@ -76,7 +76,7 @@ exports.handleRequest = function (socket){
                 fn(locator.devices);
                 break;
             case 'inView':
-                console.log("GETTING ALL DEVICES IN VIEW: " + locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
+                console.log("GETTING ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
                 fn(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
                 break;
             default:
@@ -125,7 +125,6 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getSensorsFromServer', function (request, fn) {
-        console.log("getting sensors from server")
         fn((locator.sensors));
     });
 

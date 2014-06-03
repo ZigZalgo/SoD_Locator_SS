@@ -4,7 +4,7 @@ var app = express();
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
-io.set('log level',5);
+io.set('log level',0);
 var requestHandler = require('./requestHandler');
 var factory = require('./factory');
 var locator = requestHandler.locator;
@@ -60,6 +60,12 @@ io.sockets.on('connection', function (socket) {
                 case 'webClient':
                     break;
                 case 'table':
+                    locator.cleanUpDevice(socket.id);
+                    break;
+                case 'iPad':
+                    locator.cleanUpDevice(socket.id);
+                    break;
+                case 'iPhone':
                     locator.cleanUpDevice(socket.id);
                     break;
                 default:
