@@ -53,7 +53,7 @@ function Sensor(socket){
         this.lastUpdated = new Date();
         this.calibration = {Rotation: null, TransformX: null, TransformY: null, StartingLocation: {X: 0, Y: 0, Z: 0}};
         this.isCalibrated = false;
-
+        console.log("constructing sensor: "+ JSON.stringify(this.calibration));
     }
     catch(err){
         return false;

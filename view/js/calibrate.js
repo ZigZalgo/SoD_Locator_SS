@@ -15,47 +15,36 @@ function getPosition(canvasID, sid, event)
 
     var z = depthArrays[sid][Math.round(xInPixels+(y*sensors[sid].frameWidth))];//depthArrays[sid][xInPixels+(y*sensors[sid].frameWidth)];
 
-    console.log(event.x);
+    console.log('event.x: '+ event.x);
 
     if(sensors[sid].sensorType == "Kinect2"){
         z = z*10;
     }
 
     var xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2))
-    /*
-     console.log("bunch of stuff output: " + ( rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2)));
-     console.log("less bunch of stuffs output: "+ (sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2)));
-     console.log("Even less bunch of stuffs output: "+ (sensors[sid].frameWidth)*(z>>>3));
-     console.log("Even less bunch of stuffs output narrow -> "+ (sensors[sid].frameWidth));
-     console.log("Even less bunch of stuffs output narrow -> "+ ((z>>>3)));
-     console.log("Even less bunch of stuffs output narrow -> -> "+ ((z)));
-     console.log("Even less bunch of stuffs output narrow -> -> Explore => "+ (depthArrays[sid][Math.round(xInPixels+(y*sensors[sid].frameWidth))]));
-     //console.log("Even less bunch of stuffs output narrow -> -> Explore => "+ (depthArrays[sid])); Too much data for display
-     console.log("Even less bunch of stuffs output narrow -> -> Explore => Index: "+ (xInPixels+(y*sensors[sid].frameWidth)));
-     console.log("Even less bunch of stuffs output narrow -> -> Explore => xInPixels: "+ (xInPixels));
-     console.log("Even less bunch of stuffs output narrow -> -> Explore => y: "+ (y));
-     console.log("Even less bunch of stuffs output narrow -> -> Explore => sensors[sid].frameWidth: "+ (sensors[sid].frameWidth));
-     console.log("Even even less bunch of stuffs output: "+ (Math.tan(sensors[sid].FOV/2)));
-     console.log("rect.left: "+rect.left);
-     console.log("xInMM: "+xInMM);
-     */
+    //console.log("xInMM :" + xInMM);
+
+
     if(canvasID == "cnvSensorOne"){
         if(sensorOnePoints.length < 2 && z > 0){
             sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
-            $('.status').html("<span class='green_status'>Point saved!</span>");
-            $('.green_status').fadeIn(600);
+           showGreenStatus('Points saved.');
         }else if(sensorOnePoints.length >= 2){
-            $('.status').html("<span class='red_status'>Enough Points.</span>");
-            $('.red_status').fadeIn(600);
+            showRedStatus('Enough Points.');
         }else if(z<=0){
-            $('.status').html("<span class='red_status'>Depth is out of range, please choose another point!</span>");
-            $('.red_status').fadeIn(600);
+            showNormalStatus('Depth is out of range, please choose another point!');
         }
-        //$('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
-        $( 'input[name=master_point1X]' ).val(JSON.stringify(Math.round(sensorOnePoints[0].X*ROUND_RATIO)/ROUND_RATIO));
-        $( 'input[name=master_point1Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[0].Y*ROUND_RATIO)/ROUND_RATIO));
-        $( 'input[name=master_point2X]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].X*ROUND_RATIO)/ROUND_RATIO));
-        $( 'input[name=master_point2Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].Y*ROUND_RATIO)/ROUND_RATIO));
+
+        //console.log("sensorOnePoints: "+ JSON.stringify(sensorOnePoints));
+        if(sensorOnePoints.length==1){
+            $( 'input[name=master_point1X]' ).val(JSON.stringify(Math.round(sensorOnePoints[0].X*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=master_point1Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[0].Z*ROUND_RATIO)/ROUND_RATIO));
+        }else if(sensorOnePoints.length==2){
+            $( 'input[name=master_point2X]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].X*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=master_point2Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
+        }else{
+            showRedStatus("Wrong Number of Points for Sensor 1");
+        }
     }
     else if(canvasID == "cnvSensorTwo"){
         if(sensorTwoPoints.length < 2 && z > 0){
@@ -70,10 +59,15 @@ function getPosition(canvasID, sid, event)
             $('.red_status').fadeIn(600);
         }
         //$('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
+        if(sensorTwoPoints.length==1){
         $( 'input[name=sensor_point1X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].X*ROUND_RATIO)/ROUND_RATIO));
-        $( 'input[name=sensor_point1Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].Y*ROUND_RATIO)/ROUND_RATIO));
+        $( 'input[name=sensor_point1Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].Z*ROUND_RATIO)/ROUND_RATIO));
+        }else if(sensorTwoPoints.length==2){
         $( 'input[name=sensor_point2X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].X*ROUND_RATIO)/ROUND_RATIO));
-        $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Y*ROUND_RATIO)/ROUND_RATIO));
+        $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
+        }else{
+            showRedStatus("Wrong Number of Points for Sensor 2");
+        }
 
     }
 

@@ -7,11 +7,7 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <link href="/style" rel="stylesheet"  />
-<script src="/overviewJS"></script>
-<script src="/calibrateJS"></script>
-
     <script>
-    // calibration section:
     $(document).ready(function(){
         $("#calibration_flip").click(function(){
             $("section#canvas").hide();
@@ -50,22 +46,23 @@
             $('input[name=sensor_point2X]').val('');
             $('input[name=sensor_point2Y]').val('');
             sensorTwoPoints.splice(0,sensorTwoPoints.length); // clear all the points for sensor one
-            $('.status').html("<span class='green_status'>Sensor Two Points Cleared!</span>");
-            $('.    green_status').fadeIn(600);
+            showGreenStatus("Sensor Two Points Cleared!");
         });
 
         $('body').on('click','.get_unpaired_people',function(){
         var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
             console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ $(this).text());
-            //alert( $(this).text() );
             io.emit("forcePairRequest",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
                 console.log(JSON.stringify(callback));
             });
         })
+
+
+
     });
-
-
 </script>
+<script src="/overviewJS"></script>
+<script src="/calibrateJS"></script>
 
 
 </head>

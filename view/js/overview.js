@@ -12,7 +12,31 @@ var uniqueDeviceIDToSocketID = {}
 
 io = io.connect()
 
-function drawGrid() {
+
+/*
+* Show status on the status log
+*
+* */
+function showRedStatus(status){
+    $('.status').html("<span class='red_status'>"+status+"</span>");
+    $('.red_status').fadeIn(600);
+}
+
+function showGreenStatus(status){
+    $('.status').html("<span class='green_status'>"+status+"</span>");
+    $('.green_status').fadeIn(600);
+}
+
+function showNormalStatus(status){
+    $('.status').html("<span class='normal_status'>"+status+"</span>");
+    $('.normal_status').fadeIn(600);
+}
+
+/*
+* Visualization
+*
+* */
+ function drawGrid() {
     var cnv = document.getElementById("cnvBG");
 
     var gridOptions = {
@@ -76,6 +100,9 @@ function shiftYToGridOrigin(z){
     return (z + ((document.getElementById("cnv").height)/2));
 }
 
+/*
+* Draw view for sensor
+* */
 function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
     var positionX = shiftXToGridOrigin(X);
@@ -91,6 +118,24 @@ function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     context.closePath();
     context.fill();
 }
+// draw the sensor on the screen
+function drawSensor(context,X,Y,index,angle,FOV){
+    var sensorX = 0; //get this from sensor list later on
+    var sensorY = 0; //get this from sensor list later on
+    //draw circle for sensor on visualizer
+    context.beginPath();
+    context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
+    context.closePath();
+    context.lineWidth = 1;
+    context.fillStyle = '#3370d4';
+    context.fill();
+    context.strokeStyle = '#292929';
+    context.stroke();
+    context.font = "20px Arial";
+    context.fillStyle = '#ffffff';
+    context.fillText('K'+index,shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+}
+
 function printPersonID(ID)
 {
     var htmlString= "";
@@ -104,6 +149,11 @@ function printPersonID(ID)
     return htmlString;
 }
 
+
+/**
+ * Draw Stationary Device
+ *
+ * */
 function drawStationaryDevice(context, X, Y, width, height){
     var xInMeters = X*majorGridLineWidth;
     var yInMeters = Y*majorGridLineWidth;
@@ -111,11 +161,12 @@ function drawStationaryDevice(context, X, Y, width, height){
     context.rect(shiftXToGridOrigin(xInMeters) - (width/2), shiftYToGridOrigin(yInMeters) - (height/2), width, height);
     context.fillStyle = "rgba(0, 255, 0, 0.2)";
     context.fill();
-    //context.lineWidth = 7;
-    //context.strokeStyle = 'black';
-    //context.stroke();
 }
 
+/**
+ * Stationary Only updates position when this is called
+ *
+ * */
 function refreshStationaryLayer(){
     var c = document.getElementById("cnvStationary");
     var ctx = c.getContext("2d");
@@ -132,8 +183,15 @@ function refreshStationaryLayer(){
     });
 }
 
-function updateContentWithObjects(){
 
+/**
+ *  Update the contents in the canvas and overview section.
+ * */
+function updateContentWithObjects(){
+    /*
+    * Update the clients
+    *
+    * */
     io.emit('getClientsFromServer', {}, function(data){
         var htmlString = ""
         for(var key in data){
@@ -150,6 +208,10 @@ function updateContentWithObjects(){
             '</tr>' + htmlString + '</table>')
     });
 
+   /**
+    *
+    * Update everything about sensor
+    * */
     io.emit('getSensorsFromServer', {}, function(data){
         var htmlString = ""
         var cSensors = document.getElementById("cnvSensors");
@@ -157,29 +219,11 @@ function updateContentWithObjects(){
         ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
         for(var key in data){
             if(data.hasOwnProperty(key)){
+                console.log("SensorKey: "+key+"\tcalibration: "+JSON.stringify(data[key].calibration));
                 var sensorX = 0; //get this from sensor list later on
                 var sensorY = 0; //get this from sensor list later on
-                var sensorRotationAngle = 0; //get this from sensor list later on
-                var sensorFOV = data[key].FOV; //get this from sensor list later on
-
+                drawSensor(ctxSensors,sensorX,sensorY,Object.keys(data).indexOf(key),270, data[key].FOV);
                 drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)",270, data[key].FOV);
-
-                //draw circle for sensor on visualizer
-                ctxSensors.beginPath();
-
-                ctxSensors.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
-                ctxSensors.closePath();
-                ctxSensors.lineWidth = 1;
-                ctxSensors.fillStyle = '#3370d4';
-                ctxSensors.fill();
-                ctxSensors.strokeStyle = '#292929';
-                ctxSensors.stroke();
-
-                ctxSensors.font = "20px Arial";
-                ctxSensors.fillStyle = '#ffffff';
-                ctxSensors.fillText('K'+Object.keys(data).indexOf(key),shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
-
-
                 htmlString += ('<tr>' +
                     '<td>' + data[key].sensorType + '</td>' +
                     '<td>' + data[key].socketID + '</td>' +
@@ -197,6 +241,10 @@ function updateContentWithObjects(){
     });
 
 
+    /**
+     *  Update everything about the person
+     *
+     * */
     function getPersonOrientation(personX,personZ){
         var angleTowardsKinect = Math.atan2(personX,personZ);
         var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
@@ -353,6 +401,7 @@ io.on("refreshWebClientSensors", function(){
     updateCanvasWithSensors();
 });
 */
+
 $(function(){
     $('#getPoints').click(function(){ /*listening to the button click using Jquery listener*/
         io.emit('calibrateSensors', {}, function(){
