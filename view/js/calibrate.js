@@ -188,12 +188,12 @@ $(function(){
     });
 
     $('#resetPointsOne').click(function(){
-        sensorOnePoints = [];
+        sensorOnePoints.splice(0,sensorOnePoints.length);
         $('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
     })
 
     $('#resetPointsTwo').click(function(){
-        sensorTwoPoints = [];
+        sensorTwoPoints.splice(0,sensorTwoPoints.length);
         $('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
     })
 

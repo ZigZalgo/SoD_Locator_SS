@@ -120,11 +120,13 @@ function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
 }
 // draw the sensor on the screen
 function drawSensor(context,X,Y,index,angle,FOV){
-    var sensorX = 0; //get this from sensor list later on
-    var sensorY = 0; //get this from sensor list later on
+    var sensorX = X; //get this from sensor list later on
+    var sensorY = Y; //get this from sensor list later on
+    //console.log("X : "+sensorX+"Y: "+sensorY)
     //draw circle for sensor on visualizer
+    var angleForDrawing = 270 - angle;
     context.beginPath();
-    context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,Math.PI,false);
+    context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,angleForDrawing*DEGREES_TO_RADIANS,angleForDrawing*DEGREES_TO_RADIANS+Math.PI,true);
     context.closePath();
     context.lineWidth = 1;
     context.fillStyle = '#3370d4';
@@ -221,9 +223,19 @@ function updateContentWithObjects(){
             if(data.hasOwnProperty(key)){
                 console.log("SensorKey: "+key+"\tcalibration: "+JSON.stringify(data[key].calibration));
                 var sensorX = 0; //get this from sensor list later on
-                var sensorY = 0; //get this from sensor list later on
-                drawSensor(ctxSensors,sensorX,sensorY,Object.keys(data).indexOf(key),270, data[key].FOV);
-                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)",270, data[key].FOV);
+                var sensorY=  0;
+                var angle = 270;
+                if(data[key].calibration["Rotation"]!=0&&data[key].calibration["Rotation"]!=null){
+                    sensorX += (data[key].calibration["TransformX"]*majorGridLineWidth/1000);
+                    sensorY += (data[key].calibration["TransformY"]*majorGridLineWidth/1000);
+                    angle += data[key].calibration["Rotation"];
+                }
+                console.log("X: "+sensorX+"  Y: "+sensorY+"  Angle: "+angle);
+                //console.log("angleAfterCalibration: "+ data[key].calibration["Rotation"]);
+                //console.log("TransformX : "+ sensorX+data[key].calibration["TransformX"]);
+                //console.log("sensorYAfterCalibration: "+ data[key].calibration["Rotation"]);
+                drawSensor(ctxSensors,sensorX,sensorY,Object.keys(data).indexOf(key),angle, data[key].FOV);
+                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)",angle, data[key].FOV);
                 htmlString += ('<tr>' +
                     '<td>' + data[key].sensorType + '</td>' +
                     '<td>' + data[key].socketID + '</td>' +
@@ -248,7 +260,6 @@ function updateContentWithObjects(){
     function getPersonOrientation(personX,personZ){
         var angleTowardsKinect = Math.atan2(personX,personZ);
         var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
-
         return returnDegree;
     }
     io.emit('getPeopleFromServer', {}, function(data){

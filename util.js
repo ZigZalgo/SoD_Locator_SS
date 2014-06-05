@@ -44,14 +44,14 @@ exports.translateToCoordinateSpace = function(location,translateRules)
  * startingLocation-- contains the location of the startingPoint of the sub-kinect
  */
 exports.getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
-    console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
+    //console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
     return(setVariables(fixSign));
 
     function setVariables(cb){
         var degreeBetweenVectors = util.getDegreeOfTwoVectors(util.getVector(startingLocation1,endingLocation1),util.getVector(startingLocation2,endingLocation2)); // using dot product
         var rotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2,endingLocation2),degreeBetweenVectors);               // clockwise
         var counterRotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2,endingLocation2),-degreeBetweenVectors);
-        console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
+        //console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
         return(cb(degreeBetweenVectors, rotatedVector2, counterRotatedVector2));
     }
 
@@ -59,6 +59,7 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
     {
         if(Math.abs(rotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(rotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
+            console.log("Positive!");
             return {
                 degree:degreeBetweenVectors,
                 xDistance: startingLocation1.X - startingLocation2.X,
@@ -68,6 +69,7 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
         }
         else if(Math.abs(counterRotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(counterRotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
+            console.log("Negative!");
             return {
                 degree:-degreeBetweenVectors,
                 xDistance: startingLocation1.X - startingLocation2.X,

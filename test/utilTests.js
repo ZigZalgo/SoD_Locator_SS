@@ -4,22 +4,28 @@ var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
 
-
-
+// Testing Sample From Kinect
 describe("util.getTranslationRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
-    var startingLocation1 = {X:1 ,Y:0 ,Z:1};
-    var endingLocation1   = {X:1+Math.sqrt(3), Y:0, Z:2};
-    var startingLocation2 = {X:-2 ,Y:0 ,Z:2};
-    var endingLocation2   = {X:-2+Math.sqrt(3), Y:0, Z:1};
+    /*var startingLocation1 = {X:-49.3 ,Y:0 ,Z:1901};
+    var endingLocation1   = {X:350.9, Y:0, Z:1772};
+    var startingLocation2 = {X:-235.8 ,Y:0 ,Z:1745};
+    var endingLocation2   = {X:175.8, Y:0, Z:1827};*/
+    var startingLocation1 = {X:-235.8 ,Y:0 ,Z:1745};
+    var endingLocation1   = {X:175.8, Y:0, Z:1827};
 
+    var startingLocation2 = {X:-49.3 ,Y:0 ,Z:1901};
+    var endingLocation2   = {X:350.9, Y:0, Z:1772};
+    console.log("Vector1 : "+ JSON.stringify(util.getVector(startingLocation1,endingLocation1)));
+    console.log("Vector2 : "+ JSON.stringify(util.getVector(startingLocation2,endingLocation2)));
+/*
     it("testing the calculation inside of getTranslationRule() for vector1)", function(){
-        expect(util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3),Y:0,Z:1}); // objects equal
+        expect(util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:1*1000}); // objects equal
     });
     var vector1 = util.getVector(startingLocation1,endingLocation1);
 
     it("testing the calculation inside of getTranslationRule() for vector2)", function(){
-        expect(util.getVector(startingLocation2,endingLocation2)).to.eql({X:Math.sqrt(3),Y:0,Z:-1}); // objects equal
+        expect(util.getVector(startingLocation2,endingLocation2)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:-1*1000}); // objects equal
     });
     var vector2 = util.getVector(startingLocation2,endingLocation2);
 
@@ -28,21 +34,54 @@ describe("util.getTranslationRule()", function() {
     });
     var degree = util.getDegreeOfTwoVectors(vector1,vector2);
     it("testing the matrixTransformation inside of getTranslationRule() )", function(){
-        expect(util.matrixTransformation(vector2,degree).Z).to.eql(-2); // objects equal
+        expect(util.matrixTransformation(vector2,degree).Z).to.eql(-2000); // objects equal
+    });
+*/
+    it("testing Final Result of getTranslationRule", function(){
+        expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
+            to.eql({degree:-29.133,xDistance:-186,
+                zDistance:-156,startingLocation:startingLocation2}); // objects equal
+    });
+});
+
+
+describe("util.getTranslationRule()", function() {
+    // starting and ending point for each kinect sensor sees the same project
+    var startingLocation1 = {X:1000 ,Y:0 ,Z:1000};
+    var endingLocation1   = {X:(1+Math.sqrt(3))*1000, Y:0, Z:2000};
+    var startingLocation2 = {X:-2000 ,Y:0 ,Z:2000};
+    var endingLocation2   = {X:(-2+Math.sqrt(3))*1000, Y:0, Z:1000};
+
+    it("testing the calculation inside of getTranslationRule() for vector1)", function(){
+        expect(util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:1*1000}); // objects equal
+    });
+    var vector1 = util.getVector(startingLocation1,endingLocation1);
+
+    it("testing the calculation inside of getTranslationRule() for vector2)", function(){
+        expect(util.getVector(startingLocation2,endingLocation2)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:-1*1000}); // objects equal
+    });
+    var vector2 = util.getVector(startingLocation2,endingLocation2);
+
+    it("testing the calculation inside of getTranslationRule() between degrees of vector1 & vector2)", function(){
+        expect(util.getDegreeOfTwoVectors(vector1,vector2)).to.be.closeTo(60,0.00001); // objects equal
+    });
+    var degree = util.getDegreeOfTwoVectors(vector1,vector2);
+    it("testing the matrixTransformation inside of getTranslationRule() )", function(){
+        expect(util.matrixTransformation(vector2,degree).Z).to.eql(-2000); // objects equal
     });
 
     it("testing Final Result of getTranslationRule", function(){
         expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
-            to.eql({degree:-degree,xDistance:3,
-                zDistance:-1,startingLocation:startingLocation2}); // objects equal
+            to.eql({degree:-degree,xDistance:3000,
+                zDistance:-1000,startingLocation:startingLocation2}); // objects equal
     });
 });
 
 describe("util.translateToCoordinateSpace()", function() {
-    var startingLocation1 = {X:1 ,Y:0 ,Z:1};
-    var endingLocation1   = {X:1+Math.sqrt(3), Y:0, Z:2};
-    var startingLocation2 = {X:-2 ,Y:0 ,Z:2};
-    var endingLocation2   = {X:-2+Math.sqrt(3), Y:0, Z:1};
+    var startingLocation1 = {X:1*1000 ,Y:0 ,Z:1*1000};
+    var endingLocation1   = {X:(1+Math.sqrt(3))*1000, Y:0, Z:2*1000};
+    var startingLocation2 = {X:-2*1000 ,Y:0 ,Z:2*1000};
+    var endingLocation2   = {X:(-2+Math.sqrt(3))*1000, Y:0, Z:1*1000};
 
     var rule = util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2);
 
@@ -59,24 +98,25 @@ describe("util.translateToCoordinateSpace()", function() {
     });
 
     // testing point1
-    var point1 = {X:-2+Math.sqrt(3),Y:0,Z:2}
+    var point1 = {X:(-2+Math.sqrt(3))*1000,Y:0,Z:2*1000}
 
     it("testing point1 translate to MASTER KINECT", function(){
-        expect(util.translateToCoordinateSpace(point1,rule).Z).to.be.closeTo(2.5,(1/util.ROUND_RATIO)); // objects equal
+        expect(util.translateToCoordinateSpace(point1,rule).Z).to.be.closeTo(2.5*1000,util.ROUND_RATIO); // objects equal
     });
 });
 
 // Test function util.getPersonAngle()
+
 describe("util.matrixTransformation()", function(){
-    var testLocation={X:1, Y:0.11, Z: 2};
-    var correctResult={X:1.8660254037844388,Y:0.11,Z:1.2320508075688774};
+    var testLocation={X:1*1000, Y:0.11, Z: 2*1000};
+    var correctResult={X:1.8660254037844388*1000,Y:0.11,Z:1.2320508075688774*1000};
 
     it("given (1,2) rotate 30 degrees clockwise should output new location (1.8660254037844386,1.2320508075688774)", function(){
-        expect(util.matrixTransformation(testLocation,30).Z).to.be.closeTo(1.2320508075688774,(1/util.ROUND_RATIO));//(util.matrixTransformation(testLocation,30), correctResult);
+        expect(util.matrixTransformation(testLocation,30).Z).to.be.closeTo(1.2320508075688774*1000,util.ROUND_RATIO);//(util.matrixTransformation(testLocation,30), correctResult);
     });
 
     it("given (1,2) rotate 30 degrees clockwise should output new location (1.8660254037844386,1.2320508075688774)", function(){
-        expect(util.matrixTransformation(testLocation,30).X).to.be.closeTo(1.8660254037844386,(1/util.ROUND_RATIO));//(util.matrixTransformation(testLocation,30), correctResult);
+        expect(util.matrixTransformation(testLocation,30).X).to.be.closeTo(1.8660254037844386*1000,util.ROUND_RATIO);//(util.matrixTransformation(testLocation,30), correctResult);
     });
 
 });
