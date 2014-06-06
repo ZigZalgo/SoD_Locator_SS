@@ -4,20 +4,39 @@ var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
 
+describe("util.getSpaceTransitionRule()", function() {
+    // starting and ending point for each kinect sensor sees the same project
+    var startingLocation1 = {X:2*1000 ,Y:0 ,Z:3*1000};
+    var endingLocation1   = {X:4*1000, Y:0, Z:1*1000};
+    var startingLocation2 = {X:-(5/Math.sqrt(2))*1000 ,Y:0 ,Z:(5/Math.sqrt(2))*1000};
+    var endingLocation2   = {X:-(1/Math.sqrt(2))*1000, Y:0, Z:(5/Math.sqrt(2))*1000};
+
+
+
+    var expectedResult = {X:2*1000,Y:0,Z:-2*1000}
+    var angle = 45;
+    it("testing Final Result of getSpaceTransitionRule  X", function(){
+        expect(util.getSpaceTransitionRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle).X).to.be.closeTo(expectedResult.X,0.000001);
+    });
+
+    it("testing Final Result of getSpaceTransitionRule  Z", function(){
+        expect(util.getSpaceTransitionRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle).Z).to.be.closeTo(expectedResult.Z,0.000001);
+    });
+
+    /*it("testing Final Result of getTranslationRule", function(){
+     expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
+     to.eql({degree:-29.133,xDistance:-186,
+     zDistance:-156,startingLocation:startingLocation2}); // objects equal
+     });*/
+});
+
 // Testing Sample From Kinect
 describe("util.getTranslationRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
-    /*var startingLocation1 = {X:-49.3 ,Y:0 ,Z:1901};
+    var startingLocation1 = {X:-49.3 ,Y:0 ,Z:1901};
     var endingLocation1   = {X:350.9, Y:0, Z:1772};
     var startingLocation2 = {X:-235.8 ,Y:0 ,Z:1745};
-    var endingLocation2   = {X:175.8, Y:0, Z:1827};*/
-    var startingLocation1 = {X:-235.8 ,Y:0 ,Z:1745};
-    var endingLocation1   = {X:175.8, Y:0, Z:1827};
-
-    var startingLocation2 = {X:-49.3 ,Y:0 ,Z:1901};
-    var endingLocation2   = {X:350.9, Y:0, Z:1772};
-    console.log("Vector1 : "+ JSON.stringify(util.getVector(startingLocation1,endingLocation1)));
-    console.log("Vector2 : "+ JSON.stringify(util.getVector(startingLocation2,endingLocation2)));
+    var endingLocation2   = {X:175.8, Y:0, Z:1827};
 /*
     it("testing the calculation inside of getTranslationRule() for vector1)", function(){
         expect(util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:1*1000}); // objects equal
@@ -36,12 +55,12 @@ describe("util.getTranslationRule()", function() {
     it("testing the matrixTransformation inside of getTranslationRule() )", function(){
         expect(util.matrixTransformation(vector2,degree).Z).to.eql(-2000); // objects equal
     });
-*/
+*//*
     it("testing Final Result of getTranslationRule", function(){
         expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
             to.eql({degree:-29.133,xDistance:-186,
                 zDistance:-156,startingLocation:startingLocation2}); // objects equal
-    });
+    });*/
 });
 
 

@@ -222,12 +222,13 @@ function updateContentWithObjects(){
         for(var key in data){
             if(data.hasOwnProperty(key)){
                 console.log("SensorKey: "+key+"\tcalibration: "+JSON.stringify(data[key].calibration));
+                console.log("ySpaceTransition: "+JSON.stringify(data[key].calibration.ySpaceTransition));
                 var sensorX = 0; //get this from sensor list later on
                 var sensorY=  0;
                 var angle = 270;
                 if(data[key].calibration["Rotation"]!=0&&data[key].calibration["Rotation"]!=null){
-                    sensorX += (data[key].calibration["TransformX"]*majorGridLineWidth/1000);
-                    sensorY += (data[key].calibration["TransformY"]*majorGridLineWidth/1000);
+                    sensorX += (data[key].calibration["xSpaceTransition"]*majorGridLineWidth/1000);
+                    sensorY += (data[key].calibration["ySpaceTransition"]*majorGridLineWidth/1000);
                     angle += data[key].calibration["Rotation"];
                 }
                 console.log("X: "+sensorX+"  Y: "+sensorY+"  Angle: "+angle);

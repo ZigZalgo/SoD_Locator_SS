@@ -44,36 +44,43 @@ exports.translateToCoordinateSpace = function(location,translateRules)
  * startingLocation-- contains the location of the startingPoint of the sub-kinect
  */
 exports.getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
-    //console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
+    console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
     return(setVariables(fixSign));
 
     function setVariables(cb){
         var degreeBetweenVectors = util.getDegreeOfTwoVectors(util.getVector(startingLocation1,endingLocation1),util.getVector(startingLocation2,endingLocation2)); // using dot product
         var rotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2,endingLocation2),degreeBetweenVectors);               // clockwise
         var counterRotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2,endingLocation2),-degreeBetweenVectors);
-        //console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
-        return(cb(degreeBetweenVectors, rotatedVector2, counterRotatedVector2));
+        var rotatedVectorEndingLocation2 = util.matrixTransformation(endingLocation2,degreeBetweenVectors);
+        console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
+        return(cb(degreeBetweenVectors, rotatedVector2, counterRotatedVector2,rotatedVectorEndingLocation2));
     }
 
-    function fixSign(degreeBetweenVectors, rotatedVector2, counterRotatedVector2)
+    function fixSign(degreeBetweenVectors, rotatedVector2, counterRotatedVector2,rotatedVectorEndingLocation2)
     {
+        var spaceTransitionX = (endingLocation1.X-rotatedVectorEndingLocation2.X);
+        var spaceTransitionZ = (endingLocation1.Z-rotatedVectorEndingLocation2.Z);
         if(Math.abs(rotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(rotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
-            console.log("Positive!");
+
             return {
                 degree:degreeBetweenVectors,
                 xDistance: startingLocation1.X - startingLocation2.X,
                 zDistance: startingLocation1.Z - startingLocation2.Z,
+                xSpaceTransition:spaceTransitionX,
+                zSpaceTransition:spaceTransitionZ,
                 startingLocation:startingLocation2
             };
         }
         else if(Math.abs(counterRotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(counterRotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
-            console.log("Negative!");
+            var rotatedVectorEndingLocation2 = util.matrixTransformation(endingLocation2,-degreeBetweenVectors);
             return {
                 degree:-degreeBetweenVectors,
                 xDistance: startingLocation1.X - startingLocation2.X,
                 zDistance: startingLocation1.Z - startingLocation2.Z,
+                xSpaceTransition:spaceTransitionX,
+                zSpaceTransition:spaceTransitionZ,
                 startingLocation:startingLocation2
             };
         }else
@@ -82,6 +89,8 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
                 degree:NaN,
                 xDistance: startingLocation1.X - startingLocation2.X,
                 zDistance: startingLocation1.Z - startingLocation2.Z,
+                xSpaceTransition:spaceTransitionX,
+                zSpaceTransition:spaceTransitionZ,
                 startingLocation:startingLocation2
             };
         }
@@ -90,6 +99,25 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
 }
 
 
+//
+exports.getSpaceTransitionRule = function(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle){
+    //var vectorBetweenSpace = {X:0,Y:0,Z:0};
+// Using ending location points.
+    console.log("endingLocation1: "+ JSON.stringify(endingLocation1));
+    var rotatedVectorEndingLocation2 = this.matrixTransformation(endingLocation2,angle);
+    console.log("rotated: " + JSON.stringify(rotatedVectorEndingLocation2));
+    return testCallback(endingLocation1,rotatedVectorEndingLocation2);
+    function testCallback(endingLocation1,rotatedVectorEndingLocation2){
+        var x = endingLocation1.X-rotatedVectorEndingLocation2.X;
+        var z = endingLocation1.Z-rotatedVectorEndingLocation2.Z;
+        console.log('Z:'+JSON.stringify(z));
+        var transition = {X:x,Y:0,Z:z};
+        return transition;
+    }
+}
+/*exports.cb = function(stuffReturn){
+    return stuffReturn;
+}*/
 /*
  get the vector from two points, since we are dealing with 2D space we only care about X and Z value of a location
  @param:

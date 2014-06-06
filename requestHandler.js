@@ -167,7 +167,7 @@ exports.handleRequest = function (socket){
         var translateRule = locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints);
         frontend.clients[request.uncalibratedSensorID].emit('setTranslateRule', locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints))
         locator.sensors[request.uncalibratedSensorID].calibration =
-        {Rotation: translateRule.degree, TransformX: translateRule.xDistance, TransformY: translateRule.zDistance, StartingLocation: translateRule.startingLocation};
+        {Rotation: translateRule.degree, TransformX: translateRule.xDistance, TransformY: translateRule.zDistance,xSpaceTransition:translateRule.xSpaceTransition,ySpaceTransition:translateRule.zSpaceTransition, StartingLocation: translateRule.startingLocation};
         locator.sensors[request.uncalibratedSensorID].isCalibrated = true;
 
         fn(locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints));
