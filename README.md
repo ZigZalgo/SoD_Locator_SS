@@ -2,9 +2,9 @@ SoD_Locator_SS
 ==============
 
 This is the server for SoD, and it must be running for the other parts to connect to it.
- - SoD Sensor
- - Any iOS client using the SoD API (iPad, iPhone)
- - Any C# client using the SoD API (tabletop, Windows, SurfacePro)
+ - [SoD Sensor](https://github.com/ase-lab/SoD_Sensor)
+ - Any iOS client using the [SOD iOS Library](https://github.com/ase-lab/SoD_iOS_Library) (iPad, iPhone)
+ - Any C# client using the [SOD C# Library](https://github.com/ase-lab/SoD_CS_Library) (tabletop, Windows, SurfacePro)
 
 The server is written with Node.js, and uses several modules such as Express and Socket.IO.  
 
