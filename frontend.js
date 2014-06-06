@@ -41,7 +41,12 @@ app.get('/overviewJS', function (req, res) {
 app.get('/calibrateJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/calibrate.js');
 });
-
+app.get('/SoDLibrary', function (req, res) {
+    res.sendfile(__dirname + '/view/js/SoDLibrary.js');
+});
+app.get('/client', function (req, res) {
+    res.sendfile(__dirname + '/view/clientSample.html');
+});
 
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });

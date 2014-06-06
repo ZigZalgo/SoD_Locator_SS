@@ -13,9 +13,9 @@ var uniqueDeviceIDToSocketID = {}
 io = io.connect()
 
 
-/*
-* Show status on the status log
-*
+ /*
+ * Show status on the status log
+ *
 * */
 function showRedStatus(status){
     $('.status').html("<span class='red_status'>"+status+"</span>");

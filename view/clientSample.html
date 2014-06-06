@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Super Cool SOD.js Client</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/SoDLibrary"></script>
+
+
+    <script>
+        var io;
+        var text = $('#text');
+
+        $(document).ready(function(){
+            //$('#text').html();
+            /*
+            $("#calibration_flip").click(function(){
+                $("section#canvas").hide();
+                $("section#overview").hide();
+                $("#calibration_section").fadeIn("fast");
+                $('.status').html('<span class="normal_status">Calibrate Mode!</span>');
+                $('.normal_status').fadeIn(600);
+            });
+            $('#overview_flip').on('click',function(){
+                $("#calibration_section").hide();
+                $("section#canvas").fadeIn("fast");
+                $("section#overview").fadeIn("fast");
+                $('.status').html('<span class="normal_status">OverView</span>');
+                $('.normal_status').fadeIn(600);
+            });
+            $('#refreshSensors').on('click',function(){
+                refreshSensors();
+            });
+            */
+        });
+    </script>
+
+</head>
+<body onload="setup();">
+    <div>
+        <textarea id = "text"></textarea>
+    </div>
+</body>
+</html>
