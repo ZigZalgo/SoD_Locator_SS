@@ -94,7 +94,9 @@ exports.handleRequest = function (socket){
                         frontend.clients[key].emit("string", {data: request.data})
                     }
                 }
-                fn(locator.devices);
+                if(fn!=undefined){
+                    fn({status: "sent"});
+                }
                 break;
             case 'inView':
                 console.log("SENDING " + JSON.stringify(request.data) + " TO ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
@@ -104,7 +106,9 @@ exports.handleRequest = function (socket){
                         frontend.clients[key].emit("string", {data: request.data})
                     }
                 }
-                fn({status: "sent"});
+                if(fn!=undefined){
+                    fn({status: "sent"});
+                }
                 break;
             default:
                 for(var key in locator.devices){
@@ -112,7 +116,9 @@ exports.handleRequest = function (socket){
                         frontend.clients[key].emit("string", {data: request.data})
                     }
                 }
-                fn({status: "sent"});
+                if(fn!=undefined){
+                    fn({status: "sent"});
+                }
         }
     });
 
