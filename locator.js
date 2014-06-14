@@ -352,6 +352,7 @@ exports.registerDevice = function(socket, deviceInfo){
     if(devices[socket.id] != undefined){
         devices[socket.id].height = deviceInfo.height;
         devices[socket.id].width = deviceInfo.width;
+        devices[socket.id].deviceType = deviceInfo.deviceType;
 
         console.log("Device initiated late, updating height and width");
     }
@@ -359,6 +360,7 @@ exports.registerDevice = function(socket, deviceInfo){
         var device = new factory.Device(socket);
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
+        device.deviceType = deviceInfo.deviceType;
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
         if(deviceInfo.stationary == true){

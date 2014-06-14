@@ -11,19 +11,16 @@ exports.start = function (){
 exports.locator = locator;
 
 exports.handleRequest = function (socket){
-    socket.on('getDevicesInView', function (device, fn) {
-        fn(locator.getDevicesInFront(device.ID));
-    });
-
-    socket.on('registerDevice', function(deviceInfo, fn){ //changes this to stationary devices, or merge with iosAPI's "sendDeviceInfoToServer"
+    //START REGISTRATION EVENTS//////////////////////////////////////////////////////////////////////////////////////
+    socket.on('registerDevice', function(deviceInfo, fn){
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         locator.registerDevice(socket, deviceInfo);
-        if(fn != undefined){
-            fn(({"status": 'success'}));
+        if(fn!=undefined){
+            fn({"status": 'server: your device has been registered'})
         }
     });
 
-    socket.on('registerSensor', function(sensorInfo){
+    socket.on('registerSensor', function(sensorInfo, fn){
         frontend.clients[socket.id].clientType = "sensor";
         var sensor = new factory.Sensor(socket);
         sensor.sensorType = sensorInfo.sensorType;
@@ -32,35 +29,77 @@ exports.handleRequest = function (socket){
         sensor.frameHeight = sensorInfo.frameHeight;
         sensor.frameWidth = sensorInfo.frameWidth;
         locator.registerSensor(sensor);
+        if(fn!=undefined){
+            fn({"status": 'server: you registered as a "sensor"'})
+        }
     });
 
-    socket.on('registerWebClient', function(clientInfo){
+    socket.on('registerWebClient', function(clientInfo, fn){
         frontend.clients[socket.id].clientType = "webClient";
+        if(fn!=undefined){
+            fn({"status": 'server: you registered as a "webClient"'})
+        }
     });
+    //END REGISTRATION EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
-    socket.on('setPairingState', function (data) {
+    //START PAIRING EVENTS///////////////////////////////////////////////////////////////////////////////////////////
+    socket.on('setPairingState', function (data, fn) {
         locator.setPairingState(socket.id);
+        if(fn!=undefined){
+            fn({"status": 'server: device pairing state has been set to "pairing"'})
+        }
     });
 
-    socket.on('updateOrientation', function (request) {
-        locator.updateDeviceOrientation(request.orientation, socket);
+    socket.on('pairDeviceWithPerson', function (request, fn) {
+        if(request.deviceSocketID != undefined){
+            locator.pairDevice(request.deviceSocketID, request.uniquePersonID, socket);
+        }
+        else{
+            locator.pairDevice(socket.id, request.uniquePersonID, socket);
+        }
+
+        fn(({"status": 'success'}));
     });
 
-    socket.on('unpairDevice', function (request) {
+    socket.on('unpairDevice', function (request, fn) {
         locator.unpairDevice(socket.id, request.personID);
+        if(fn!=undefined){
+            fn({"status": 'server: your device has been unpaired'})
+        }
     });
 
-    socket.on('unpairAllDevices', function (request) {
+    socket.on('unpairAllDevices', function (request, fn) {
         locator.unpairAllDevices();
+        if(fn!=undefined){
+            fn({"status": 'server: all devices have been unpaired'})
+        }
     });
 
     socket.on('unpairAllPeople', function (request, fn) {
         locator.unpairAllPeople();
-        fn({"status": 'success'});
+        if(fn!=undefined){
+            fn({"status": 'server: all people have been unpaired'})
+        }
+    });
+    //END PAIRING EVENTS/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    //START LOCATOR SERVICES/////////////////////////////////////////////////////////////////////////////////////////
+    socket.on('getDevicesInView', function (device, fn) {
+        if(fn!=undefined){
+            fn(locator.getDevicesInFront(device.ID));
+        }
+    });
+
+    socket.on('updateOrientation', function (request) {
+        //not checking for fn(callback), since adding a callback here would be costly
+        locator.updateDeviceOrientation(request.orientation, socket);
     });
 
     socket.on('getPeopleFromServer', function (request, fn) {
-        fn((locator.persons));
+        if(fn!=undefined){
+            fn((locator.persons));
+        }
     });
 
     socket.on('getClientsFromServer', function (request, fn) {
@@ -72,20 +111,20 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
-        //console.log("Get Devices with Selection: " + request.selection);
         switch(request.selection){
             case 'all':
                 fn(locator.devices);
                 break;
             case 'inView':
-                console.log("GETTING ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
                 fn(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
                 break;
             default:
                 fn(locator.devices);
         }
     });
+    //END LOCATOR SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
+    //START SENDING SERVICES/////////////////////////////////////////////////////////////////////////////////////////
     socket.on('sendStringToDevicesWithSelection', function (request, fn) {
         switch(request.selection){
             case 'all':
@@ -99,7 +138,6 @@ exports.handleRequest = function (socket){
                 }
                 break;
             case 'inView':
-                console.log("SENDING " + JSON.stringify(request.data) + " TO ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
                 var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
                 for(var key in devicesInView){
                     if(devicesInView.hasOwnProperty(key)){
@@ -122,16 +160,43 @@ exports.handleRequest = function (socket){
         }
     });
 
-    socket.on('forcePairRequest', function (request, fn) {
-        if(request.deviceSocketID != undefined){
-            locator.pairDevice(request.deviceSocketID, request.uniquePersonID, socket);
+    socket.on('sendDictionaryToDevicesWithSelection', function (request, fn) {
+        switch(request.selection){
+            case 'all':
+                for(var key in locator.devices){
+                    if(locator.devices.hasOwnProperty(key)){
+                        frontend.clients[key].emit("dictionary", {data: request.data})
+                    }
+                }
+                if(fn!=undefined){
+                    fn({status: "sent"});
+                }
+                break;
+            case 'inView':
+                console.log("SENDING " + JSON.stringify(request.data) + " TO ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
+                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
+                for(var key in devicesInView){
+                    if(devicesInView.hasOwnProperty(key)){
+                        frontend.clients[key].emit("dictionary", {data: request.data})
+                    }
+                }
+                if(fn!=undefined){
+                    fn({status: "sent"});
+                }
+                break;
+            default:
+                for(var key in locator.devices){
+                    if(locator.devices.hasOwnProperty(key)){
+                        frontend.clients[key].emit("dictionary", {data: request.data})
+                    }
+                }
+                if(fn!=undefined){
+                    fn({status: "sent"});
+                }
         }
-        else{
-            locator.pairDevice(socket.id, request.uniquePersonID, socket);
-        }
-
-        fn(({"status": 'success'}));
     });
+
+    //END SENDING SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
     socket.on('broadcast', function (request, fn) {
         socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});

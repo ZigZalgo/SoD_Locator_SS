@@ -52,7 +52,7 @@
         $('body').on('click','.get_unpaired_people',function(){
         var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
             console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ $(this).text());
-            io.emit("forcePairRequest",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
+            io.emit("pairDeviceWithPerson",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
                 console.log(JSON.stringify(callback));
             });
         })
