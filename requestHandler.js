@@ -129,33 +129,33 @@ exports.handleRequest = function (socket){
         switch(request.selection){
             case 'all':
                 for(var key in locator.devices){
-                    if(locator.devices.hasOwnProperty(key)){
+                    if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("string", {data: request.data})
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "sent"});
+                    fn({status: "server: string sent"});
                 }
                 break;
             case 'inView':
                 var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
                 for(var key in devicesInView){
-                    if(devicesInView.hasOwnProperty(key)){
+                    if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("string", {data: request.data})
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "sent"});
+                    fn({status: "server: string sent"});
                 }
                 break;
             default:
                 for(var key in locator.devices){
-                    if(locator.devices.hasOwnProperty(key)){
+                    if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("string", {data: request.data})
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "sent"});
+                    fn({status: "server: string sent"});
                 }
         }
     });
@@ -164,34 +164,78 @@ exports.handleRequest = function (socket){
         switch(request.selection){
             case 'all':
                 for(var key in locator.devices){
-                    if(locator.devices.hasOwnProperty(key)){
+                    if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("dictionary", {data: request.data})
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "sent"});
+                    fn({status: "server: dictionary sent"});
                 }
                 break;
             case 'inView':
                 console.log("SENDING " + JSON.stringify(request.data) + " TO ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
                 var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
                 for(var key in devicesInView){
-                    if(devicesInView.hasOwnProperty(key)){
+                    if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("dictionary", {data: request.data})
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "sent"});
+                    fn({status: "server: dictionary sent"});
                 }
                 break;
             default:
                 for(var key in locator.devices){
-                    if(locator.devices.hasOwnProperty(key)){
+                    if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("dictionary", {data: request.data})
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "sent"});
+                    fn({status: "server: dictionary sent"});
+                }
+        }
+    });
+
+    socket.on('requestDataFromSelection', function (request, fn) {
+        switch(request.selection){
+            case 'all':
+                for(var key in locator.devices){
+                    if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
+                        frontend.clients[key].emit("request", {requestName: request.requestName}, function(data){
+                            console.log("Got data from request: " + data);
+                            socket.emit("requestedData", data);
+                        })
+                    }
+                }
+                if(fn!=undefined){
+                    fn({status: "server: request sent"});
+                }
+                break;
+            case 'inView':
+                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
+                for(var key in devicesInView){
+                    if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
+                        frontend.clients[key].emit("request", {requestName: request.requestName}, function(data){
+                            console.log("Got data from request: " + data);
+                            socket.emit("requestedData", data);
+                        })
+                    }
+                }
+                if(fn!=undefined){
+                    fn({status: "server: request sent"});
+                }
+                break;
+            default:
+                for(var key in locator.devices){
+                    if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
+                        frontend.clients[key].emit("request", {requestName: request.requestName}, function(data){
+                            console.log("Got data from request: " + data);
+                            socket.emit("requestedData", data);
+                        })
+                    }
+                }
+                if(fn!=undefined){
+                    fn({status: "server: request sent"});
                 }
         }
     });
