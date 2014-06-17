@@ -294,4 +294,5 @@ exports.handleRequest = function (socket){
         locator.printDevices();
         fn((locator.devices));
     });
+
 }

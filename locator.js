@@ -357,12 +357,14 @@ exports.registerDevice = function(socket, deviceInfo){
         console.log("Device initiated late, updating height and width");
     }
     else{
+
         var device = new factory.Device(socket);
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
         device.deviceType = deviceInfo.deviceType;
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
+        device.deviceIP = socket.handshake.address.address;
         if(deviceInfo.stationary == true){
             device.stationary = deviceInfo.stationary;
             device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}

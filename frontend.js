@@ -4,7 +4,7 @@ var app = express();
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
-io.set('log level',5);
+io.set('log level',0);
 var requestHandler = require('./requestHandler');
 var factory = require('./factory');
 var locator = requestHandler.locator;
@@ -49,6 +49,7 @@ app.get('/client', function (req, res) {
 });
 
 io.sockets.on('connection', function (socket) {
+
     socket.on('error', function() { console.log("error"); });
     console.log("something connected with sessionID: " + socket.id);
     requestHandler.handleRequest(socket);

@@ -79,6 +79,7 @@ function Device(socket){
         this.intersectionPoint = {X: 0, Y: 0};
         this.lastUpdated = new Date();
         this.stationary = false;
+        this.deviceIP = null;
     }
     catch(err){
     }
