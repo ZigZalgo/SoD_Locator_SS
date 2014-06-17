@@ -110,7 +110,7 @@ exports.getSpaceTransitionRule = function(startingLocation1,endingLocation1,star
     function testCallback(endingLocation1,rotatedVectorEndingLocation2){
         var x = endingLocation1.X-rotatedVectorEndingLocation2.X;
         var z = endingLocation1.Z-rotatedVectorEndingLocation2.Z;
-        console.log('Z:'+JSON.stringify(z));
+       //console.log('Z:'+JSON.stringify(z));
         var transition = {X:x,Y:0,Z:z};
         return transition;
     }

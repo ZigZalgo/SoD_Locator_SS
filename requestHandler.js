@@ -107,8 +107,12 @@ exports.handleRequest = function (socket){
         var selectedValues = {};
         for(var key in frontend.clients){
             selectedValues[key] = {socketID: frontend.clients[key].id, clientType: frontend.clients[key].clientType}
+
         };
-        fn(selectedValues);
+
+        if(fn != undefined){
+            fn(selectedValues);
+        }
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
@@ -135,7 +139,7 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: string sent"});
+                    fn({status: "server: string sent to all"});
                 }
                 break;
             case 'inView':
@@ -146,7 +150,7 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: string sent"});
+                    fn({status: "server: string sent to inView"});
                 }
                 break;
             default:
@@ -272,7 +276,9 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getSensorsFromServer', function (request, fn) {
-        fn((locator.sensors));
+        if(fn!=undefined){
+            fn((locator.sensors));
+        }
     });
 
     socket.on('getCalibrationFrames', function(request, fn){
@@ -294,7 +300,9 @@ exports.handleRequest = function (socket){
     socket.on('getDevicesFromServer',function(request,fn){
         console.log("get Devices From Server!");
         locator.printDevices();
-        fn((locator.devices));
+        if(fn!=undefined){
+            fn((locator.devices));
+        }
     });
 
 

@@ -5,7 +5,7 @@
  *To run the test:
  *      1, Fire up the server
  *          - through command: "node frontend.js
- *      2, run command : "mocha"
+ *      2, run command : "mocha -R -nyan"
  . */
 
 var chai = require('chai');
@@ -23,54 +23,102 @@ var options ={
     transports: ['websocket'],
     'force new connection': true
 };
+// Disconnect clients through array
+function recursiveDisconnect(Clients, callback) {
+    Client = Clients.pop();
+    Client.on('disconnect',function() {
+        if(Clients.length > 0) recursiveDisconnect(Clients);
+        else {
+            callback();
+        }
+    });
 
+    Client.disconnect();
+}
 
-describe("register", function () {
-    it('Should be able to register clients', function(done){
-
+// testing register functions
+describe("register functions", function () {
+    it('should be able to register everything(sensor,clients,devices)', function(done){
         var client = io.connect(socketURL,options);
         client.on('connect',function(data){
+            /*
+            * Testing registering functions
+            * */
             client.emit('registerWebClient',{},function(data){
-
-                console.log(data.status);
                 data.status.should.equal('server: you registered as a "webClient"');
+            });
+
+            /*
+            * Testing all the after effect for registering.
+            * */
+            client.emit('getClientsFromServer',{},function(data){
+                Object.keys(data).length.should.be.above(0);
                 client.disconnect();
                 done();
-            });
+            })
+
         })
     });
-    /*var client1, client2, client3;
-     var message = 'Hello World';
-     var messages = 0;
 
-     var checkMessage = function(client){
-     client.on('message', function(msg){
-     message.should.equal(msg);
-     client.disconnect();
-     messages++;
-     if(messages === 3){
-     done();
-     };
-     });
-     };
+    it('should be able to register sensor', function(done){
+        var client = io.connect(socketURL,options);
+        client.on('connect',function(data){
+            // register sensor
+            client.emit('registerSensor',{},function(data){
+                data.status.should.equal('server: you registered as a "sensor"');
+                client.emit('registerSensor',{});
+            });
 
-     client1 = io.connect(socketURL, options);
-     checkMessage(client1);
+            /*
+             * Testing all the after effect for registering.
+             * */
+            client.emit('getSensorsFromServer',{},function(data){
 
-     client1.on('connect', function(data){
-     client2 = io.connect(socketURL, options);
-     checkMessage(client2);
+                Object.keys(data).length.should.be.equal(2);
+                client.disconnect();
+                done();
+            })
+        })
+    });
 
-     client2.on('connect', function(data){
-     client3 = io.connect(socketURL, options);
-     checkMessage(client3);
+    it('should be able to register device', function(done){
+        var client = io.connect(socketURL,options);
+        client.on('connect',function(data){
+            // register sensor
+            client.emit('registerDevice',{},function(data){
+                data.status.should.equal('server: your device has been registered');
+                client.emit('registerDevice',{});
+            });
 
-     client3.on('connect', function(data){
-     client2.send(message);
-     });
-     });
-     });*/
+            /*
+             * Testing all the after effect for registering.
+             * */
+            client.emit('getDevicesFromServer',{},function(data){
 
-
-
+                Object.keys(data).length.should.be.equal(2);
+                client.disconnect();
+                done();
+            })
+        });
+    })
 });
+
+
+//testing send data
+describe("send data", function () {
+    it('should sendString To Devices With Selection)', function(done){
+        var client = io.connect(socketURL,options);
+        client.on('connect',function(data){
+            client.emit('sendStringToDevicesWithSelection',{},function(data){
+                data.status.should.be.equal('server: string sent');
+
+                client.emit('sendStringToDevicesWithSelection',{selection:'all'},function(data){
+                    data.status.should.be.equal('server: string sent to all');
+                    client.disconnect();
+                    done();
+                });
+            });
+        })
+    })
+});
+
