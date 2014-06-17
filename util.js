@@ -44,7 +44,7 @@ exports.translateToCoordinateSpace = function(location,translateRules)
  * startingLocation-- contains the location of the startingPoint of the sub-kinect
  */
 exports.getTranslationRule= function(startingLocation1,endingLocation1,startingLocation2,endingLocation2){
-    console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
+    //console.log("S1P1: " + JSON.stringify(startingLocation1) + "     S1P2: " + JSON.stringify(endingLocation1) + "    S2P1: " + JSON.stringify(startingLocation2) + "     S2P2: " + JSON.stringify(endingLocation2));
     return(setVariables(fixSign));
 
     function setVariables(cb){
@@ -52,7 +52,7 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
         var rotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2,endingLocation2),degreeBetweenVectors);               // clockwise
         var counterRotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2,endingLocation2),-degreeBetweenVectors);
         var rotatedVectorEndingLocation2 = util.matrixTransformation(endingLocation2,degreeBetweenVectors);
-        console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
+        //console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
         return(cb(degreeBetweenVectors, rotatedVector2, counterRotatedVector2,rotatedVectorEndingLocation2));
     }
 
@@ -103,9 +103,9 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
 exports.getSpaceTransitionRule = function(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle){
     //var vectorBetweenSpace = {X:0,Y:0,Z:0};
 // Using ending location points.
-    console.log("endingLocation1: "+ JSON.stringify(endingLocation1));
+    //console.log("endingLocation1: "+ JSON.stringify(endingLocation1));
     var rotatedVectorEndingLocation2 = this.matrixTransformation(endingLocation2,angle);
-    console.log("rotated: " + JSON.stringify(rotatedVectorEndingLocation2));
+    //console.log("rotated: " + JSON.stringify(rotatedVectorEndingLocation2));
     return testCallback(endingLocation1,rotatedVectorEndingLocation2);
     function testCallback(endingLocation1,rotatedVectorEndingLocation2){
         var x = endingLocation1.X-rotatedVectorEndingLocation2.X;

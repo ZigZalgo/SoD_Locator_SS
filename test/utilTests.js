@@ -92,7 +92,7 @@ describe("util.getTranslationRule()", function() {
     it("testing Final Result of getTranslationRule", function(){
         expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
             to.eql({degree:-degree,xDistance:3000,
-                zDistance:-1000,startingLocation:startingLocation2}); // objects equal
+                zDistance:-1000,xSpaceTransition:1999.997474235544,zSpaceTransition:1267.9466666666667,startingLocation:startingLocation2}); // objects equal
     });
 });
 

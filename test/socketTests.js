@@ -2,18 +2,19 @@
  * Created by yuxiw_000 on 6/16/14.
  */
 /* We mainly test everything related to socket.io with mocha & chai
- *To runt the test: "mocha"
+ *To run the test: "mocha"
  . */
 
-
-var should = require('should');
+var chai = require('chai');
+var should = chai.should();
+var mocha = require('mocha');
 var frontend = require('../frontend');
 //var io = frontend.io;
 //var clients = frontend.clients;
-var io = require('socket.io');
-io = io.connect();
+var io = require('socket.io/node_modules/socket.io-client');
 describe("tryTesting",function(){
     /* Test 1 - A Single User */
+    /*
     it('try to test',function(done){
         //var client = io.connect(socketURL, options);
         console.log("am i here?");
@@ -27,4 +28,20 @@ describe("tryTesting",function(){
         })
 
     });
+*/
+    it("echos message", function (done) {
+        var client = io.connect();
+
+        client.on("connect", function () {
+            client.once("echo", function (message) {
+                message.should.equal("Hello World");
+
+                client.disconnect();
+                done();
+            });
+
+            client.emit("echo", "Hello World");
+        });
+    });
+
 });

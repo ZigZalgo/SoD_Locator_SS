@@ -160,6 +160,7 @@ exports.handleRequest = function (socket){
         }
     });
 
+
     socket.on('sendDictionaryToDevicesWithSelection', function (request, fn) {
         switch(request.selection){
             case 'all':
@@ -293,6 +294,15 @@ exports.handleRequest = function (socket){
         console.log("get Devices From Server!");
         locator.printDevices();
         fn((locator.devices));
+    });
+
+
+    socket.on("echo", function (msg, callback) {
+        callback = callback || function () {};
+
+        socket.emit("echo", msg);
+
+        callback(null, "Done.");
     });
 
 }
