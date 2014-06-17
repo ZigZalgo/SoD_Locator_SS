@@ -12,6 +12,7 @@ exports.locator = locator;
 
 exports.handleRequest = function (socket){
     //START REGISTRATION EVENTS//////////////////////////////////////////////////////////////////////////////////////
+
     socket.on('registerDevice', function(deviceInfo, fn){
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         locator.registerDevice(socket, deviceInfo);
@@ -297,12 +298,5 @@ exports.handleRequest = function (socket){
     });
 
 
-    socket.on("echo", function (msg, callback) {
-        callback = callback || function () {};
-
-        socket.emit("echo", msg);
-
-        callback(null, "Done.");
-    });
 
 }

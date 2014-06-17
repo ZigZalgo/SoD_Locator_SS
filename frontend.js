@@ -50,6 +50,8 @@ app.get('/client', function (req, res) {
 
 io.sockets.on('connection', function (socket) {
 
+
+
     socket.on('error', function() { console.log("error"); });
     console.log("something connected with sessionID: " + socket.id);
     requestHandler.handleRequest(socket);
