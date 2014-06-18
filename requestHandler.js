@@ -130,11 +130,20 @@ exports.handleRequest = function (socket){
     //END LOCATOR SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
     //START SENDING SERVICES/////////////////////////////////////////////////////////////////////////////////////////
+
+    /*
+    * Send string to devices based on selection
+    *   'all'       -- So far we can send to all the devices that are connected to the server,
+    *   'inView'    -- The devices in the view of the device who calls this function.
+    *   ''          -- to nobody. Server still acknowledge the event
+    **/
     socket.on('sendStringToDevicesWithSelection', function (request, fn) {
         switch(request.selection){
             case 'all':
                 for(var key in locator.devices){
+                    // send to all the devices except the one who calls it.
                     if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
+                        console.log('sending to a '+locator.devices[key].deviceType);
                         frontend.clients[key].emit("string", {data: request.data})
                     }
                 }
