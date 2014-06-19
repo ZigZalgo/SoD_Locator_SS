@@ -216,8 +216,7 @@ exports.handleRequest = function (socket){
             case 'all':
                 for(var key in locator.devices){
                     if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
-                        frontend.clients[key].emit("request", {requestName: request.requestName}, function(data){
-                            console.log("Got data from request: " + data);
+                        frontend.clients[key].emit("request", {data: request.data}, function(data){
                             socket.emit("requestedData", data);
                         })
                     }
@@ -230,8 +229,7 @@ exports.handleRequest = function (socket){
                 var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
                 for(var key in devicesInView){
                     if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
-                        frontend.clients[key].emit("request", {requestName: request.requestName}, function(data){
-                            console.log("Got data from request: " + data);
+                        frontend.clients[key].emit("request", {data: request.data}, function(data){
                             socket.emit("requestedData", data);
                         })
                     }
@@ -243,8 +241,7 @@ exports.handleRequest = function (socket){
             default:
                 for(var key in locator.devices){
                     if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
-                        frontend.clients[key].emit("request", {requestName: request.requestName}, function(data){
-                            console.log("Got data from request: " + data);
+                        frontend.clients[key].emit("request", {data: request.data}, function(data){
                             socket.emit("requestedData", data);
                         })
                     }
