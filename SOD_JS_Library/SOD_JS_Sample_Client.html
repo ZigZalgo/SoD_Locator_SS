@@ -68,6 +68,7 @@
         var localSocket;
         SOD.prototype = {
             init: function(serverURL,socketURL){
+                //connect socket register device and hearing events
                 $.getScript(socketURL,function(){
                     localSocket = io.connect(serverURL);
                     localSocket.on('connect',function(data){
@@ -186,7 +187,10 @@
             $("#requestToAll").on('click',function(){
                 var selection = 'all';
                 var data = $('#requestData').val();
-                sod.requestDataFromSelection(selection,data);
+                sod.requestDataFromSelection(selection,data,testFunction);
+                localSocket.on('request',function(data){
+                    console.log('received request: ' + data.data);
+                });
             }) // end of click
 
         })// end of document ready
