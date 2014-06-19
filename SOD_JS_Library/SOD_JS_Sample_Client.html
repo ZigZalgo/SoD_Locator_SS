@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>SOD Client</title>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <script>
+        function showRedStatus(status){
+            $('.status').html("<span class='red_status'>"+status+"</span>");
+            $('.red_status').fadeIn(600);
+        }
+
+        function showGreenStatus(status){
+            $('.status').html("<span class='green_status'>"+status+"</span>");
+            $('.green_status').fadeIn(600);
+        }
+
+        function showNormalStatus(status){
+            $('.status').html("<span class='normal_status'>"+status+"</span>");
+            $('.normal_status').fadeIn(600);
+        }
+
+
+
+
+
+        //var SOD = Class.create();
+        //var SOD = null;
+
+/*
+        $.getScript( socketURL, function() {
+            socket= io.connect(serverURL);
+
+                Register = function(){
+                device.socketID = socket.id;
+                socket.emit('registerDevice',device,function(status){
+                    console.log(status.status);
+                })
+            }
+        });// end of get script
+*/
+        var device = {  ID : null,
+            socketID : null,
+            deviceType : "JSClient",
+            location : {X: null, Y: null, Z:null},
+            orientation : null,
+            FOV : 0,
+            height : null,
+            width :  null,
+            ownerID : null,
+            pairingState : "unpaired",
+            intersectionPoint : {X: 0, Y: 0},
+            lastUpdated : new Date(),
+            stationary : false,
+            deviceIP : null
+        }
+        function SOD(serverURL,socketURL){
+            this.serverURL = serverURL;
+            this.socketURL = socketURL;
+            this.socket = null;
+            $.getScript(socketURL,function(){
+                this.socket = io.connect(serverURL);
+            })
+        }
+        SOD.prototype = {
+            init: function(){
+                console.log('socketURL: '+this.socketURL);
+            },
+            getDeviceWithSelection : function(selection,callbackFunction){
+                socketLocal.emit('getDevicesWithSelection',{selection:selection},callbackFunction)
+            },
+            reconnect : function(callbackFunction){
+            if(!socketLocal.socket.connected){
+                this.initialize();
+            }else{
+                console.log('Device is already connected');
+            }
+        },
+            getAllPeople : function(callbackFunction){
+                socketLocal.emit('getPeopleFromServer',{},callbackFunction);
+            },
+            unpairDevice : function(callbackFunction){
+                socketLocal.emit('unpairDevice',{},callbackFunction);
+            },
+            unpairAllPeople : function(callbackFunction){
+                socketLocal.emit('unpairAllPeople',{},callbackFunction);
+            },
+            unpairAllDevices : function(callbackFunction){
+                socketLocal.emit('unpairAllDevices',{},callbackFunction);
+            },
+            requestDataFromSelection : function(selection,requestName){
+                console.log(JSON.stringify({selection:selection,requestName:requestName}));
+                socketLocal.emit('requestDataFromSelection',{selection:selection,requestName:requestName});
+            }
+
+        }
+
+        $(document).ready(function(){
+            var port = $('input#serverPort').val();
+            var serverIP = $('input#serverIP').val();
+            var serverURL = "http://"+serverIP+":"+port;
+            var socketURL = serverURL+"/socket.io/socket.io.js";
+            var libraryURL= serverURL+"/SOD_JS_Library"
+
+            //initilization:
+            var sod = new SOD(serverURL,socketURL);
+            sod.init;
+            sod.socket.on('connect',function(data){
+                console.log('Socket Connected ...');
+                this.socket.emit('registerDevice',device,function(status){
+                    console.log(status.status);
+                });
+            })
+            /*
+            sod.socket.on('connect',function(data){
+                console.log('im here!');
+            });
+            */
+            //default callback function
+            var testFunction = function(data){
+                if(data.status!=undefined){
+                    showGreenStatus(data.status);
+                }
+                else{
+                    console.log("status: "+JSON.stringify(data));
+                };
+            }
+            //SOD.initialize(serverURL,socketURL);//= new SOD(serverURL,socketURL);
+
+            $("#connect").on('click',function(){
+                sod.initialize(serverURL,socketURL);
+            }) // end of click
+
+            $("#setSocket").on('click',function(){
+
+                var socket = sod.socket;
+                socket.on('request',function(data){
+                    console.log(JSON.stringify('Requested requestName: '+ data.requestName));
+                });
+
+            }) // end of click
+
+            $("#reconnect").on('click',function(){
+                sod.reconnect(testFunction);
+            }) // end of click
+
+            $("#getDevicesAll").on('click',function(){
+
+                sod.getDeviceWithSelection('all',testFunction);
+            }) // end of click
+
+            $("#getDevicesInView").on('click',function(){
+                sod.getDeviceWithSelection('inView',testFunction);
+            }) // end of click
+
+            $("#getPeopleAll").on('click',function(){
+                sod.getAllPeople(testFunction);
+            }) // end of click
+
+            $("#unpairDevice").on('click',function(){
+                sod.unpairDevice(testFunction);
+            }) // end of click
+
+            $("#unpairAllPeople").on('click',function(){
+                sod.unpairAllPeople(testFunction);
+            }) // end of click
+
+            $("#unpairAllDeivces").on('click',function(){
+                sod.requestDataFromSelection(testFunction);
+            }) // end of click
+
+            $("#requestToAll").on('click',function(){
+                var selection = 'all';
+                var requestName = $('#requestName').val();
+                sod.requestDataFromSelection(selection,requestName);
+            }) // end of click
+
+        })// end of document ready
+    </script>
+
+    <script src="SOD_JS_Library.js"> </script>
+    <link href="sample_client_style.css" rel="stylesheet"/>
+
+</head>
+<body onload="">
+<div id="page-wrap">
+    <section id="top">
+        <header>SOD Client
+        </header>
+    </section>
+
+    <nav id="mode_selection" >
+        <div class="block"></div>
+            <table>
+                <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'></td></tr>
+                <tr><td><li id="setSocket">Set Socket</li></td></tr>
+                <tr><td><li id="reconnect">Reconnect</li></td></tr>
+                <tr><td><li id="getPeopleAll">Get All People</li></td></tr>
+                <tr><td><li id="getDevicesAll">Get Devices(All)</li></td></tr>
+                <tr><td><li id="getDevicesInView">Get Devices(inView)</li></td></tr>
+                <tr><td><li id="unpairDevice">Unpair Device</li></td></tr>
+                <tr><td><li id="unpairAllDeivces">Unpair All Device</li></td></tr>
+                <tr><td><li id="unpairAllPeople">Unpair All People</li></td></tr>
+                <tr><td><li id="requestToAll">Request(All)</li> </td><td>Request Name<input id='requestName'  type="text" value='Brazil request something!! '></td></tr>
+                <tr><td><li id="reply">Reply</li> </td><td>Reply Data<input id='replyData'  type="text" value='Brazil reply something!!'></td></tr>
+            </table>
+        </nav>
+    <div class="status_wrap">
+        <h1>status:</h1>
+        <div class="status"></div> <!--This is where the data from the server is added-->
+    </div>
+
+</div><!-- closing page wrap -->
+</body>
+</html>
