@@ -57,43 +57,59 @@
             stationary : false,
             deviceIP : null
         }
-        function SOD(serverURL,socketURL){
-            this.serverURL = serverURL;
-            this.socketURL = socketURL;
-            this.socket = null;
-            $.getScript(socketURL,function(){
-                this.socket = io.connect(serverURL);
-            })
+
+
+        function SOD(){
+            //this.serverURL = serverURL;
+            //this.socketURL = socketURL;
+            this.socket= null;
+
         }
+        var localSocket;
         SOD.prototype = {
-            init: function(){
-                console.log('socketURL: '+this.socketURL);
+            init: function(serverURL,socketURL){
+                $.getScript(socketURL,function(){
+                    localSocket = io.connect(serverURL);
+                    localSocket.on('connect',function(data){
+                        console.log('Socket Connected ...');
+                        //console.log(device);
+                        localSocket.emit('registerDevice',device,function(status){
+                            console.log(status.status);
+
+                        });
+
+                    })
+                    localSocket.on('request',function(data){
+                        console.log('received request: ' + data.data);
+                    });
+                })
+
             },
             getDeviceWithSelection : function(selection,callbackFunction){
-                socketLocal.emit('getDevicesWithSelection',{selection:selection},callbackFunction)
+                localSocket.emit('getDevicesWithSelection',{selection:selection},callbackFunction)
             },
             reconnect : function(callbackFunction){
-            if(!socketLocal.socket.connected){
+            if(!localSocket.socket.connected){
                 this.initialize();
             }else{
                 console.log('Device is already connected');
             }
         },
             getAllPeople : function(callbackFunction){
-                socketLocal.emit('getPeopleFromServer',{},callbackFunction);
+                localSocket.emit('getPeopleFromServer',{},callbackFunction);
             },
             unpairDevice : function(callbackFunction){
-                socketLocal.emit('unpairDevice',{},callbackFunction);
+                localSocket.emit('unpairDevice',{},callbackFunction);
             },
             unpairAllPeople : function(callbackFunction){
-                socketLocal.emit('unpairAllPeople',{},callbackFunction);
+                localSocket.emit('unpairAllPeople',{},callbackFunction);
             },
             unpairAllDevices : function(callbackFunction){
-                socketLocal.emit('unpairAllDevices',{},callbackFunction);
+                localSocket.emit('unpairAllDevices',{},callbackFunction);
             },
-            requestDataFromSelection : function(selection,requestName){
-                console.log(JSON.stringify({selection:selection,requestName:requestName}));
-                socketLocal.emit('requestDataFromSelection',{selection:selection,requestName:requestName});
+            requestDataFromSelection : function(selection,data){
+                console.log(JSON.stringify({selection:selection,data:data}));
+                localSocket.emit('requestDataFromSelection',{selection:selection,data:data});
             }
 
         }
@@ -106,14 +122,9 @@
             var libraryURL= serverURL+"/SOD_JS_Library"
 
             //initilization:
-            var sod = new SOD(serverURL,socketURL);
-            sod.init;
-            sod.socket.on('connect',function(data){
-                console.log('Socket Connected ...');
-                this.socket.emit('registerDevice',device,function(status){
-                    console.log(status.status);
-                });
-            })
+            var sod = new SOD();
+            sod.init(serverURL,socketURL);
+            console.log(sod);
             /*
             sod.socket.on('connect',function(data){
                 console.log('im here!');
@@ -174,8 +185,8 @@
 
             $("#requestToAll").on('click',function(){
                 var selection = 'all';
-                var requestName = $('#requestName').val();
-                sod.requestDataFromSelection(selection,requestName);
+                var data = $('#requestData').val();
+                sod.requestDataFromSelection(selection,data);
             }) // end of click
 
         })// end of document ready
@@ -204,7 +215,7 @@
                 <tr><td><li id="unpairDevice">Unpair Device</li></td></tr>
                 <tr><td><li id="unpairAllDeivces">Unpair All Device</li></td></tr>
                 <tr><td><li id="unpairAllPeople">Unpair All People</li></td></tr>
-                <tr><td><li id="requestToAll">Request(All)</li> </td><td>Request Name<input id='requestName'  type="text" value='Brazil request something!! '></td></tr>
+                <tr><td><li id="requestToAll">Request(All)</li> </td><td>Request data<input id='requestData'  type="text" value='Brazil request something!! '></td></tr>
                 <tr><td><li id="reply">Reply</li> </td><td>Reply Data<input id='replyData'  type="text" value='Brazil reply something!!'></td></tr>
             </table>
         </nav>
