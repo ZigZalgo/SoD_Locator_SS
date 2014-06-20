@@ -1,47 +1,15 @@
 <!DOCTYPE html>
 
 <html>
+<link href="/JSclientCSS" rel="stylesheet"  />
 
 <head>
     <title>SOD Client</title>
 
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/SoDLibrary"></script>
 
     <script>
-        function showRedStatus(status){
-            $('.status').html("<span class='red_status'>"+status+"</span>");
-            $('.red_status').fadeIn(600);
-        }
-
-        function showGreenStatus(status){
-            $('.status').html("<span class='green_status'>"+status+"</span>");
-            $('.green_status').fadeIn(600);
-        }
-
-        function showNormalStatus(status){
-            $('.status').html("<span class='normal_status'>"+status+"</span>");
-            $('.normal_status').fadeIn(600);
-        }
-
-
-
-
-
-        //var SOD = Class.create();
-        //var SOD = null;
-
-/*
-        $.getScript( socketURL, function() {
-            socket= io.connect(serverURL);
-
-                Register = function(){
-                device.socketID = socket.id;
-                socket.emit('registerDevice',device,function(status){
-                    console.log(status.status);
-                })
-            }
-        });// end of get script
-*/
         var device = {  ID : null,
             socketID : null,
             deviceType : "JSClient",
@@ -58,61 +26,19 @@
             deviceIP : null
         }
 
-
-        function SOD(){
-            //this.serverURL = serverURL;
-            //this.socketURL = socketURL;
-            this.socket= null;
-
+        function showRedStatus(status){
+            $('.status').html("<span class='red_status'>"+status+"</span>");
+            $('.red_status').fadeIn(600);
         }
-        var localSocket;
-        SOD.prototype = {
-            init: function(serverURL,socketURL){
-                //connect socket register device and hearing events
-                $.getScript(socketURL,function(){
-                    localSocket = io.connect(serverURL);
-                    localSocket.on('connect',function(data){
-                        console.log('Socket Connected ...');
-                        //console.log(device);
-                        localSocket.emit('registerDevice',device,function(status){
-                            console.log(status.status);
 
-                        });
+        function showGreenStatus(status){
+            $('.status').html("<span class='green_status'>"+status+"</span>");
+            $('.green_status').fadeIn(600);
+        }
 
-                    })
-                    localSocket.on('request',function(data){
-                        console.log('received request: ' + data.data);
-                    });
-                })
-
-            },
-            getDeviceWithSelection : function(selection,callbackFunction){
-                localSocket.emit('getDevicesWithSelection',{selection:selection},callbackFunction)
-            },
-            reconnect : function(callbackFunction){
-            if(!localSocket.socket.connected){
-                this.initialize();
-            }else{
-                console.log('Device is already connected');
-            }
-        },
-            getAllPeople : function(callbackFunction){
-                localSocket.emit('getPeopleFromServer',{},callbackFunction);
-            },
-            unpairDevice : function(callbackFunction){
-                localSocket.emit('unpairDevice',{},callbackFunction);
-            },
-            unpairAllPeople : function(callbackFunction){
-                localSocket.emit('unpairAllPeople',{},callbackFunction);
-            },
-            unpairAllDevices : function(callbackFunction){
-                localSocket.emit('unpairAllDevices',{},callbackFunction);
-            },
-            requestDataFromSelection : function(selection,data){
-                console.log(JSON.stringify({selection:selection,data:data}));
-                localSocket.emit('requestDataFromSelection',{selection:selection,data:data});
-            }
-
+        function showNormalStatus(status){
+            $('.status').html("<span class='normal_status'>"+status+"</span>");
+            $('.normal_status').fadeIn(600);
         }
 
         $(document).ready(function(){
@@ -122,15 +48,25 @@
             var socketURL = serverURL+"/socket.io/socket.io.js";
             var libraryURL= serverURL+"/SOD_JS_Library"
 
-            //initilization:
-            var sod = new SOD();
-            sod.init(serverURL,socketURL);
-            console.log(sod);
-            /*
-            sod.socket.on('connect',function(data){
-                console.log('im here!');
+            //initialization:
+            var sod = new SOD(device);
+            sod.init(serverURL,socketURL, sod);
+
+            //ADD LISTENERS////////////////////////////////////////////////
+            sod.addListener('connect',function(data){
+                sod.registerDevice();
             });
-            */
+
+            sod.addListener('request',function(data){
+                console.log(JSON.stringify('Requested requestName: '+ data.requestName));
+            });
+
+            sod.addListener('string', function(data){
+                console.log("Received: " + JSON.stringify(data))
+            })
+
+            //END LISTENERS////////////////////////////////////////////////
+
             //default callback function
             var testFunction = function(data){
                 if(data.status!=undefined){
@@ -140,19 +76,13 @@
                     console.log("status: "+JSON.stringify(data));
                 };
             }
-            //SOD.initialize(serverURL,socketURL);//= new SOD(serverURL,socketURL);
 
             $("#connect").on('click',function(){
                 sod.initialize(serverURL,socketURL);
             }) // end of click
 
             $("#setSocket").on('click',function(){
-
-                var socket = sod.socket;
-                socket.on('request',function(data){
-                    console.log(JSON.stringify('Requested requestName: '+ data.requestName));
-                });
-
+                console.log("Don't need this anymore, remove button?")
             }) // end of click
 
             $("#reconnect").on('click',function(){
@@ -187,18 +117,11 @@
             $("#requestToAll").on('click',function(){
                 var selection = 'all';
                 var data = $('#requestData').val();
-                sod.requestDataFromSelection(selection,data,testFunction);
-                localSocket.on('request',function(data){
-                    console.log('received request: ' + data.data);
-                });
+                sod.requestDataFromSelection(selection,data);
             }) // end of click
 
         })// end of document ready
     </script>
-
-    <script src="SOD_JS_Library.js"> </script>
-    <link href="sample_client_style.css" rel="stylesheet"/>
-
 </head>
 <body onload="">
 <div id="page-wrap">

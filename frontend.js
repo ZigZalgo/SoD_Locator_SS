@@ -42,10 +42,13 @@ app.get('/calibrateJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/calibrate.js');
 });
 app.get('/SoDLibrary', function (req, res) {
-    res.sendfile(__dirname + '/view/js/SoDLibrary.js');
+    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Library.js');
 });
-app.get('/client', function (req, res) {
-    res.sendfile(__dirname + '/view/clientSample.html');
+app.get('/JSclient', function (req, res) {
+    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Sample_Client.html');
+});
+app.get('/JSclientCSS', function (req, res) {
+    res.sendfile(__dirname + '/SOD_JS_Library/sample_client_style.css');
 });
 
 io.sockets.on('connection', function (socket) {
@@ -79,6 +82,10 @@ io.sockets.on('connection', function (socket) {
                     locator.cleanUpDevice(socket.id);
                     break;
                 case 'iPhone':
+                    locator.cleanUpDevice(socket.id);
+                    break;
+                case 'JSClient':
+                    console.log("IMPLEMENT CLEAN UP CODE FOR JSCLIENT!")
                     locator.cleanUpDevice(socket.id);
                     break;
                 default:
