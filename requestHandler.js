@@ -129,8 +129,6 @@ exports.handleRequest = function (socket){
                 for(var key in locator.devices){
                     counter--;
                     if(locator.devices.hasOwnProperty(key)){
-                        console.log("UDID: " + locator.devices[key].uniqueDeviceID)
-                        console.log("Search ID: " + request.ID)
                         if(request.ID == locator.devices[key].uniqueDeviceID){
                             fn(locator.devices[key]);
                         }
@@ -187,8 +185,6 @@ exports.handleRequest = function (socket){
                 for(var key in locator.devices){
                     counter--;
                     if(locator.devices.hasOwnProperty(key)){
-                        console.log("UDID: " + locator.devices[key].uniqueDeviceID)
-                        console.log("Search ID: " + request.ID)
                         if(request.ID == locator.devices[key].uniqueDeviceID){
                             frontend.clients[key].emit("string", {data: request.data})
                             if(fn!=undefined){
@@ -197,7 +193,7 @@ exports.handleRequest = function (socket){
                         }
                         else{
                             if(counter==0){
-                                fn(null);
+                                fn({status: "server: no device found with ID: " + request.ID});
                             }
                         }
                     }
@@ -225,11 +221,10 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: dictionary sent"});
+                    fn({status: "server: dictionary sent to all devices"});
                 }
                 break;
             case 'inView':
-                console.log("SENDING " + JSON.stringify(request.data) + " TO ALL DEVICES IN VIEW: " + JSON.stringify(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id))));
                 var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
                 for(var key in devicesInView){
                     if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
@@ -237,14 +232,25 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: dictionary sent"});
+                    fn({status: "server: dictionary sent to devices inView"});
                 }
                 break;
             case 'single':
+                var counter = Object.keys(locator.devices).length;
+
                 for(var key in locator.devices){
+                    counter--;
                     if(locator.devices.hasOwnProperty(key)){
                         if(request.ID == locator.devices[key].uniqueDeviceID){
-                            frontend.clients[key].emit("string", {data: request.data})
+                            frontend.clients[key].emit("dictionary", {data: request.data})
+                            if(fn!=undefined){
+                                fn({status: "server: dictionary sent to device with ID: " + request.ID});
+                            }
+                        }
+                        else{
+                            if(counter==0){
+                                fn({status: "server: no device found with ID: " + request.ID});
+                            }
                         }
                     }
                 }
@@ -256,7 +262,7 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: dictionary sent"});
+                    fn({status: "server: dictionary sent to all devices"});
                 }
         }
     });
@@ -272,7 +278,7 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: request sent"});
+                    fn({status: "server: request sent to all devices"});
                 }
                 break;
             case 'inView':
@@ -285,10 +291,33 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: request sent"});
+                    fn({status: "server: request sent to devices inView"});
                 }
                 break;
+            case 'single':
+                var counter = Object.keys(locator.devices).length;
 
+                for(var key in locator.devices){
+                    counter--;
+                    if(locator.devices.hasOwnProperty(key)){
+                        if(request.ID == locator.devices[key].uniqueDeviceID){
+                            if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
+                                frontend.clients[key].emit("request", {data: request.data}, function(data){
+                                    socket.emit("requestedData", data);
+                                })
+                            }
+                            if(fn!=undefined){
+                                fn({status: "server: request sent to device with ID: " + request.ID});
+                            }
+                        }
+                        else{
+                            if(counter==0){
+                                fn({status: "server: no device found with ID: " + request.ID});
+                            }
+                        }
+                    }
+                }
+                break;
             default:
                 for(var key in locator.devices){
                     if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
@@ -298,7 +327,7 @@ exports.handleRequest = function (socket){
                     }
                 }
                 if(fn!=undefined){
-                    fn({status: "server: request sent"});
+                    fn({status: "server: request sent to all devices"});
                 }
         }
     });
@@ -354,14 +383,4 @@ exports.handleRequest = function (socket){
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....
     });
-    socket.on('getDevicesFromServer',function(request,fn){
-        console.log("get Devices From Server!");
-        locator.printDevices();
-        if(fn!=undefined){
-            fn((locator.devices));
-        }
-    });
-
-
-
 }
