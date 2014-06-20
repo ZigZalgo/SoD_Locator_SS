@@ -118,6 +118,7 @@ exports.handleRequest = function (socket){
     socket.on('getDevicesWithSelection', function (request, fn) {
         switch(request.selection){
             case 'all':
+            console.log(JSON.stringify(locator.devices));
                 fn(locator.devices);
                 break;
             case 'inView':

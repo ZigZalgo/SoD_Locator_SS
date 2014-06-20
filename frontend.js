@@ -1,6 +1,26 @@
 var express = require('express.io');
 var app = express();
 
+// testing 
+var os = require('os')
+var interfaces = os.networkInterfaces();
+exports.serverAddress;
+for (k in interfaces) {
+        for (k2 in interfaces[k]) {
+            var address = interfaces[k][k2];
+            if (address.family == 'IPv4' && !address.internal) {
+                serverAddress = address.address
+            }
+        }
+    }
+
+console.log('SOD server IP : '+serverAddress);
+
+// testing 
+
+
+
+
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
@@ -52,7 +72,6 @@ app.get('/JSclientCSS', function (req, res) {
 });
 
 io.sockets.on('connection', function (socket) {
-
 
 
     socket.on('error', function() { console.log("error"); });

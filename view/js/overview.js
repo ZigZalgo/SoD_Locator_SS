@@ -371,10 +371,12 @@ function updateContentWithObjects(){
 
 
 
+
         for(var key in data){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
-                htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+
+                console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP);
+                htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
                     '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
                     '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
                     '<td>'+data[key].ownerID+'</td>'+
@@ -385,7 +387,7 @@ function updateContentWithObjects(){
 
         $('#devices').html('<legend>Devices</legend>' +
             '<table id = "device_table">' +
-            '<tr><th>uniqueDeviceID</th><th>location</th> <th>orientation</th>'+
+            '<tr><th>uniqueDeviceID</th><th>Name</th><th>location</th> <th>orientation</th>'+
             '<th>Pairing State</th>'+
             '<th>OwnerID</th>'+
             '</tr>'+

@@ -359,14 +359,26 @@ exports.registerDevice = function(socket, deviceInfo){
         console.log("Device initiated late, updating height and width");
     }
     else{
-
+        // if client is running on server side, the socket IP will be localhost ip 
+        // here to set that to actual server IP 
+        var socketIP;
+        if(socket.handshake.address.address=='127.0.0.1' && frontend.serverAddress!=undefined){
+            console.log(socket.handshake.address.address+' --> ' + frontend.serverAddress);
+            socketIP = frontend.serverAddress;
+        }else{
+            socketIP = socket.handshake.address.address;
+        }
+        console.log("IP: "+socketIP);
+        //console.log('got deviceInfo.ID'+ deviceInfo.ID);
         var device = new factory.Device(socket);
+        device.ID = deviceInfo.ID;
+        device.name = deviceInfo.name;
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
         device.deviceType = deviceInfo.deviceType;
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
-        device.deviceIP = socket.handshake.address.address;
+        device.deviceIP = socketIP;
         if(deviceInfo.stationary == true){
             device.stationary = deviceInfo.stationary;
             device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}

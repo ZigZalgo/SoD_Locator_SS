@@ -11,19 +11,20 @@
 
     <script>
         var device = {  ID : null,
+            name : 'JSClient',
             socketID : null,
-            deviceType : "JSClient",
-            location : {X: null, Y: null, Z:null},
+            deviceType : "JSClientDevice",
+            location : {X: 0, Y: 0, Z:0},
             orientation : null,
             FOV : 0,
-            height : null,
-            width :  null,
+            height : 0,
+            width :  0,
             ownerID : null,
             pairingState : "unpaired",
             intersectionPoint : {X: 0, Y: 0},
             lastUpdated : new Date(),
             stationary : false,
-            deviceIP : null
+            deviceIP : ''
         }
 
         function showRedStatus(status){
