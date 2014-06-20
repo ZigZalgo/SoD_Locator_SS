@@ -311,18 +311,20 @@ exports.cleanUpSensor = function(socketID){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
     delete sensors[socketID];
     var counter = Object.keys(persons).length;
+
     for(var key in persons){
+        counter--;
         if(persons.hasOwnProperty(key)){
             for(var IDkey in persons[key].ID){
                 if(persons[key].ID.hasOwnProperty(IDkey)){
                     if(persons[key].ID[IDkey] == socketID){
                         delete persons[key].ID[IDkey];
+                        if(counter == 0){
+                            locator.removeUntrackedPeople();
+                        }
                     }
                 }
             }
-        }
-        if(counter == 0){
-            locator.removeUntrackedPeople();
         }
     }
 

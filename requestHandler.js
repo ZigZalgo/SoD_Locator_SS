@@ -123,6 +123,25 @@ exports.handleRequest = function (socket){
             case 'inView':
                 fn(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
                 break;
+            case 'single':
+                var counter = Object.keys(locator.devices).length;
+
+                for(var key in locator.devices){
+                    counter--;
+                    if(locator.devices.hasOwnProperty(key)){
+                        console.log("UDID: " + locator.devices[key].uniqueDeviceID)
+                        console.log("Search ID: " + request.ID)
+                        if(request.ID == locator.devices[key].uniqueDeviceID){
+                            fn(locator.devices[key]);
+                        }
+                        else{
+                            if(counter==0){
+                                fn(null);
+                            }
+                        }
+                    }
+                }
+                break;
             default:
                 fn(locator.devices);
         }
@@ -162,6 +181,28 @@ exports.handleRequest = function (socket){
                     fn({status: "server: string sent to inView"});
                 }
                 break;
+            case 'single':
+                var counter = Object.keys(locator.devices).length;
+
+                for(var key in locator.devices){
+                    counter--;
+                    if(locator.devices.hasOwnProperty(key)){
+                        console.log("UDID: " + locator.devices[key].uniqueDeviceID)
+                        console.log("Search ID: " + request.ID)
+                        if(request.ID == locator.devices[key].uniqueDeviceID){
+                            frontend.clients[key].emit("string", {data: request.data})
+                            if(fn!=undefined){
+                                fn({status: "server: string sent to single device with ID: " + request.ID});
+                            }
+                        }
+                        else{
+                            if(counter==0){
+                                fn(null);
+                            }
+                        }
+                    }
+                }
+                break;
             default:
                 for(var key in locator.devices){
                     if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
@@ -197,6 +238,15 @@ exports.handleRequest = function (socket){
                 }
                 if(fn!=undefined){
                     fn({status: "server: dictionary sent"});
+                }
+                break;
+            case 'single':
+                for(var key in locator.devices){
+                    if(locator.devices.hasOwnProperty(key)){
+                        if(request.ID == locator.devices[key].uniqueDeviceID){
+                            frontend.clients[key].emit("string", {data: request.data})
+                        }
+                    }
                 }
                 break;
             default:
@@ -238,6 +288,7 @@ exports.handleRequest = function (socket){
                     fn({status: "server: request sent"});
                 }
                 break;
+
             default:
                 for(var key in locator.devices){
                     if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
