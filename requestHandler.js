@@ -300,8 +300,10 @@ exports.handleRequest = function (socket){
                 for(var key in locator.devices){
                     counter--;
                     if(locator.devices.hasOwnProperty(key)){
+
                         if(request.ID == locator.devices[key].uniqueDeviceID){
-                            if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
+                            console.log('this ID : '+locator.devices[key].uniqueDeviceID);
+                            if(locator.devices.hasOwnProperty(key) && socket!=frontend.clients[key]){
                                 frontend.clients[key].emit("request", {data: request.data}, function(data){
                                     socket.emit("requestedData", data);
                                 })
@@ -312,7 +314,9 @@ exports.handleRequest = function (socket){
                         }
                         else{
                             if(counter==0){
-                                fn({status: "server: no device found with ID: " + request.ID});
+                                if(fn!=undefined){
+                                    fn({status: "server: no device found with ID: " + request.ID});
+                                }
                             }
                         }
                     }

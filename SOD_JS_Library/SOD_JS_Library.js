@@ -54,7 +54,7 @@ SOD.prototype = {
         }
         catch(err){
             console.log(err);
-            console.log("Socket is probably null, adding event listener " + eventName + " to queue, will try again after socket connects.")
+            console.log('Socket is probably null, adding event listener "' + eventName + '" to queue, will try again after socket connects.')
             this.userListeners[eventName] = callback;
         }
     },
@@ -79,7 +79,7 @@ SOD.prototype = {
         }
     },
     getAllPeople : function(callbackFunction){
-        socket.emit('getPeopleFromServer',{},callbackFunction);
+        this.socket.emit('getPeopleFromServer',{},callbackFunction);
     },
     unpairDevice : function(callbackFunction){
         this.socket.emit('unpairDevice',{},callbackFunction);
@@ -90,8 +90,12 @@ SOD.prototype = {
     unpairAllDevices : function(callbackFunction){
         this.socket.emit('unpairAllDevices',{},callbackFunction);
     },
-    requestDataFromSelection : function(selection,data){
+    requestDataFromSelection : function(selection,data,ID){
         console.log(JSON.stringify({selection:selection,data:data}));
+        if(ID !=undefined){
+            this.socket.emit('requestDataFromSelection',{selection:selection,data:data,ID:ID});
+        }
         this.socket.emit('requestDataFromSelection',{selection:selection,data:data});
     }
+
 }

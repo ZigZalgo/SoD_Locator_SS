@@ -58,7 +58,7 @@
             });
 
             sod.addListener('request',function(data){
-                console.log(JSON.stringify('Requested requestName: '+ data.requestName));
+                console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
             });
 
             sod.addListener('string', function(data){
@@ -119,6 +119,13 @@
                 var data = $('#requestData').val();
                 sod.requestDataFromSelection(selection,data);
             }) // end of click
+            $("#requestByID").on('click',function(){
+                var selection = 'single';
+                var ID = Number($('#requestID').val());
+                var data = $('#requestDataByID').val();
+                console.log('requesting '+ID+'withName' +data);
+                sod.requestDataFromSelection(selection,data,ID);
+            }) // end of click
 
         })// end of document ready
     </script>
@@ -144,6 +151,8 @@
                 <tr><td><li id="unpairAllPeople">Unpair All People</li></td></tr>
                 <tr><td><li id="requestToAll">Request(All)</li> </td><td>Request data<input id='requestData'  type="text" value='Brazil request something!! '></td></tr>
                 <tr><td><li id="reply">Reply</li> </td><td>Reply Data<input id='replyData'  type="text" value='Brazil reply something!!'></td></tr>
+                <tr><td><li id="requestByID">Request(ID)</li> </td><td>Request data<input id='requestDataByID'  type="text" value='Brazil request something!! with ID'> <br/>
+                    ID<input id='requestID'  type="text" value='0'></td></tr>
             </table>
         </nav>
     <div class="status_wrap">
