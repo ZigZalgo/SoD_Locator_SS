@@ -1,4 +1,5 @@
 var factory = require('./factory');
+var locator = require('./locator');
 var util = require('./util');
 
 exports.DEFAULT_FIELD_OF_VIEW = 25.0;
@@ -445,6 +446,24 @@ exports.findWithAttrWeak = function(array, attr, query) {
         if(JSON.stringify(array[i][attr]).indexOf(JSON.stringify(query)) != -1) {
             return i;
             //console.log("returned: ");
+        }
+    }
+}
+
+exports.getDeviceSocketIDByID = function(ID) {
+    var counter = Object.keys(locator.devices).length;
+
+    for(var key in locator.devices){
+        counter--;
+        if(locator.devices.hasOwnProperty(key)){
+            if(ID == locator.devices[key].uniqueDeviceID){
+                return key;
+            }
+            else{
+                if(counter==0){
+                    return undefined;
+                }
+            }
         }
     }
 }

@@ -145,6 +145,38 @@ exports.handleRequest = function (socket){
                 fn(locator.devices);
         }
     });
+
+    socket.on('getDistanceToDevice', function (request, fn){
+        if(util.getDeviceSocketIDByID(request.ID) != undefined){
+            //target device found, return distance
+            try{
+                fn(util.distanceBetweenPoints(devices[socket.id].location, devices[util.getDeviceSocketIDByID(request.ID)].location));
+            }
+            catch(err){
+                console.log("Error calculating distance between devices: " + err);
+            }
+        }
+        else{
+            //target device not found
+            fn(undefined);
+        }
+    });
+
+    socket.on('getDistanceBetweenDevices', function (request, fn){
+        if(util.getDeviceSocketIDByID(request.ID1) != undefined && util.getDeviceSocketIDByID(request.ID2) != undefined){
+            //target devices found, return distance
+            try{
+                fn(util.distanceBetweenPoints(devices[util.getDeviceSocketIDByID(request.ID1)].location, devices[util.getDeviceSocketIDByID(request.ID2)].location));
+            }
+            catch(err){
+                console.log("Error calculating distance between devices: " + err);
+            }
+        }
+        else{
+            //one or both target devices not found
+            fn(undefined);
+        }
+    });
     //END LOCATOR SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
     //START SENDING SERVICES/////////////////////////////////////////////////////////////////////////////////////////
