@@ -371,7 +371,13 @@ exports.registerDevice = function(socket, deviceInfo){
         console.log("IP: "+socketIP);
         //console.log('got deviceInfo.ID'+ deviceInfo.ID);
         var device = new factory.Device(socket, {ID: deviceInfo.ID, orientation: deviceInfo.orientation});
-        device.name = deviceInfo.name;
+        if(deviceInfo.name != null && device.Info != undefined){
+            device.name = deviceInfo.name;
+        }
+        else{
+            device.name = "Device " + device.ID;
+        }
+
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
         device.deviceType = deviceInfo.deviceType;
