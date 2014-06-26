@@ -87,12 +87,6 @@ exports.handleRequest = function (socket){
 
 
     //START LOCATOR SERVICES/////////////////////////////////////////////////////////////////////////////////////////
-    socket.on('getDevicesInView', function (device, fn) {
-        if(fn!=undefined){
-            fn(locator.getDevicesInFront(device.ID));
-        }
-    });
-
     socket.on('updateOrientation', function (request) {
         //not checking for fn(callback), since adding a callback here would be costly
         locator.updateDeviceOrientation(request.orientation, socket);
@@ -115,6 +109,58 @@ exports.handleRequest = function (socket){
             fn(selectedValues);
         }
     });
+
+    socket.on('getDevicesWithSelectionChain', function(request, fn){
+        var filterSelection = function(i, listDevices){
+            if (i <= (request.selection.length - 1))
+            {
+                switch(request.selection[i])
+                {
+                    case "all":
+                        return filterSelection(i+1, (listDevices)); //just in case
+                        break;
+                    case "inFront":
+                        return filterSelection(i+1, locator.getDevicesInFront(listDevices));
+                        break
+                    case "inView":
+                        return filterSelection(i+1, locator.getDevicesInView(listDevices));
+                        break;
+                    /*case "inRange":
+                        return filterSelection(i+1, getDevicesInRange(listDevices));
+                        break;
+                    case "nearest":
+                        return filterSelection(i+1, getNearestDevice(listDevices));
+                        break;*/
+                    default:
+                        return filterSelection(i+1, (listDevices)); //just in case
+                }
+            }
+            else
+            {
+                switch(request.selection[i])
+                {
+                    case "all":
+                        return listDevices; //just in case
+                        break;
+                    case "inFront":
+                        return locator.getDevicesInFront(listDevices);
+                        break
+                    case "inView":
+                        return locator.getDevicesInView(listDevices);
+                        break;
+                    /*case "inRange":
+                        return getDevicesInRange(listDevices);
+                        break;
+                    case "nearest":
+                        return getNearestDevice(listDevices);
+                        break;*/
+                    default:
+                        return listDevices; //just in case
+                }
+            }
+        }
+        fn(filterSelection(0, locator.devices));
+    })
 
     socket.on('getDevicesWithSelection', function (request, fn) {
         switch(request.selection){
@@ -244,7 +290,6 @@ exports.handleRequest = function (socket){
                 }
         }
     });
-
 
     socket.on('sendDictionaryToDevicesWithSelection', function (request, fn) {
         switch(request.selection){
