@@ -1,6 +1,3 @@
-var cameraHeightInPixels = 320;
-var cameraWidthInPixels = 480;
-var cameraFOV = 57;
 var minorGridLineWidth = 10;
 var majorGridLineWidth = 50;
 var RADIANS_TO_DEGREES = 180 / Math.PI;
@@ -126,16 +123,16 @@ function drawSensor(context,X,Y,index,angle,FOV){
     //draw circle for sensor on visualizer
     var angleForDrawing = 270 - angle;
     context.beginPath();
-    context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),30,angleForDrawing*DEGREES_TO_RADIANS,angleForDrawing*DEGREES_TO_RADIANS+Math.PI,true);
+    context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),248/1000*pixelsPerMeter,angleForDrawing*DEGREES_TO_RADIANS,angleForDrawing*DEGREES_TO_RADIANS+Math.PI,true);
     context.closePath();
     context.lineWidth = 1;
     context.fillStyle = '#3370d4';
     context.fill();
     context.strokeStyle = '#292929';
     context.stroke();
-    context.font = "20px Arial";
-    context.fillStyle = '#ffffff';
-    context.fillText('K'+index,shiftXToGridOrigin(sensorX)-12,shiftYToGridOrigin(sensorY)-5);
+    context.font = "14px Arial";
+    context.fillStyle = '#3370d4';
+    context.fillText('K'+index,shiftXToGridOrigin(sensorX)+10,shiftYToGridOrigin(sensorY)-15);
 }
 
 function printPersonID(ID)
@@ -156,13 +153,28 @@ function printPersonID(ID)
  * Draw Stationary Device
  *
  * */
-function drawStationaryDevice(context, X, Y, width, height){
-    var xInMeters = X*majorGridLineWidth;
-    var yInMeters = Y*majorGridLineWidth;
+function drawStationaryDevice(context, X, Z, width, height, ID, orientation, FOV){
+    var xInMeters = X*pixelsPerMeter;
+    var zInMeters = Z*pixelsPerMeter;
     context.beginPath();
-    context.rect(shiftXToGridOrigin(xInMeters) - (width/2), shiftYToGridOrigin(yInMeters) - (height/2), width, height);
-    context.fillStyle = "rgba(0, 255, 0, 0.2)";
+    context.rect(shiftXToGridOrigin(xInMeters) - (width/2), shiftYToGridOrigin(zInMeters) - (height/2), width, height);
+    context.fillStyle = "rgba(0, 255, 0, 0.7)";
     context.fill();
+
+    function getDeviceOrientation(deviceX,deviceZ){
+        var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
+        var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+        return returnDegree;
+    }
+
+    if(orientation != undefined)
+    {
+        drawView(context, xInMeters, zInMeters, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
+    }
+
+    context.fillStyle = "rgba(0, 255, 0, 1.0)"; //
+    context.font = "18px Arial";
+    context.fillText(ID,shiftXToGridOrigin(xInMeters)+(width/2),shiftYToGridOrigin(zInMeters)-(height/2));
 }
 
 /**
@@ -178,7 +190,12 @@ function refreshStationaryLayer(){
         for(var key in data){
             if(data.hasOwnProperty(key)){
                 if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
-                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'), data[key].location.X, data[key].location.Z, data[key].width/1000*majorGridLineWidth, data[key].height/1000*majorGridLineWidth);
+                    console.log("X:" + data[key].location.X)
+                    console.log("Y:" + data[key].location.Y)
+                    console.log("Z:" + data[key].location.Z)
+                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'),
+                        data[key].location.X, data[key].location.Z, data[key].width/1000*pixelsPerMeter,
+                        data[key].height/1000*pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV);
                 }
             }
         }
@@ -221,22 +238,25 @@ function updateContentWithObjects(){
         ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
         for(var key in data){
             if(data.hasOwnProperty(key)){
-                console.log("SensorKey: "+key+"\tcalibration: "+JSON.stringify(data[key].calibration));
-                console.log("ySpaceTransition: "+JSON.stringify(data[key].calibration.ySpaceTransition));
+                //console.log("SensorKey: "+key+"\tcalibration: "+JSON.stringify(data[key].calibration));
+                //console.log("ySpaceTransition: "+JSON.stringify(data[key].calibration.ySpaceTransition));
                 var sensorX = 0; //get this from sensor list later on
                 var sensorY=  0;
                 var angle = 270;
                 if(data[key].calibration["Rotation"]!=0&&data[key].calibration["Rotation"]!=null){
-                    sensorX += (data[key].calibration["xSpaceTransition"]*majorGridLineWidth/1000);
-                    sensorY += (data[key].calibration["ySpaceTransition"]*majorGridLineWidth/1000);
+                    sensorX += (data[key].calibration["xSpaceTransition"]*pixelsPerMeter/1000);
+                    sensorY += (data[key].calibration["ySpaceTransition"]*pixelsPerMeter/1000);
                     angle += data[key].calibration["Rotation"];
                 }
-                console.log("X: "+sensorX+"  Y: "+sensorY+"  Angle: "+angle);
+                //console.log("X: "+sensorX+"  Y: "+sensorY+"  Angle: "+angle);
                 //console.log("angleAfterCalibration: "+ data[key].calibration["Rotation"]);
                 //console.log("TransformX : "+ sensorX+data[key].calibration["TransformX"]);
                 //console.log("sensorYAfterCalibration: "+ data[key].calibration["Rotation"]);
                 drawSensor(ctxSensors,sensorX,sensorY,Object.keys(data).indexOf(key),angle, data[key].FOV);
-                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, "rgba(0, 0, 0, 0.2)",angle, data[key].FOV);
+                var grd = ctxSensors.createLinearGradient(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY), shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY) + (data[key].rangeInMM)/1000*pixelsPerMeter);
+                grd.addColorStop(0, 'rgba(51, 112, 212, 0.8)');
+                grd.addColorStop(1, 'rgba(51, 112, 212, 0.0)');
+                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, grd,angle, data[key].FOV);
                 htmlString += ('<tr>' +
                     '<td>' + data[key].sensorType + '</td>' +
                     '<td>' + data[key].socketID + '</td>' +
@@ -280,7 +300,6 @@ function updateContentWithObjects(){
                     ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
                     ctx.fill();
                     if(data[key].pairingState == 'paired'){
-                        //console.log("Life is tough bro!");
                         ctx.strokeStyle = "#2cd72A";
                         ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
                         ctx.stroke();
@@ -289,17 +308,13 @@ function updateContentWithObjects(){
                 if(data[key].orientation != null){
                     var orientationToSensor = getPersonOrientation(data[key].location.X,data[key].location.Z);
                     //console.log(" personOrientationToSensor: " + orientationToSensor);
-                    console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor + " Sum up: " + (data[key].orientation+orientationToSensor+90));
+                    //console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor + " Sum up: " + (data[key].orientation+orientationToSensor+90));
                     drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation+orientationToSensor+90), 30);
                 }
-                    ctx.fillStyle = "#ffffff"; //white
-                    ctx.font = "19px Arial";
-                    if(data[key].uniquePersonID>=10)
-                    {
-                        ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-11,shiftYToGridOrigin(zInMeters)+7);
-                    }else{
-                        ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)-5,shiftYToGridOrigin(zInMeters)+7);
-                    }
+                    ctx.fillStyle = "#c82124"; //red
+                    ctx.font = "18px Arial";
+                    ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+5,shiftYToGridOrigin(zInMeters)-5);
+
                     if(!jQuery.isEmptyObject(data[key].ID)){
                         htmlString += ('<tr>' +
                             '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
@@ -369,18 +384,25 @@ function updateContentWithObjects(){
             }
         }
 
-
-
-
         for(var key in data){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
-                console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP);
-                htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
-                    '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
-                    '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
-                    '<td>'+data[key].ownerID+'</td>'+
-                    '</tr>'
+                //console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP);
+                if(!data[key].stationary){
+                    htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
+                        '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
+                        '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
+                        '<td>'+data[key].ownerID+'</td>'+
+                        '</tr>'
+                }
+                else{
+                    htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
+                        '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
+                        '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>disabled</td>'+
+                        '<td>'+data[key].ownerID+'</td>'+
+                        '</tr>'
+                }
+
 
             }
         }

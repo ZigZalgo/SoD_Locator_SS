@@ -19,6 +19,7 @@ exports.handleRequest = function (socket){
         if(fn!=undefined){
             fn({"status": 'server: your device has been registered'})
         }
+        socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name} );
     });
 
     socket.on('registerSensor', function(sensorInfo, fn){
@@ -150,7 +151,7 @@ exports.handleRequest = function (socket){
         if(util.getDeviceSocketIDByID(request.ID) != undefined){
             //target device found, return distance
             try{
-                fn(util.distanceBetweenPoints(devices[socket.id].location, devices[util.getDeviceSocketIDByID(request.ID)].location));
+                fn(util.distanceBetweenPoints(locator.devices[socket.id].location, locator.devices[util.getDeviceSocketIDByID(request.ID)].location));
             }
             catch(err){
                 console.log("Error calculating distance between devices: " + err);
@@ -166,7 +167,7 @@ exports.handleRequest = function (socket){
         if(util.getDeviceSocketIDByID(request.ID1) != undefined && util.getDeviceSocketIDByID(request.ID2) != undefined){
             //target devices found, return distance
             try{
-                fn(util.distanceBetweenPoints(devices[util.getDeviceSocketIDByID(request.ID1)].location, devices[util.getDeviceSocketIDByID(request.ID2)].location));
+                fn(util.distanceBetweenPoints(locator.devices[util.getDeviceSocketIDByID(request.ID1)].location, locator.devices[util.getDeviceSocketIDByID(request.ID2)].location));
             }
             catch(err){
                 console.log("Error calculating distance between devices: " + err);

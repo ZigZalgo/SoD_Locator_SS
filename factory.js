@@ -1,7 +1,8 @@
 var util = require('./util');
 
 var uniquePersonCounter = 0;
-var uniqueDeviceCounter = 0;
+var reservedDeviceIDRange = 100;
+var uniqueDeviceCounter = reservedDeviceIDRange + 1;
 
 // TODO: TEST again, modified...
 function Person(){
@@ -63,15 +64,59 @@ function Sensor(socket){
 exports.Sensor = Sensor;
 
 // TODO: TEST
-function Device(socket){
+function Device(socket, opts){
     try{
-        this.ID = null;
+        var intRegex = /^\d+$/;
+        if(opts['ID']){
+            if(intRegex.test(opts['ID'])) {
+                if(0 <= opts['ID'] && opts['ID'] <= reservedDeviceIDRange){
+                    if(util.getDeviceSocketIDByID(opts['ID']) == undefined){
+                        this.uniqueDeviceID = opts['ID'];
+                    }
+                    else{
+                        console.log("Device tried to register with a reserved ID which already exists.")
+                        this.uniqueDeviceID = uniqueDeviceCounter++;
+                    }
+                }
+                else{
+                    console.log("Device tried to reserve an ID outside the permitted range.")
+                    this.uniqueDeviceID = uniqueDeviceCounter++;
+                }
+            }
+            else{
+                console.log("Device specified an invalid (non-integer) ID during registration.")
+                this.uniqueDeviceID = uniqueDeviceCounter++;
+            }
+        }
+        else{
+            this.uniqueDeviceID = uniqueDeviceCounter++;
+        }
+
+        if(opts['orientation']){
+            if(intRegex.test(opts['orientation'])) {
+                if(0 <= opts['orientation'] && opts['orientation'] <= 360){
+                    console.log("Device orientation: " + opts['orientation'])
+                    this.orientation = opts['orientation'];
+                }
+                else{
+                    console.log("Device specified an invalid angle for orientation (0 - 360).")
+                    this.orientation = null;
+                }
+            }
+            else{
+                console.log("Device specified an invalid (non-integer) orientation during registration.")
+                this.orientation = null;
+            }
+        }
+        else{
+            this.orientation = null;
+        }
+
         this.name = null;
         this.socketID = socket.id;
-        this.uniqueDeviceID = uniqueDeviceCounter++;
+        //this.uniqueDeviceID = uniqueDeviceCounter++;
         this.deviceType = "Not specified";
         this.location = {X: null, Y: null, Z:null};
-        this.orientation = null;
         this.FOV = util.DEFAULT_FIELD_OF_VIEW;
         this.height = null;
         this.width =  null;

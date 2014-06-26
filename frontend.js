@@ -84,6 +84,14 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
 
+        try{
+            io.sockets.emit("someDeviceDisconnected", { name: locator.devices[socket.id].name });
+        }
+        catch(err){
+            io.sockets.emit("someDeviceDisconnected", { name: "failed to retrieve name" });
+            console.log("failed to emit name of device, possibly null... error: " + err)
+        }
+
         //run cleanup functions for socket
         if(clients[socket.id] != undefined){
             switch(clients[socket.id].clientType){

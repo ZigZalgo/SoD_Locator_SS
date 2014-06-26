@@ -370,8 +370,7 @@ exports.registerDevice = function(socket, deviceInfo){
         }
         console.log("IP: "+socketIP);
         //console.log('got deviceInfo.ID'+ deviceInfo.ID);
-        var device = new factory.Device(socket);
-        device.ID = deviceInfo.ID;
+        var device = new factory.Device(socket, {ID: deviceInfo.ID, orientation: deviceInfo.orientation});
         device.name = deviceInfo.name;
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
@@ -486,6 +485,9 @@ exports.getDevicesInFront = function(observerSocketID){
                 console.log("Angle from observer to target: " + util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI))
                 console.log("Observer: \n" + JSON.stringify(observer))
                 console.log("Target: \n" + JSON.stringify(devices[key]))
+
+                console.log("First condition less than lFOV: " + util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI));
+                console.log("Second condition greater than rFOV: " + (util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)))
                 if (leftFieldOfView > rightFieldOfView &&
                     (util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
                     (util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){

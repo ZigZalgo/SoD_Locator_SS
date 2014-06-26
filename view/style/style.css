@@ -90,7 +90,7 @@ nav#mode_selection li{
     margin-left: 10px;
 }
 #cnv{
-    position: absolute; left: 0; top: 0; z-index: 2;
+    position: absolute; left: 0; top: 0; z-index: 10;
 }
 #cnvSensors{
     position: absolute; left: 0; top: 0; z-index: 2;
