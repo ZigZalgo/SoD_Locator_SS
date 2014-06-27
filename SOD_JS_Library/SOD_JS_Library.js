@@ -5,24 +5,46 @@
 *   JS Client Implementation for SOD
 *
 * **/
+/* The device for this JS Library*/
 
-function SOD(){
+
+
+
+/*the constructor for registering device
+*   Param: set any device property with JSON string such as {orientation:200}
+*
+**/
+function SODDevice(deviceInfo){
     //this.serverURL = serverURL;
     //this.socketURL = socketURL;
+    this.device = {  ID : null,
+        name : 'JSClient',
+        socketID : null,
+        deviceType : "JSClientDevice",
+        location : {X: 0, Y: 0, Z:0},
+        orientation : 0,
+        FOV : 0,
+        height : 0,
+        width :  0,
+        ownerID : null,
+        pairingState : "unpaired",
+        intersectionPoint : {X: 0, Y: 0},
+        lastUpdated : new Date(),
+        stationary : false,
+        deviceIP : ''
+    }
+    //setters
+    for(var key in deviceInfo){
+        //console.log('key '+ key +' :'+ deviceInfo[key]);
+        this.device[key] = deviceInfo[key];
+        //console.log('device.key: '+ this.device.key);
+    }
     this.socket= null;
     this.userListeners = {};
-    this.device = null;
+    //this.device = device;
 }
 
-function SOD(device){
-    //this.serverURL = serverURL;
-    //this.socketURL = socketURL;
-    this.socket= null;
-    this.userListeners = {};
-    this.device = device;
-}
-
-SOD.prototype = {
+SODDevice.prototype = {
     init: function(serverURL,socketURL, _SOD){
         //connect socket register device and hearing events
         $.getScript(socketURL,function(){
@@ -60,7 +82,7 @@ SOD.prototype = {
     },
     registerDevice: function(callbackFunction){
         try{
-            console.log("Registering device...")
+            console.log("Registering device..." + JSON.stringify(this.device))
             this.socket.emit('registerDevice', this.device, callbackFunction)
         }
         catch(err){
@@ -96,6 +118,11 @@ SOD.prototype = {
             this.socket.emit('requestDataFromSelection',{selection:selection,data:data,ID:ID});
         }
         this.socket.emit('requestDataFromSelection',{selection:selection,data:data});
+    },getDistanceToDevice : function(targetID){
+        console.log(JSON.stringify((targetID)));
+        if(targetID !=undefined){
+            console.log('targetID is not defined yet');
+        }
+        this.socket.emit('getDistanceToDevice',{ID:targetID});
     }
-
 }

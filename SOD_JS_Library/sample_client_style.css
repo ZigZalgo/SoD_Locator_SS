@@ -16,9 +16,10 @@ body{background:#bfbfbf;
     font-size: 16px;
     width:100%;
     line-height: 138%;
-    font-family: "futura-pt",Century Gothic,Futura,sans-serif;
+    font-family: "Titillium",Century Gothic,Futura,sans-serif;
     -webkit-font-smoothing: antialiased;
 }
+input {width: 60px;}
 #page-wrap{
     background: #292929;
     position:relative;
@@ -444,7 +445,7 @@ section#calibration_section .calibration_wrap{
 .status_wrap h1{
     text-decoration:underline;
     text-transform: uppercase;
-    font:font-family:"Agency FB",DinRound, Sans-Serif;
+    font-family: "Agency FB",DinRound, Sans-Serif;
     font-size: 1.2em;
     margin:2px;
 }

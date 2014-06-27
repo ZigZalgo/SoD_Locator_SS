@@ -10,22 +10,7 @@
     <script src="/SoDLibrary"></script>
 
     <script>
-        var device = {  ID : null,
-            name : 'JSClient',
-            socketID : null,
-            deviceType : "JSClientDevice",
-            location : {X: 0, Y: 0, Z:0},
-            orientation : null,
-            FOV : 0,
-            height : 0,
-            width :  0,
-            ownerID : null,
-            pairingState : "unpaired",
-            intersectionPoint : {X: 0, Y: 0},
-            lastUpdated : new Date(),
-            stationary : false,
-            deviceIP : ''
-        }
+
 
         function showRedStatus(status){
             $('.status').html("<span class='red_status'>"+status+"</span>");
@@ -43,28 +28,10 @@
         }
 
         $(document).ready(function(){
-            var port = $('input#serverPort').val();
-            var serverIP = $('input#serverIP').val();
-            var serverURL = "http://"+serverIP+":"+port;
-            var socketURL = serverURL+"/socket.io/socket.io.js";
-            var libraryURL= serverURL+"/SOD_JS_Library"
+
 
             //initialization:
-            var sod = new SOD(device);
-            sod.init(serverURL,socketURL, sod);
 
-            //ADD LISTENERS////////////////////////////////////////////////
-            sod.addListener('connect',function(data){
-                sod.registerDevice();
-            });
-
-            sod.addListener('request',function(data){
-                console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
-            });
-
-            sod.addListener('string', function(data){
-                console.log("Received: " + JSON.stringify(data))
-            })
 
             //END LISTENERS////////////////////////////////////////////////
 
@@ -79,7 +46,27 @@
             }
 
             $("#connect").on('click',function(){
-                sod.initialize(serverURL,socketURL);
+                var port = $('input#serverPort').val();
+                var serverIP = $('input#serverIP').val();
+                var serverURL = "http://"+serverIP+":"+port;
+                var socketURL = serverURL+"/socket.io/socket.io.js";
+                var libraryURL= serverURL+"/SOD_JS_Library"
+                var sod = new SODDevice({orientation:$('input#inputOrientation').val(),location:{X:$('input#inputLocationX').val(),Y:$('input#inputLocationY').val(),Z:$('input#inputLocationZ').val()}});
+                sod.init(serverURL,socketURL, sod);
+
+                //ADD LISTENERS////////////////////////////////////////////////
+                sod.addListener('connect',function(data){
+                    sod.registerDevice();
+                });
+
+                sod.addListener('request',function(data){
+                    console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
+                });
+
+                sod.addListener('string', function(data){
+                    console.log("Received: " + JSON.stringify(data))
+                })
+
             }) // end of click
 
             $("#setSocket").on('click',function(){
@@ -141,8 +128,10 @@
     <nav id="mode_selection" >
         <div class="block"></div>
             <table>
-                <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'></td></tr>
-                <tr><td><li id="setSocket">Set Socket</li></td></tr>
+                <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
+                    orientation: <input id='inputOrientation'  type="text" value='12'> Location: X<input id='inputLocationX'  type="text" value='15'> Y<input id='inputLocationY'  type="text" value='0'>
+                    Z<input id='inputLocationZ'  type="text" value='12'>
+                </td></tr>
                 <tr><td><li id="reconnect">Reconnect</li></td></tr>
                 <tr><td><li id="getPeopleAll">Get All People</li></td></tr>
                 <tr><td><li id="getDevicesAll">Get Devices(All)</li></td></tr>
@@ -154,6 +143,8 @@
                 <tr><td><li id="reply">Reply</li> </td><td>Reply Data<input id='replyData'  type="text" value='Brazil reply something!!'></td></tr>
                 <tr><td><li id="requestByID">Request(ID)</li> </td><td>Request data<input id='requestDataByID'  type="text" value='Brazil request something!! with ID'> <br/>
                     ID<input id='requestID'  type="text" value='0'></td></tr>
+                <tr><td><li id="getDistanceByTargetID">getDistance(targetID)</li></td><td> ID <input id='targetID'  type="text" value='1'>
+                    </td></tr>
             </table>
         </nav>
     <div class="status_wrap">

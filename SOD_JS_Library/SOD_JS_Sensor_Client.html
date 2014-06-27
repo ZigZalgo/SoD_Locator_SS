@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html>
+<link href="/JSclientCSS" rel="stylesheet"  />
+
+<head>
+    <title>SOD Client</title>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/SoDLibrary"></script>
+
+    <script>
+
+
+        function showRedStatus(status){
+            $('.status').html("<span class='red_status'>"+status+"</span>");
+            $('.red_status').fadeIn(600);
+        }
+
+        function showGreenStatus(status){
+            $('.status').html("<span class='green_status'>"+status+"</span>");
+            $('.green_status').fadeIn(600);
+        }
+
+        function showNormalStatus(status){
+            $('.status').html("<span class='normal_status'>"+status+"</span>");
+            $('.normal_status').fadeIn(600);
+        }
+
+        $(document).ready(function(){
+
+
+            //initialization:
+
+
+            //END LISTENERS////////////////////////////////////////////////
+
+            //default callback function
+            var testFunction = function(data){
+                if(data.status!=undefined){
+                    showGreenStatus(data.status);
+                }
+                else{
+                    console.log("status: "+JSON.stringify(data));
+                };
+            }
+
+            $("#connect").on('click',function(){
+                var port = $('input#serverPort').val();
+                var serverIP = $('input#serverIP').val();
+                var serverURL = "http://"+serverIP+":"+port;
+                var socketURL = serverURL+"/socket.io/socket.io.js";
+                var libraryURL= serverURL+"/SOD_JS_Library"
+                var sod = new SODDevice({orientation:$('input#inputOrientation').val(),location:{X:$('input#inputLocationX').val(),Y:$('input#inputLocationY').val(),Z:$('input#inputLocationZ').val()}});
+                sod.init(serverURL,socketURL, sod);
+
+                //ADD LISTENERS////////////////////////////////////////////////
+                sod.addListener('connect',function(data){
+                    sod.registerDevice();
+                });
+
+                sod.addListener('request',function(data){
+                    console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
+                });
+
+                sod.addListener('string', function(data){
+                    console.log("Received: " + JSON.stringify(data))
+                })
+
+            }) // end of click
+
+            $("#setSocket").on('click',function(){
+                console.log("Don't need this anymore, remove button?")
+            }) // end of click
+
+            $("#reconnect").on('click',function(){
+                sod.reconnect(testFunction);
+            }) // end of click
+
+
+        })// end of document ready
+    </script>
+</head>
+<body onload="">
+<div id="page-wrap">
+    <section id="top">
+        <header>SOD Client
+        </header>
+    </section>
+
+    <nav id="mode_selection" >
+        <div class="block"></div>
+        <table>
+            <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
+                orientation: <input id='inputOrientation'  type="text" value='12'> Location: X<input id='inputLocationX'  type="text" value='15'> Y<input id='inputLocationY'  type="text" value='0'>
+                Z<input id='inputLocationZ'  type="text" value='12'>
+            </td></tr>
+            <tr><td><li id="reconnect">Reconnect</li></td></tr>
+           </tr>
+        </table>
+    </nav>
+    <div class="status_wrap">
+        <h1>status:</h1>
+        <div class="status"></div> <!--This is where the data from the server is added-->
+    </div>
+
+</div><!-- closing page wrap -->
+</body>
+</html>

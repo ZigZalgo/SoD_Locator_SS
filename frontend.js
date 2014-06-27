@@ -64,8 +64,11 @@ app.get('/calibrateJS', function (req, res) {
 app.get('/SoDLibrary', function (req, res) {
     res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Library.js');
 });
-app.get('/JSclient', function (req, res) {
+app.get('/JSDeviceClient', function (req, res) {
     res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Sample_Client.html');
+});
+app.get('/JSSensorClient', function (req, res) {
+    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Sensor_Client.html');
 });
 app.get('/JSclientCSS', function (req, res) {
     res.sendfile(__dirname + '/SOD_JS_Library/sample_client_style.css');

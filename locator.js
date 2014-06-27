@@ -359,8 +359,8 @@ exports.registerDevice = function(socket, deviceInfo){
         console.log("Device initiated late, updating height and width");
     }
     else{
-        // if client is running on server side, the socket IP will be localhost ip 
-        // here to set that to actual server IP 
+        // if client is running on server side, the socket IP will be localhost ip
+        // here to set that to actual server IP
         var socketIP;
         if(socket.handshake.address.address=='127.0.0.1' && frontend.serverAddress!=undefined){
             console.log(socket.handshake.address.address+' --> ' + frontend.serverAddress);
@@ -371,7 +371,7 @@ exports.registerDevice = function(socket, deviceInfo){
         console.log("IP: "+socketIP);
         //console.log('got deviceInfo.ID'+ deviceInfo.ID);
         var device = new factory.Device(socket, {ID: deviceInfo.ID, orientation: deviceInfo.orientation});
-        if(deviceInfo.name != null && deviceInfo.name != undefined){
+        if(deviceInfo.name != null && device.Info != undefined){
             device.name = deviceInfo.name;
         }
         else{
@@ -384,12 +384,19 @@ exports.registerDevice = function(socket, deviceInfo){
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
         device.deviceIP = socketIP;
+        // for station
         if(deviceInfo.stationary == true){
             device.stationary = deviceInfo.stationary;
             device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
-        devices[socket.id] = device;
+        // JSclient may register deivce with location as well.
+        if(deviceInfo.location!=undefined){
+            device.location = {X: deviceInfo.location.X, Y: deviceInfo.location.Y, Z: deviceInfo.location.Z}
+        }
+
+
+        devices[socket.id] = device; // officiciallly register the device to locator(server)
         console.log("Registering device: " + JSON.stringify(device));
     }
 }
