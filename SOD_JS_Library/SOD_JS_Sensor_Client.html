@@ -51,21 +51,13 @@
                 var serverURL = "http://"+serverIP+":"+port;
                 var socketURL = serverURL+"/socket.io/socket.io.js";
                 var libraryURL= serverURL+"/SOD_JS_Library"
-                var sod = new SODDevice({orientation:$('input#inputOrientation').val(),location:{X:$('input#inputLocationX').val(),Y:$('input#inputLocationY').val(),Z:$('input#inputLocationZ').val()}});
+                var sod = new SODSensor({sensorType:$('#sensorType').val(),FOV:$('#FOV').val(),rangeInMM:$('#rangeInMM').val()});
                 sod.init(serverURL,socketURL, sod);
 
                 //ADD LISTENERS////////////////////////////////////////////////
                 sod.addListener('connect',function(data){
-                    sod.registerDevice();
+                    sod.registerSensor();
                 });
-
-                sod.addListener('request',function(data){
-                    console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
-                });
-
-                sod.addListener('string', function(data){
-                    console.log("Received: " + JSON.stringify(data))
-                })
 
             }) // end of click
 
@@ -92,8 +84,7 @@
         <div class="block"></div>
         <table>
             <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
-                orientation: <input id='inputOrientation'  type="text" value='12'> Location: X<input id='inputLocationX'  type="text" value='15'> Y<input id='inputLocationY'  type="text" value='0'>
-                Z<input id='inputLocationZ'  type="text" value='12'>
+                SensorType: <input id='sensorType'  type="text" value='kinect2'> FOV<input id='FOV'  type="text" value='70'> rangeInMM<input id='rangeInMM'  type="text" value='4000'>
             </td></tr>
             <tr><td><li id="reconnect">Reconnect</li></td></tr>
            </tr>

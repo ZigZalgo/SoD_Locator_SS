@@ -118,11 +118,89 @@ SODDevice.prototype = {
             this.socket.emit('requestDataFromSelection',{selection:selection,data:data,ID:ID});
         }
         this.socket.emit('requestDataFromSelection',{selection:selection,data:data});
-    },getDistanceToDevice : function(targetID){
+    },getDistanceToDevice : function(targetID,callbackFunction){
         console.log(JSON.stringify((targetID)));
         if(targetID !=undefined){
             console.log('targetID is not defined yet');
         }
-        this.socket.emit('getDistanceToDevice',{ID:targetID});
+        this.socket.emit('getDistanceToDevice',{ID:targetID},callbackFunction);
     }
 }
+
+
+/************************************************************************************************************
+ * ************************************************************************************************************
+ * ************************************************************************************************************
+ * ************************************************************************************************************
+ * @param sensorInfo - contains all the information from sensor
+ * @constructor
+ */
+
+function SODSensor(sensorInfo){
+    //this.serverURL = serverURL;
+    //this.socketURL = socketURL;
+    this.sensor = {
+        sensorType : 'JSSensor',
+        FOV : 0,
+        rangeInMM : 0,
+        frameHeight : 0,
+        frameWidth : 0
+    }
+    //setters
+    for(var key in sensorInfo){
+        //console.log('key '+ key +' :'+ deviceInfo[key]);
+        this.sensor[key] = sensorInfo[key];
+        //console.log('device.key: '+ this.device.key);
+    }
+    this.socket= null;
+    this.userListeners = {};
+}
+
+SODSensor.prototype = {
+    init: function(serverURL,socketURL, _SOD){
+        //connect socket register device and hearing events
+        $.getScript(socketURL,function(){
+            _SOD.socket = io.connect(serverURL);
+            _SOD.socket.on('connect',function(data){
+                console.log('Socket Connected ...');
+
+                //add any listeners that failed to add before socket was initialized
+                for(var key in _SOD.userListeners){
+                    if(_SOD.userListeners.hasOwnProperty(key)){
+                        _SOD.addListener(key, _SOD.userListeners[key]);
+
+                        //If user specified a connect event, it will automatically override the default one (ie. the block running now).
+                        //Since the connect event already triggered, we want to manually trigger the user's specified code.
+                        //After the first connect, subsequent reconnects will automatically run user's code.
+                        if(key == "connect"){
+                            _SOD.userListeners["connect"]();
+                        }
+                    }
+                }
+            })
+        })
+    },//end of init
+    addListener: function(eventName, callback){
+        try{
+            console.log("Adding event listener: " + eventName)
+            this.socket.on(eventName, callback);
+        }
+        catch(err){
+            console.log(err);
+            console.log('Socket is probably null, adding event listener "' + eventName + '" to queue, will try again after socket connects.')
+            this.userListeners[eventName] = callback;
+        }
+    },
+    registerSensor: function(callbackFunction){
+        try{
+            console.log("Registering device..." + JSON.stringify(this.device))
+            this.socket.emit('registerSensor', this.sensor, callbackFunction)
+        }
+        catch(err){
+            console.log(err)
+            console.log("Failed to register device.")
+        }
+    }
+}
+
+

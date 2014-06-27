@@ -29,7 +29,7 @@
 
         $(document).ready(function(){
 
-
+            var sod;
             //initialization:
 
 
@@ -44,28 +44,38 @@
                     console.log("status: "+JSON.stringify(data));
                 };
             }
-
+            // set a counter to check if the client is already been registered
+           var clickCount = 0;
             $("#connect").on('click',function(){
-                var port = $('input#serverPort').val();
-                var serverIP = $('input#serverIP').val();
-                var serverURL = "http://"+serverIP+":"+port;
-                var socketURL = serverURL+"/socket.io/socket.io.js";
-                var libraryURL= serverURL+"/SOD_JS_Library"
-                var sod = new SODDevice({orientation:$('input#inputOrientation').val(),location:{X:$('input#inputLocationX').val(),Y:$('input#inputLocationY').val(),Z:$('input#inputLocationZ').val()}});
-                sod.init(serverURL,socketURL, sod);
+                clickCount++;
+                if(clickCount==1){
+                    var port = $('input#serverPort').val();
+                    var serverIP = $('input#serverIP').val();
+                    var serverURL = "http://"+serverIP+":"+port;
+                    var socketURL = serverURL+"/socket.io/socket.io.js";
+                    var libraryURL= serverURL+"/SOD_JS_Library"
+                    // grabbing device info from the page
+                    sod = new SODDevice({orientation:$('input#inputOrientation').val(),location:{X:$('input#inputLocationX').val(),Y:$('input#inputLocationY').val(),Z:$('input#inputLocationZ').val()}});
+                    sod.init(serverURL,socketURL, sod);
 
-                //ADD LISTENERS////////////////////////////////////////////////
-                sod.addListener('connect',function(data){
-                    sod.registerDevice();
-                });
+                    //ADD LISTENERS////////////////////////////////////////////////
+                    sod.addListener('connect',function(data){
+                        sod.registerDevice();
+                        showGreenStatus('connect to server ..')
+                    });
 
-                sod.addListener('request',function(data){
-                    console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
-                });
+                    sod.addListener('request',function(data){
+                        console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
+                        showGreenStatus(JSON.stringify(data))
+                    });
 
-                sod.addListener('string', function(data){
-                    console.log("Received: " + JSON.stringify(data))
-                })
+                    sod.addListener('string', function(data){
+                        console.log("Received: " + JSON.stringify(data))
+                        showGreenStatus(JSON.stringify(data))
+                    })
+                }else{
+                    showRedStatus('Can not register this client again. One page only can register one device.');
+                }
 
             }) // end of click
 
@@ -78,7 +88,6 @@
             }) // end of click
 
             $("#getDevicesAll").on('click',function(){
-
                 sod.getDeviceWithSelection('all',testFunction);
             }) // end of click
 
@@ -113,6 +122,12 @@
                 var data = $('#requestDataByID').val();
                 console.log('requesting '+ID+'withName' +data);
                 sod.requestDataFromSelection(selection,data,ID);
+            }) // end of click
+
+            $("#getDistanceByTargetID").on('click',function(){
+                var ID = Number($('#targetID').val());
+                console.log('get distance to device :"'+ID+'" ');
+                sod.getDistanceToDevice(ID,testFunction);
             }) // end of click
 
         })// end of document ready
