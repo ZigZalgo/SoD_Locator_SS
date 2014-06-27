@@ -11,7 +11,6 @@
 
     <script>
 
-
         function showRedStatus(status){
             $('.status').html("<span class='red_status'>"+status+"</span>");
             $('.red_status').fadeIn(600);
@@ -31,7 +30,7 @@
 
 
             //initialization:
-
+            var sod; // initialize sod connection
 
             //END LISTENERS////////////////////////////////////////////////
 
@@ -51,7 +50,7 @@
                 var serverURL = "http://"+serverIP+":"+port;
                 var socketURL = serverURL+"/socket.io/socket.io.js";
                 var libraryURL= serverURL+"/SOD_JS_Library"
-                var sod = new SODSensor({sensorType:$('#sensorType').val(),FOV:$('#FOV').val(),rangeInMM:$('#rangeInMM').val()});
+                sod = new SODSensor({sensorType:$('#sensorType').val(),FOV:$('#FOV').val(),rangeInMM:$('#rangeInMM').val()});
                 sod.init(serverURL,socketURL, sod);
 
                 //ADD LISTENERS////////////////////////////////////////////////
@@ -69,6 +68,17 @@
                 sod.reconnect(testFunction);
             }) // end of click
 
+            $("#addPeople").on('click',function(){
+                var numberOfPeople = $('#numPeople').val();
+                sod.addPeople(numberOfPeople);
+            }) // end of click
+
+            $("#startMovement").on('click',function(){
+                sod.startMovement();
+            }) // end of click
+            $("#stopMovement").on('click',function(){
+                sod.stopMovement();
+            }) // end of click
 
         })// end of document ready
     </script>
@@ -87,7 +97,9 @@
                 SensorType: <input id='sensorType'  type="text" value='kinect2'> FOV<input id='FOV'  type="text" value='70'> rangeInMM<input id='rangeInMM'  type="text" value='4000'>
             </td></tr>
             <tr><td><li id="reconnect">Reconnect</li></td></tr>
-           </tr>
+            <tr><td><li id="addPeople">Add People In!</li></td><td> Number of People :<input id='numPeople'  type="text" value='1'> </td></tr>
+            <tr><td><li id="startMovement">Start Movement</li></td><td> </td></tr>
+            <tr><td><li id="stopMovement">Stop Movement</li></td><td> </td></tr>
         </table>
     </nav>
     <div class="status_wrap">

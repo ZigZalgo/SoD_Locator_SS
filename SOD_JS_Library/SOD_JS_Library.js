@@ -154,8 +154,10 @@ function SODSensor(sensorInfo){
     }
     this.socket= null;
     this.userListeners = {};
+    this.people = [];
+    this.movementInterval = null;
 }
-
+// sensor functions:
 SODSensor.prototype = {
     init: function(serverURL,socketURL, _SOD){
         //connect socket register device and hearing events
@@ -199,6 +201,62 @@ SODSensor.prototype = {
         catch(err){
             console.log(err)
             console.log("Failed to register device.")
+        }
+    },
+    reconnect : function(callbackFunction){
+        if(!this.socket.socket.connected){ //is this right?
+            this.initialize();
+        }else{
+            console.log('Sensor is already connected');
+        }
+    },
+    addPeople: function(numPeople){
+        try{
+            var i;
+            for(i =0;i<numPeople;i++) {
+                var person = {ID:'JS_'+ i.toFixed(0),location:{X:-0.2,Y:1,Z:1}};
+                this.people.push(person);
+            }
+            this.socket.emit('personUpdate',this.people);
+            console.log('JS Sensor Client generated '+numPeople+' people and pushed to the server');
+        }catch(err){
+            console.log(err)
+            console.log("Failed to add people");
+        }
+    },
+    // only has functions for moving right
+    startMovement: function(){
+        try {
+            if(this.socket.socket.connected) {
+                // the movement interval
+                var sod = this;
+
+                this.movementInterval = setInterval(function () {
+                    sod.people.forEach(function(person) {
+                        // move right 0.2
+                       person.location.X +=0.2;
+                    })
+                    sod.socket.emit('personUpdate', sod.people);
+
+                }, 1000);
+            }
+
+        }catch(err){
+            console.log(err)
+            console.log("Failed to start movement");
+        }
+    },
+    stopMovement: function(){
+        try {
+            if(this.socket.socket.connected) {
+                //
+                clearInterval(this.movementInterval);
+                console.log('movement has stopped.');
+            }
+
+        }catch(err){
+            console.log(err)
+            console.log("Failed to stop movement");
         }
     }
 }
