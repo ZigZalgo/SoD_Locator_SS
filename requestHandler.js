@@ -111,20 +111,20 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getDevicesWithSelectionChain', function(request, fn){
+        console.log("There are " + request.selection.length + " filters in selection array.")
         var filterSelection = function(i, listDevices){
             if (i <= (request.selection.length - 1))
             {
+                console.log("filter #" + i + ": " + request.selection[i])
+                console.log(listDevices);
                 switch(request.selection[i])
                 {
                     case "all":
                         return filterSelection(i+1, (listDevices)); //just in case
                         break;
-                    case "inFront":
-                        return filterSelection(i+1, locator.getDevicesInFront(listDevices));
-                        break
                     case "inView":
-                        return filterSelection(i+1, locator.getDevicesInView(listDevices));
-                        break;
+                        return filterSelection(i+1, locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
+                        break
                     /*case "inRange":
                         return filterSelection(i+1, getDevicesInRange(listDevices));
                         break;
@@ -142,11 +142,8 @@ exports.handleRequest = function (socket){
                     case "all":
                         return listDevices; //just in case
                         break;
-                    case "inFront":
-                        return locator.getDevicesInFront(listDevices);
-                        break
                     case "inView":
-                        return locator.getDevicesInView(listDevices);
+                        locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices))
                         break;
                     /*case "inRange":
                         return getDevicesInRange(listDevices);
@@ -159,6 +156,7 @@ exports.handleRequest = function (socket){
                 }
             }
         }
+        console.log(filterSelection(0, locator.devices));
         fn(filterSelection(0, locator.devices));
     })
 
@@ -169,7 +167,7 @@ exports.handleRequest = function (socket){
                 fn(locator.devices);
                 break;
             case 'inView':
-                fn(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id)));
+                fn(locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, locator.devices)));
                 break;
             case 'single':
                 var counter = Object.keys(locator.devices).length;
@@ -249,7 +247,7 @@ exports.handleRequest = function (socket){
                 }
                 break;
             case 'inView':
-                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
+                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, locator.devices));
                 for(var key in devicesInView){
                     if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("string", {data: request.data})
@@ -304,7 +302,7 @@ exports.handleRequest = function (socket){
                 }
                 break;
             case 'inView':
-                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
+                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, locator.devices));
                 for(var key in devicesInView){
                     if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("dictionary", {data: request.data})
@@ -361,7 +359,7 @@ exports.handleRequest = function (socket){
                 }
                 break;
             case 'inView':
-                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id));
+                var devicesInView = locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, locator.devices));
                 for(var key in devicesInView){
                     if(devicesInView.hasOwnProperty(key) && socket!=frontend.clients[key]){
                         frontend.clients[key].emit("request", {data: request.data}, function(data){

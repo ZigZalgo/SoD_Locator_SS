@@ -451,7 +451,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
 
 // TODO: implement!
 // TODO: test!
-exports.getDevicesInFront = function(observerSocketID){
+exports.getDevicesInFront = function(observerSocketID, deviceList){
 	// TODO: implement!
 	// List<Device> returnDevices = new List<Device>();
     var observer = devices[observerSocketID];
@@ -481,28 +481,28 @@ exports.getDevicesInFront = function(observerSocketID){
         console.log("Left FOV = " + leftFieldOfView)
         console.log("Right FOV = " + rightFieldOfView)
 
-        return Object.keys(devices).filter(function(key){
+        return Object.keys(deviceList).filter(function(key){
             //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
 
 
-            if(devices[key] != observer && devices[key].location != undefined){
-                console.log("Deivice Location:: \n" + JSON.stringify(devices[key].location))
+            if(deviceList[key] != observer && deviceList[key].location != undefined){
+                console.log("Deivice Location:: \n" + JSON.stringify(deviceList[key].location))
 
-                console.log("Angle from observer to target: " + util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI))
+                console.log("Angle from observer to target: " + util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI))
                 console.log("Observer: \n" + JSON.stringify(observer))
-                console.log("Target: \n" + JSON.stringify(devices[key]))
+                console.log("Target: \n" + JSON.stringify(deviceList[key]))
 
-                console.log("First condition less than lFOV: " + util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI));
-                console.log("Second condition greater than rFOV: " + (util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)))
+                console.log("First condition less than lFOV: " + util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI));
+                console.log("Second condition greater than rFOV: " + (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)))
                 if (leftFieldOfView > rightFieldOfView &&
-                    (util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
-                    (util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
+                    (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
+                    (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
                     return true;
                 }
                 else if (leftFieldOfView < rightFieldOfView)
                 {
-                    if ((util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
-                        (util.normalizeAngle(Math.atan2(devices[key].location.Z - observer.location.Z, devices[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
+                    if ((util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                        (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
                         return true;
                     }
                 }
