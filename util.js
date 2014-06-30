@@ -59,11 +59,12 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
 
     function fixSign(degreeBetweenVectors, rotatedVector2, counterRotatedVector2,rotatedVectorEndingLocation2)
     {
-        var spaceTransitionX = (endingLocation1.X-rotatedVectorEndingLocation2.X);
-        var spaceTransitionZ = (endingLocation1.Z-rotatedVectorEndingLocation2.Z);
+        var spaceTransitionX ;
+        var spaceTransitionZ ;
         if(Math.abs(rotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(rotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
-
+            spaceTransitionX= (endingLocation1.X-rotatedVectorEndingLocation2.X);
+            spaceTransitionZ = (endingLocation1.Z-rotatedVectorEndingLocation2.Z);
             return {
                 degree:degreeBetweenVectors,
                 xDistance: startingLocation1.X - startingLocation2.X,
@@ -75,7 +76,9 @@ exports.getTranslationRule= function(startingLocation1,endingLocation1,startingL
         }
         else if(Math.abs(counterRotatedVector2.X - util.getVector(startingLocation1,endingLocation1).X) < util.ROUND_RATIO && Math.abs(counterRotatedVector2.Z - util.getVector(startingLocation1,endingLocation1).Z) < util.ROUND_RATIO)
         {
-            var rotatedVectorEndingLocation2 = util.matrixTransformation(endingLocation2,-degreeBetweenVectors);
+            var counterRotatedVectorEndingLocation2 = util.matrixTransformation(endingLocation2,-degreeBetweenVectors);
+            spaceTransitionX = (endingLocation1.X-counterRotatedVectorEndingLocation2.X);
+            spaceTransitionZ = (endingLocation1.Z-counterRotatedVectorEndingLocation2.Z);
             return {
                 degree:-degreeBetweenVectors,
                 xDistance: startingLocation1.X - startingLocation2.X,

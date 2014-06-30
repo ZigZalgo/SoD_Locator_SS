@@ -227,6 +227,9 @@ function updateContentWithObjects(){
             '</tr>' + htmlString + '</table>')
     });
 
+
+
+
    /**
     *
     * Update everything about sensor
@@ -244,7 +247,7 @@ function updateContentWithObjects(){
                 var sensorY=  0;
                 var angle = 270;
                 if(data[key].calibration["Rotation"]!=0&&data[key].calibration["Rotation"]!=null){
-                    sensorX += (data[key].calibration["xSpaceTransition"]*pixelsPerMeter/1000);
+                    sensorX += (data[key].calibration["xSpaceTransition"]*pixelsPerMeter/1000); //changed from += to -= probably because sensor see mirror image?
                     sensorY += (data[key].calibration["ySpaceTransition"]*pixelsPerMeter/1000);
                     angle += data[key].calibration["Rotation"];
                 }
@@ -253,7 +256,15 @@ function updateContentWithObjects(){
                 //console.log("TransformX : "+ sensorX+data[key].calibration["TransformX"]);
                 //console.log("sensorYAfterCalibration: "+ data[key].calibration["Rotation"]);
                 drawSensor(ctxSensors,sensorX,sensorY,Object.keys(data).indexOf(key),angle, data[key].FOV);
-                var grd = ctxSensors.createLinearGradient(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY), shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY) + (data[key].rangeInMM)/1000*pixelsPerMeter);
+                var gradientVector = {X:0,Z:data[key].rangeInMM};
+                // get the vector from sensor point to the end point ot gradient
+                var rotatedGradientVector = matrixTransformation(gradientVector,data[key].calibration["Rotation"]);
+                //console.log('rotated: ' + JSON.stringify(rotatedGradientVector));
+                //console.log('sensorX: ' + sensorX + '\tsensorY: ' + sensorY);
+                // get the end point of the gradient
+                var endPointOfGradient = {X:shiftXToGridOrigin((rotatedGradientVector.X)/1000*pixelsPerMeter+sensorX),Z:shiftYToGridOrigin((rotatedGradientVector.Z)/1000*pixelsPerMeter+sensorY)}          // move the point to where it belongs in the canvas
+                //console.log('end point : ' + JSON.stringify(endPointOfGradient));
+                var grd = ctxSensors.createLinearGradient(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY), endPointOfGradient.X,endPointOfGradient.Z)//shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY) + (data[key].rangeInMM)/1000*pixelsPerMeter);
                 grd.addColorStop(0, 'rgba(51, 112, 212, 0.8)');
                 grd.addColorStop(1, 'rgba(51, 112, 212, 0.0)');
                 drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, grd,angle, data[key].FOV);
@@ -446,6 +457,27 @@ $(function(){
         });
     });
 });
+
+/*
+* Matrix CLOCKWISE transformation ,
+* given point(x,y) and rotation angle A, return (x',y') after transformation.
+* @param:
+* personLocation   -- location contains x,y,z value of a point, we are going to use x,z since
+* we are dealing with 2D-dimension
+* angle            -- Rotation angle
+* @return:
+* returnLocation   -- location after transformation
+* */
+var matrixTransformation = function(personLocation,angle){
+    var returnLocation = {X:0,Y:0,Z:0};
+    var returnX = personLocation.X * Math.cos(angle * DEGREES_TO_RADIANS) + personLocation.Z * Math.sin(angle * DEGREES_TO_RADIANS);
+    var returnZ = personLocation.Z * Math.cos(angle * DEGREES_TO_RADIANS) - (personLocation.X * Math.sin(angle * DEGREES_TO_RADIANS));
+    returnLocation.X = Math.round(returnX*this.ROUND_RATIO)/this.ROUND_RATIO;
+    returnLocation.Z = Math.round(returnZ*this.ROUND_RATIO)/this.ROUND_RATIO;
+    return returnLocation; // for testing
+}
+
+
 io.emit("registerWebClient", {});
 //setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
 setInterval(function() {updateContentWithObjects(); }, 200); //poll server for sensors, people, and devices and display to the side
