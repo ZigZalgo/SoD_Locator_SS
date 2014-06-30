@@ -322,7 +322,7 @@ function updateContentWithObjects(){
                             '<td>' +
                             '('+Math.round(data[key].location.X*ROUND_RATIO)/ROUND_RATIO+', '
                             +Math.round(data[key].location.Y*ROUND_RATIO)/ROUND_RATIO+', '
-                            +Math.round(data[key].location.Z*ROUND_RATIO)/ROUND_RATIO+')'
+                            +data[key].location.Z+')'//Math.round(data[key].location.Z*ROUND_RATIO)/ROUND_RATIO+')'
                             + //JSON.stringify(person.location)
                             '<td>' + data[key].pairingState + '</td>' +
                             '<td>' + data[key].ownedDeviceID + '</td>' +

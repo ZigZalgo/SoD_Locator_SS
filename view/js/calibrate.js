@@ -11,24 +11,27 @@ function getPosition(canvasID, sid, event)
 {
     var rect = document.getElementById(canvasID).getBoundingClientRect();
     var xInPixels = event.x - rect.left;
+    console.log('rect.left : ' + rect.left+ '\trect.top: '+rect.top);
     var y = event.y - rect.top;
-
+    // this Z value is actully very close to reality value O_O
     var z = depthArrays[sid][Math.round(xInPixels+(y*sensors[sid].frameWidth))];//depthArrays[sid][xInPixels+(y*sensors[sid].frameWidth)];
+    console.log('z: '+ z);
 
-    console.log('event.x: '+ event.x);
-
+    console.log('event.x: '+ event.x + '\tevent.y: ' + event.y);
+    var xInMM;
     if(sensors[sid].sensorType == "Kinect2"){
-        z = z*10;
+        var zForCalc = z*10;
+        xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(zForCalc>>>3)*(Math.tan(sensors[sid].FOV/2))
     }
 
-    var xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2))
+    //z = z/10;
     //console.log("xInMM :" + xInMM);
 
 
     if(canvasID == "cnvSensorOne"){
         if(sensorOnePoints.length < 2 && z > 0){
-            sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
-           showGreenStatus('Points saved.');
+            sensorOnePoints.push({X: xInMM, Y: y, Z: z});
+            showGreenStatus('Points saved.');
         }else if(sensorOnePoints.length >= 2){
             showRedStatus('Enough Points.');
         }else if(z<=0){
@@ -48,7 +51,7 @@ function getPosition(canvasID, sid, event)
     }
     else if(canvasID == "cnvSensorTwo"){
         if(sensorTwoPoints.length < 2 && z > 0){
-            sensorTwoPoints.push({X: xInMM, Y: y, Z: z >>> 3});
+            sensorTwoPoints.push({X: xInMM, Y: y, Z: z});
             $('.status').html("<span class='green_status'>Point saved!</span>");
             $('.green_status').fadeIn(600);
         }else if(sensorTwoPoints.length >= 2){
@@ -60,11 +63,11 @@ function getPosition(canvasID, sid, event)
         }
         //$('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
         if(sensorTwoPoints.length==1){
-        $( 'input[name=sensor_point1X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].X*ROUND_RATIO)/ROUND_RATIO));
-        $( 'input[name=sensor_point1Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].Z*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=sensor_point1X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].X*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=sensor_point1Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].Z*ROUND_RATIO)/ROUND_RATIO));
         }else if(sensorTwoPoints.length==2){
-        $( 'input[name=sensor_point2X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].X*ROUND_RATIO)/ROUND_RATIO));
-        $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=sensor_point2X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].X*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
         }else{
             showRedStatus("Wrong Number of Points for Sensor 2");
         }
@@ -72,6 +75,59 @@ function getPosition(canvasID, sid, event)
     }
 
 
+
+    /*
+        var xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2))
+        //console.log("xInMM :" + xInMM);
+
+
+        if(canvasID == "cnvSensorOne"){
+            if(sensorOnePoints.length < 2 && z > 0){
+                sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
+               showGreenStatus('Points saved.');
+            }else if(sensorOnePoints.length >= 2){
+                showRedStatus('Enough Points.');
+            }else if(z<=0){
+                showNormalStatus('Depth is out of range, please choose another point!');
+            }
+
+            //console.log("sensorOnePoints: "+ JSON.stringify(sensorOnePoints));
+            if(sensorOnePoints.length==1){
+                $( 'input[name=master_point1X]' ).val(JSON.stringify(Math.round(sensorOnePoints[0].X*ROUND_RATIO)/ROUND_RATIO));
+                $( 'input[name=master_point1Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[0].Z*ROUND_RATIO)/ROUND_RATIO));
+            }else if(sensorOnePoints.length==2){
+                $( 'input[name=master_point2X]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].X*ROUND_RATIO)/ROUND_RATIO));
+                $( 'input[name=master_point2Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
+            }else{
+                showRedStatus("Wrong Number of Points for Sensor 1");
+            }
+        }
+        else if(canvasID == "cnvSensorTwo"){
+            if(sensorTwoPoints.length < 2 && z > 0){
+                sensorTwoPoints.push({X: xInMM, Y: y, Z: z >>> 3});
+                $('.status').html("<span class='green_status'>Point saved!</span>");
+                $('.green_status').fadeIn(600);
+            }else if(sensorTwoPoints.length >= 2){
+                $('.status').html("<span class='red_status'>Enough Points.</span>");
+                $('.red_status').fadeIn(600);
+            }else if(z<=0){
+                $('.status').html("<span class='red_status'>Depth is out of range, please choose another point!</span>");
+                $('.red_status').fadeIn(600);
+            }
+            //$('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
+            if(sensorTwoPoints.length==1){
+            $( 'input[name=sensor_point1X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].X*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=sensor_point1Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[0].Z*ROUND_RATIO)/ROUND_RATIO));
+            }else if(sensorTwoPoints.length==2){
+            $( 'input[name=sensor_point2X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].X*ROUND_RATIO)/ROUND_RATIO));
+            $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
+            }else{
+                showRedStatus("Wrong Number of Points for Sensor 2");
+            }
+
+        }
+
+    */
 }
 
 function setup(){
@@ -113,26 +169,33 @@ io.on("anything", function(data){
     $('.status').html("MESSAGE RECEIVED: " + data);
 })
 
+//data is the frame data from sensor
 io.on("setCalibrationFrame", function(data){
+    //check if data was sent from reference sensor or the sensor selected to be calibrated
     if(calibrationFrames["reference"] == data.sourceID || calibrationFrames["uncalibrated"] == data.sourceID){
         depthArrays[data.sourceID] = data.payload;
+        var depthMultiplier;
         if(sensors[data.sourceID].sensorType == "Kinect1"){
-            var depthMultiplier = 7000;
+            depthMultiplier = 7000;
         }
         else{
-            var depthMultiplier = 5;
+            depthMultiplier = 5;//how is this
         }
+        // if the frame data is from reference sensor
         if(calibrationFrames["reference"] == data.sourceID){
             canvas = document.getElementById("cnvSensorOne");
             var ctx = canvas.getContext("2d");
+            // draw the data based on the kinect frameWidth and frame hight
             var bytearray = new Uint8Array(data.payload);
             var imgdata = ctx.getImageData(0,0, sensors[data.sourceID].frameWidth, sensors[data.sourceID].frameHeight);
             ctx.canvas.width = sensors[data.sourceID].frameWidth;
             ctx.canvas.height = sensors[data.sourceID].frameHeight;
             var imgdatalen = imgdata.data.length;
+            //payload is where the frame array data stored.
             for(var i=0;i<(imgdatalen/4);i++){
-                var depth = (data.payload[i]>>>3)*255/depthMultiplier;
+                var depth = (data.payload[i]>>>3)*255/depthMultiplier; // what is this 255?
 
+              //   console.log('depth :' +depth);
                 imgdata.data[4*i] = depth;
                 imgdata.data[4*i+1] = depth;
                 imgdata.data[4*i+2] = depth;
@@ -182,19 +245,19 @@ $(function(){
         }
         calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
         calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
-        $('.status').html('<span class="normal_status">CLICKED BUTTON</span>');
+        $('.status').html('<span class="normal_status">Getting Frames...</span>');
         $(".normal_status").fadeIn(600);
         io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
     });
 
     $('#resetPointsOne').click(function(){
         sensorOnePoints.splice(0,sensorOnePoints.length);
-        $('#sensorOneStatus').html(JSON.stringify(sensorOnePoints));
+        showNormalStatus(JSON.stringify(sensorOnePoints));
     })
 
     $('#resetPointsTwo').click(function(){
         sensorTwoPoints.splice(0,sensorTwoPoints.length);
-        $('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
+        showNormalStatus(JSON.stringify(sensorTwoPoints));
     })
 
     $('#calibrate').click(function(){

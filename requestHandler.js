@@ -416,7 +416,11 @@ exports.handleRequest = function (socket){
     //END SENDING SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
     socket.on('broadcast', function (request, fn) {
-        socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});
+        try{
+        socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});}
+        catch (err){
+            console.log(err + 'broadcasting failed.');
+        }
     });
 
     socket.on('personUpdate', function(persons, fn){
@@ -449,8 +453,13 @@ exports.handleRequest = function (socket){
     });
 
     socket.on('getCalibrationFrames', function(request, fn){
-        frontend.clients[request.referenceSensorID].emit('getFrameFromSensor', socket.id);
-        frontend.clients[request.uncalibratedSensorID].emit('getFrameFromSensor', socket.id);
+        // error checking see if the sensor is not defined
+        if(frontend.clients[request.referenceSensorID]!=undefined && frontend.clients[request.uncalibratedSensorID]!=undefined){
+            frontend.clients[request.referenceSensorID].emit('getFrameFromSensor', socket.id);
+            frontend.clients[request.uncalibratedSensorID].emit('getFrameFromSensor', socket.id);
+        }else{
+            console.log('reference sensor or calibrate sensor could be undefined.');
+        }
     });
 
     socket.on('calibrateSensors', function (request, fn){
