@@ -44,17 +44,19 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
         if(persons.hasOwnProperty(key)){
             for(var IDkey in persons[key].ID){
                 if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
-                    delete persons[key].ID[IDkey];
                     try{
                         if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey]){
-                            if(object.keys(persons[key].ID).length > 0){
-                                persons[key].currentlyTrackedBy = persons[object.keys(persons[key].ID)[0]];
+                            if(Object.keys(persons[key].ID).length > 0){
+                                console.log('currentlyTrackedBy before:' + persons[key].currentlyTrackedBy);
+                                persons[key].currentlyTrackedBy = persons[Object.keys(persons[key].ID)[0]];
                             }
                         }
+
                     }
                     catch(err){
                         console.log("failed to update currentlyTrackedBy to new socket.id: " + err);
                     }
+                    delete persons[key].ID[IDkey];
                 }
             }
         }
@@ -68,11 +70,12 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 }
 
 exports.removeDuplicateInstancesOfTrackedPerson = function(uniquePersonID, personID){
-    for(var key in person){
+    for(var key in persons){
         if(key != uniquePersonID){
             for(var IDkey in persons[key].ID){
                 if(IDkey == personID){
                     delete persons[key].ID[IDkey];
+                    console.log('Am i here? uniquePersonID: ' + uniquePersonID);
                 }
             }
         }
@@ -134,6 +137,7 @@ exports.updatePersons = function(receivedPerson, socket){
                     ////
                     //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
                     if(util.distanceBetweenPoints(persons[key].location, receivedPerson.location) < nearestDistance){
+                        console.log('same person observed. Adding new person to person' + persons[key].uniquePersonID );
                         nearestPerson = persons[key];
                         //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
                         nearestDistance= util.distanceBetweenPoints(persons[key].location, receivedPerson.location);
@@ -141,13 +145,13 @@ exports.updatePersons = function(receivedPerson, socket){
                     }
                     ////
                     if(counter == 0){
-                        console.log('nearestDistance : ' + nearestDistance);
+                        //console.log('nearestDistance : ' + nearestDistance);
                         if(nearestDistance < 0.4){
                             nearestPerson.ID[receivedPerson.ID] = socket.id;
                             locator.removeDuplicateInstancesOfTrackedPerson(nearestPerson.uniquePersonID, receivedPerson.ID)
                         }
                         else{
-                            console.log(JSON.stringify(receivedPerson.location));
+                            console.log('register new person : ' + JSON.stringify(receivedPerson.location));
                             ///end of iterations, person not found and not near a tracked person
                             if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
                                 var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
