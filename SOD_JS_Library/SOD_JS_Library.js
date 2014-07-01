@@ -124,6 +124,9 @@ SODDevice.prototype = {
             console.log('targetID is not defined yet');
         }
         this.socket.emit('getDistanceToDevice',{ID:targetID},callbackFunction);
+    },getDeviceWithSelectionChain : function(selectionChain,callbackFunction){
+        console.log('selectionChain: ' + JSON.stringify(selectionChain));
+        this.socket.emit('getDevicesWithSelectionChain',{selection:selectionChain},callbackFunction);
     }
 }
 

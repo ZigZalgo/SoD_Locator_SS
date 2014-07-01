@@ -444,7 +444,7 @@ section#calibration_section .calibration_wrap{
 .status_wrap h1{
     text-decoration:underline;
     text-transform: uppercase;
-    font:font-family:"Agency FB",DinRound, Sans-Serif;
+    font-family:"Agency FB",DinRound, Sans-Serif;
     font-size: 1.2em;
     margin:2px;
 }

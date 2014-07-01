@@ -130,6 +130,16 @@
                 sod.getDistanceToDevice(ID,testFunction);
             }) // end of click
 
+            $("#getDevicesBySelectionChain").on('click',function(){
+                var selectionChain = [];
+                selectionChain.push($('#selectionChain_1').val());
+                selectionChain.push($('#selectionChain_2').val());
+                selectionChain.push($('#selectionChain_3').val());
+                selectionChain.push($('#selectionChain_4').val());
+                //console.log('get distance to device :"'+ID+'" ');
+                sod.getDeviceWithSelectionChain(selectionChain,testFunction);
+            }) // end of click
+
         })// end of document ready
     </script>
 </head>
@@ -160,6 +170,11 @@
                     ID<input id='requestID'  type="text" value='0'></td></tr>
                 <tr><td><li id="getDistanceByTargetID">getDistance(targetID)</li></td><td> ID <input id='targetID'  type="text" value='1'>
                     </td></tr>
+                <tr><td><li id="getDevicesBySelectionChain">Get Devices Chain</li></td><td> Chain1 <input id='selectionChain_1'  type="text" value='all'>
+                    Chain2 <input id='selectionChain_2'  type="text" value='all'>
+                    Chain3 <input id='selectionChain_3'  type="text" value='all'>
+                    Chain4 <input id='selectionChain_4'  type="text" value='all'>
+                </td></tr>
             </table>
         </nav>
     <div class="status_wrap">
