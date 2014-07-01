@@ -45,6 +45,17 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
             for(var IDkey in persons[key].ID){
                 if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
                     delete persons[key].ID[IDkey];
+                    try{
+                        if(persons[key].currentlyTrackedBy == IDkey){
+                            if(object.keys(persons[key].ID).length > 0){
+                                persons[key].currentlyTrackedBy = persons[object.keys(persons[key].ID)[0]];
+                            }
+                        }
+                    }
+                    catch(err){
+                        console.log("failed to update currentlyTrackedBy to new socket.id: " + err);
+                    }
+
                 }
             }
         }
@@ -62,18 +73,20 @@ exports.updatePersons = function(receivedPerson, socket){
             if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
                 var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
                 person.lastUpdated = new Date();
+                persons[key].currentlyTrackedBy = socket.id;
                 persons[person.uniquePersonID] = person;
-                console.log(persons[person.uniquePersonID])
             }
         }
     }
     else{
         //there are people being tracked, see if they match
         var counter = Object.keys(persons).length;
+        var nearestPerson;
+        nearestPerson.distance = 10000;
         for(var key in persons){
             counter --;
             if(persons.hasOwnProperty(key)){
-                if(persons[key].ID[receivedPerson.ID] != undefined){
+                if(persons[key].ID[receivedPerson.ID] != undefined && persons[key].currentlyTrackedBy == receivedPerson.ID){
                     //person found
                     try{
                         persons[key].location.X = receivedPerson.location.X.toFixed(3);
@@ -96,12 +109,24 @@ exports.updatePersons = function(receivedPerson, socket){
                     break;
                 }
                 else{
+                    ////
+                    if(util.distanceBetweenPoints([persons[key].location, receivedPerson.location]) < nearestPerson.distance){
+                        nearestPerson = persons[key];
+                        nearestPerson.distance = util.distanceBetweenPoints([persons[key].location, receivedPerson.location]);
+                    }
+                    ////
                     if(counter == 0){
-                        //person was not found
-                        if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
-                            var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
-                            person.lastUpdated = new Date();
-                            persons[person.uniquePersonID] = person;
+                        if(nearestPerson.distance < 300){
+                            nearestPerson.ID[receivedPerson.ID] = socket.id;
+                        }
+                        else{
+                            ///end of iterations, person not found and not near a tracked person
+                            if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
+                                var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+                                person.lastUpdated = new Date();
+                                person.currentlyTrackedBy = socket.id;
+                                persons[person.uniquePersonID] = person;
+                            }
                         }
                     }
                 }
@@ -218,8 +243,6 @@ exports.printDevices = function(){
     return true;
 }
 
-// TODO: implement!
-// TODO: test!
 exports.updateDeviceOrientation = function(orientation, socket){
     if(devices[socket.id] != undefined){
         try{

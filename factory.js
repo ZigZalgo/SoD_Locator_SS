@@ -30,7 +30,7 @@ function Person(id, location, socket){
         this.orientation = null;
         this.ownedDeviceID = null;
         this.pairingState = "unpaired";
-        this.lastUpdatedBy = socket.id;
+        this.currentlyTrackedBy = socket.id;
         this.lastUpdated = new Date();
     }
     catch(err){
