@@ -55,7 +55,6 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                     catch(err){
                         console.log("failed to update currentlyTrackedBy to new socket.id: " + err);
                     }
-
                 }
             }
         }
@@ -64,6 +63,24 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
         }
         catch(err){
             console.log("error trying to remove untracked people: " + err);
+        }
+    }
+}
+
+exports.removeDuplicateInstancesOfTrackedPerson = function(uniquePersonID, personID){
+    for(var key in person){
+        if(key != uniquePersonID){
+            for(var IDkey in persons[key].ID){
+                if(IDkey == personID){
+                    delete persons[key].ID[IDkey];
+                }
+            }
+        }
+        try{
+            locator.removeUntrackedPeople();
+        }
+        catch(err){
+            console.log("error while trying to remove untracked people after checking for duplicate instances of tracked people: \n" + err);
         }
     }
 }
@@ -127,6 +144,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         console.log('nearestDistance : ' + nearestDistance);
                         if(nearestDistance < 0.4){
                             nearestPerson.ID[receivedPerson.ID] = socket.id;
+                            locator.removeDuplicateInstancesOfTrackedPerson(nearestPerson.uniquePersonID, receivedPerson.ID)
                         }
                         else{
                             console.log(JSON.stringify(receivedPerson.location));
