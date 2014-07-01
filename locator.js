@@ -46,7 +46,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                 if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
                     delete persons[key].ID[IDkey];
                     try{
-                        if(persons[key].currentlyTrackedBy == IDkey){
+                        if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey]){
                             if(object.keys(persons[key].ID).length > 0){
                                 persons[key].currentlyTrackedBy = persons[object.keys(persons[key].ID)[0]];
                             }
@@ -59,8 +59,11 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                 }
             }
         }
-        if(Object.keys(persons).indexOf(key) == Object.keys(persons).length - 1){
+        try{
             locator.removeUntrackedPeople();
+        }
+        catch(err){
+            console.log("error trying to remove untracked people: " + err);
         }
     }
 }
