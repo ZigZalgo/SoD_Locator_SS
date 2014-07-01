@@ -117,7 +117,7 @@ exports.handleRequest = function (socket){
             {
                 console.log("filter #" + i + ": " + request.selection[i])
                 console.log(listDevices);
-                switch(request.selection[i])
+                switch(cv.selection[i])
                 {
                     case "all":
                         return filterSelection(i+1, (listDevices)); //just in case

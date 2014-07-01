@@ -73,7 +73,7 @@ exports.updatePersons = function(receivedPerson, socket){
             if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
                 var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
                 person.lastUpdated = new Date();
-                persons[key].currentlyTrackedBy = socket.id;
+                person.currentlyTrackedBy = socket.id;
                 persons[person.uniquePersonID] = person;
             }
         }
@@ -82,11 +82,13 @@ exports.updatePersons = function(receivedPerson, socket){
         //there are people being tracked, see if they match
         var counter = Object.keys(persons).length;
         var nearestPerson;
-        nearestPerson.distance = 10000;
+        var nearestDistance = 1000;
         for(var key in persons){
             counter --;
             if(persons.hasOwnProperty(key)){
-                if(persons[key].ID[receivedPerson.ID] != undefined && persons[key].currentlyTrackedBy == receivedPerson.ID){
+                //console.log(persons[key].currentlyTrackedBy + " == " + socket.id)
+
+                if(persons[key].ID[receivedPerson.ID] != undefined && persons[key].currentlyTrackedBy == socket.id){
                     //person found
                     try{
                         persons[key].location.X = receivedPerson.location.X.toFixed(3);
@@ -110,16 +112,21 @@ exports.updatePersons = function(receivedPerson, socket){
                 }
                 else{
                     ////
-                    if(util.distanceBetweenPoints([persons[key].location, receivedPerson.location]) < nearestPerson.distance){
+                    //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
+                    if(util.distanceBetweenPoints(persons[key].location, receivedPerson.location) < nearestDistance){
                         nearestPerson = persons[key];
-                        nearestPerson.distance = util.distanceBetweenPoints([persons[key].location, receivedPerson.location]);
+                        //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
+                        nearestDistance= util.distanceBetweenPoints(persons[key].location, receivedPerson.location);
+
                     }
                     ////
                     if(counter == 0){
-                        if(nearestPerson.distance < 300){
+                        console.log('nearestDistance : ' + nearestDistance);
+                        if(nearestDistance < 0.4){
                             nearestPerson.ID[receivedPerson.ID] = socket.id;
                         }
                         else{
+                            console.log(JSON.stringify(receivedPerson.location));
                             ///end of iterations, person not found and not near a tracked person
                             if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
                                 var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
