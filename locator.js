@@ -21,12 +21,12 @@ exports.start = function(){
 
 exports.registerSensor = function(sensor){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
-    console.log("REFERENCE IS: " + sensorsReference)
+    console.log("REFERENCE IS: " + sensorsReference);
     if(sensorsReference == null){
         sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
         sensor.isCalibrated = true;
         sensorsReference = sensor;
-        console.log("setting default reference")
+        console.log("setting default reference");
         sensors[sensor.socketID] = sensor;
     }
     else{
@@ -44,19 +44,17 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
         if(persons.hasOwnProperty(key)){
             for(var IDkey in persons[key].ID){
                 if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
+                    delete persons[key].ID[IDkey];
                     try{
                         if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey]){
-                            if(Object.keys(persons[key].ID).length > 0){
-                                console.log('currentlyTrackedBy before:' + persons[key].currentlyTrackedBy);
-                                persons[key].currentlyTrackedBy = persons[Object.keys(persons[key].ID)[0]];
+                            if(object.keys(persons[key].ID).length > 0){
+                                persons[key].currentlyTrackedBy = persons[object.keys(persons[key].ID)[0]];
                             }
                         }
-
                     }
                     catch(err){
                         console.log("failed to update currentlyTrackedBy to new socket.id: " + err);
                     }
-                    delete persons[key].ID[IDkey];
                 }
             }
         }
@@ -70,12 +68,11 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 }
 
 exports.removeDuplicateInstancesOfTrackedPerson = function(uniquePersonID, personID){
-    for(var key in persons){
+    for(var key in person){
         if(key != uniquePersonID){
             for(var IDkey in persons[key].ID){
                 if(IDkey == personID){
                     delete persons[key].ID[IDkey];
-                    console.log('Am i here? uniquePersonID: ' + uniquePersonID);
                 }
             }
         }
@@ -137,7 +134,6 @@ exports.updatePersons = function(receivedPerson, socket){
                     ////
                     //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
                     if(util.distanceBetweenPoints(persons[key].location, receivedPerson.location) < nearestDistance){
-                        console.log('same person observed. Adding new person to person' + persons[key].uniquePersonID );
                         nearestPerson = persons[key];
                         //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
                         nearestDistance= util.distanceBetweenPoints(persons[key].location, receivedPerson.location);
@@ -145,13 +141,13 @@ exports.updatePersons = function(receivedPerson, socket){
                     }
                     ////
                     if(counter == 0){
-                        //console.log('nearestDistance : ' + nearestDistance);
+                        console.log('nearestDistance : ' + nearestDistance);
                         if(nearestDistance < 0.4){
                             nearestPerson.ID[receivedPerson.ID] = socket.id;
                             locator.removeDuplicateInstancesOfTrackedPerson(nearestPerson.uniquePersonID, receivedPerson.ID)
                         }
                         else{
-                            console.log('register new person : ' + JSON.stringify(receivedPerson.location));
+                            console.log(JSON.stringify(receivedPerson.location));
                             ///end of iterations, person not found and not near a tracked person
                             if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
                                 var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
@@ -576,68 +572,65 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     }
 }
 
-// TODO: implement!
 // TODO: test!
-exports.GetNearestDeviceInView = function(observer){
-	// TODO: test
-    var devicesInView = this.GetDevicesInView(observer);
-    return this.FindNearestDevice(observer, devicesInView);
-}
+exports.getNearestDevice = function (observer, listDevices) {
+    //recursive function to return nearest device, given an observer and a list of devices to compare
+    var compareNextDeviceInList = function (keyIndexOfDeviceList, currentClosestDevice) {
+        //if not end of recursion
+        if (keyIndexOfDeviceList >= 0) {
+            if(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].uniqueDeviceID == observer.uniqueDeviceID){
+                return compareNextDeviceInList(keyIndexOfDeviceList - 1, currentClosestDevice);
+            }
+            else{
+                //first call passes null as currentClosestDevice, pick device from list as currentClosestDevice
+                if (currentClosestDevice == null) {
+                    return compareNextDeviceInList(keyIndexOfDeviceList - 1, listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]])
+                }
 
-// TODO: implement!
-// TODO: test!
-exports.GetDevicesWithinRange = function(observer, distance){
-	// TODO: test
-    var returnDevices = {};
-    if(observer.location == null){
-        return returnDevices;
+                //if device in list is closer to observer than currentClosestDevice, replace currentClosestDevice with device in list
+                else if (util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) <
+                    util.distanceBetweenPoints(currentClosestDevice.location, observer.location)) {
+                    return compareNextDeviceInList(keyIndexOfDeviceList - 1, listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]]);
+                }
+                //currentClosestDevice is closer to observer than device in list, no change
+                else {
+                    return compareNextDeviceInList(keyIndexOfDeviceList - 1, currentClosestDevice);
+                }
+            }
+        }
+        //end of recursion
+        else {
+            if(currentClosestDevice == null){
+                return {};
+            }
+            else{
+                var container = {};
+                container[currentClosestDevice.uniqueDeviceID] = currentClosestDevice;
+                return container;
+            }
+        }
     }
 
-    devices.forEach(function(device){
-        if(device == observer){
-           //this.continue /////is this necessary, if it's an else if?
-        }
-        else if(device.location != null && util.distanceBetweenPoints((observer.location, device.location) < distance)){
-            returnDevices.push(device);
-        }
-    });
+    return compareNextDeviceInList(Object.keys(listDevices).length - 1, null)
+};
 
-    return returnDevices;
-}
-
-// TODO: implement!
 // TODO: test!
-exports.GetNearestDeviceWithinRange = function(observer, distance){
-	// TODO: test
-    var devicesInView = this.GetDevicesWithinRange(observer, distance);
-    return this.FindNearestDevice(observer, devicesInView);
-}
+exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
 
-// TODO: implement!
-// TODO: test!
-exports.FindNearestDevice = function(observer, deviceList){
-	// TODO: test
-    if(_.size(deviceList) > 0){
-        return null;
-    }
-    else{
-        var nearest = null;
-
-        deviceList.forEach(function(device){
-           if(device != observer && device.location != null){//!=null equivalent to .HasValue?
-               nearest = device;
-           }
-        });
-        if(nearest == null){
-            return null;
+    var filterDeviceListByRange = function (keyIndexOfDeviceList, listDevicesToReturn) {
+        if (keyIndexOfDeviceList >= 0) {
+            if (util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) > maxRange) {
+                return filterDeviceListByRange(keyIndexOfDeviceList - 1, listDevicesToReturn);
+            }
+            else {
+                //check to see list is modified before sending as param in return recursive call
+                listDevicesToReturn[Object.keys(listDevices)[keyIndexOfDeviceList]] = listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]];
+                return filterDeviceListByRange(keyIndexOfDeviceList - 1, listDevicesToReturn);
+            }
         }
-
-        deviceList.forEach(function(device){
-           if(device != observer && device.location != null &&
-                        util.distanceBetweenPoints(device.location, observer.location) < util.distanceBetweenPoints(nearest.location, observer.location)){
-              nearest = device;
-           }
-        });
-        return nearest;
+        //end of recursion
+        else {
+            return listDevicesToReturn;
+        }
     }
-}
+};

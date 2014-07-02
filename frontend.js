@@ -2,19 +2,19 @@ var express = require('express.io');
 var app = express();
 
 // testing 
-var os = require('os')
+var os = require('os');
 var interfaces = os.networkInterfaces();
 exports.serverAddress;
 for (k in interfaces) {
         for (k2 in interfaces[k]) {
             var address = interfaces[k][k2];
             if (address.family == 'IPv4' && !address.internal) {
-                serverAddress = address.address
+                var serverAddress = address.address;
             }
         }
     }
 
-console.log('SOD server IP : '+serverAddress);
+console.log('SOD server IP : '+ serverAddress);
 
 // testing 
 
@@ -99,13 +99,13 @@ io.sockets.on('connection', function (socket) {
         if(clients[socket.id] != undefined){
             switch(clients[socket.id].clientType){
                 case 'sensor':
-                    console.log("CLEANING UP SENSOR")
+                    console.log("CLEANING UP SENSOR");
                     locator.cleanUpSensor(socket.id);
                     break;
                 case 'webClient':
                     break;
                 case 'table':
-                    console.log("CLEANING UP TABLE")
+                    console.log("CLEANING UP TABLE");
                     locator.cleanUpDevice(socket.id);
                     break;
                 case 'iPad':
@@ -115,7 +115,7 @@ io.sockets.on('connection', function (socket) {
                     locator.cleanUpDevice(socket.id);
                     break;
                 case 'JSClient':
-                    console.log("IMPLEMENT CLEAN UP CODE FOR JSCLIENT!")
+                    console.log("IMPLEMENT CLEAN UP CODE FOR JSCLIENT!");
                     locator.cleanUpDevice(socket.id);
                     break;
                 default:
