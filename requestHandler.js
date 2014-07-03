@@ -113,11 +113,17 @@ exports.handleRequest = function (socket) {
 
     socket.on('getDevicesWithSelectionChain', function (request, fn) {
         console.log("There are " + request.selection.length + " filters in selection array.")
+
         var filterSelection = function (i, listDevices) {
             if (i <= (request.selection.length - 1)) {
+                var regex = /([a-zA-Z ]+)([0-9\.]*).*?$/
+                var result = request.selection[i].match(regex);
+                var selectionType = result[1];
+                var selectionParam = result[2];
+
                 console.log("filter #" + i + ": " + request.selection[i])
                 console.log(listDevices);
-                switch (request.selection[i]) {
+                switch (selectionType) {
                     case "all":
                         return filterSelection(i + 1, (listDevices)); //just in case
                         break;
@@ -125,7 +131,8 @@ exports.handleRequest = function (socket) {
                         return filterSelection(i + 1, locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
                         break
                     case "inRange":
-                        return filterSelection(i+1, locator.getDevicesWithinRange(locator.devices[socket.id], listDevices));
+                        //return filterSelection(i+1, locator.getDevicesWithinRange(locator.devices[socket.id], listDevices));
+                        return filterSelection(i+1, locator.getDevicesWithinRange(locator.devices[socket.id], selectionParam, listDevices));
                         break;
                     case "nearest":
                         return filterSelection(i+1, locator.getNearestDevice(locator.devices[socket.id], listDevices));

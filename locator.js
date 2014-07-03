@@ -486,47 +486,57 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
 	//var returnDevices = {};
     var returnDevices = {};
     var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].location, devices[observerSocketID].orientation);
+    console.log("length of devicesInFront: " + devicesInFront.length)
     for(var i = 0; i <= devicesInFront.length; i++){
+
         if(i == devicesInFront.length){
             console.log("returning devicesInView!\n" + JSON.stringify(returnDevices))
             return returnDevices;
         }
         else{
-            if(devices[devicesInFront[i]].width != null){
-                var sides = util.getLinesOfShape(devices[devicesInFront[i]]);
-                var intersectionPoints = [];
-                console.log("Sides: " + JSON.stringify(sides))
+            if(devices[devicesInFront[i]]!= undefined){
+                if(devices[devicesInFront[i]].width != null){
+                    var sides = util.getLinesOfShape(devices[devicesInFront[i]]);
+                    var intersectionPoints = [];
+                    console.log("Sides: " + JSON.stringify(sides))
 
-                sides.forEach(function(side){
-                    var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
-                    if(intPoint != null){
-                        console.log("Added an intersection point")
-                        intersectionPoints.push(intPoint);
-                    }
-                });
-
-                if(intersectionPoints.length != 0){
-                    console.log("intersection points not empty");
-                    //this.continue;
-                    var nearestPoint = intersectionPoints[0];
-                    var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].location, nearestPoint);
-
-                    intersectionPoints.forEach(function(point){
-                        var distance = util.distanceBetweenPoints(devices[observerSocketID].location, point);
-                        if(distance < shortestDistance){
-                            nearestPoint = point;
-                            shortestDistance = distance;
+                    sides.forEach(function(side){
+                        var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
+                        if(intPoint != null){
+                            console.log("Added an intersection point")
+                            intersectionPoints.push(intPoint);
                         }
                     });
 
-                    var ratioOnScreen = util.GetRatioPositionOnScreen(devicesInFront[i], nearestPoint);
+                    if(intersectionPoints.length != 0){
+                        console.log("intersection points not empty");
+                        //this.continue;
+                        var nearestPoint = intersectionPoints[0];
+                        var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].location, nearestPoint);
 
-                    devices[devicesInFront[i]].intersectionPoint.X = ratioOnScreen.X;
-                    devices[devicesInFront[i]].intersectionPoint.Y = ratioOnScreen.Y;
-                    console.log("Pushed a target for sending!");
-                    returnDevices[devicesInFront[i]] = devices[devicesInFront[i]];
+                        intersectionPoints.forEach(function(point){
+                            var distance = util.distanceBetweenPoints(devices[observerSocketID].location, point);
+                            if(distance < shortestDistance){
+                                nearestPoint = point;
+                                shortestDistance = distance;
+                            }
+                        });
+
+                        var ratioOnScreen = util.GetRatioPositionOnScreen(devicesInFront[i], nearestPoint);
+
+                        devices[devicesInFront[i]].intersectionPoint.X = ratioOnScreen.X;
+                        devices[devicesInFront[i]].intersectionPoint.Y = ratioOnScreen.Y;
+                        console.log("Pushed a target for sending!");
+                        returnDevices[devicesInFront[i]] = devices[devicesInFront[i]];
+                    }
                 }
             }
+            else{
+                console.log("devices:\n " + JSON.stringify(devices))
+                console.log("devicesInFront:\n " + JSON.stringify(devicesInFront));
+                console.log("i:\n " + JSON.stringify(i));
+            }
+
         }
     };
 }
@@ -629,7 +639,7 @@ exports.getNearestDevice = function (observer, listDevices) {
             }
             else{
                 var container = {};
-                container[currentClosestDevice.uniqueDeviceID] = currentClosestDevice;
+                container[currentClosestDevice.socketID] = currentClosestDevice;
                 return container;
             }
         }
@@ -643,7 +653,12 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
 
     var filterDeviceListByRange = function (keyIndexOfDeviceList, listDevicesToReturn) {
         if (keyIndexOfDeviceList >= 0) {
-            if (util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) > maxRange) {
+            if(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].uniqueDeviceID == observer.uniqueDeviceID){
+                return filterDeviceListByRange(keyIndexOfDeviceList - 1, listDevicesToReturn);
+            }
+            else if (util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) > maxRange) {
+                console.log(util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location));
+                console.log(maxRange);
                 return filterDeviceListByRange(keyIndexOfDeviceList - 1, listDevicesToReturn);
             }
             else {
@@ -657,4 +672,6 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
             return listDevicesToReturn;
         }
     }
+
+    return filterDeviceListByRange(Object.keys(listDevices).length-1, {});
 };
