@@ -33,10 +33,14 @@ function SODDevice(deviceInfo){
         stationary : false,
         deviceIP : ''
     }
-    //setters
+    //setters]
+    console.log('deviceInfo: '+ JSON.stringify(deviceInfo));
     for(var key in deviceInfo){
-        //console.log('key '+ key +' :'+ deviceInfo[key]);
+        //console.log('key '+ key +' :'+ this.device[key]);
         this.device[key] = deviceInfo[key];
+        if(key == 'stationary'){
+            console.log('changed to: '+this.device[key] + '\t by deviceInfo: '+ this.device[key]);
+        }
         //console.log('device.key: '+ this.device.key);
     }
     this.socket= null;

@@ -21,6 +21,7 @@ exports.start = function(){
 
 exports.registerSensor = function(sensor){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
+    console.log('received sensor: ' +JSON.stringify(sensor));
     console.log("REFERENCE IS: " + sensorsReference);
     if(sensorsReference == null){
         sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
@@ -51,7 +52,8 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                         if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey] && Object.keys(persons[key].ID).length > 0){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
-                            persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
+
+                            console.log('Now, person ' + key + ' is seen by: ' + persons[key].currentlyTrackedBy);
                         }
 
                     }
@@ -60,6 +62,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                     }
 
                 }
+                 persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
             }
         }
         try{
@@ -136,10 +139,11 @@ exports.updatePersons = function(receivedPerson, socket){
                         // check if the nearest person is within the threshold
                         if(nearestDistance < 0.4){
                             //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
-                            console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
+
                             // if the sensor hasn't been registered to the person's seen by sensor list
                             if(persons[key].ID[receivedPerson.ID]==undefined){
                                 console.log('person '+persons[key].uniquePersonID+' is started being seen by ' + socket.id);
+                                console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
                                 persons[key].ID[receivedPerson.ID] = socket.id;
                             }
                             //console.log('only updating nearest person');
