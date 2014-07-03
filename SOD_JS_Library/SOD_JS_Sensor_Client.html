@@ -50,7 +50,9 @@
                 var serverURL = "http://"+serverIP+":"+port;
                 var socketURL = serverURL+"/socket.io/socket.io.js";
                 var libraryURL= serverURL+"/SOD_JS_Library"
-                sod = new SODSensor({sensorType:$('#sensorType').val(),FOV:$('#FOV').val(),rangeInMM:$('#rangeInMM').val()});
+                sod = new SODSensor({sensorType:$('#sensorType').val(),FOV:Number($('#FOV').val()),rangeInMM:Number($('#rangeInMM').val()),translateRule:{startingLocation:{X:Number($('#calibrationStartingLocationX').val()),Y:Number($('#calibrationStartingLocationY').val()),Z:Number($('#calibrationStartingLocationZ').val())},
+                    changeInOrientation: Number($('#calibrationRotation').val()),xSpace:Number($('#calibrationXSpace').val()),zSpace:Number($('#calibrationYSpace').val()),dX:Number($('#calibrationDX').val()),dZ:Number($('#calibrationDY').val())}});
+
                 sod.init(serverURL,socketURL, sod);
 
                 //ADD LISTENERS////////////////////////////////////////////////
@@ -94,7 +96,10 @@
         <div class="block"></div>
         <table>
             <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
-                SensorType: <input id='sensorType'  type="text" value='kinect2'> FOV<input id='FOV'  type="text" value='70'> rangeInMM<input id='rangeInMM'  type="text" value='4000'>
+                SensorType: <input id='sensorType'  type="text" value='kinect2'> FOV<input id='FOV'  type="text" value='70'> rangeInMM<input id='rangeInMM'  type="text" value='4000'> <br/>
+                Calibration Rotation :<input id='calibrationRotation'  type="text" value='0'> TransformX :<input id='calibrationDX'  type="text" value='0'> TransformY :<input id='calibrationDY'  type="text" value='0'> <br/>
+                xSpaceTransformation :<input id='calibrationXSpace'  type="text" value='0'> ySpaceTransformation :<input id='calibrationYSpace'  type="text" value='0'> <br/>
+                starting location X: <input id='calibrationStartingLocationX'  type="text" value='0'> Y:<input id='calibrationStartingLocationY'  type="text" value='0'> Z:<input id='calibrationStartingLocationZ'  type="text" value='0'>
             </td></tr>
             <tr><td><li id="reconnect">Reconnect</li></td></tr>
             <tr><td><li id="addPeople">Add People In!</li></td><td> Number of People :<input id='numPeople'  type="text" value='1'> </td></tr>

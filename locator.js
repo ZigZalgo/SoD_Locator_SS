@@ -24,7 +24,7 @@ exports.registerSensor = function(sensor){
     console.log('received sensor: ' +JSON.stringify(sensor));
     console.log("REFERENCE IS: " + sensorsReference);
     if(sensorsReference == null){
-        sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
+        //sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
         sensor.isCalibrated = true;
         sensorsReference = sensor;
         console.log("setting default reference");
