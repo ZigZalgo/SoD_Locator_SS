@@ -77,6 +77,11 @@
                         showGreenStatus(JSON.stringify(data))
                     });
 
+                    sod.addListener('dictionary',function(data){
+                        console.log(JSON.stringify('received: '+ JSON.stringify(data)));
+                        showGreenStatus(JSON.stringify(data))
+                    });
+
                     sod.addListener('string', function(data){
                         console.log("Received: " + JSON.stringify(data))
                         showGreenStatus(JSON.stringify(data))

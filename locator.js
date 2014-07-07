@@ -53,7 +53,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
 
-                            console.log('Now, person ' + key + ' is seen by: ' + persons[key].currentlyTrackedBy);
+                            console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
                         }
 
                     }
