@@ -125,42 +125,44 @@ exports.updatePersons = function(receivedPerson, socket){
                 // this person comes in with a new ID
                 else{
                     //console.log('counter: '+counter);
-                    //// udpating the nearest person
+                    //// updating the nearest person
                     if(util.distanceBetweenPoints(persons[key].location, receivedPerson.location) < nearestDistance){
                         //console.log('updating nearest person by ' + persons[key].uniquePersonID +' for person :' + JSON.stringify(receivedPerson) );
                         //nearestPerson = persons[key];
                         //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
                         nearestDistance= util.distanceBetweenPoints(persons[key].location, receivedPerson.location);
-                    }
-                    ////
-                    // reach the end of the people list
-                    if(counter == 0){
-                        //console.log('nearestDistance : ' + nearestDistance);
-                        // check if the nearest person is within the threshold
-                        if(nearestDistance < 0.4){
-                            //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
 
-                            // if the sensor hasn't been registered to the person's seen by sensor list
-                            if(persons[key].ID[receivedPerson.ID]==undefined){
-                                console.log('person '+persons[key].uniquePersonID+' is started being seen by ' + socket.id);
-                                console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
-                                persons[key].ID[receivedPerson.ID] = socket.id;
+                        ////
+                        // reach the end of the people list
+                        if(counter == 0){
+
+                            // check if the nearest person is within the threshold
+                            if(nearestDistance < 0.4){
+                                //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
+
+                                // if the sensor hasn't been registered to the person's seen by sensor list
+                                if(persons[key].ID[receivedPerson.ID]==undefined){
+                                    console.log('person '+persons[key].uniquePersonID+' is started being seen by ' + socket.id);
+                                    console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
+                                    persons[key].ID[receivedPerson.ID] = socket.id;
+                                }
+                                //console.log('only updating nearest person');
+                                //locator.removeDuplicateInstancesOfTrackedPerson(persons[key].uniquePersonID, receivedPerson.ID)
+                                locator.removeUntrackedPeople();
                             }
-                            //console.log('only updating nearest person');
-                            //locator.removeDuplicateInstancesOfTrackedPerson(persons[key].uniquePersonID, receivedPerson.ID)
-                            locator.removeUntrackedPeople();
-                        }
-                        else{
-                            console.log('register new person : ' + JSON.stringify(receivedPerson.location) +' by sensor :' + socket.id);
-                            ///end of iterations, person not found and not near a tracked person
-                            if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
-                                var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
-                                person.lastUpdated = new Date();
-                                person.currentlyTrackedBy = socket.id;
-                                persons[person.uniquePersonID] = person;
+                            else{
+                                console.log('register new person : ' + JSON.stringify(receivedPerson.location) +' by sensor :' + socket.id);
+                                ///end of iterations, person not found and not near a tracked person
+                                if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
+                                    var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+                                    person.lastUpdated = new Date();
+                                    person.currentlyTrackedBy = socket.id;
+                                    persons[person.uniquePersonID] = person;
+                                }
                             }
                         }
                     }
+
                 }
             }
         }

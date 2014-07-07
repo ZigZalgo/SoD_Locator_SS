@@ -50,8 +50,69 @@ function showNormalStatus(status){
     drawGridLines(cnv, gridOptions.minorLines);
     drawGridLines(cnv, gridOptions.majorLines);
 
+
+     var color = '1e1e1e';
+    drawCoordinate(cnv,color,50,50,150);
+
     return;
 }
+
+
+/*
+ * Draw Coordinates.
+ *
+ * */
+function drawCoordinate(cnv,color,startingX,startingY,length){
+    var gridWidth = cnv.width;
+    var gridHeight = cnv.height;
+    var context =   cnv.getContext('2d');;
+    context.beginPath();
+    context.lineWidth="2";
+    context.strokeStyle = color;
+    context.fillstyle= color;
+    context.moveTo(startingX,startingY);
+    context.lineTo(startingX+length,startingY);
+    context.lineTo(startingX+length-15,startingY-5);
+    //context.arcTo(gridWidth-175,25,gridWidth-175+15,35,);
+    context.lineTo(startingX+length,startingY);
+    context.lineTo(startingX+length-15,startingY+5);
+    //context.lineTo(gridWidth-175+15,20);
+    context.stroke();
+
+    context.fillStyle = color;
+    context.font = "bold 15px Arial";
+    context.fillText("X", startingX+length-10,startingY+20);
+
+
+    context.fillRect(startingX+pixelsPerMeter-2,startingY-5,3,10);
+    context.fillStyle = color;
+    context.font = "bold 12px Arial";
+    context.fillText('1m', startingX+50,startingY+20);
+
+
+    context.beginPath();
+    context.lineWidth="2";
+    context.strokeStyle = color;
+    context.fillstyle= color;
+    context.moveTo(startingX,startingY);
+    context.lineTo(startingX,startingY+length);
+    context.lineTo(startingX-5,startingY+length-10);
+    context.lineTo(startingX,startingY+length);
+    context.lineTo(startingX+5,startingY+length-10);
+    context.stroke();
+
+
+
+    context.fillRect(startingX-5,startingY+pixelsPerMeter-2,10,3);
+    context.fillStyle = color;
+    context.font = "bold 12px Arial";
+    context.fillText('1m', startingX+10,startingY+50);
+
+    context.fillStyle = color;
+    context.font = "bold 15px Arial";
+    context.fillText("Z", startingX+15,startingY+length-10);
+}
+
 function drawGridLines(cnv, lineOptions) {
     var iWidth = cnv.width;
     var iHeight = cnv.height;
@@ -176,6 +237,9 @@ function drawStationaryDevice(context, X, Z, width, height, ID, orientation, FOV
     context.font = "18px Arial";
     context.fillText(ID,shiftXToGridOrigin(xInMeters)+(width/2),shiftYToGridOrigin(zInMeters)-(height/2));
 }
+
+
+
 
 /**
  * Stationary Only updates position when this is called
