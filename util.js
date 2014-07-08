@@ -463,6 +463,9 @@ exports.getDeviceSocketIDByID = function (ID) {
 exports.filterDevices = function(socket, request){
     var filterSelection = function (i, listDevices) {
         //console.log(i);
+        if(request.selection != undefined){
+            request.selection[0] = 'all';
+        }
         if (i <= (request.selection.length - 1)) {
             var regex = /([a-zA-Z ]+)([0-9\.]*).*?$/
             var result = request.selection[i].match(regex);
