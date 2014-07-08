@@ -81,7 +81,7 @@ function drawCoordinate(cnv,color,startingX,startingY,length){
 
     context.fillStyle = color;
     context.font = "bold 15px Arial";
-    context.fillText("X", startingX+length-10,startingY+20);
+    context.fillText("+X", startingX+length-10,startingY+20);
 
 
     context.fillRect(startingX+pixelsPerMeter-2,startingY-5,3,10);
@@ -110,7 +110,7 @@ function drawCoordinate(cnv,color,startingX,startingY,length){
 
     context.fillStyle = color;
     context.font = "bold 15px Arial";
-    context.fillText("Z", startingX+15,startingY+length-10);
+    context.fillText("+Z", startingX+10,startingY+length-10);
 }
 
 function drawGridLines(cnv, lineOptions) {

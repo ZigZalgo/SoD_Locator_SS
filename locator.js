@@ -52,17 +52,16 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                         if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey] && Object.keys(persons[key].ID).length > 0){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
-
-                            console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
                         }
 
                     }
                     catch(err){
                         console.log("failed to update currentlyTrackedBy to new socket.id: " + err);
                     }
-
+                    persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
+                    console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
                 }
-                 persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
+
             }
         }
         try{
@@ -151,7 +150,7 @@ exports.updatePersons = function(receivedPerson, socket){
                                 locator.removeUntrackedPeople();
                             }
                             else{
-                                console.log('register new person : ' + JSON.stringify(receivedPerson.location) +' by sensor :' + socket.id);
+                                console.log('the distance off by '+ nearestDistance+  '. Register new person : ' + JSON.stringify(receivedPerson.location) +' by sensor :' + socket.id);
                                 ///end of iterations, person not found and not near a tracked person
                                 if(receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
                                     var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
@@ -408,9 +407,12 @@ exports.cleanUpSensor = function(socketID){
     /////
     if(sensorsReference.socketID == socketID){
         if(Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)}).length > 0){
-            sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]].isCalibrated = true;
-            sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]].calibration = {Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
-            sensorsReference = sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]];
+            var secondCalibratedSensor = sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]];
+            // set the second calibrat
+            secondCalibratedSensor.isCalibrated = true;
+            secondCalibratedSensor.calibration = secondCalibratedSensor.calibration; //{Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
+            sensorsReference = secondCalibratedSensor;
+            console.log('Reference sensor is set to ' + JSON.stringify(sensorsReference));
         }
         else{
                 if(Object.keys(sensors).length != 0){

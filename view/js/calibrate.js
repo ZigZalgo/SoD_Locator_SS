@@ -6,6 +6,42 @@ var sensorTwoPoints = [];
 var sensors = {};
 var depthArrays = {};
 
+var referenceSensorCalibration;
+
+/*
+ take a location from sub-kinect and translate to the location to the MASTER kinect
+ @param:
+ location        -- the location of a point from the sub-kinect
+ translateRules  -- the rules each sub-kinect has for translate the points in its plane to the MASTER-kinect
+ @return:
+ rotatedPoint    -- the translated location of point in the subKinect to the MASTER kinect
+ */
+function translateToCoordinateSpace(location, translateRules) {
+    function getVector(locationA, locationB) {
+        //console.log('locationA: '+ JSON.stringify(locationA.X));
+        //console.log('locationB: '+ JSON.stringify(locationB.X));
+        return {X: locationB.X - locationA.X, Y: 0, Z: locationB.Z - locationA.Z};
+        //typeof callback === 'function' && callback();
+    };
+
+    function matrixTransformation(personLocation, angle) {
+        var returnLocation = {X: 0, Y: 0, Z: 0};
+        var returnX = personLocation.X * Math.cos(angle * DEGREES_TO_RADIANS) + personLocation.Z * Math.sin(angle * DEGREES_TO_RADIANS);
+        var returnZ = personLocation.Z * Math.cos(angle * DEGREES_TO_RADIANS) - (personLocation.X * Math.sin(angle * DEGREES_TO_RADIANS));
+        returnLocation.X = Math.round(returnX * this.ROUND_RATIO) / this.ROUND_RATIO;
+        returnLocation.Z = Math.round(returnZ * this.ROUND_RATIO) / this.ROUND_RATIO;
+        return returnLocation; // for testing
+    };
+    console.log('location: '+ JSON.stringify(location));
+    console.log('translateRules: '+ JSON.stringify(translateRules));
+    var vectorToStartingPoint = getVector(translateRules.StartingLocation, location);
+    var rotatedPoint = matrixTransformation(vectorToStartingPoint, translateRules.Rotation);
+    rotatedPoint.X += translateRules.TransformX + translateRules.StartingLocation.X;
+    rotatedPoint.Z += translateRules.TransformY + translateRules.StartingLocation.Z;
+    console.log('traslated point : ' + JSON.stringify(rotatedPoint));
+    return rotatedPoint;
+};
+
 
 function getPosition(canvasID, sid, event)
 {
@@ -24,13 +60,17 @@ function getPosition(canvasID, sid, event)
         xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(zForCalc>>>3)*(Math.tan(sensors[sid].FOV/2))
     }
 
+
     //z = z/10;
     //console.log("xInMM :" + xInMM);
 
-
+    var pointFromDepthFrame;
+    var translatedPoint
     if(canvasID == "cnvSensorOne"){
         if(sensorOnePoints.length < 2 && z > 0){
-            sensorOnePoints.push({X: xInMM, Y: y, Z: z});
+            pointFromDepthFrame = {X: xInMM, Y: y, Z: z};
+            translatedPoint = translateToCoordinateSpace(pointFromDepthFrame,referenceSensorCalibration)
+            sensorOnePoints.push(translatedPoint);
             showGreenStatus('Points saved.');
         }else if(sensorOnePoints.length >= 2){
             showRedStatus('Enough Points.');
@@ -238,6 +278,20 @@ $(function(){
         refreshSensors();
     })
     $('#getCalibrationFrames').click(function(){ /*listening to the button click using Jquery listener*/
+
+        var referenceSensorID = $('select#referenceSensorList option:selected').text();
+        // get calibration rule for reference sensor
+        io.emit('getSensorsFromServer',{},function(sensors){
+            for(var key in sensors){
+                if(sensors.hasOwnProperty(key) && key == referenceSensorID){
+                    //console.log('reference sensor key:'+sensors[key].ID);
+                    console.log(JSON.stringify(sensors[key].calibration));
+                    referenceSensorCalibration = sensors[key].calibration;
+                }
+            }
+        });
+
+
         var e1 = document.getElementById("referenceSensorList");
         var e2 = document.getElementById("uncalibratedSensorList");
         while(calibrationFrames.length > 0){

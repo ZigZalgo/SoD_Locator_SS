@@ -471,7 +471,7 @@ exports.filterDevices = function(socket, request){
             var result = request.selection[i].match(regex);
             var selectionType = result[1];
             var selectionParam = result[2];
-            console.log("filter #" + i + ": " + request.selection[i])
+            //console.log("filter #" + i + ": " + request.selection[i])
             //console.log(listDevices);
             switch (selectionType) {
                 case "all":
