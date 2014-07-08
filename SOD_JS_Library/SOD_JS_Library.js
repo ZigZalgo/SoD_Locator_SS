@@ -116,21 +116,16 @@ SODDevice.prototype = {
     unpairAllDevices : function(callbackFunction){
         this.socket.emit('unpairAllDevices',{},callbackFunction);
     },
-    requestDataFromSelection : function(selection,data,ID){
+    requestDataFromSelection : function(selection,data){
         console.log(JSON.stringify({selection:selection,data:data}));
-        if(ID !=undefined){
-            this.socket.emit('requestDataFromSelection',{selection:selection,data:data,ID:ID});
-        }
         this.socket.emit('requestDataFromSelection',{selection:selection,data:data});
-    },getDistanceToDevice : function(targetID,callbackFunction){
+    },
+    getDistanceToDevice : function(targetID,callbackFunction){
         console.log(JSON.stringify((targetID)));
         if(targetID !=undefined){
             console.log('targetID is not defined yet');
         }
         this.socket.emit('getDistanceToDevice',{ID:targetID},callbackFunction);
-    },getDeviceWithSelectionChain : function(selectionChain,callbackFunction){
-        console.log('selectionChain: ' + JSON.stringify(selectionChain));
-        this.socket.emit('getDevicesWithSelectionChain',{selection:selectionChain},callbackFunction);
     }
 }
 

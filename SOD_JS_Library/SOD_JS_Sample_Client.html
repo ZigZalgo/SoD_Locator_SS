@@ -101,11 +101,11 @@
             }) // end of click
 
             $("#getDevicesAll").on('click',function(){
-                sod.getDeviceWithSelection('all',testFunction);
+                sod.getDeviceWithSelection(['all'],testFunction);
             }) // end of click
 
             $("#getDevicesInView").on('click',function(){
-                sod.getDeviceWithSelection('inView',testFunction);
+                sod.getDeviceWithSelection(['inView'],testFunction);
             }) // end of click
 
             $("#getPeopleAll").on('click',function(){
@@ -125,16 +125,16 @@
             }) // end of click
 
             $("#requestToAll").on('click',function(){
-                var selection = 'all';
+                var selection = ['all'];
                 var data = $('#requestData').val();
                 sod.requestDataFromSelection(selection,data);
             }) // end of click
             $("#requestByID").on('click',function(){
-                var selection = 'single';
+                var selection = [('single'+ID)];
                 var ID = Number($('#requestID').val());
                 var data = $('#requestDataByID').val();
                 console.log('requesting '+ID+'withName' +data);
-                sod.requestDataFromSelection(selection,data,ID);
+                sod.requestDataFromSelection(selection,data);
             }) // end of click
 
             $("#getDistanceByTargetID").on('click',function(){
@@ -150,7 +150,7 @@
                 selectionChain.push($('#selectionChain_3').val());
                 selectionChain.push($('#selectionChain_4').val());
                 //console.log('get distance to device :"'+ID+'" ');
-                sod.getDeviceWithSelectionChain(selectionChain,testFunction);
+                sod.getDeviceWithSelection(selectionChain,testFunction);
             }) // end of click
 
 

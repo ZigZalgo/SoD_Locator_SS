@@ -250,13 +250,13 @@ function refreshStationaryLayer(){
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height);
 
-    io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
+    io.emit('getDevicesWithSelection', {selection: ["all"]}, function(data){
         for(var key in data){
             if(data.hasOwnProperty(key)){
                 if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
-                    console.log("X:" + data[key].location.X)
-                    console.log("Y:" + data[key].location.Y)
-                    console.log("Z:" + data[key].location.Z)
+                    //console.log("X:" + data[key].location.X)
+                    //console.log("Y:" + data[key].location.Y)
+                    //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'),
                         data[key].location.X, data[key].location.Z, data[key].width/1000*pixelsPerMeter,
                         data[key].height/1000*pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV);
@@ -418,7 +418,6 @@ function updateContentWithObjects(){
             '</tr>' + htmlString + '</table>')
     });
 
-
     function firstKey(obj) {
         var first;
 
@@ -441,7 +440,7 @@ function updateContentWithObjects(){
         }
     });
 
-    io.emit('getDevicesWithSelection', {additionalInfo:{selection: "all"}}, function(data){
+    io.emit('getDevicesWithSelection', {selection: ["all"]}, function(data){
         var htmlString= "";
 
         function pairingInfo(state){

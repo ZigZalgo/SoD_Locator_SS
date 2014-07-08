@@ -473,7 +473,7 @@ exports.registerDevice = function(socket, deviceInfo){
         }
 
 
-        devices[socket.id] = device; // officiciallly register the device to locator(server)
+        devices[socket.id] = device; // officially register the device to locator(server)
         console.log("Registering device: " + JSON.stringify(device));
     }
 }
@@ -481,18 +481,15 @@ exports.registerDevice = function(socket, deviceInfo){
 // TODO: implement!
 // TODO: test!
 exports.getDevicesInView = function(observerSocketID, devicesInFront){
-    console.log("devicesInFront: " + JSON.stringify(devicesInFront));
-    console.log("GetDevicesInView was called");
+    //console.log("devicesInFront: " + JSON.stringify(devicesInFront));
 	// TODO: test
     //console.log(devices[observerSocketID]);
 	//var returnDevices = {};
     var returnDevices = {};
     var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].location, devices[observerSocketID].orientation);
-    console.log("length of devicesInFront: " + devicesInFront.length)
     for(var i = 0; i <= devicesInFront.length; i++){
 
         if(i == devicesInFront.length){
-            console.log("returning devicesInView!\n" + JSON.stringify(returnDevices))
             return returnDevices;
         }
         else{
@@ -500,7 +497,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
                 if(devices[devicesInFront[i]].width != null){
                     var sides = util.getLinesOfShape(devices[devicesInFront[i]]);
                     var intersectionPoints = [];
-                    console.log("Sides: " + JSON.stringify(sides))
+                    //console.log("Sides: " + JSON.stringify(sides))
 
                     sides.forEach(function(side){
                         var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
@@ -551,9 +548,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     var observer = devices[observerSocketID];
     var returnDevices = [];
 
-    console.log("Observer has socketID of: " + observerSocketID)
-
-	// //(CB - Should we throw an exception here? Rather then just returning an empty list?)
+    //(CB - Should we throw an exception here? Rather then just returning an empty list?)
     try{
         if (observer.location == null || observer.orientation == null)
              return returnDevices;
@@ -572,22 +567,14 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
         var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ 15);
         var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- 15);
 
-        console.log("Left FOV = " + leftFieldOfView)
-        console.log("Right FOV = " + rightFieldOfView)
+        //console.log("Left FOV = " + leftFieldOfView)
+        //console.log("Right FOV = " + rightFieldOfView)
 
         return Object.keys(deviceList).filter(function(key){
             //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
 
 
             if(deviceList[key] != observer && deviceList[key].location != undefined){
-                console.log("Deivice Location:: \n" + JSON.stringify(deviceList[key].location))
-
-                console.log("Angle from observer to target: " + util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI))
-                console.log("Observer: \n" + JSON.stringify(observer))
-                console.log("Target: \n" + JSON.stringify(deviceList[key]))
-
-                console.log("First condition less than lFOV: " + util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI));
-                console.log("Second condition greater than rFOV: " + (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)))
                 if (leftFieldOfView > rightFieldOfView &&
                     (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
                     (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
@@ -677,3 +664,26 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
 
     return filterDeviceListByRange(Object.keys(listDevices).length-1, {});
 };
+
+exports.getDeviceByID = function (ID){
+    try{
+        var container = {};
+        if(ID != undefined){
+            if(devices[util.getDeviceSocketIDByID(ID)] != undefined){
+                container[util.getDeviceSocketIDByID(ID)] = devices[util.getDeviceSocketIDByID(ID)];
+                return container;
+            }
+            else{
+                //no device with that ID
+                return {};
+            }
+        }
+        else{
+            //ID undefined
+            return {};
+        }
+    }
+    catch(err){
+        console.log('Error trying to get single device with ID(' + ID + '): ' + err);
+    }
+}
