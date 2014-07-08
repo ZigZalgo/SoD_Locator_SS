@@ -52,14 +52,15 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                         if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey] && Object.keys(persons[key].ID).length > 0){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
+                            persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
+                            console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
                         }
 
                     }
                     catch(err){
                         console.log("failed to update currentlyTrackedBy to new socket.id: " + err);
                     }
-                    persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
-                    console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
+
                 }
 
             }
@@ -136,7 +137,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         if(counter == 0){
 
                             // check if the nearest person is within the threshold
-                            if(nearestDistance < 0.4){
+                            if(nearestDistance < 0.4 || persons[key].ID[receivedPerson.ID]!=undefined){
                                 //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
 
                                 // if the sensor hasn't been registered to the person's seen by sensor list
