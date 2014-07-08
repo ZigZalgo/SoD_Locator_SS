@@ -24,7 +24,7 @@ console.log('SOD server IP : '+ serverAddress);
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
-io.set('log level',0);
+io.set('log level',5);
 var requestHandler = require('./requestHandler');
 var factory = require('./factory');
 var locator = requestHandler.locator;
@@ -80,10 +80,8 @@ app.get('/JSclientCSS', function (req, res) {
 });
 
 io.sockets.on('connection', function (socket) {
-
-
     socket.on('error', function() { console.log("error"); });
-    console.log("something connected with sessionID: " + socket.id);
+    console.log("something connected with sessionID [" + socket.id + "] and IP [" + socket.handshake.address.address + "]");
     requestHandler.handleRequest(socket);
 
     clients[socket.id] = socket;
@@ -93,7 +91,7 @@ io.sockets.on('connection', function (socket) {
         console.log('Got disconnect!');
 
         try{
-            io.sockets.emit("someDeviceDisconnected", { name: locator.devices[socket.id].name });
+            io.sockets.emit("someDeviceDisconnected", { name: locator.devices[socket.id].name, ID: locator.devices.uniqueDeviceID});
         }
         catch(err){
             io.sockets.emit("someDeviceDisconnected", { name: "failed to retrieve name" });
