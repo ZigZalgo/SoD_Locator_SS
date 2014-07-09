@@ -24,7 +24,7 @@ console.log('SOD server IP : '+ serverAddress);
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
-io.set('log level',5);
+io.set('log level',0);
 var requestHandler = require('./requestHandler');
 var factory = require('./factory');
 var locator = requestHandler.locator;
@@ -52,6 +52,10 @@ app.get('/user', function (req, res) {
 });
 app.get('/testing', function (req, res) {
     res.sendfile(__dirname + '/view/testing.html');
+});
+
+app.get('/jquery', function (req, res) {
+    res.sendfile(__dirname + '/view/js/jquery-1.11.1.min.js');
 });
 
 app.get('/style', function (req, res) {

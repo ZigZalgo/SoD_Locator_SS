@@ -123,7 +123,7 @@ exports.handleRequest = function (socket) {
     socket.on('getDevicesWithSelection', function (request, fn) {
         //console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
         //console.log(util.filterDevices(socket, request.selection));
-        console.log(request.selection)
+        //console.log(request.selection)
         fn(util.filterDevices(socket, request));
     })
 
