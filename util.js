@@ -461,42 +461,44 @@ exports.getDeviceSocketIDByID = function (ID) {
 };
 
 exports.filterDevices = function(socket, request){
-    var filterSelection = function (i, listDevices) {
-        //console.log(i);
-        if(request.selection != undefined){
-            request.selection[0] = 'all';
-        }
-        if (i <= (request.selection.length - 1)) {
-            var regex = /([a-zA-Z ]+)([0-9\.]*).*?$/
-            var result = request.selection[i].match(regex);
-            var selectionType = result[1];
-            var selectionParam = result[2];
-            //console.log("filter #" + i + ": " + request.selection[i])
-            //console.log(listDevices);
-            switch (selectionType) {
-                case "all":
-                    return filterSelection(i + 1, (listDevices)); //just in case
-                    break;
-                case "inView":
-                    return filterSelection(i + 1, locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
-                    break
-                case "inRange":
-                    //return filterSelection(i+1, locator.getDevicesWithinRange(locator.devices[socket.id], listDevices));
-                    return filterSelection(i + 1, locator.getDevicesWithinRange(locator.devices[socket.id], selectionParam, listDevices));
-                    break;
-                case "nearest":
-                    return filterSelection(i + 1, locator.getNearestDevice(locator.devices[socket.id], listDevices));
-                    break;
-                case "single":
-                    return filterSelection(i + 1, locator.getDeviceByID(selectionParam));
-                    break;
-                default:
-                    return filterSelection(i + 1, (listDevices)); //just in case
+    if(request.selection == undefined || request.selection == null || request.selection[0] == undefined || request.selection[0] == null){
+        return(locator.devices)
+    }
+    else{
+        var filterSelection = function (i, listDevices) {
+            //console.log(i);
+            if (i <= (request.selection.length - 1)) {
+                var regex = /([a-zA-Z ]+)([0-9\.]*).*?$/
+                var result = request.selection[i].match(regex);
+                var selectionType = result[1];
+                var selectionParam = result[2];
+                //console.log("filter #" + i + ": " + request.selection[i])
+                //console.log(listDevices);
+                switch (selectionType) {
+                    case "all":
+                        return filterSelection(i + 1, (listDevices)); //just in case
+                        break;
+                    case "inView":
+                        return filterSelection(i + 1, locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
+                        break
+                    case "inRange":
+                        //return filterSelection(i+1, locator.getDevicesWithinRange(locator.devices[socket.id], listDevices));
+                        return filterSelection(i + 1, locator.getDevicesWithinRange(locator.devices[socket.id], selectionParam, listDevices));
+                        break;
+                    case "nearest":
+                        return filterSelection(i + 1, locator.getNearestDevice(locator.devices[socket.id], listDevices));
+                        break;
+                    case "single":
+                        return filterSelection(i + 1, locator.getDeviceByID(selectionParam));
+                        break;
+                    default:
+                        return filterSelection(i + 1, (listDevices)); //just in case
+                }
+            }
+            else {
+                return(listDevices);
             }
         }
-        else {
-            return(listDevices);
-        }
+        return (filterSelection(0, locator.devices));
     }
-    return (filterSelection(0, locator.devices));
 }

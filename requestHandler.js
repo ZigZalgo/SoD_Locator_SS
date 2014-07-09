@@ -122,6 +122,7 @@ exports.handleRequest = function (socket) {
     socket.on('getDevicesWithSelection', function (request, fn) {
         //console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
         //console.log(util.filterDevices(socket, request.selection));
+        console.log(request.selection)
         fn(util.filterDevices(socket, request));
     })
 
@@ -137,7 +138,7 @@ exports.handleRequest = function (socket) {
         }
         else {
             //target device not found
-            fn(undefined);
+            fn(-1);
         }
     });
 
@@ -208,7 +209,7 @@ exports.handleRequest = function (socket) {
             }
         }
         if (fn != undefined) {
-            fn({status: "server: string sent to all"});
+            fn({status: "server: string sent to devices with selection: " + request.selection});
         }
     });
 
@@ -224,7 +225,7 @@ exports.handleRequest = function (socket) {
             }
         }
         if (fn != undefined) {
-            fn({status: "server: dictionary sent to all devices"});
+            fn({status: "server: dictionary sent to devices with selection: " + request.selection});
         }
     });
 
@@ -240,7 +241,7 @@ exports.handleRequest = function (socket) {
             }
         }
         if (fn != undefined) {
-            fn({status: "server: content sent to all devices"});
+            fn({status: "server: content sent to devices with selection: " + request.selection});
         }
     });
 
@@ -253,7 +254,7 @@ exports.handleRequest = function (socket) {
             }
         }
         if (fn != undefined) {
-            fn({status: "server: request sent to all devices"});
+            fn({status: "server: request sent to devices with selection: " + request.selection});
         }
     });
 
