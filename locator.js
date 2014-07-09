@@ -136,7 +136,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         // reach the end of the people list
                         if(counter == 0){
 
-                            // check if the nearest person is within the threshold
+                            // check if the nearest person is within the threshold, merge the person into the exsisting person
                             if(nearestDistance < 0.4 || persons[key].ID[receivedPerson.ID]!=undefined){
                                 //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
 

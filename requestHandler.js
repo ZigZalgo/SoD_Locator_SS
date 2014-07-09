@@ -19,8 +19,9 @@ exports.handleRequest = function (socket) {
         if (fn != undefined) {
             fn({"status": 'server: your device has been registered'})
         }
+        console.log('deviceInfo:' + JSON.stringify(deviceInfo));
         try{
-            socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID});
+            socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID,deviceType: deviceInfo.deviceType});
         }
         catch(err){
             console.log("Error emitting name or ID, device may still be registering: " + err);
