@@ -93,16 +93,18 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
+    // if the socket is a device socket
+    if (locator.devices[socket.id] != undefined) {
 
-        try{
+        try {
             io.sockets.emit("someDeviceDisconnected", { name: locator.devices[socket.id].name, ID: locator.devices[socket.id].uniqueDeviceID, deviceType: locator.devices[socket.id].deviceType});
-            console.log("name: " + locator.devices[socket.id].name +  ", ID: " + locator.devices[socket.id].uniqueDeviceID + ", deviceType: " + locator.devices[socket.id].deviceType)
+            console.log("device disconnected -> name: " + locator.devices[socket.id].name + ", ID: " + locator.devices[socket.id].uniqueDeviceID + ", deviceType: " + locator.devices[socket.id].deviceType)
         }
-        catch(err){
+        catch (err) {
             io.sockets.emit("someDeviceDisconnected", { name: "failed to retrieve name" });
             console.log("failed to emit name of device, possibly null... error: " + err)
         }
-
+    }
         //run cleanup functions for socket
         if(clients[socket.id] != undefined){
             switch(clients[socket.id].clientType){
