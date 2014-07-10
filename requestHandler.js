@@ -15,10 +15,12 @@ exports.handleRequest = function (socket) {
 
     socket.on('registerDevice', function (deviceInfo, fn) {
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
-        locator.registerDevice(socket, deviceInfo);
-        if (fn != undefined) {
-            fn({"status": 'server: your device has been registered'})
+        if(fn!=undefined) {
+            locator.registerDevice(socket, deviceInfo,fn);
+        }else{
+            locator.registerDevice(socket,deviceInfo)
         }
+
         console.log('deviceInfo:' + JSON.stringify(deviceInfo));
         try{
             socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID,deviceType: deviceInfo.deviceType});

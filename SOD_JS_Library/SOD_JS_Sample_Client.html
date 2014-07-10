@@ -68,7 +68,7 @@
 
                     //ADD LISTENERS////////////////////////////////////////////////
                     sod.addListener('connect',function(data){
-                        sod.registerDevice();
+                        sod.registerDevice(sod);
                         showGreenStatus('connect to server ..')
                     });
 

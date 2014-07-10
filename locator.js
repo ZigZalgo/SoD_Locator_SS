@@ -430,7 +430,7 @@ exports.cleanUpSensor = function(socketID){
     }
 }
 
-exports.registerDevice = function(socket, deviceInfo){
+exports.registerDevice = function(socket, deviceInfo,fn){
     if(devices[socket.id] != undefined){
         devices[socket.id].height = deviceInfo.height;
         devices[socket.id].width = deviceInfo.width;
@@ -457,6 +457,10 @@ exports.registerDevice = function(socket, deviceInfo){
         else{
             device.name = "Device " + device.ID;
         }
+        if (fn != undefined) {
+            fn({deviceID:device.uniqueDeviceID});
+        }
+
 
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
@@ -478,6 +482,8 @@ exports.registerDevice = function(socket, deviceInfo){
 
         devices[socket.id] = device; // officially register the device to locator(server)
         console.log("Registering device: " + JSON.stringify(device));
+        console.log('emitting registered device ID : '+ deviceInfo.ID);
+        frontend.clients[socket.id].emit('registered',{deviceID:deviceInfo.ID});
     }
 }
 

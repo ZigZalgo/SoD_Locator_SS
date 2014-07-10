@@ -84,10 +84,13 @@ SODDevice.prototype = {
             this.userListeners[eventName] = callback;
         }
     },
-    registerDevice: function(callbackFunction){
+    registerDevice: function(sod){
         try{
             console.log("Registering device..." + JSON.stringify(this.device))
-            this.socket.emit('registerDevice', this.device, callbackFunction)
+            this.socket.emit('registerDevice', this.device, function(data){
+                sod.device.ID = data.deviceID;
+                console.log('this device ID is set to'+sod.device.ID);
+            })
         }
         catch(err){
             console.log(err)
