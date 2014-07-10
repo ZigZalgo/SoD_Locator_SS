@@ -170,10 +170,6 @@ function getPosition(canvasID, sid, event)
     */
 }
 
-function setup(){
-    //
-}
-
 function refreshSensors(){
     $("#referenceSensorList").empty();
     $("#uncalibratedSensorList").empty();
