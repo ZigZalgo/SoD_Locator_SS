@@ -67,6 +67,8 @@
                     sod.init(serverURL,socketURL, sod);
 
                     //ADD LISTENERS////////////////////////////////////////////////
+
+                    // add listener when the device is connected , that it register device. Note sod object itself is been passed as parameter
                     sod.addListener('connect',function(data){
                         sod.registerDevice(sod);
                         showGreenStatus('connect to server ..')
