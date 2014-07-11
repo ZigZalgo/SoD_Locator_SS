@@ -200,12 +200,12 @@ SODSensor.prototype = {
     },
     registerSensor: function(callbackFunction){
         try{
-            console.log("Registering device..." + JSON.stringify(this.device))
+            console.log("Registering Senosr..." + JSON.stringify(this.sensor))
             this.socket.emit('registerSensor', this.sensor, callbackFunction)
         }
         catch(err){
             console.log(err)
-            console.log("Failed to register device.")
+            console.log("Failed to register sensor.")
         }
     },
     reconnect : function(callbackFunction){

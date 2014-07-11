@@ -182,27 +182,33 @@ function refreshSensors(){
     clearSelect("#uncalibratedSensorList");
     //$("#referenceSensorList").empty();
     //$("#uncalibratedSensorList").empty();
+    var referenceSensorList = document.getElementById("referenceSensorList");
+    var uncalibratedSensorList = document.getElementById("uncalibratedSensorList");
     io.emit('getSensorsFromServer', {}, function(data){
         sensors = {};
-        var referenceSensorList = document.getElementById("referenceSensorList")
-        var uncalibratedSensorList = document.getElementById("uncalibratedSensorList")
+        //var referenceSensorList = document.getElementById("referenceSensorList")
+        //var uncalibratedSensorList = document.getElementById("uncalibratedSensorList")
+        //console.log("there are "+Object.keys(data).length + " sensors in the server.");
         for(var key in data){
             if(data.hasOwnProperty(key)){
                 sensors[key] = data[key];
                 var option = document.createElement("option");
                 option.text = data[key].socketID;
                 $('select[name=referenceSensorList] option:eq(0)').attr('selected', 'selected');
-                //console.log('referenceSelected: ' + $('select[name=referenceSensorList] option:eq(0)').text());
-                if(data[key].isCalibrated == true && key!=$('select[name=referenceSensorList] option:eq(0)').text()){
+                //console.log('adding option: '+option.text + ' to uncalibrtedSensorList');
+                uncalibratedSensorList.add(option);
+                //console.log('referenceSelected: ' + ($('select[name=referenceSensorList] option:selected').text()));
+                if(data[key].isCalibrated == true){
                     var option2 = document.createElement("option");
                     option2.text = data[key].socketID;
                     referenceSensorList.add(option2);
                 }
-                uncalibratedSensorList.add(option);
+
             }
             // automaticly select uncalibratedSensorList to the second sensors
-            $('select[name=uncalibratedSensorList] option:eq(1)').attr('selected', 'selected');
+
         }
+        $('select[name=uncalibratedSensorList] option:eq(1)').attr('selected', 'selected');
     });
 }
 
@@ -280,9 +286,7 @@ io.on("setCalibrationFrame", function(data){
 });
 
 $(function(){
-    $('#refreshSensors').click(function(){
-        refreshSensors();
-    })
+
     $('#getCalibrationFrames').click(function(){ /*listening to the button click using Jquery listener*/
 
         var referenceSensorID = $('select#referenceSensorList option:selected').text();
