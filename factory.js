@@ -3,7 +3,7 @@ var util = require('./util');
 var uniquePersonCounter = 0;
 var reservedDeviceIDRange = 100;
 var uniqueDeviceCounter = reservedDeviceIDRange + 1;
-
+var uniqueSensorCounter = 0;
 // TODO: TEST again, modified...
 function Person(){
     this.ID = null;
@@ -48,6 +48,7 @@ exports.Person = Person;
 
 function Sensor(socket){
     try{
+        this.ID = uniqueSensorCounter ++;
         this.socketID = socket.id;
         this.sensorType = "";
         this.FOV = 0;

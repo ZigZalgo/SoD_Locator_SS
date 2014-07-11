@@ -208,12 +208,12 @@ section#calibration_section{
     display:none;
     background: transparent;
     position:relative;;
-    top:-40px;
+    top:-77px;
     left:0px;
     height:auto;
 }
 section#calibration_section form{
-    height:788px;
+    height:auto;
 }
 
 section#calibration_section table{
@@ -230,7 +230,7 @@ section#calibration_section fieldset.master{
     margin:auto;
     padding:0px;
     background:#cacaca;
-    height:788px;
+    height:auto;
 }
 section#calibration_section h5{
     color:#1656bf;
@@ -280,7 +280,7 @@ section#calibration_section select {
     -webkit-appearance: none;
     -moz-appearance: none;
     outline: none;
-    height: 40px;
+    height: auto;
     overflow: hidden;
 }
 
@@ -362,8 +362,11 @@ section#calibration_section .calibration_wrap{
 
 #calibrate{
     width:40%;
+    position: relative;
+    top: -45px;
+}
 
-}div#calibration_flip{
+div#calibration_flip{
      font-size:1em;
      width: 200px;
      position: absolute;

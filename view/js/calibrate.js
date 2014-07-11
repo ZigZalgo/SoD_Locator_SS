@@ -170,9 +170,18 @@ function getPosition(canvasID, sid, event)
     */
 }
 
+// clear the select options
+function clearSelect(IDElement){
+    $(IDElement).empty();
+
+}
+
+
 function refreshSensors(){
-    $("#referenceSensorList").empty();
-    $("#uncalibratedSensorList").empty();
+    clearSelect("#referenceSensorList");
+    clearSelect("#uncalibratedSensorList");
+    //$("#referenceSensorList").empty();
+    //$("#uncalibratedSensorList").empty();
     io.emit('getSensorsFromServer', {}, function(data){
         sensors = {};
         var referenceSensorList = document.getElementById("referenceSensorList")
@@ -183,14 +192,15 @@ function refreshSensors(){
                 var option = document.createElement("option");
                 option.text = data[key].socketID;
                 $('select[name=referenceSensorList] option:eq(0)').attr('selected', 'selected');
-                if(data[key].isCalibrated == true){
+                //console.log('referenceSelected: ' + $('select[name=referenceSensorList] option:eq(0)').text());
+                if(data[key].isCalibrated == true && key!=$('select[name=referenceSensorList] option:eq(0)').text()){
                     var option2 = document.createElement("option");
                     option2.text = data[key].socketID;
                     referenceSensorList.add(option2);
                 }
                 uncalibratedSensorList.add(option);
             }
-
+            // automaticly select uncalibratedSensorList to the second sensors
             $('select[name=uncalibratedSensorList] option:eq(1)').attr('selected', 'selected');
         }
     });
