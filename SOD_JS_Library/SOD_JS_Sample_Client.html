@@ -161,6 +161,10 @@
                 sod.updateDeviceInfo(infoToUpdate,testFunction);
             }) // end of click
 
+            $('#pairDeviceWithPersonID').on('click',function(){
+                var pairPersonID = $('#pairPersonID').val();
+                sod.pairPersonWithID(pairPersonID);
+            })
 
         })// end of document ready
     </script>
@@ -202,6 +206,7 @@
                     Chain4 <input id='selectionChain_4'  type="text" value='all'> </td>
                 <tr><td><li id="updateDeviceInfo">Update Device info</li></td>
                 <td>Name: <input id='updateName'  type="text" value='JSUpdateName'></td></tr>
+                <tr><td><li id="pairDeviceWithPersonID">pairWithPerson</li></td><td>Person ID: <input id='pairPersonID'  type="text" value='1'></td></tr>
             </table>
         </nav>
     <div class="status_wrap">

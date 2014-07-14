@@ -189,7 +189,7 @@ exports.removeDuplicateInstancesOfTrackedPerson = function(uniquePersonID, perso
         }
     }
 }
-exports.pairDevice = function(deviceSocketID, uniquePersonID, socket){
+exports.pairDevice = function(deviceSocketID, uniquePersonID,socket){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         "\nPerson ID: " + uniquePersonID;
 
@@ -477,7 +477,8 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             device.name = "Device " + device.ID;
         }
         if (fn != undefined) {
-            fn({deviceID:device.uniqueDeviceID});
+            console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
+            fn({deviceID:device.uniqueDeviceID,socketID:socket.id});
         }
 
 

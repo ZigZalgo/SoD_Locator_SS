@@ -134,7 +134,12 @@ SODDevice.prototype = {
         //deviceInfo.socket = this.socket;
         console.log('updating device info:'+ JSON.stringify(deviceInfo));
         this.socket.emit('updateDeviceInfo',deviceInfo,callbackFunction);
+    },
+    pairPersonWithID : function(personID){
+        console.log('pairing with person' + personID);
+        this.socket.emit('pairDeviceWithPerson',{deviceSocketID:this.socket.id,uniquePersonID:personID});
     }
+
 
 }
 
