@@ -429,6 +429,25 @@ exports.cleanUpSensor = function(socketID){
         console.log("All good, removed sensor is not reference");
     }
 }
+/*
+    Update a registered device with a new device info
+ */
+exports.updateDevice = function(socket,deviceInfo,fn){
+
+    if(devices[socket] != undefined){
+        console.log('Updating Device ' + devices[socket].uniqueDeviceID +' with device info: '+JSON.stringify(deviceInfo));
+        for(var key in deviceInfo){
+            devices[socket][key] = deviceInfo[key];
+        }
+    }else{
+        console.log("got a device update request but the device hasn't been registered yet");
+    }
+
+    if(fn!=undefined){
+        fn(devices[socket]);
+    }
+}
+
 
 exports.registerDevice = function(socket, deviceInfo,fn){
     if(devices[socket.id] != undefined){

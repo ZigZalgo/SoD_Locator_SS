@@ -103,7 +103,9 @@ exports.handleRequest = function (socket) {
         //not checking for fn(callback), since adding a callback here would be costly
         locator.updateDeviceOrientation(request.orientation, socket);
     });
-
+    socket.on('updateDeviceInfo', function (deviceInfo, fn) {
+        locator.updateDevice(socket.id,deviceInfo,fn);
+    });
     socket.on('getPeopleFromServer', function (request, fn) {
         if (fn != undefined) {
             fn((locator.persons));

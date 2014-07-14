@@ -155,6 +155,12 @@
                 sod.getDeviceWithSelection(selectionChain,testFunction);
             }) // end of click
 
+            $("#updateDeviceInfo").on('click',function(){
+                var infoToUpdate = {name:$('#updateName').val()};
+                console.log(infoToUpdate);
+                sod.updateDeviceInfo(infoToUpdate,testFunction);
+            }) // end of click
+
 
         })// end of document ready
     </script>
@@ -193,8 +199,9 @@
                 <tr><td><li id="getDevicesBySelectionChain">Get Devices Chain</li></td><td> Chain1 <input id='selectionChain_1'  type="text" value='all'>
                     Chain2 <input id='selectionChain_2'  type="text" value='all'>
                     Chain3 <input id='selectionChain_3'  type="text" value='all'>
-                    Chain4 <input id='selectionChain_4'  type="text" value='all'>
-                </td></tr>
+                    Chain4 <input id='selectionChain_4'  type="text" value='all'> </td>
+                <tr><td><li id="updateDeviceInfo">Update Device info</li></td>
+                <td>Name: <input id='updateName'  type="text" value='JSUpdateName'></td></tr>
             </table>
         </nav>
     <div class="status_wrap">

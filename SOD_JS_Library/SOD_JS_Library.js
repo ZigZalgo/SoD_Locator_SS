@@ -129,7 +129,13 @@ SODDevice.prototype = {
             console.log('targetID is not defined yet');
         }
         this.socket.emit('getDistanceToDevice',{ID:targetID},callbackFunction);
+    },
+    updateDeviceInfo : function(deviceInfo,callbackFunction){
+        //deviceInfo.socket = this.socket;
+        console.log('updating device info:'+ JSON.stringify(deviceInfo));
+        this.socket.emit('updateDeviceInfo',deviceInfo,callbackFunction);
     }
+
 }
 
 
