@@ -3,14 +3,14 @@
  */
 //var gm = require('gm');
 var fs = require('fs');
-var imageDirectory = 'data/';
+var dataDirectory = 'data/';
 //var thumbnailSize = 400;
 var util = require('util');
 
 exports.show = function(req, res){
     var fileName = req.params.fileName;
     var ext = req.params.ext;
-    var filePath = imageDirectory + fileName + "." + ext;
+    var filePath = dataDirectory + fileName + "." + ext;
 
     fs.readFile(filePath, function(err, data){
         if(err){
