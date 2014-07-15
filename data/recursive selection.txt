@@ -1,0 +1,61 @@
+Code:
+
+filterSelection(i, listDevices){
+	if (i <= (selection.length - 1))
+	{
+		switch(selection[i])
+		{
+			case "all":
+				return filterSelection(i+1, (listDevices)); //just in case
+				break;
+			case "inFront":
+				return filterSelection(i+1, getDevicesInFront(listDevices));
+				break
+			case "inView":
+				return filterSelection(i+1, getDevicesInView(listDevices));
+				break;
+			case "inRange"
+				return filterSelection(i+1, getDevicesInRange(listDevices));
+				break;
+			case "nearest"
+				return filterSelection(i+1, getNearestDevice(listDevices));
+				break;
+			default:
+				return filterSelection(i+1, (listDevices)); //just in case
+				break;
+		}
+	}
+	else
+	{
+		case "all":
+				return listDevices; //just in case
+				break;
+			case "inFront":
+				return getDevicesInFront(listDevices);
+				break
+			case "inView":
+				return getDevicesInView(listDevices);
+				break;
+			case "inRange"
+				return getDevicesInRange(listDevices);
+				break;
+			case "nearest"
+				return getNearestDevice(listDevices);
+				break;
+			default:
+				return listDevices; //just in case
+				break;
+	}	
+}
+fn(filterSelection(0, locator.Devices));
+
+Example:
+
+selection   = 	[inFront, inView, inRange, nearest]
+				[0      , 1     , 2      , 3      ]
+
+fn	filterSelection(0, locatorDevices);
+	return 	filterSelection(1, getDevicesInFront(locator.Devices));
+			return 	filterSelection(2, getDevicesInView(getDevicesInFront(locator.Devices)));
+					return 	filterSelection(3, getDevicesInRange(getDevicesInview(getDevicesInFront(locator.Devices))));
+							return getNearestDevice(getDevicesInRange(getDevicesInView(getDevicesInFront(locator.Devices))));

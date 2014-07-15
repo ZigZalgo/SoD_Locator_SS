@@ -1,5 +1,5 @@
 var express = require('express.io');
-var app = express();
+var app = express().http().io();
 var data = require('./data');
 
 // testing 
@@ -27,6 +27,7 @@ var http = require('http')
     , io = require('socket.io').listen(server);
 io.set('log level',0);
 var requestHandler = require('./requestHandler');
+var fs = require('fs');
 var factory = require('./factory');
 var locator = requestHandler.locator;
 var util = require('./util');
@@ -37,10 +38,8 @@ exports.clients = clients;
 server.listen(3000);
 
 requestHandler.start();
-/*
-app.get('/', function (req, res) {
-    res.sendfile(__dirname + '/index.html');
-}); */
+
+app.use(express.bodyParser({uploadDir:'./data'}));
 
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/setup.html');
@@ -84,11 +83,24 @@ app.get('/JSclientCSS', function (req, res) {
 app.get('/JSDataPointClient', function (req, res) {
     res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_DataPoint_Client.html');
 });
+app.get('/data', function (req, res) {
+    res.sendfile(__dirname + '/view/data.html');
+});
+app.get('/dataJS', function (req, res) {
+    res.sendfile(__dirname + '/view/js/dataView.js');
+});
 
 app.get('/files/:fileName.:ext', data.show);
+app.get('/filesList', data.fileList);
+app.post('/upload', function(req, res) {
+    console.log(req.files);
+    //console.log(req);
 
+    console.log(req.files.dataFile.path + "          " + "data\\" + req.files.dataFile.name);
+    fs.rename(req.files.dataFile.path, "data\\" + req.files.dataFile.name);
+    res.sendfile(__dirname + '/view/data.html');
 
-
+});
 
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });

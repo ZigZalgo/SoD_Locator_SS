@@ -6,6 +6,7 @@ var fs = require('fs');
 var dataDirectory = 'data/';
 //var thumbnailSize = 400;
 var util = require('util');
+var mime = require('mime');
 
 exports.show = function(req, res){
     var fileName = req.params.fileName;
@@ -21,37 +22,32 @@ exports.show = function(req, res){
             }
         }
         else{
-            switch(ext)
-            {
-                case 'gif':
-                    res.writeHead(200, {'Content-Type':'image/gif'});
-                    res.write(data);
-                    break;
-                case 'jpg':
-                    res.writeHead(200, {'Content-Type':'image/jpg'});
-                    res.write(data);
-                    break;
-                case 'jpeg':
-                    res.writeHead(200, {'Content-Type':'image/jpeg'});
-                    res.write(data);
-                    break;
-                case 'png':
-                    res.writeHead(200, {'Content-Type':'image/png'});
-                    res.write(data);
-                    break;
-                case 'bmp':
-                    res.writeHead(200, {'Content-Type':'image/bmp'});
-                    res.write(data);
-                    break;
-                default:
-                    /// TODO: Clarify this!
-                    /// I am not sure if this should be reached since we will
-                    /// perform the file check when the image is uploaded!
-                    console.log("Image type may not be supported.");
-                    res.writeHead(200, {'Content-Type':'image/jpg'});
-            }
+            var mimeType = mime.lookup(filePath);
+            console.log(mimeType);
+
+            res.writeHead(200, {'Content-Type':mimeType});
+            res.write(data);
             res.end();
         }
+    });
+}
+
+exports.fileList = function(req, res){
+    var walk    = require('walk');
+    var files   = [];
+
+    // Walker options
+    var walker  = walk.walk('./data', { followLinks: false });
+
+    walker.on('file', function(root, stat, next) {
+        // Add this file to the list of files
+        files.push(stat.name);
+        next();
+    });
+
+    walker.on('end', function() {
+        //console.log(files);
+        res.send(files);
     });
 }
 
@@ -87,13 +83,13 @@ function sendNotFoundError(req,res){
     // respond with html page
     /*
     if (req.accepts('html')) {
-        res.render('error', {
-            title: '404 | Page Not Found',
-            code: 404,
-            myuid: req.myuid
-        });
-        return;
-    }
+     res.render('error', {
+     title: '404 | Page Not Found',
+     code: 404,
+     myuid: req.myuid
+     });
+     return;
+     }
     */
 
     // respond with json
@@ -101,7 +97,6 @@ function sendNotFoundError(req,res){
         res.send({ error: 'Not found' });
         return;
     }
-
 
     // default to plain-text. send()
     res.type('txt').send('Not found');

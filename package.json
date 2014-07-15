@@ -12,6 +12,8 @@
     "underscore": "*",
     "socket.io": "0.9",
     "zeparser": "0.0.7",
-    "express.io": "*"
+    "express.io": "*",
+    "walk": "*",
+    "mime": "*"
   }
 }

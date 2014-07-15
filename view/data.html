@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<!-- saved from url=(0023)http://www.contoso.com/ -->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>SOD Vanilla</title>
+    <script src="/jquery"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="/style" rel="stylesheet"/>
+    <script src="/dataJS"></script>
+</head>
+
+<body onload="fileList();">
+    <div>
+        Files List: </br>
+        <select id="filesList" size="15" style="margin-left: 20px; width: 500px;"></select>
+    </div>
+    </br>
+    <div>
+        <section id="upload">
+            <form method="post" enctype="multipart/form-data" action="/upload">
+                <input type="file" name="dataFile">
+                <input type="submit">
+            </form>
+        </section>
+    </div>
+
+
+</body>
+</html>
