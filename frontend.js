@@ -1,5 +1,6 @@
 var express = require('express.io');
 var app = express();
+var data = require('./data');
 
 // testing 
 var os = require('os');
@@ -62,8 +63,6 @@ app.get('/style', function (req, res) {
     res.sendfile(__dirname + '/view/style/style.css');
 });
 
-
-
 app.get('/overviewJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/overview.js');
 });
@@ -82,6 +81,11 @@ app.get('/JSSensorClient', function (req, res) {
 app.get('/JSclientCSS', function (req, res) {
     res.sendfile(__dirname + '/SOD_JS_Library/sample_client_style.css');
 });
+
+app.get('/files/:fileName.:ext', data.show);
+
+
+
 
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });
