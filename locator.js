@@ -697,6 +697,7 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
 exports.getDeviceByID = function (ID){
     try{
         var container = {};
+
         if(ID != undefined){
             if(devices[util.getDeviceSocketIDByID(ID)] != undefined){
                 container[util.getDeviceSocketIDByID(ID)] = devices[util.getDeviceSocketIDByID(ID)];
