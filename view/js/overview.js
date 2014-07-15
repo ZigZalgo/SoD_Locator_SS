@@ -358,6 +358,22 @@ function updateContentWithObjects(){
         var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
         return returnDegree;
     }
+
+    function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
+        var deviceNameString;
+        io.emit('getDevicesWithSelection',{selection:['single'+deviceID]},function(data){
+            console.log('got device: '+data[Object.keys(data)].name.length);
+            if(data[Object.keys(data)].name.length>=5){
+                deviceNameString = data[Object.keys(data)].name.substring(0, 4)+'...';
+            }else{
+                deviceNameString = data[Object.keys(data)].name;
+            }
+            ctx.fillStyle = "#2cd72A"; //green
+            ctx.font = "12px Arial";
+            ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+10,shiftYToGridOrigin(zInMeters)+1);
+        });
+
+    }
     io.emit('getPeopleFromServer', {}, function(data){
         var htmlString = ""
         var c = document.getElementById("cnv");
@@ -378,6 +394,10 @@ function updateContentWithObjects(){
                         ctx.strokeStyle = "#2cd72A";
                         ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
                         ctx.stroke();
+
+                        getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters);
+
+
                     }
 
                 if(data[key].orientation != null){
@@ -385,7 +405,8 @@ function updateContentWithObjects(){
                     //console.log(" personOrientationToSensor: " + orientationToSensor);
                     //console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor + " Sum up: " + (data[key].orientation+orientationToSensor+90));
                     drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation+orientationToSensor+90), 30);
-                }
+                    // Adding device name for paired person
+                    }
                     ctx.fillStyle = "#c82124"; //red
                     ctx.font = "18px Arial";
                     ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+5,shiftYToGridOrigin(zInMeters)-5);
