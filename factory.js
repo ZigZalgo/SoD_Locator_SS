@@ -4,6 +4,37 @@ var uniquePersonCounter = 0;
 var reservedDeviceIDRange = 100;
 var uniqueDeviceCounter = reservedDeviceIDRange + 1;
 var uniqueSensorCounter = 0;
+var uniqueDataPointCounter = 0;
+
+// dataPoint Constructors
+function dataPoint(){
+    this.ID = null;
+    this.location = null;
+    this.dataPath = null;
+    this.range = null; // how far this data is allow to be seen
+}
+function dataPoint(location,socketID,range,dataPath){
+    try{
+        if(location.X == null || location.Y == null || location.Z == null){
+            var err = new Error("X, Y, or Z is null");
+            this.emit('error', err);
+        }
+        this.ID = uniqueDataPointCounter++;
+        this.socketID = socketID;
+        this.location = location;
+        this.range = range;
+        if(dataPath!=undefined){
+            this.dataPath = dataPath;
+        }
+    }catch(err){
+        return false;
+    }
+}
+dataPoint.prototype = {
+};
+exports.dataPoint = dataPoint;
+
+
 // TODO: TEST again, modified...
 function Person(){
     this.ID = null;

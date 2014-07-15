@@ -6,6 +6,7 @@ var frontend = require('./frontend');
 var events = require("events");
 var EventEmitter = require("events").EventEmitter;
 
+var dataPoints = {};
 var persons = {};
 var devices = {};
 var sensors = {};
@@ -13,7 +14,7 @@ var sensorsReference = null;
 exports.persons = persons;
 exports.devices = devices;
 exports.sensors = sensors;
-
+exports.dataPoints = dataPoints;
 // TODO: test!
 exports.start = function(){
 	// Do initialization here, if any
@@ -448,7 +449,24 @@ exports.updateDevice = function(socket,deviceInfo,fn){
     }
 }
 
+/*
+*   Registering dataPoint with dataPoint info
+* */
+exports.registerDataPoint = function(socket,dataPointInfo,fn){
+    console.log('received dataPoint' + JSON.stringify(dataPointInfo));
+    try{
+        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.range,dataPointInfo.dataPath);
+        //dataPoints[socket.id].ID = ;
+        dataPoints[socket.id] = dataPoint; // reigster dataPoint to the list
+        console.log('all data points: ' +JSON.stringify(dataPoints));
+        if(fn!=undefined){
+            fn(dataPoints[socket.id]);
+        }
+    }catch(err){
+        console.log('failed registering data point due to: '+err);
+    }
 
+}
 exports.registerDevice = function(socket, deviceInfo,fn){
     if(devices[socket.id] != undefined){
         devices[socket.id].height = deviceInfo.height;

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Data Point Sample Client</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/SoDLibrary"></script>
+    <link href="/JSclientCSS" rel="stylesheet"  />
+
+    <script>
+
+
+    function showRedStatus(status){
+        $('.status').html("<span class='red_status'>"+status+"</span>");
+        $('.red_status').fadeIn(600);
+    }
+
+    function showGreenStatus(status){
+        $('.status').html("<span class='green_status'>"+status+"</span>");
+        $('.green_status').fadeIn(600);
+    }
+
+    function showNormalStatus(status){
+        $('.status').html("<span class='normal_status'>"+status+"</span>");
+        $('.normal_status').fadeIn(600);
+    }
+
+    $(document).ready(function(){
+
+        var sod;
+        //initialization:
+
+
+        //END LISTENERS////////////////////////////////////////////////
+
+        //default callback function
+        var testFunction = function(data){
+            if(data.status!=undefined){
+                showGreenStatus(JSON.stringify(data));
+            }
+            else{
+                console.log("status: "+JSON.stringify(data));
+            };
+        }
+        // set a counter to check if the client is already been registered
+        var clickCount = 0;
+        $("#connect").on('click',function(){
+            clickCount++;
+            if(clickCount==1){
+                var port = $('input#serverPort').val();
+                var serverIP = $('input#serverIP').val();
+                var serverURL = "http://"+serverIP+":"+port;
+                var socketURL = serverURL+"/socket.io/socket.io.js";
+                var libraryURL= serverURL+"/SOD_JS_Library"
+                // grabbing device info from the page
+
+                sod = new SODDataPoint({range:Number($('#inputDataRange').val()),location:{X:Number($('#inputLocationX').val()),Y:Number($('#inputLocationY').val()),
+                    Z:Number($('#inputLocationZ').val())},dataPath:$('#inputDataPath').val()});
+                sod.init(serverURL,socketURL, sod);
+
+                //ADD LISTENERS////////////////////////////////////////////////
+
+                // add listener when the device is connected , that it register device. Note sod object itself is been passed as parameter
+                sod.addListener('connect',function(data){
+                    sod.registerDataPoint(sod,testFunction);
+                    showGreenStatus('connect to server ..')
+                });
+
+                sod.addListener('request',function(data){
+                    console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
+                    showGreenStatus(JSON.stringify(data))
+                });
+
+                sod.addListener('dictionary',function(data){
+                    console.log(JSON.stringify('received: '+ JSON.stringify(data)));
+                    showGreenStatus(JSON.stringify(data))
+                });
+
+                sod.addListener('string', function(data){
+                    console.log("Received: " + JSON.stringify(data))
+                    showGreenStatus(JSON.stringify(data))
+                })
+            }else{
+                showRedStatus('Can not register this client again. One page only can register one device.');
+            }
+
+        })
+    }) // end of click
+
+
+</script>
+
+</head>
+<body onload="">
+<div id="page-wrap">
+    <section id="top">
+        <header>SOD Client
+        </header>
+    </section>
+
+    <nav id="mode_selection" >
+        <div class="block"></div>
+        <table>
+            <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
+                Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
+                Z<input id='inputLocationZ'  type="text" value='1'><br/> range: <input id='inputDataRange'  type="text" value='100'> <br/> Data Path: <input id='inputDataPath'  type="text" value='/files/sample.jpg'>
+                    <option>true</option>
+                    <option>false</option>
+                </select></td></tr>
+        </table>
+    </nav>
+    <div class="status_wrap">
+        <h1>status:</h1>
+        <div class="status"></div> <!--This is where the data from the server is added-->
+    </div>
+
+</div><!-- closing page wrap -->
+</body>
+</html>

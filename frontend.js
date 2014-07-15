@@ -81,6 +81,9 @@ app.get('/JSSensorClient', function (req, res) {
 app.get('/JSclientCSS', function (req, res) {
     res.sendfile(__dirname + '/SOD_JS_Library/sample_client_style.css');
 });
+app.get('/JSDataPointClient', function (req, res) {
+    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_DataPoint_Client.html');
+});
 
 app.get('/files/:fileName.:ext', data.show);
 

@@ -23,7 +23,6 @@ exports.handleRequest = function (socket) {
         }else{
             locator.registerDevice(socket,deviceInfo)
         }
-
         console.log('deviceInfo:' + JSON.stringify(deviceInfo));
         try{
             socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID,deviceType: deviceInfo.deviceType});
@@ -31,6 +30,10 @@ exports.handleRequest = function (socket) {
         catch(err){
             console.log("Error emitting name or ID, device may still be registering: " + err);
         }
+    });
+    socket.on('registerDataPoint',function (dataPointInfo,fn){
+        //console.log('registering dataPoint with info: ' + JSON.stringify(dataPointInfo));
+        locator.registerDataPoint(socket,dataPointInfo,fn);
     });
     socket.on('registerSensor', function (sensorInfo, fn) {
         console.log('registering with sensorInfo: '+JSON.stringify(sensorInfo));

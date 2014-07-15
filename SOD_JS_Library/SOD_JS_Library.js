@@ -277,4 +277,72 @@ SODSensor.prototype = {
     }
 }
 
+///*
+//
+//
+//
+//
+// **////
 
+function SODDataPoint(dataPointInfo){
+    //this.serverURL = serverURL;
+    //this.socketURL = socketURL;
+    this.dataPoint = {
+        range : 0,
+        location: {X:0,Y:0,Z:0},
+        dataPath: null
+    }
+    //setters
+    for(var key in dataPointInfo){
+        //console.log('key '+ key +' :'+ dataPointInfo[key]);
+        this.dataPoint[key] = dataPointInfo[key];
+        console.log('dataPoint.key: '+ JSON.stringify(this.dataPoint[key]));
+    }
+    this.socket= null;
+    this.userListeners = {};
+}
+SODDataPoint.prototype = {
+    init: function(serverURL,socketURL, _SOD){
+        //connect socket register device and hearing events
+        $.getScript(socketURL,function(){
+            _SOD.socket = io.connect(serverURL);
+            _SOD.socket.on('connect',function(data){
+                console.log('Socket Connected ...');
+
+                //add any listeners that failed to add before socket was initialized
+                for(var key in _SOD.userListeners){
+                    if(_SOD.userListeners.hasOwnProperty(key)){
+                        _SOD.addListener(key, _SOD.userListeners[key]);
+
+                        //If user specified a connect event, it will automatically override the default one (ie. the block running now).
+                        //Since the connect event already triggered, we want to manually trigger the user's specified code.
+                        //After the first connect, subsequent reconnects will automatically run user's code.
+                        if(key == "connect"){
+                            _SOD.userListeners["connect"]();
+                        }
+                    }
+                }
+            })
+        })
+    },//end of init
+    addListener: function(eventName, callback){
+        try{
+            console.log("Adding event listener: " + eventName)
+            this.socket.on(eventName, callback);
+        }
+        catch(err){
+            console.log(err);
+            console.log('Socket is probably null, adding event listener "' + eventName + '" to queue, will try again after socket connects.')
+            this.userListeners[eventName] = callback;
+        }
+    },registerDataPoint: function(sod,callbackFunction){
+        try{
+            console.log("Registering dataPoint..." + JSON.stringify(sod.dataPoint))
+            this.socket.emit('registerDataPoint', sod.dataPoint, callbackFunction)
+        }
+        catch(err){
+            console.log(err)
+            console.log("Failed to register data point. Due to: " + err)
+        }
+    }
+}
