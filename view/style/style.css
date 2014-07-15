@@ -173,8 +173,10 @@ fieldset#clients {
 }
 fieldset#clients legend{
     color:#ffffff;
-    border: 2px solid #A1A2A5;;
+    /*padding:2px 1px;*/
+    /*border: 2px solid #A1A2A5;*/
     background:#292929;
+    box-shadow: 1px 1px 3px #888888;
 }
 #clients_table {
     width:100%;
@@ -182,19 +184,22 @@ fieldset#clients legend{
 }
 section #sensors legend{
     background: #3370d4;
-    border: 2px solid #A1A2A5;
+    /*border: 2px solid #A1A2A5;*/
     color: #ffffff;
+    box-shadow: 1px 1px 3px #888888;
 }
 section input#getPoints{
     position:relative;
 }
 section #people legend{
     color:#ffffff;
-    border: 2px solid #A1A2A5;;
+    /*border: 2px solid #A1A2A5;;*/
     background:#d05a47;
+    box-shadow: 1px 1px 3px #888888;
 }
 section #devices legend{
-    background: #2cd72A;border: solid #A1A2A5;color: #ffffff;
+    background: #2cd72A;/*border: solid #A1A2A5;*/color: #ffffff;
+    box-shadow: 1px 1px 3px #888888;
 }
 /* End overview section */
 

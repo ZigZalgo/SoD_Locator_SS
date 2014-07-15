@@ -3,6 +3,7 @@ var factory = require('../factory');
 var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
+var Q = require('q');
 
 describe("util.getSpaceTransitionRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
@@ -92,7 +93,7 @@ describe("util.getTranslationRule()", function() {
     it("testing Final Result of getTranslationRule", function(){
         expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
             to.eql({degree:-degree,xDistance:3000,
-                zDistance:-1000,xSpaceTransition:1999.997474235544,zSpaceTransition:1267.9466666666667,startingLocation:startingLocation2}); // objects equal
+                zDistance:-1000,xSpaceTransition: 3732.050807568877,zSpaceTransition: 1732.0533333333333,startingLocation:startingLocation2}); // objects equal
     });
 });
 

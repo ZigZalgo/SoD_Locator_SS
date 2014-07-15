@@ -8,6 +8,9 @@ exports.start = function () {
     locator.start();
 };
 
+
+
+
 exports.locator = locator;
 
 exports.handleRequest = function (socket) {
@@ -31,20 +34,25 @@ exports.handleRequest = function (socket) {
     });
     socket.on('registerSensor', function (sensorInfo, fn) {
         console.log('registering with sensorInfo: '+JSON.stringify(sensorInfo));
-        frontend.clients[socket.id].clientType = "sensor";
-        var sensor = new factory.Sensor(socket);
-        sensor.sensorType = sensorInfo.sensorType;
-        sensor.FOV = sensorInfo.FOV;
-        sensor.rangeInMM = sensorInfo.rangeInMM;
-        sensor.frameHeight = sensorInfo.frameHeight;
-        sensor.frameWidth = sensorInfo.frameWidth;
-        var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
-            StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
-        sensor.calibration = receivedCalibration;
-        locator.registerSensor(sensor);
-        if (fn != undefined) {
-            fn({"status": 'server: you registered as a "sensor"'})
+        if(Object.keys(sensorInfo).length != 0){
+            frontend.clients[socket.id].clientType = "sensor";
+            var sensor = new factory.Sensor(socket);
+            sensor.sensorType = sensorInfo.sensorType;
+            sensor.FOV = sensorInfo.FOV;
+            sensor.rangeInMM = sensorInfo.rangeInMM;
+            sensor.frameHeight = sensorInfo.frameHeight;
+            sensor.frameWidth = sensorInfo.frameWidth;
+            var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
+                StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
+            sensor.calibration = receivedCalibration;
+            locator.registerSensor(sensor);
+            if (fn != undefined) {
+                fn({"status": 'server: you registered as a "sensor"',sensorNumber:Object.keys(locator.sensors).length})
+            }
+        }else{
+            console.log('received null sensor info. Can not register to the server');
         }
+
     });
 
 

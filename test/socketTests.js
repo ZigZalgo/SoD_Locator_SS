@@ -8,6 +8,8 @@
  *      2, run command : "mocha -R -nyan"
  . */
 
+
+var Q = require('q');
 var chai = require('chai');
 var should = chai.should();
 var mocha = require('mocha');
@@ -62,28 +64,22 @@ describe("register functions", function () {
 
     it('should be able to register sensor', function(done){
         var client1 = io.connect(socketURL,options);
+        var sampleSensor = {sensorType:'sampleType',FOV:10,rangeInMM:1,frameHeight:10,frameWidth:10,translateRule:{
+            changeInOrientation:10,dX:10,dZ:10,xSpace:10,zSpace:10,startingLocation:{X:0,Y:0,Z:0}}};
         client1.on('connect',function(data){
             // register sensor
-            client1.emit('registerSensor',{},function(data){
-                data.status.should.equal('server: you registered as a "sensor"');
+            client1.emit('registerSensor',sampleSensor,function(data){
+                data.sensorNumber.should.equal(1);
             });
             client1.disconnect();
         })
         var client2 = io.connect(socketURL,options);
         client2.on('connect',function(data){
-            client2.emit('registerSensor',{});
+            client2.emit('registerSensor',sampleSensor,function(data){
+                data.sensorNumber.should.equal(2);
             client2.disconnect();
         })
-
-        var client3 = io.connect(socketURL,options);
-        client3.on('connect',function(data){
-            client3.emit('getSensorsFromServer',{},function(data){
-                Object.keys(data).length.should.be.equal(2);
-            })
-            client3.disconnect();
         })
-
-
 
         done();
             //        recursiveDisconnect([client1,client2,client3],done);
@@ -105,13 +101,7 @@ describe("register functions", function () {
             client2.disconnect();
         })
 
-        var client3 = io.connect(socketURL,options);
-        client3.on('connect',function(data){
-            client3.emit('getDevicesFromServer',{},function(data){
-                Object.keys(data).length.should.be.equal(2);
-            })
-            client3.disconnect();
-        })
+
 
         //recursiveDisconnect([client1,client2,client3],done);
         done();
@@ -124,21 +114,10 @@ describe("send data", function () {
     it('should send String To Devices With Selection)', function(done){
         var client1 = io.connect(socketURL,options);
         client1.on('connect',function(data){
-            client1.emit('registerDevice',{deviceType:'testDevice'})
+            client1.emit('registerDevice',{deviceType:'testDevice'},function(data){
+                data.currentDeviceNumber.should.equal(1);
+            })
         });
-
-
-
-        var client = io.connect(socketURL,options);
-           client.on('connect',function(data){
-            client.emit('sendStringToDevicesWithSelection',{},function(data){
-                data.status.should.be.equal('server: string sent');
-            });
-            client.emit('sendStringToDevicesWithSelection',{selection:'all',data:'life is hard'},function(data){
-                data.status.should.be.equal('server: string sent to all');
-                client.disconnect();
-            });
-        })
 
         client1.on('string',function(request,fn){
             console.log(JSON.stringify(request.data));
@@ -146,6 +125,23 @@ describe("send data", function () {
             client1.disconnect();
 
         })
+
+
+        var client2 = io.connect(socketURL,options);
+        client2.on('connect',function(data){
+            client2.emit('registerDevice',{deviceType:'testDevice'},function(data){
+                data.currentDeviceNumber.should.equal(2);
+                client2.emit('string',{data:'life is hard'},function(){
+                    console.log('test client 2 disconnected.');
+                    client2.disconnect();
+                });
+            })
+
+
+
+        });
+
+
 
         done();
     })

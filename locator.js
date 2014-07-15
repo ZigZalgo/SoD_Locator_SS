@@ -478,7 +478,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         }
         if (fn != undefined) {
             console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
-            fn({deviceID:device.uniqueDeviceID,socketID:socket.id});
+            fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length});
         }
 
 
