@@ -252,7 +252,7 @@ function getDataPath(object) {
     var returnHTML = '';
     if(!jQuery.isEmptyObject(object.data)){
         for(var key in object.data){
-            //console.log(JSON.stringify(object.data));
+            console.log(JSON.stringify(object.data[key]));
             returnHTML += '<a class="dataButton"  target="_blank" href='+object.data[key].dataPath+'>data file</a>';
             //console.log(Object.keys(object.data).length);
         }

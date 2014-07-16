@@ -96,7 +96,8 @@ function grabData(object){
             if(distance <= dataRange && object.data[key]==undefined){
                 // starting transfer data
                 //var data = {dataPath:dataPoints[key].data};// copy data path from dataPoints to person;
-                object.data[key] =dataPoints[key].data;
+
+                object.data[key] ={dataPath: dataPoints[key].data[key].dataPath};
                 console.log('-> Object grabbed:' + JSON.stringify(object.data) +' From dataPoint: ' + dataPoints[key].ID);
             }
         }
