@@ -4,6 +4,9 @@
 
 <head>
 <title>Super Cool SOD Visualizer</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <script src="/dataJS"></script>
 <script src = "/jquery"> </script>
 <script src="/socket.io/socket.io.js"></script>
 <link href="/style" rel="stylesheet"  />
@@ -12,17 +15,27 @@
         $("#calibration_flip").click(function(){
             $("section#canvas").hide();
             $("section#overview").hide();
+            $('#dataManage').hide();
             $("#calibration_section").fadeIn("fast");
             $('.status').html('<span class="normal_status">Calibrate Mode!</span>');
             $('.normal_status').fadeIn(600);
         });
         $('#overview_flip').on('click',function(){
             $("#calibration_section").hide();
+            $('#dataManage').hide();
             $("section#canvas").fadeIn("fast");
             $("section#overview").fadeIn("fast");
             $('.status').html('<span class="normal_status">OverView</span>');
             $('.normal_status').fadeIn(600);
         });
+        $('#dataManage_flip').on('click',function(){
+            console.log('data flip!');
+            $("section#canvas").hide();
+            $("section#overview").hide();
+            $("#calibration_section").hide();
+            $('#dataManage').fadeIn("fast");
+            showNormalStatus('Data Manage Mod');
+        })
         $('#refreshSensors').on('click',function(){
             refreshSensors();
         })
@@ -66,7 +79,7 @@
 
 
 </head>
-<body onload="drawGrid(); refreshSensors();">
+<body onload="drawGrid(); refreshSensors();fileList();">
 <div id="page-wrap">
     <section id="top">
         <header>Super Cool SOD Visualizer
@@ -74,8 +87,8 @@
         <nav id="mode_selection" >
             <ul>
                 <li id="overview_flip">Overview</li>
-                <li id="calibration_flip">Calibration Mode!</li>
-                <li>More Pages1</li>
+                <li id="calibration_flip">Calibration Mode</li>
+                <li id="dataManage_flip">Data Management</li>
                 <li>More Pages2</li>
             </ul>
         </nav>
@@ -177,17 +190,40 @@
             <fieldset id="people">
                 <legend> People </legend>
             </fieldset> <!--This is where the data from the server is added-->
-
             <fieldset id="devices">
                 <legend> Devices </legend>
             </fieldset> <!--This is where the data from the server is added-->
 
+            <fieldset id="dataPoints">
+                <legend> dataPoints </legend>
+            </fieldset> <!--This is where the data from the server is added-->
+
+
         </form>
     </section>
+    <section id="dataManage">
+        <div id="dataManage_wrap">
+            <h1>Files List: </h1>
+            <select id="filesList" size="15"></select>
+            </br>
+            <div>
+                <section id="upload">
+                    <form method="post" enctype="multipart/form-data" action="/upload">
+                        <input type="file" name="dataFile" style="color: whitesmoke;">
+                        <input type="submit">
+                    </form>
+                </section>
+            </div>
+        </div> <!-- End of dataManage_wrap -->
+    </section>
+
+
     <div class="status_wrap">
         <h1>status:</h1>
         <div class="status"></div> <!--This is where the data from the server is added-->
     </div>
+
+
 
 </div><!-- closing page wrap -->
 </body>

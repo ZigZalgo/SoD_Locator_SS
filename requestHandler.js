@@ -148,6 +148,18 @@ exports.handleRequest = function (socket) {
         fn(util.filterDevices(socket, request));
     })
 
+    socket.on('getDataPointsWithSelection', function (request, fn) {
+        var selection = request.selection;
+        if(fn!=undefined){
+            switch (selection){
+                case 'all':
+                    fn(locator.dataPoints);
+                default:
+                    fn(locator.dataPoints);
+            }
+        }
+    })
+
     socket.on('getDistanceToDevice', function (request, fn) {
         if (util.getDeviceSocketIDByID(request.ID) != undefined) {
             //target device found, return distance

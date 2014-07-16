@@ -112,18 +112,19 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
-    // if the socket is a device socket
-    if (locator.devices[socket.id] != undefined) {
-
-        try {
-            io.sockets.emit("someDeviceDisconnected", { name: locator.devices[socket.id].name, ID: locator.devices[socket.id].uniqueDeviceID, deviceType: locator.devices[socket.id].deviceType});
-            console.log("device disconnected -> name: " + locator.devices[socket.id].name + ", ID: " + locator.devices[socket.id].uniqueDeviceID + ", deviceType: " + locator.devices[socket.id].deviceType)
+        // if the socket is a device socket
+        if(locator.dataPoints[socket.id]!=undefined){
+            console.log('dataPoints disconnected -> ID: ' + locator.dataPoints[socket.id].ID +' with dataPath: ' + locator.dataPoints[socket.id].dataPath);
+        }else if (locator.devices[socket.id] != undefined) {
+            try {
+                io.sockets.emit("someDeviceDisconnected", { name: locator.devices[socket.id].name, ID: locator.devices[socket.id].uniqueDeviceID, deviceType: locator.devices[socket.id].deviceType});
+                console.log("device disconnected -> name: " + locator.devices[socket.id].name + ", ID: " + locator.devices[socket.id].uniqueDeviceID + ", deviceType: " + locator.devices[socket.id].deviceType)
+            }
+            catch (err) {
+                io.sockets.emit("someDeviceDisconnected", { name: "failed to retrieve name" });
+                console.log("failed to emit name of device, possibly null... error: " + err)
+            }
         }
-        catch (err) {
-            io.sockets.emit("someDeviceDisconnected", { name: "failed to retrieve name" });
-            console.log("failed to emit name of device, possibly null... error: " + err)
-        }
-    }
         //run cleanup functions for socket
         if(clients[socket.id] != undefined){
             switch(clients[socket.id].clientType){
@@ -132,6 +133,9 @@ io.sockets.on('connection', function (socket) {
                     locator.cleanUpSensor(socket.id);
                     break;
                 case 'webClient':
+                    break;
+                case 'dataPointClient':
+                    locator.cleanUpDataPoint(socket.id);
                     break;
                 case 'table':
                     console.log("CLEANING UP TABLE");

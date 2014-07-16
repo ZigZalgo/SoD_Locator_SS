@@ -368,6 +368,13 @@ exports.removeUntrackedPeople = function(){
     }
 }
 
+exports.cleanUpDataPoint = function(socketID){
+    // simply delete this data point for now
+    delete locator.dataPoints[socketID];
+    //refresh visualizer
+    frontend.io.sockets.emit("refreshStationaryLayer", {});
+}
+
 exports.cleanUpDevice = function(socketID){
     var personID = devices[socketID].ownerID;
     if(devices[socketID].pairingState == "paired" && personID != null){
@@ -457,11 +464,14 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
     try{
         var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.range,dataPointInfo.dataPath);
         //dataPoints[socket.id].ID = ;
+        frontend.clients[socket.id].clientType = "dataPointClient";
         dataPoints[socket.id] = dataPoint; // reigster dataPoint to the list
-        console.log('all data points: ' +JSON.stringify(dataPoints));
+        //console.log('all data points: ' +JSON.stringify(dataPoints));
         if(fn!=undefined){
             fn(dataPoints[socket.id]);
         }
+        // fresh visualizer
+        frontend.io.sockets.emit("refreshStationaryLayer", {});
     }catch(err){
         console.log('failed registering data point due to: '+err);
     }

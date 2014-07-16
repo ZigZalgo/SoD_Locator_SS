@@ -197,6 +197,14 @@ section #people legend{
     background:#d05a47;
     box-shadow: 1px 1px 3px #888888;
 }
+
+section #dataPoints legend{
+    color:#ffffff;
+    /*border: 2px solid #A1A2A5;;*/
+    background:#8A8A8A;
+    box-shadow: 1px 1px 3px #888888;
+}
+
 section #devices legend{
     background: #2cd72A;/*border: solid #A1A2A5;*/color: #ffffff;
     box-shadow: 1px 1px 3px #888888;
@@ -340,6 +348,37 @@ section#calibration_section .calibration_wrap{
 }
 
 
+
+
+/* Data Section*/
+
+section#dataManage{
+    display:none;
+    margin: auto;
+    width: 35%;
+}
+
+#dataManage_wrap{
+    padding: 15px;
+}
+
+section#dataManage h1{
+    color:whitesmoke;
+}
+#filesList{
+    min-width: 303px;
+}
+
+input[type="file"]
+{
+    border:1px solid #5F5F5F;
+    text-decoration:none;
+    font-family: Rockwell, "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
+    color:red;
+}
+
+/* End Data Section*/
+
 /* Buttons!! */
 
 .button{
@@ -425,6 +464,27 @@ div#calibration_flip{
     width:160px;
     position: relative;
     top: 50px;
+}
+.dataButton{
+    text-decoration: none;
+    color: whitesmoke;
+    background: #8A8A8A;
+    font-size: 1em;
+    font-family: "Franklin Gothic Medium", "Franklin Gothic", "ITC Franklin Gothic", Arial, sans-serif;
+    font-weight: bold;
+    padding: 0.2em 0.1em;
+    border-radius: 3px;
+    box-shadow: 1px 1px 5px #888888;
+}
+
+.dataButton:hover {
+    color: #8A8A8A;
+    background: whitesmoke;
+}
+
+.dataButton:active {
+    color: whitesmoke;
+    background: #8A8A8A;
 }
 
 

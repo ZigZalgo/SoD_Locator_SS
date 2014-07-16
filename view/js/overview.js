@@ -245,25 +245,79 @@ function drawStationaryDevice(context, X, Z, width, height, ID, orientation, FOV
  * Stationary Only updates position when this is called
  *
  * */
-function refreshStationaryLayer(){
+function refreshStationaryLayer() {
     var c = document.getElementById("cnvStationary");
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height);
 
-    io.emit('getDevicesWithSelection', {selection: ["all"]}, function(data){
-        for(var key in data){
-            if(data.hasOwnProperty(key)){
-                if(data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null){
+    io.emit('getDevicesWithSelection', {selection: ["all"]}, function (data) {
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                if (data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null) {
                     //console.log("X:" + data[key].location.X)
                     //console.log("Y:" + data[key].location.Y)
                     //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'),
-                        data[key].location.X, data[key].location.Z, data[key].width/1000*pixelsPerMeter,
-                        data[key].height/1000*pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV);
+                        data[key].location.X, data[key].location.Z, data[key].width / 1000 * pixelsPerMeter,
+                            data[key].height / 1000 * pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV);
                 }
             }
         }
     });
+
+    /*
+    * Function that check if a string is empty
+    * */
+    function isEmpty(str) {
+        return (!str || 0 === str.length);
+    }
+    /*
+    * Pass in the dataPoints objects and return a link if it contains a data
+    * */
+    function getDataPath(data) {
+        var returnHTML;
+        if(!isEmpty(data.dataPath)){
+            returnHTML = '<a class="dataButton"  target="_blank" href='+data.dataPath+'>data file</a>';
+        }else{
+            returnHTML = 'undefined dataPath';
+        }
+        return returnHTML;
+    }
+
+    io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
+        //var c = document.getElementById("cnv");
+        console.log(JSON.stringify(data));
+        //var ctx = c.getContext("2d");
+        var x, y, radius, htmlString = "";
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                x = shiftXToGridOrigin(data[key].location.X * pixelsPerMeter);
+                y = shiftXToGridOrigin(data[key].location.Z * pixelsPerMeter);
+                radius = data[key].range * pixelsPerMeter
+                console.log('drawing data point X: ' + x + ' Y: ' + y + ' radius: ' + radius);
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = "#4D4D4D";
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.globalAlpha = 1;
+                //paint file
+                ctx.fillStyle = "#4D4D4D";
+                ctx.font = "bold 14px Consolas";
+                ctx.fillText(data[key].ID, x + radius * 0.6, y - radius * 0.6);
+                htmlString += '<tr ><td>' + data[key].ID + '</td><td>X:' + data[key].location.X + ' Y:' + data[key].location.Y + ' Z:' + data[key].location.Z + '</td>' +
+                    '<td>' + getDataPath(data[key]) + '</td><td>' + data[key].range + '</td>' + ' </tr>';
+            }
+        }
+        //updateDataPointsInOverview(htmlString);
+        $('#dataPoints').html('<legend>Data Points</legend><table style="width:100%"><tr>' +
+            '<th style="">Data Point ID</th>' +
+            '<th>location</th>' +
+            '<th style="">dataPath</th>' +
+            '<th style="">range</th>' +
+            '</tr>' + htmlString + '</table>')
+        })
 }
 
 
@@ -374,6 +428,8 @@ function updateContentWithObjects(){
         });
 
     }
+
+
     io.emit('getPeopleFromServer', {}, function(data){
         var htmlString = ""
         var c = document.getElementById("cnv");
@@ -394,10 +450,7 @@ function updateContentWithObjects(){
                         ctx.strokeStyle = "#2cd72A";
                         ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
                         ctx.stroke();
-
                         getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters);
-
-
                     }
 
                 if(data[key].orientation != null){
@@ -467,7 +520,6 @@ function updateContentWithObjects(){
         function pairingInfo(state){
             var return_html ="";
             if(state == 'unpaired'){
-
                 for(var key in unpaired_people){
                     if(unpaired_people.hasOwnProperty(key)){
                         return_html+= '<span class="get_unpaired_people">'+ unpaired_people[key].uniquePersonID + '</span>';
