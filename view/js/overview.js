@@ -239,7 +239,28 @@ function drawStationaryDevice(context, X, Z, width, height, ID, orientation, FOV
 }
 
 
-
+/*
+ * Function that check if a string is empty
+ * */
+function isEmpty(str) {
+    return (!str || 0 === str.length);
+}
+/*
+ * Pass in the object and return a link if it contains a data
+ * */
+function getDataPath(object) {
+    var returnHTML = '';
+    if(!jQuery.isEmptyObject(object.data)){
+        for(var key in object.data){
+            //console.log(JSON.stringify(object.data));
+            returnHTML += '<a class="dataButton"  target="_blank" href='+object.data[key].dataPath+'>data file</a>';
+            //console.log(Object.keys(object.data).length);
+        }
+    }else{
+        returnHTML = 'Empty';
+    }
+    return returnHTML;
+}
 
 /**
  * Stationary Only updates position when this is called
@@ -265,24 +286,7 @@ function refreshStationaryLayer() {
         }
     });
 
-    /*
-    * Function that check if a string is empty
-    * */
-    function isEmpty(str) {
-        return (!str || 0 === str.length);
-    }
-    /*
-    * Pass in the dataPoints objects and return a link if it contains a data
-    * */
-    function getDataPath(data) {
-        var returnHTML;
-        if(!isEmpty(data.dataPath)){
-            returnHTML = '<a class="dataButton"  target="_blank" href='+data.dataPath+'>data file</a>';
-        }else{
-            returnHTML = 'undefined dataPath';
-        }
-        return returnHTML;
-    }
+
 
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
         //var c = document.getElementById("cnv");
@@ -476,17 +480,19 @@ function updateContentWithObjects(){
                             '<td>' + data[key].pairingState + '</td>' +
                             '<td>' + data[key].ownedDeviceID + '</td>' +
                             '<td>' + data[key].orientation + '</td>' +
+                            '<td>'+getDataPath(data[key])+'</td>' +
                             '</tr>')
                 }
             }
         }
 
         $('#people').html('<legend>People</legend><table style="width:100%"><tr>' +
-            '<th style="width:100px">uniquePersonID</th>' +
+            '<th >uniquePersonID</th>' +
             '<th>location</th>' +
-            '<th style="width:100px">Pairing State</th>' +
-            '<th style="width:100px">Paired Device</th>' +
-            '<th style="width:100px">orientation</th>' +
+            '<th >Pairing State</th>' +
+            '<th >Paired Device</th>' +
+            '<th >orientation</th>' +
+            '<th >data</th>' +
             //'<th style="width:100px">orientation to Sensor</th>' +
             //'<th style="width:100px">Distance to Sensor</th>' +
             '</tr>' + htmlString + '</table>')

@@ -10,10 +10,10 @@ var uniqueDataPointCounter = 0;
 function dataPoint(){
     this.ID = null;
     this.location = null;
-    this.dataPath = null;
+    this.data = null;
     this.range = null; // how far this data is allow to be seen
 }
-function dataPoint(location,socketID,range,dataPath){
+function dataPoint(location,socketID,range,data){
     try{
         if(location.X == null || location.Y == null || location.Z == null){
             var err = new Error("X, Y, or Z is null");
@@ -23,8 +23,8 @@ function dataPoint(location,socketID,range,dataPath){
         this.socketID = socketID;
         this.location = location;
         this.range = range;
-        if(dataPath!=undefined){
-            this.dataPath = dataPath;
+        if(data!=undefined){
+            this.data = data;
         }
     }catch(err){
         return false;
@@ -43,6 +43,7 @@ function Person(){
     this.orientationToKinect=null;
     this.ownedDeviceID = null;
     this.trackedBy = [];
+    this.data = null;
 }
 
 function Person(id, location, socket){
@@ -63,6 +64,7 @@ function Person(id, location, socket){
         this.pairingState = "unpaired";
         this.currentlyTrackedBy = socket.id;
         this.lastUpdated = new Date();
+        this.data = {};
     }
     catch(err){
         return false;

@@ -53,9 +53,10 @@
                 var socketURL = serverURL+"/socket.io/socket.io.js";
                 var libraryURL= serverURL+"/SOD_JS_Library"
                 // grabbing device info from the page
-
+                var dataList = [];
+                dataList.push($('#inputDataPath').val());
                 sod = new SODDataPoint({range:Number($('#inputDataRange').val()),location:{X:Number($('#inputLocationX').val()),Y:Number($('#inputLocationY').val()),
-                    Z:Number($('#inputLocationZ').val())},dataPath:$('#inputDataPath').val()});
+                    Z:Number($('#inputLocationZ').val())},data:dataList});
                 sod.init(serverURL,socketURL, sod);
 
                 //ADD LISTENERS////////////////////////////////////////////////

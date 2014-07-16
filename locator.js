@@ -75,7 +75,33 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
     }
 }
 
-
+/*
+ * Function that check if a string is empty
+ * */
+function isEmpty(str) {
+    return (!str || 0 === str.length);
+}
+/*
+* check all the data location and grab data if within range
+*
+* **/
+function grabData(object){
+    var distance;
+    var dataRange;
+    for( var key in dataPoints){
+        if(dataPoints.hasOwnProperty(key)){
+            dataRange = dataPoints[key].range;              // get range of this point
+            distance = util.distanceBetweenPoints(object.location,dataPoints[key].location); // get distance between data and object
+            //console.log('hah?'+dataPoints[key].ID + ' -> distance: '+distance+' range: '+dataRange);
+            if(distance <= dataRange && object.data[key]==undefined){
+                // starting transfer data
+                //var data = {dataPath:dataPoints[key].data};// copy data path from dataPoints to person;
+                object.data[key] =dataPoints[key].data;
+                console.log('-> Object grabbed:' + JSON.stringify(object.data) +' From dataPoint: ' + dataPoints[key].ID);
+            }
+        }
+    }
+}
 
 exports.updatePersons = function(receivedPerson, socket){
     if(Object.keys(persons).length == 0){
@@ -113,6 +139,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                         }
+                        grabData(persons[key]); // try to grab data if any data is within range
                     }
                     catch(err){
                         console.log("Error updating person: " + err)
@@ -461,8 +488,14 @@ exports.updateDevice = function(socket,deviceInfo,fn){
 * */
 exports.registerDataPoint = function(socket,dataPointInfo,fn){
     console.log('received dataPoint' + JSON.stringify(dataPointInfo));
+    var registerData = {};
     try{
-        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.range,dataPointInfo.dataPath);
+        var registerData;
+        dataPointInfo.data.forEach(function(dataPath){
+            registerData[socket.id]={dataPath:dataPath};
+        })
+        console.log('register data: ' + JSON.stringify(registerData));
+        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.range,registerData);
         //dataPoints[socket.id].ID = ;
         frontend.clients[socket.id].clientType = "dataPointClient";
         dataPoints[socket.id] = dataPoint; // reigster dataPoint to the list

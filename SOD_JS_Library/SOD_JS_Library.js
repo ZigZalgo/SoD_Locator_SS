@@ -278,7 +278,7 @@ SODSensor.prototype = {
 }
 
 ///*
-//
+// Data point client section
 //
 //
 //
@@ -290,7 +290,7 @@ function SODDataPoint(dataPointInfo){
     this.dataPoint = {
         range : 0,
         location: {X:0,Y:0,Z:0},
-        dataPath: null
+        data: null
     }
     //setters
     for(var key in dataPointInfo){
