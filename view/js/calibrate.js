@@ -65,7 +65,7 @@ function getPosition(canvasID, sid, event)
     //console.log("xInMM :" + xInMM);
 
     var pointFromDepthFrame;
-    var translatedPoint
+    var translatedPoint;
     if(canvasID == "cnvSensorOne"){
         if(sensorOnePoints.length < 2 && z > 0){
             pointFromDepthFrame = {X: xInMM, Y: y, Z: z};

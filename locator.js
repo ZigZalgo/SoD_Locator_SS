@@ -50,12 +50,15 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                 //if current sensor socket ID is exists in the current person's ID list, and this sensor ID doesn't exit in the new list of people
                 if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
                     try{
-                        if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey] && Object.keys(persons[key].ID).length > 0){
+                        if(persons[key].currentlyTrackedBy == persons[key].ID[IDkey] && Object.keys(persons[key].ID).length > 1){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
                             persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
                             console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
-                        }
+                        }else if (Object.keys(persons[key].ID).length = 1){
+							console.log('->-> person: ' + persons[key].uniquePersonID + ' deleting: ' + persons[key].ID[IDkey]);
+							delete persons[key].ID[IDkey];
+						}
 
                     }
                     catch(err){
@@ -105,6 +108,7 @@ function grabData(object){
 }
 
 exports.updatePersons = function(receivedPerson, socket){
+
     if(Object.keys(persons).length == 0){
         //nobody being tracked, add new person
         if(Object.keys(persons).indexOf(key) == Object.keys(persons).length - 1){
@@ -114,6 +118,7 @@ exports.updatePersons = function(receivedPerson, socket){
                 person.lastUpdated = new Date();
                 person.currentlyTrackedBy = socket.id;
                 persons[person.uniquePersonID] = person;
+				
             }
         }
     }
@@ -155,28 +160,28 @@ exports.updatePersons = function(receivedPerson, socket){
                 else{
                     //console.log('counter: '+counter);
                     //// updating the nearest person
-                    if(util.distanceBetweenPoints(persons[key].location, receivedPerson.location) < nearestDistance){
-                        //console.log('updating nearest person by ' + persons[key].uniquePersonID +' for person :' + JSON.stringify(receivedPerson) );
-                        //nearestPerson = persons[key];
-                        //console.log(JSON.stringify(persons[key].location) + 'life is hard : '+ JSON.stringify(receivedPerson.location));
+					if(util.distanceBetweenPoints(persons[key].location, receivedPerson.location) < nearestDistance){
+                        
                         nearestDistance= util.distanceBetweenPoints(persons[key].location, receivedPerson.location);
 
-                        ////
                         // reach the end of the people list
                         if(counter == 0){
-
+							
                             // check if the nearest person is within the threshold, merge the person into the exsisting person
                             if(nearestDistance < 0.4 || persons[key].ID[receivedPerson.ID]!=undefined){
                                 //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
-
+								
                                 // if the sensor hasn't been registered to the person's seen by sensor list
                                 if(persons[key].ID[receivedPerson.ID]==undefined){
                                     console.log('person '+persons[key].uniquePersonID+' is started being seen by ' + socket.id);
+									locator.removeDuplicateInstancesOfTrackedPerson(persons[key].ID, receivedPerson.ID,socket)
+                    
                                     console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
                                     persons[key].ID[receivedPerson.ID] = socket.id;
+									console.log('->-> Person ID list ('+Object.keys(persons[key].ID).length+') with details: '+JSON.stringify(persons[key].ID));
                                 }
                                 //console.log('only updating nearest person');
-                                //locator.removeDuplicateInstancesOfTrackedPerson(persons[key].uniquePersonID, receivedPerson.ID)
+                                
                                 locator.removeUntrackedPeople();
                             }
                             else{
@@ -198,6 +203,26 @@ exports.updatePersons = function(receivedPerson, socket){
     }
 };
 
+
+
+exports.removeDuplicateInstancesOfTrackedPerson = function(personIDList,receivedPersonID,sensorSocket){
+    // if received person is not in person's list
+	if(personIDList[receivedPersonID]==undefined){
+		// if the sensor socket.id exists
+		var existingID = util.findKeyWithAttr(personIDList,sensorSocket.id);
+		if(existingID!=null){
+			console.log('-> Deleting '+existingID+'from' + JSON.stringify(personIDList));
+			delete personIDList[existingID];
+		}
+	}
+	/*for(var key in personIDList){
+		if(personIDList.hasOwnProperty(key)){
+			//if(util.findKeyWithAttr(personIDList,))
+			
+		}
+	}*/
+}
+/*
 exports.removeDuplicateInstancesOfTrackedPerson = function(uniquePersonID, personID){
     for(var key in persons){
         // for all the people other than this person
@@ -218,6 +243,7 @@ exports.removeDuplicateInstancesOfTrackedPerson = function(uniquePersonID, perso
         }
     }
 }
+*/
 exports.pairDevice = function(deviceSocketID, uniquePersonID,socket){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         "\nPerson ID: " + uniquePersonID;

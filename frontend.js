@@ -98,7 +98,7 @@ app.post('/upload', function(req, res) {
 
     console.log(req.files.dataFile.path + "          " + "data\\" + req.files.dataFile.name);
     fs.rename(req.files.dataFile.path, "data\\" + req.files.dataFile.name);
-    res.sendfile(__dirname + '/view/data.html');
+    res.sendfile(__dirname + '/view/setup.html');
 
 });
 

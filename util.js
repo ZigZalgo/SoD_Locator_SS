@@ -442,6 +442,20 @@ exports.findWithAttrWeak = function (array, attr, query) {
     }
 };
 
+
+exports.findKeyWithAttr = function(obj,value){
+	if(typeof(obj) == "object"){
+		for(var key in obj){
+			if(obj[key] == value){
+				return key;
+			}
+		}
+		return null;
+	}else{
+		console.log("can not search through non object");
+		return null;
+	}
+}
 exports.getDeviceSocketIDByID = function (ID) {
     var counter = Object.keys(locator.devices).length;
 
