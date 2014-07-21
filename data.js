@@ -5,8 +5,9 @@
 var fs = require('fs');
 var dataDirectory = 'data/';
 //var thumbnailSize = 400;
-var util = require('util');
+var util = require('./util');
 var mime = require('mime');
+var locator = require('./locator');
 
 exports.show = function(req, res){
     var fileName = req.params.fileName;
@@ -24,7 +25,6 @@ exports.show = function(req, res){
         else{
             var mimeType = mime.lookup(filePath);
             console.log(mimeType);
-
             res.writeHead(200, {'Content-Type':mimeType});
             res.write(data);
             res.end();
@@ -42,6 +42,9 @@ exports.fileList = function(req, res){
     walker.on('file', function(root, stat, next) {
         // Add this file to the list of files
         files.push(stat.name);
+        //console.log('stat: '+JSON.stringify(stat));
+        //console.log('-> lookup: ' +mime.lookup('data\\'+stat.name))
+        //locator.registerData({name:stat.name,type:mime.lookup('data\\'+stat.name),dataPath:'\\files\\'+stat.name});
         next();
     });
 

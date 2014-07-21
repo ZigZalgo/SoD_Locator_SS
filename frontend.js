@@ -2,23 +2,10 @@ var express = require('express.io');
 var app = express().http().io();
 var data = require('./data');
 
-// testing 
-var os = require('os');
-var interfaces = os.networkInterfaces();
-exports.serverAddress;
-for (k in interfaces) {
-        for (k2 in interfaces[k]) {
-            var address = interfaces[k][k2];
-            if (address.family == 'IPv4' && !address.internal) {
-                var serverAddress = address.address;
-            }
-        }
-    }
+// getting server IP address
 
-console.log('SOD server IP : '+ serverAddress);
-
-// testing 
-
+// Server Initilize
+init();
 
 
 
@@ -98,7 +85,7 @@ app.post('/upload', function(req, res) {
     if(req.files.dataFile.name.length!=0) {
         fs.rename(req.files.dataFile.path, "data\\" + req.files.dataFile.name, function (err) {
             if (err) throw err;
-            locator.registerData({name: req.files.dataFile.name, type: req.files.dataFile.type, path: "files\\" + req.files.dataFile.name});
+            locator.registerData({name: req.files.dataFile.name, type: req.files.dataFile.type, dataPath: "files\\" + req.files.dataFile.name});
             res.sendfile(__dirname + '/view/data.html');
         });
     }else{
@@ -118,7 +105,7 @@ io.sockets.on('connection', function (socket) {
         console.log('Got disconnect!');
         // if the socket is a device socket
         if(locator.dataPoints[socket.id]!=undefined){
-            console.log('dataPoints disconnected -> ID: ' + locator.dataPoints[socket.id].ID +' with dataPath: ' + locator.dataPoints[socket.id].dataPath);
+            console.log('dataPoints disconnected -> ID: ' + locator.dataPoints[socket.id].ID +' with data: ' + JSON.stringify(Object.keys(locator.dataPoints[socket.id].data)));
         }else if (locator.devices[socket.id] != undefined) {
             try {
                 io.sockets.emit("someDeviceDisconnected", { name: locator.devices[socket.id].name, ID: locator.devices[socket.id].uniqueDeviceID, deviceType: locator.devices[socket.id].deviceType});
@@ -163,3 +150,46 @@ io.sockets.on('connection', function (socket) {
         }
     });
 });
+
+
+function init(){
+    var os = require('os');
+    var interfaces = os.networkInterfaces();
+    exports.serverAddress;
+// setting up server IP and display in the console
+    for (var k in interfaces) {
+        for (k2 in interfaces[k]) {
+            var address = interfaces[k][k2];
+            if (address.family == 'IPv4' && !address.internal) {
+                var serverAddress = address.address;
+            }
+        }
+    }
+    console.log('SOD server IP : '+ serverAddress);
+
+
+    // Initialize all the existing data in the data and convert them into object store them in the locator
+    console.log('Loading existing data ...');
+    var fs = require('fs');
+    var dataDirectory = 'data/';
+//var thumbnailSize = 400;
+    var util = require('./util');
+    var mime = require('mime');
+    var locator = require('./locator');
+
+    var walk    = require('walk');
+    var files   = [];
+    var walker  = walk.walk('./data', { followLinks: false });
+    walker.on('file', function(root, stat, next) {
+        //files.push(stat.name);
+        locator.registerData({name:stat.name,type:mime.lookup('data\\'+stat.name),dataPath:'\\files\\'+stat.name});
+        next();
+    });
+    walker.on('end', function() {
+        //console.log(files);
+        console.log('End of initializing data');
+    });
+
+
+
+}

@@ -67,7 +67,6 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                     }
 
                 }
-
             }
         }
         try{
@@ -87,7 +86,7 @@ function isEmpty(str) {
 }
 /*
 * check all the data location and grab data if within range
-*
+*   param: object  -> can be people , devices , dataPoints
 * **/
 function grabData(object){
     var distance;
@@ -96,13 +95,18 @@ function grabData(object){
         if(dataPoints.hasOwnProperty(key)){
             dataRange = dataPoints[key].range;              // get range of this point
             distance = util.distanceBetweenPoints(object.location,dataPoints[key].location); // get distance between data and object
-            //console.log('hah?'+dataPoints[key].ID + ' -> distance: '+distance+' range: '+dataRange);
-            if(distance <= dataRange && object.data[key]==undefined){
+            if(distance <= dataRange){
                 // starting transfer data
                 //var data = {dataPath:dataPoints[key].data};// copy data path from dataPoints to person;
+                for(var dataKey in dataPoints[key].data){
+                    if(object.data[dataKey]==undefined) {
 
-                object.data[key] ={dataPath: dataPoints[key].data[key].dataPath};
-                console.log('-> Object grabbed:' + JSON.stringify(object.data) +' From dataPoint: ' + dataPoints[key].ID);
+                        // if the data has existed in the object
+                        object.data[dataKey] = dataPoints[key].data[dataKey];
+                        console.log('-> Object grabbed:' + JSON.stringify(object.data[dataKey]) +' From dataPoint: ' + dataPoints[key].ID);
+                    }
+                }
+
             }
         }
     }
@@ -517,11 +521,15 @@ exports.updateDevice = function(socket,deviceInfo,fn){
 *
 * */
 exports.registerData = function (dataInfo,fn){
-    console.log('received data: ' + JSON.stringify(dataInfo));
+    //console.log('received data: ' + JSON.stringify(dataInfo));
     try{
-        var newData = new factory.data(dataInfo.name,dataInfo.type,dataInfo.path);
-        datas[newData.name] = newData;
-        console.log('-> registered data: '+ JSON.stringify(datas));
+        if(datas[dataInfo.name]==undefined){
+            var newData = new factory.data(dataInfo.name,dataInfo.type,dataInfo.dataPath);
+            datas[newData.name] = newData;
+            console.log('-> registered data: '+ JSON.stringify(datas[newData.name]));
+        }else{
+            console.log('-> '+ dataInfo.name+  ' has been registered');
+        }
     }catch(err){
         console.log('Unable to register data due to: '+ err);
     }
@@ -542,7 +550,6 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
         })
         console.log('register data: ' + JSON.stringify(registerData));
         var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.range,registerData);
-        //dataPoints[socket.id].ID = ;
         frontend.clients[socket.id].clientType = "dataPointClient";
         dataPoints[socket.id] = dataPoint; // reigster dataPoint to the list
         //console.log('all data points: ' +JSON.stringify(dataPoints));
