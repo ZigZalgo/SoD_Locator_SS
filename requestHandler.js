@@ -15,7 +15,9 @@ exports.locator = locator;
 
 exports.handleRequest = function (socket) {
     //START REGISTRATION EVENTS//////////////////////////////////////////////////////////////////////////////////////
-
+    /*socket.on('registerData',function(dataInfo,fn){
+        locator.registerData(dataInfo,)
+    });*/
     socket.on('registerDevice', function (deviceInfo, fn) {
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         if(fn!=undefined) {

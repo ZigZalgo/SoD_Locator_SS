@@ -93,11 +93,11 @@ app.get('/dataJS', function (req, res) {
 app.get('/files/:fileName.:ext', data.show);
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {
-    console.log(req.files);
+    //console.log(req.files);
     //console.log(req);
-
-    console.log(req.files.dataFile.path + "          " + "data\\" + req.files.dataFile.name);
-    fs.rename(req.files.dataFile.path, "data\\" + req.files.dataFile.name);
+    //console.log(req.files.dataFile.path + "          " + "data\\" + req.files.dataFile.name);
+    fs.rename(req.files.dataFile.path, "data\\" + req.files.dataFilename);
+    locator.registerData({name:req.files.dataFile.name,type:req.files.dataFile.type,path:req.files.dataFile.path});
     res.sendfile(__dirname + '/view/setup.html');
 
 });

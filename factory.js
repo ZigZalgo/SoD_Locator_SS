@@ -5,6 +5,26 @@ var reservedDeviceIDRange = 100;
 var uniqueDeviceCounter = reservedDeviceIDRange + 1;
 var uniqueSensorCounter = 0;
 var uniqueDataPointCounter = 0;
+var uniqueDataCounter = 0;
+
+// data object (first class)
+function data(){
+    this.ID = null;
+    this.dataPath = null;
+    this.type= null;
+    this.name = null;
+}
+
+function data(fileName,fileType,path){
+    this.ID = uniqueDataCounter++ ;
+    this.name = fileName;
+    this.type = fileType;
+    this.dataPath = path;
+}
+data.prototype={
+};
+exports.data = data;
+
 
 // dataPoint Constructors
 function dataPoint(){

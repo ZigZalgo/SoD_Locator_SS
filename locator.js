@@ -10,6 +10,7 @@ var dataPoints = {};
 var persons = {};
 var devices = {};
 var sensors = {};
+var datas = {};
 var sensorsReference = null;
 exports.persons = persons;
 exports.devices = devices;
@@ -510,7 +511,25 @@ exports.updateDevice = function(socket,deviceInfo,fn){
     }
 }
 
+
 /*
+* Registering data with data info
+*
+* */
+exports.registerData = function (dataInfo,fn){
+    console.log('received data: ' + JSON.stringify(dataInfo));
+    try{
+        var newData = new factory.data(dataInfo.name,dataInfo.type,dataInfo.path);
+        datas[newData.ID] = newData;
+        console.log('-> registered data: '+ JSON.stringify(datas[newData.ID]));
+    }catch(err){
+        console.log('Unable to register data due to: '+ err);
+    }
+}
+
+
+
+ /*
 *   Registering dataPoint with dataPoint info
 * */
 exports.registerDataPoint = function(socket,dataPointInfo,fn){
