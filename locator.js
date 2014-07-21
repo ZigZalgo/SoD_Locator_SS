@@ -520,8 +520,8 @@ exports.registerData = function (dataInfo,fn){
     console.log('received data: ' + JSON.stringify(dataInfo));
     try{
         var newData = new factory.data(dataInfo.name,dataInfo.type,dataInfo.path);
-        datas[newData.ID] = newData;
-        console.log('-> registered data: '+ JSON.stringify(datas[newData.ID]));
+        datas[newData.name] = newData;
+        console.log('-> registered data: '+ JSON.stringify(datas));
     }catch(err){
         console.log('Unable to register data due to: '+ err);
     }
@@ -537,8 +537,8 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
     var registerData = {};
     try{
         var registerData;
-        dataPointInfo.data.forEach(function(dataPath){
-            registerData[socket.id]={dataPath:dataPath};
+        dataPointInfo.data.forEach(function(dataName){
+            registerData[dataName]=datas[dataName];
         })
         console.log('register data: ' + JSON.stringify(registerData));
         var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.range,registerData);
