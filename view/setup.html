@@ -4,12 +4,24 @@
 
 <head>
 <title>Super Cool SOD Visualizer</title>
+    <script type="text/javascript">
+        <!--
+        if (screen.width <= 699) {
+            document.location = "/mobile";
+        }
+        //-->
+    </script>
+
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+
     <script src="/dataJS"></script>
 <script src = "/jquery"> </script>
 <script src="/socket.io/socket.io.js"></script>
 <link href="/style" rel="stylesheet"  />
+
+
     <script>
     $(document).ready(function(){
         $("#calibration_flip").click(function(){
@@ -70,6 +82,13 @@
             });
         })
 
+        $('#dumpData_BTN').on('click',function(){
+            console.log('asking: ' + Number($('#dumpDataPersonID').val()) + ' to dump data in range '+ Number($('#dumpDataRange').val()));
+            io.emit('dropData',{ID:Number($('#dumpDataPersonID').val()), range:Number($('#dumpDataRange').val())},function(data){
+                console.log(data);
+                showGreenStatus(data);
+            });
+        })
 
 
     });
@@ -215,6 +234,8 @@
                 </section>
             </div>
         </div> <!-- End of dataManage_wrap -->
+        Person ID: <input id="dumpDataPersonID" value = "0">    range:  <input id="dumpDataRange" value = "2">
+        <div id ="dumpData_BTN" class='button'>Dump Data</div>
     </section>
 
 

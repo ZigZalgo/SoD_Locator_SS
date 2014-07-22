@@ -290,7 +290,7 @@ function refreshStationaryLayer() {
 
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
         //var c = document.getElementById("cnv");
-        console.log(JSON.stringify(data));
+        //console.log(JSON.stringify(data));
         //var ctx = c.getContext("2d");
         var x, y, radius, htmlString = "";
         for (var key in data) {

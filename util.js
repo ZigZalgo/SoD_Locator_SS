@@ -494,7 +494,10 @@ exports.filterDevices = function(socket, request){
                         break;
                     case "inView":
                         return filterSelection(i + 1, locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
-                        break
+                        break;
+                    case "paired":
+                        return filterSelection(i + 1, locator.getPairedDevice(listDevices));
+                        break;
                     case "inRange":
                         //return filterSelection(i+1, locator.getDevicesWithinRange(locator.devices[socket.id], listDevices));
                         return filterSelection(i + 1, locator.getDevicesWithinRange(locator.devices[socket.id], selectionParam, listDevices));

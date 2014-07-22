@@ -1,6 +1,10 @@
 var express = require('express.io');
 var app = express().http().io();
 var data = require('./data');
+var static = require('node-static');
+
+var fileServer = new static.Server('./images');
+
 
 // getting server IP address
 
@@ -31,6 +35,9 @@ app.use(express.bodyParser({uploadDir:'./data'}));
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/setup.html');
 });
+app.get('/mobile', function (req, res) {
+    res.sendfile(__dirname + '/view/mobile.html');
+});
 app.get('/grid', function (req, res) {
     res.sendfile(__dirname + '/view/Grid.html');
 });
@@ -45,10 +52,18 @@ app.get('/jquery', function (req, res) {
     res.sendfile(__dirname + '/view/js/jquery-1.11.1.min.js');
 });
 
+app.get('/jquery-mobile', function (req, res) {
+    res.sendfile(__dirname + '/view/js/jquery.mobile-1.4.3.min.js');
+});
+
+
 app.get('/style', function (req, res) {
     res.sendfile(__dirname + '/view/style/style.css');
 });
-
+//jquery.mobile-1.4.3.min.css
+app.get('/style-mobile', function (req, res) {
+    res.sendfile(__dirname + '/view/style/jquery.mobile-1.4.3.min.css');
+});
 app.get('/overviewJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/overview.js');
 });
@@ -189,6 +204,7 @@ function init(){
         //console.log(files);
         console.log('End of initializing data');
     });
+
 
 
 

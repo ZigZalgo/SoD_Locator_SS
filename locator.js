@@ -84,11 +84,63 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 function isEmpty(str) {
     return (!str || 0 === str.length);
 }
+
+/*
+*  Grab data from targetObject to requestObject
+*
+* **/
+function grabData(requestObject,targetObject){
+    if(targetObject.data != undefined) {
+        // if there exists data in side of an object, grab all the data
+        for (var dataKey in targetObject.data) {
+            if(targetObject.data.hasOwnProperty(dataKey)) {
+                if (requestObject.data[dataKey] == undefined) {
+                    // if the data is not exited in the requestObject.
+                    requestObject.data[dataKey] = targetObject.data[dataKey];
+                    console.log('-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey]) + ' From targetobject: ' + JSON.stringify(targetObject));
+                }
+            }
+        }
+    }
+}
+
+/**
+ *  Drop data from current location of the requestsObject with a range
+ *  if the location is within the range of
+ *
+ * */
+
+exports.dropData = function(socket,requestObject,range,fn){
+    console.log('drop data request from: '+ JSON.stringify(requestObject));
+    if(requestObject.location!=undefined && range != undefined && Object.keys(obj).length != 0){
+        //var dropLocation = requestObject.location;
+        var distance,dataRange;
+        for(var key in dataPoints) {
+            dataRange = dataPoints[key].range;              // get range of this point
+            distance = util.distanceBetweenPoints(requestObject.location,dataPoints[key].location); // get distance between data and object
+            if(distance <= dataRange){
+                grabData(dataPoints[key],requestObject);    //dump the data once and return.
+                //console.log('-> Dumping data to data point: ' + dataPoints[key].ID);
+                if(fn!=undefined){
+                    fn('dumping data to dataPoint '+dataPoints[key].ID);
+                }
+                return;
+            }
+        }
+        // if it is not in any dataPoints range
+        locator.registerDataPoint(socket,{location:requestObject.location,data:Object.keys(requestObject.data),range:range},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
+
+
+    }else{
+        fn('Dump data requestObject is not well defined.');
+    }
+}
+
 /*
 * check all the data location and grab data if within range
 *   param: object  -> can be people , devices , dataPoints
 * **/
-function grabData(object){
+function grabDataFromDataPoints(object){
     var distance;
     var dataRange;
     for( var key in dataPoints){
@@ -98,15 +150,7 @@ function grabData(object){
             if(distance <= dataRange){
                 // starting transfer data
                 //var data = {dataPath:dataPoints[key].data};// copy data path from dataPoints to person;
-                for(var dataKey in dataPoints[key].data){
-                    if(object.data[dataKey]==undefined) {
-
-                        // if the data has existed in the object
-                        object.data[dataKey] = dataPoints[key].data[dataKey];
-                        console.log('-> Object grabbed:' + JSON.stringify(object.data[dataKey]) +' From dataPoint: ' + dataPoints[key].ID);
-                    }
-                }
-
+                grabData(object,dataPoints[key]);
             }
         }
     }
@@ -150,7 +194,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                         }
-                        grabData(persons[key]); // try to grab data if any data is within range
+                        grabDataFromDataPoints(persons[key]); // try to grab data if any data is within range
                     }
                     catch(err){
                         console.log("Error updating person: " + err)
@@ -805,8 +849,23 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
         }
     }
 
+
     return filterDeviceListByRange(Object.keys(listDevices).length-1, {});
 };
+/*
+* get all the devices that is been paried
+* **/
+exports.getPairedDevice = function(listDevices){
+    var pairedDevices = {};
+    if(Object.keys(listDevices).length!=0){
+        for(var key in devices){
+            if(devices.hasOwnProperty(key) && listDevices[key].pairingState == 'paired'){
+                pairedDevices[key] = devices[key];
+            }
+        }
+    }
+    return pairedDevices;
+}
 
 exports.getDeviceByID = function (ID){
     try{
