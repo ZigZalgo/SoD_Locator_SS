@@ -54,18 +54,6 @@ dataPoint.prototype = {
 };
 exports.dataPoint = dataPoint;
 
-
-// TODO: TEST again, modified...
-function Person(){
-    this.ID = null;
-    this.location = null;
-    this.orientation = null;
-    this.orientationToKinect=null;
-    this.ownedDeviceID = null;
-    this.trackedBy = [];
-    this.data = null;
-}
-
 function Person(id, location, socket){
     try{
         if(location.X == null || location.Y == null || location.Z == null){
@@ -85,6 +73,7 @@ function Person(id, location, socket){
         this.currentlyTrackedBy = socket.id;
         this.lastUpdated = new Date();
         this.data = {};
+        this.gesture = "untracked";
     }
     catch(err){
         return false;

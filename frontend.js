@@ -1,9 +1,9 @@
 var express = require('express.io');
 var app = express().http().io();
 var data = require('./data');
-var static = require('node-static');
+//var static = require('node-static');
 
-var fileServer = new static.Server('./images');
+//var fileServer = new static.Server('./images');
 
 
 // getting server IP address

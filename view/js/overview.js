@@ -286,8 +286,6 @@ function refreshStationaryLayer() {
         }
     });
 
-
-
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
         //var c = document.getElementById("cnv");
         //console.log(JSON.stringify(data));
@@ -480,7 +478,8 @@ function updateContentWithObjects(){
                             '<td>' + data[key].pairingState + '</td>' +
                             '<td>' + data[key].ownedDeviceID + '</td>' +
                             '<td>' + data[key].orientation + '</td>' +
-                            '<td>'+getDataPath(data[key])+'</td>' +
+                            '<td>'+ getDataPath(data[key]) + '</td>' +
+                            '<td>'+ data[key].gesture +'</td>' +
                             '</tr>')
                 }
             }
@@ -493,6 +492,7 @@ function updateContentWithObjects(){
             '<th >Paired Device</th>' +
             '<th >orientation</th>' +
             '<th >data</th>' +
+            '<th >gesture</th>' +
             //'<th style="width:100px">orientation to Sensor</th>' +
             //'<th style="width:100px">Distance to Sensor</th>' +
             '</tr>' + htmlString + '</table>')
