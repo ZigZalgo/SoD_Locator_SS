@@ -286,33 +286,42 @@ function refreshStationaryLayer() {
         }
     });
 
+function drawDataPoint(ctx,x,z,data){
+    console.log('drawing data point X: ' + x + ' Y: ' + z + ' radius: ' + data.range);
+    var radius = data.range * pixelsPerMeter;
+    ctx.fillStyle = "#4D4D4D";
+    ctx.beginPath();
+    ctx.arc(x, z, radius, 0, 2 * Math.PI);
+    ctx.fill();
 
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = "#4D4D4D";
+    ctx.font = "bold 14px Consolas";
+    ctx.fillText(data.ID, x + radius * 0.6, z - radius * 0.6);
+}
 
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
         //var c = document.getElementById("cnv");
         //console.log(JSON.stringify(data));
         //var ctx = c.getContext("2d");
-        var x, y, radius, htmlString = "";
+        var x, z, radius, htmlString = "";
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 x = shiftXToGridOrigin(data[key].location.X * pixelsPerMeter);
-                y = shiftXToGridOrigin(data[key].location.Z * pixelsPerMeter);
-                radius = data[key].range * pixelsPerMeter
-                console.log('drawing data point X: ' + x + ' Y: ' + y + ' radius: ' + radius);
-                ctx.globalAlpha = 0.3;
-                ctx.fillStyle = "#4D4D4D";
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, 2 * Math.PI);
-                ctx.fill();
+                z = shiftXToGridOrigin(data[key].location.Z * pixelsPerMeter);
+                //radius = data[key].range * pixelsPerMeter
 
-                ctx.globalAlpha = 1;
-                //paint file
-                ctx.fillStyle = "#4D4D4D";
-                ctx.font = "bold 14px Consolas";
-                ctx.fillText(data[key].ID, x + radius * 0.6, y - radius * 0.6);
-                htmlString += '<tr ><td>' + data[key].ID + '</td><td>X:' + data[key].location.X + ' Y:' + data[key].location.Y + ' Z:' + data[key].location.Z + '</td>' +
-                    '<td>' + getDataPath(data[key]) + '</td><td>' + data[key].range + '</td>' + ' </tr>';
+                //ctx.globalAlpha = 0.3;
+                for(var dataKey in data[key].data){
+                    if(data[key].data.hasOwnProperty(dataKey)) {
+                        //console.log(JSON.stringify(data[key].data[dataKey].range));
+                        drawDataPoint(ctx, x, z, data[key].data[dataKey])
+                    }
+                }
             }
+            htmlString += '<tr ><td>' + data[key].ID + '</td><td>X:' + data[key].location.X + ' Y:' + data[key].location.Y + ' Z:' + data[key].location.Z + '</td>' +
+                '<td>' + getDataPath(data[key]) + '</td><td>' + data[key].range + '</td>' + ' </tr>';
         }
         //updateDataPointsInOverview(htmlString);
         $('#dataPoints').html('<legend>Data Points</legend><table style="width:100%"><tr>' +

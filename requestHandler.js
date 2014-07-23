@@ -64,6 +64,13 @@ exports.handleRequest = function (socket) {
             fn({"status": 'server: you registered as a "webClient"'})
         }
     });
+    socket.on('registerMobileWebClient', function (clientInfo, fn) {
+        frontend.clients[socket.id].clientType = "mobileWebClient";
+        console.log('-> A mobile web client has been registered');
+        if (fn != undefined) {
+            fn({"status": 'server: you registered as a "mobileWebClient"'})
+        }
+    });
     //END REGISTRATION EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
     //START PAIRING EVENTS///////////////////////////////////////////////////////////////////////////////////////////

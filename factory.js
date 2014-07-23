@@ -13,13 +13,15 @@ function data(){
     this.dataPath = null;
     this.type= null;
     this.name = null;
+    this.range = null;
 }
 
-function data(fileName,fileType,path){
+function data(fileName,fileType,path,range){
     this.ID = uniqueDataCounter++ ;
     this.name = fileName;
     this.type = fileType;
     this.dataPath = path;
+    this.range = range;
 }
 data.prototype={
 };
@@ -33,7 +35,7 @@ function dataPoint(){
     this.data = null;
     this.range = null; // how far this data is allow to be seen
 }
-function dataPoint(location,socketID,range,data){
+function dataPoint(location,socketID,dropRange,data){
     try{
         if(location.X == null || location.Y == null || location.Z == null){
             var err = new Error("X, Y, or Z is null");
@@ -42,7 +44,7 @@ function dataPoint(location,socketID,range,data){
         this.ID = uniqueDataPointCounter++;
         this.socketID = socketID;
         this.location = location;
-        this.range = range;
+        this.dropRange = dropRange;
         if(data!=undefined){
             this.data = data;
         }

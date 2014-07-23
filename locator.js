@@ -90,11 +90,15 @@ function isEmpty(str) {
 *
 * **/
 function grabData(requestObject,targetObject){
+    var distance,dataRange;
     if(targetObject.data != undefined) {
         // if there exists data in side of an object, grab all the data
+        distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
         for (var dataKey in targetObject.data) {
             if(targetObject.data.hasOwnProperty(dataKey)) {
-                if (requestObject.data[dataKey] == undefined) {
+                dataRange = targetObject.data[dataKey].range;
+                            // get range of this point
+                if (requestObject.data[dataKey] == undefined && distance <= dataRange) {
                     // if the data is not exited in the requestObject.
                     requestObject.data[dataKey] = targetObject.data[dataKey];
                     console.log('-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey]) + ' From targetobject: ' + JSON.stringify(targetObject));
@@ -110,17 +114,18 @@ function grabData(requestObject,targetObject){
  *
  * */
 
-exports.dropData = function(socket,requestObject,range,fn){
+exports.dropData = function(socket,requestObject,dropRange,fn){
     console.log('drop data request from: '+ JSON.stringify(requestObject));
-    if(requestObject.location!=undefined && range != undefined && Object.keys(obj).length != 0){
+    if(requestObject.location!=undefined && range != undefined && Object.keys(requestObject.data).length != 0){
         //var dropLocation = requestObject.location;
         var distance,dataRange;
         for(var key in dataPoints) {
             dataRange = dataPoints[key].range;              // get range of this point
             distance = util.distanceBetweenPoints(requestObject.location,dataPoints[key].location); // get distance between data and object
+
             if(distance <= dataRange){
                 grabData(dataPoints[key],requestObject);    //dump the data once and return.
-                //console.log('-> Dumping data to data point: ' + dataPoints[key].ID);
+                console.log('-> Dumping data to data point: ' + dataPoints[key].ID);
                 if(fn!=undefined){
                     fn('dumping data to dataPoint '+dataPoints[key].ID);
                 }
@@ -128,7 +133,7 @@ exports.dropData = function(socket,requestObject,range,fn){
             }
         }
         // if it is not in any dataPoints range
-        locator.registerDataPoint(socket,{location:requestObject.location,data:Object.keys(requestObject.data),range:range},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
+        locator.registerDataPoint(socket,{location:requestObject.location,data:Object.keys(requestObject.data),dropRange:dropRange},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
 
 
     }else{
@@ -141,17 +146,18 @@ exports.dropData = function(socket,requestObject,range,fn){
 *   param: object  -> can be people , devices , dataPoints
 * **/
 function grabDataFromDataPoints(object){
-    var distance;
-    var dataRange;
+    //var distance;
+    //var dataRange;
     for( var key in dataPoints){
         if(dataPoints.hasOwnProperty(key)){
-            dataRange = dataPoints[key].range;              // get range of this point
-            distance = util.distanceBetweenPoints(object.location,dataPoints[key].location); // get distance between data and object
-            if(distance <= dataRange){
+            //dataRange = dataPoints[key].range;              // get range of this point
+            //distance = util.distanceBetweenPoints(object.location,dataPoints[key].location); // get distance between data and object
+            grabData(object,dataPoints[key]); // try to grab data from all the dataPoints
+            //if(distance <= dataRange){
                 // starting transfer data
                 //var data = {dataPath:dataPoints[key].data};// copy data path from dataPoints to person;
-                grabData(object,dataPoints[key]);
-            }
+                //grabData(object,dataPoints[key]);
+            //}
         }
     }
 }
@@ -471,9 +477,20 @@ exports.removeUntrackedPeople = function(){
     }
 }
 
+
+/*
+*   clean up the dataPoints that is disconnected
+* */
 exports.cleanUpDataPoint = function(socketID){
     // simply delete this data point for now
-    delete locator.dataPoints[socketID];
+    for(var key in dataPoints){
+        if(dataPoints.hasOwnProperty(key) && dataPoints[key].socketID == socketID){
+            console.log('-> dataPoints Client: '+ key+' has been cleaned');
+            // clean up the dataPoints that is disconnected
+            delete locator.dataPoints[key];
+        }
+    }
+
     //refresh visualizer
     frontend.io.sockets.emit("refreshStationaryLayer", {});
 }
@@ -558,6 +575,16 @@ exports.updateDevice = function(socket,deviceInfo,fn){
         fn(devices[socket]);
     }
 }
+/*
+*  Update the data with new information
+* */
+exports.updateData = function(ID,dataInfo,fn){
+    for(var key in dataInfo){
+        if(dataInfo.hasOwnProperty(key)){
+
+        }
+    }
+}
 
 
 /*
@@ -568,7 +595,7 @@ exports.registerData = function (dataInfo,fn){
     //console.log('received data: ' + JSON.stringify(dataInfo));
     try{
         if(datas[dataInfo.name]==undefined){
-            var newData = new factory.data(dataInfo.name,dataInfo.type,dataInfo.dataPath);
+            var newData = new factory.data(dataInfo.name,dataInfo.type,dataInfo.dataPath,dataInfo.range);
             datas[newData.name] = newData;
             console.log('-> registered data: '+ JSON.stringify(datas[newData.name]));
         }else{
@@ -593,9 +620,9 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
             registerData[dataName]=datas[dataName];
         })
         console.log('register data: ' + JSON.stringify(registerData));
-        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.range,registerData);
+        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.dropRange,registerData);
         frontend.clients[socket.id].clientType = "dataPointClient";
-        dataPoints[socket.id] = dataPoint; // reigster dataPoint to the list
+        dataPoints[dataPoint.ID] = dataPoint; // reigster dataPoint to the list
         //console.log('all data points: ' +JSON.stringify(dataPoints));
         if(fn!=undefined){
             fn(dataPoints[socket.id]);

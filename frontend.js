@@ -64,6 +64,11 @@ app.get('/style', function (req, res) {
 app.get('/style-mobile', function (req, res) {
     res.sendfile(__dirname + '/view/style/jquery.mobile-1.4.3.min.css');
 });
+// I don't know why Jquery wants to load this so bad
+app.get('/images/ajax-loader.gif', function (req, res) {
+    res.sendfile(__dirname + '/view/images/ajax-loader.gif');
+});
+
 app.get('/overviewJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/overview.js');
 });
@@ -140,6 +145,9 @@ io.sockets.on('connection', function (socket) {
                     break;
                 case 'webClient':
                     break;
+                case 'mobileWebClient':
+                    console.log('A Mobile web client disconnected');
+                    break;
                 case 'dataPointClient':
                     locator.cleanUpDataPoint(socket.id);
                     break;
@@ -197,7 +205,7 @@ function init(){
     var walker  = walk.walk('./data', { followLinks: false });
     walker.on('file', function(root, stat, next) {
         //files.push(stat.name);
-        locator.registerData({name:stat.name,type:mime.lookup('data\\'+stat.name),dataPath:'\\files\\'+stat.name});
+        locator.registerData({name:stat.name,type:mime.lookup('data\\'+stat.name),dataPath:'\\files\\'+stat.name,range:0.2});
         next();
     });
     walker.on('end', function() {

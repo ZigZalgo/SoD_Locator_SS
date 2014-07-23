@@ -3,18 +3,37 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>SOD Mobile</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1">
     <title>jQuery Mobile Demos</title>
     <link rel="stylesheet" href="/style-mobile">
     <script src="/jquery"></script>
     <script src="/jquery-mobile"></script>
     <script src="/socket.io/socket.io.js"></script>
+    -->
+    <script src="/socket.io/socket.io.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style-mobile">
+    <script src="/jquery"></script>
+    <script src="/jquery-mobile"></script>
 
     <script>
-        $( "#dropData" ).bind( "click", function(event, ui) {
-            console.log('haha');
+        var io=io.connect();
+        // socket part
+        io.on("connect", function(){
+            io.emit("registerMobileWebClient", {});
         });
+        // END of socket
 
+        $(document).ready(function() {
+            $("#dropData").bind("click", function () {
+                console.log('Person '+ $('#dropPersonID').val() + ' drop range: '+ Number($('#dropRange').val()));
+                io.emit('dropData',{ID:$('#dropPersonID').val(),range:Number($('#dropRange').val())});
+            });
+            $('#resetDropData').bind('click',function(){
+                $('#dropPersonID').val('0');
+                $('#dropRange').val('1');
+            });
+        })
     </script>
 
 </head>
@@ -28,22 +47,22 @@
         <h1>Data</h1>
     </div><!-- /header -->
 
-    <div data-role="content" data-theme="b">
-        <div data-role="fieldcontain" data-theme="b">
+    <div data-role="content" >
+        <div data-role="fieldContain">
             <label for="dropPersonID">Person ID:</label>
             <input type="text" name="dropPersonID" id="dropPersonID" value="0"  />
-            <label for="dropRange">Person ID:</label>
+            <label for="dropRange">Range:</label>
             <input type="text" name="dropRange" id="dropRange" value="1"  />
 
         </div>
         <div class="ui-grid-a">
-            <div class="ui-block-a"><button data-icon="delete" id="resetDropData" data-theme="b">Clear</button></div>
-            <div class="ui-block-b"><button data-icon="check" id="dropData" data-theme="b">Drop</button></div>
+            <div class="ui-block-a"><button data-icon="delete" id="resetDropData">Reset</button></div>
+            <div class="ui-block-b"><button data-icon="check" id="dropData">Drop</button></div>
         </div><!-- /grid-a -->
 
     </div><!-- /content -->
 
-    <div data-role="footer" data-theme="b">
+    <div data-role="footer">
         <h4>SOD - ASE 2014</h4>
     </div><!-- /footer -->
 </div><!-- /page -->
