@@ -4,7 +4,7 @@ var locator = require('./locator');
 var util = require('./util');
 var frontend = require('./frontend');
 var events = require("events");
-var EventEmitter = require("events").EventEmitter;
+//var EventEmitter = require("events").EventEmitter;
 
 var dataPoints = {};
 var persons = {};
@@ -213,7 +213,7 @@ exports.updatePersons = function(receivedPerson, socket){
                 //console.log(persons[key].currentlyTrackedBy + " == " + socket.id)
                 // the received the person's ID exists in a person's ID list AND this person is tracked by this sensor
                 if(persons[key].ID[receivedPerson.ID] != undefined && persons[key].currentlyTrackedBy == socket.id){
-                    //person found and updating person's new information nd device information
+                    //person found and updating person's new information and device information
                     //console.log('Found and updating person :' + key);
                     try{
                         persons[key].location.X = receivedPerson.location.X.toFixed(3);
@@ -221,6 +221,19 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[key].location.Z = receivedPerson.location.Z.toFixed(3);
                         persons[key].lastUpdated = new Date();
                         persons[key].gesture = receivedPerson.gesture;
+                        if(persons[key].gesture != null){
+                            switch(persons[key].gesture){
+                                case "Grab":
+                                    console.log("GRAB gesture detected from person: " + key + "!");
+                                    break;
+                                case "Release":
+                                    console.log("RELEASE gesture detected from person: " + key + "!");
+                                    break;
+                                default:
+                                    console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
+                            }
+                        }
+
                         if(persons[key].ownedDeviceID != null){
                             devices[persons[key].ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
@@ -260,6 +273,18 @@ exports.updatePersons = function(receivedPerson, socket){
                                     console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
                                     persons[key].ID[receivedPerson.ID] = socket.id;
                                     persons[key].gesture = receivedPerson.gesture;
+                                    if(persons[key].gesture != null){
+                                        switch(persons[key].gesture){
+                                            case "Grab":
+                                                console.log("GRAB gesture detected from person: " + key + "!");
+                                                break;
+                                            case "Release":
+                                                console.log("RELEASE gesture detected from person: " + key + "!");
+                                                break;
+                                            default:
+                                                console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
+                                        }
+                                    }
 									console.log('->-> Person ID list ('+Object.keys(persons[key].ID).length+') with details: '+JSON.stringify(persons[key].ID));
                                 }
                                 //console.log('only updating nearest person');
@@ -274,6 +299,18 @@ exports.updatePersons = function(receivedPerson, socket){
                                     person.lastUpdated = new Date();
                                     person.currentlyTrackedBy = socket.id;
                                     person.gesture = receivedPerson.gesture;
+                                    if(person.gesture != null){
+                                        switch(person.gesture){
+                                            case "Grab":
+                                                console.log("GRAB gesture detected from person: " + key + "!");
+                                                break;
+                                            case "Release":
+                                                console.log("RELEASE gesture detected from person: " + key + "!");
+                                                break;
+                                            default:
+                                                console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
+                                        }
+                                    }
                                     persons[person.uniquePersonID] = person;
                                 }
                             }

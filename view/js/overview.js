@@ -10,10 +10,10 @@ var uniqueDeviceIDToSocketID = {}
 io = io.connect()
 
 
- /*
+/*
  * Show status on the status log
  *
-* */
+ * */
 function showRedStatus(status){
     $('.status').html("<span class='red_status'>"+status+"</span>");
     $('.red_status').fadeIn(600);
@@ -30,10 +30,10 @@ function showNormalStatus(status){
 }
 
 /*
-* Visualization
-*
-* */
- function drawGrid() {
+ * Visualization
+ *
+ * */
+function drawGrid() {
     var cnv = document.getElementById("cnvBG");
 
     var gridOptions = {
@@ -51,7 +51,7 @@ function showNormalStatus(status){
     drawGridLines(cnv, gridOptions.majorLines);
 
 
-     var color = '1e1e1e';
+    var color = '1e1e1e';
     drawCoordinate(cnv,color,50,50,150);
 
     return;
@@ -159,8 +159,8 @@ function shiftYToGridOrigin(z){
 }
 
 /*
-* Draw view for sensor
-* */
+ * Draw view for sensor
+ * */
 function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
     var positionX = shiftXToGridOrigin(X);
@@ -297,7 +297,7 @@ function refreshStationaryLayer() {
                     //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'),
                         data[key].location.X, data[key].location.Z, data[key].width / 1000 * pixelsPerMeter,
-                            data[key].height / 1000 * pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV);
+                        data[key].height / 1000 * pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV);
                 }
             }
         }
@@ -352,9 +352,9 @@ function refreshStationaryLayer() {
  * */
 function updateContentWithObjects(){
     /*
-    * Update the clients
-    *
-    * */
+     * Update the clients
+     *
+     * */
     io.emit('getClientsFromServer', {}, function(data){
         var htmlString = ""
         for(var key in data){
@@ -375,10 +375,10 @@ function updateContentWithObjects(){
 
 
 
-   /**
-    *
-    * Update everything about sensor
-    * */
+    /**
+     *
+     * Update everything about sensor
+     * */
     io.emit('getSensorsFromServer', {}, function(data){
         var htmlString = ""
         var cSensors = document.getElementById("cnvSensors");
@@ -468,19 +468,19 @@ function updateContentWithObjects(){
         for(var key in data){
             if(data.hasOwnProperty(key)){
                 var xInMeters = data[key].location.X*majorGridLineWidth;
-                    var yInMeters = data[key].location.Y*majorGridLineWidth;
-                    var zInMeters = data[key].location.Z*majorGridLineWidth;
-                    ctx.beginPath();
-                    ctx.fillStyle = "#c82124"; //red
-                    ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
-                    ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
-                    ctx.fill();
-                    if(data[key].pairingState == 'paired'){
-                        ctx.strokeStyle = "#2cd72A";
-                        ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
-                        ctx.stroke();
-                        getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters);
-                    }
+                var yInMeters = data[key].location.Y*majorGridLineWidth;
+                var zInMeters = data[key].location.Z*majorGridLineWidth;
+                ctx.beginPath();
+                ctx.fillStyle = "#c82124"; //red
+                ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
+                ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
+                ctx.fill();
+                if(data[key].pairingState == 'paired'){
+                    ctx.strokeStyle = "#2cd72A";
+                    ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
+                    ctx.stroke();
+                    getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters);
+                }
 
                 if(data[key].orientation != null){
                     var orientationToSensor = getPersonOrientation(data[key].location.X,data[key].location.Z);
@@ -488,25 +488,25 @@ function updateContentWithObjects(){
                     //console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor + " Sum up: " + (data[key].orientation+orientationToSensor+90));
                     drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation+orientationToSensor+90), 30);
                     // Adding device name for paired person
-                    }
-                    ctx.fillStyle = "#c82124"; //red
-                    ctx.font = "18px Arial";
-                    ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+5,shiftYToGridOrigin(zInMeters)-5);
+                }
+                ctx.fillStyle = "#c82124"; //red
+                ctx.font = "18px Arial";
+                ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+5,shiftYToGridOrigin(zInMeters)-5);
 
-                    if(!jQuery.isEmptyObject(data[key].ID)){
-                        htmlString += ('<tr>' +
-                            '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
-                            +'</td>' +
-                            '<td>' +
-                            '('+Math.round(data[key].location.X*ROUND_RATIO)/ROUND_RATIO+', '
-                            +Math.round(data[key].location.Y*ROUND_RATIO)/ROUND_RATIO+', '
-                            +data[key].location.Z+')'//Math.round(data[key].location.Z*ROUND_RATIO)/ROUND_RATIO+')'
-                            + //JSON.stringify(person.location)
-                            '<td>' + data[key].pairingState + '</td>' +
-                            '<td>' + data[key].ownedDeviceID + '</td>' +
-                            '<td>' + data[key].orientation + '</td>' +
-                            '<td>'+getDataPath(data[key])+'</td>' +
-                            '</tr>')
+                if(!jQuery.isEmptyObject(data[key].ID)){
+                    htmlString += ('<tr>' +
+                        '<td>'+data[key].uniquePersonID//JSON.stringify(person.ID)
+                        +'</td>' +
+                        '<td>' +
+                        '('+Math.round(data[key].location.X*ROUND_RATIO)/ROUND_RATIO+', '
+                        +Math.round(data[key].location.Y*ROUND_RATIO)/ROUND_RATIO+', '
+                        +data[key].location.Z+')'//Math.round(data[key].location.Z*ROUND_RATIO)/ROUND_RATIO+')'
+                        + //JSON.stringify(person.location)
+                        '<td>' + data[key].pairingState + '</td>' +
+                        '<td>' + data[key].ownedDeviceID + '</td>' +
+                        '<td>' + data[key].orientation + '</td>' +
+                        '<td>'+getDataPath(data[key])+'</td>' +
+                        '</tr>')
                 }
             }
         }
@@ -611,10 +611,10 @@ io.on("connect", function(){
     refreshStationaryLayer();
 });
 /*
-io.on("refreshWebClientSensors", function(){
-    updateCanvasWithSensors();
-});
-*/
+ io.on("refreshWebClientSensors", function(){
+ updateCanvasWithSensors();
+ });
+ */
 
 $(function(){
     $('#getPoints').click(function(){ /*listening to the button click using Jquery listener*/
@@ -626,15 +626,15 @@ $(function(){
 });
 
 /*
-* Matrix CLOCKWISE transformation ,
-* given point(x,y) and rotation angle A, return (x',y') after transformation.
-* @param:
-* personLocation   -- location contains x,y,z value of a point, we are going to use x,z since
-* we are dealing with 2D-dimension
-* angle            -- Rotation angle
-* @return:
-* returnLocation   -- location after transformation
-* */
+ * Matrix CLOCKWISE transformation ,
+ * given point(x,y) and rotation angle A, return (x',y') after transformation.
+ * @param:
+ * personLocation   -- location contains x,y,z value of a point, we are going to use x,z since
+ * we are dealing with 2D-dimension
+ * angle            -- Rotation angle
+ * @return:
+ * returnLocation   -- location after transformation
+ * */
 var matrixTransformation = function(personLocation,angle){
     var returnLocation = {X:0,Y:0,Z:0};
     var returnX = personLocation.X * Math.cos(angle * DEGREES_TO_RADIANS) + personLocation.Z * Math.sin(angle * DEGREES_TO_RADIANS);

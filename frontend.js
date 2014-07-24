@@ -7,9 +7,6 @@ var data = require('./data');
 // Server Initilize
 init();
 
-//check for port number if specified
-var userPort = process.argv[2];
-
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
@@ -23,11 +20,11 @@ var clients = {};
 exports.io = io;
 exports.clients = clients;
 
-if(isNaN(userPort)){
+if(isNaN(process.argv[2])){
     server.listen(3000);
 }
 else{
-    server.listen(userPort);
+    server.listen(process.argv[2]);
 }
 
 requestHandler.start();
