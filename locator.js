@@ -116,7 +116,7 @@ function grabData(requestObject,targetObject){
 
 exports.dropData = function(socket,requestObject,dropRange,fn){
     console.log('drop data request from: '+ JSON.stringify(requestObject));
-    if(requestObject.location!=undefined && range != undefined && Object.keys(requestObject.data).length != 0){
+    if(requestObject.location!=undefined && dropRange != undefined && Object.keys(requestObject.data).length != 0){
         //var dropLocation = requestObject.location;
         var distance,dataRange;
         for(var key in dataPoints) {
@@ -172,6 +172,7 @@ exports.updatePersons = function(receivedPerson, socket){
                 var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
                 person.lastUpdated = new Date();
                 person.currentlyTrackedBy = socket.id;
+                person.gesture = receivedPerson.gesture;
                 persons[person.uniquePersonID] = person;
 				
             }
@@ -180,7 +181,6 @@ exports.updatePersons = function(receivedPerson, socket){
     else{
         //there are people being tracked, see if they match
         var counter = Object.keys(persons).length;
-        var nearestPerson;
         var nearestDistance = 1000;
         for(var key in persons){
             counter --;
@@ -195,6 +195,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[key].location.Y = receivedPerson.location.Y.toFixed(3);
                         persons[key].location.Z = receivedPerson.location.Z.toFixed(3);
                         persons[key].lastUpdated = new Date();
+                        persons[key].gesture = receivedPerson.gesture;
                         if(persons[key].ownedDeviceID != null){
                             devices[persons[key].ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
@@ -222,17 +223,18 @@ exports.updatePersons = function(receivedPerson, socket){
                         // reach the end of the people list
                         if(counter == 0){
 							
-                            // check if the nearest person is within the threshold, merge the person into the exsisting person
+                            // check if the nearest person is within the threshold, merge the person into the existing person
                             if(nearestDistance < 0.4 || persons[key].ID[receivedPerson.ID]!=undefined){
                                 //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
 								
-                                // if the sensor hasn't been registered to the person's seen by sensor list
+                                // if the sensor hasn't been registered to the person's seen-by-sensor list
                                 if(persons[key].ID[receivedPerson.ID]==undefined){
-                                    console.log('person '+persons[key].uniquePersonID+' is started being seen by ' + socket.id);
+                                    console.log('person '+persons[key].uniquePersonID+' is now tracked by ' + socket.id);
 									locator.removeDuplicateInstancesOfTrackedPerson(persons[key].ID, receivedPerson.ID,socket)
                     
                                     console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
                                     persons[key].ID[receivedPerson.ID] = socket.id;
+                                    persons[key].gesture = receivedPerson.gesture;
 									console.log('->-> Person ID list ('+Object.keys(persons[key].ID).length+') with details: '+JSON.stringify(persons[key].ID));
                                 }
                                 //console.log('only updating nearest person');
@@ -246,12 +248,12 @@ exports.updatePersons = function(receivedPerson, socket){
                                     var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
                                     person.lastUpdated = new Date();
                                     person.currentlyTrackedBy = socket.id;
+                                    person.gesture = receivedPerson.gesture;
                                     persons[person.uniquePersonID] = person;
                                 }
                             }
                         }
                     }
-
                 }
             }
         }
