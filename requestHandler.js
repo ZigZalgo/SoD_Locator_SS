@@ -137,7 +137,7 @@ exports.handleRequest = function (socket) {
     socket.on('dropData',function(request,fn){
         for(var key in locator.persons){
             if(locator.persons[key].uniquePersonID == request.ID){
-                locator.dropData(socket,locator.persons[key],request.range,fn);
+                locator.dropData(socket,locator.persons[key],request.dropRange,fn);
             }
         }
         //locator.dropData(socket,request.ID,request.range);

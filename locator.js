@@ -89,7 +89,7 @@ function isEmpty(str) {
 *  Grab data from targetObject to requestObject
 *
 * **/
-function grabData(requestObject,targetObject){
+function grabDataInRange(requestObject,targetObject){
     var distance,dataRange;
     if(targetObject.data != undefined) {
         // if there exists data in side of an object, grab all the data
@@ -107,34 +107,59 @@ function grabData(requestObject,targetObject){
         }
     }
 }
+//*
+// Request Object grab all the data from targetObject
+// *//
+function grabAllData(requestObject,targetObject){
+    if(targetObject.data != undefined) {
+        // if there exists data in side of an object, grab all the data
+        for (var dataKey in targetObject.data) {
+            if(targetObject.data.hasOwnProperty(dataKey)) {
+                requestObject.data[dataKey] = targetObject.data[dataKey];
+                console.log('-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey]) + ' From targetobject: ' + JSON.stringify(targetObject));
+            }
+        }
+    }
+}
+
 
 /**
  *  Drop data from current location of the requestsObject with a range
  *  if the location is within the range of
  *
  * */
-
 exports.dropData = function(socket,requestObject,dropRange,fn){
     console.log('drop data request from: '+ JSON.stringify(requestObject));
+    var dataPointCounter = 0;
+    var dataPointsLength = Object.keys(dataPoints).length;
     if(requestObject.location!=undefined && dropRange != undefined && Object.keys(requestObject.data).length != 0){
         //var dropLocation = requestObject.location;
-        var distance,dataRange;
         for(var key in dataPoints) {
-            dataRange = dataPoints[key].range;              // get range of this point
-            distance = util.distanceBetweenPoints(requestObject.location,dataPoints[key].location); // get distance between data and object
+            if(dataPoints.hasOwnProperty(key)){
+                // if reach the end of the dataPoints list
+                    dataPointCounter ++;
+                    console.log('Current DP: ' + JSON.stringify(dataPoints[key]));
+                    console.log(dataPointCounter+ ' / '+ dataPointsLength);
+                    var distance, dataPointDropRange;
+                    dataPointDropRange = dataPoints[key].dropRange;              // get range of this point
+                    console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
+                    distance = util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
+                    if (distance <= dataPointDropRange) {
+                        grabAllData(dataPoints[key], requestObject);    //dump the data once and return.
+                        console.log('-> Dumping data to data point: ' + dataPoints[key].ID + ' since the distance: ' + distance + ' within dropRange: ' + dropRange);
+                        if (fn != undefined) {
+                            fn('dumping data to dataPoint ' + dataPoints[key].ID);
+                        }
+                        frontend.io.sockets.emit("refreshStationaryLayer", {}); // refresh the fronted layer
+                        return;
+                    }else if(dataPointCounter==dataPointsLength) {
+                        var currentLocation = {X:requestObject.location.X,Y:requestObject.location.Y,Z:requestObject.location.Z};
+                        locator.registerDataPoint(socket,{location:currentLocation,data:Object.keys(requestObject.data),dropRange:dropRange},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
+                    }
 
-            if(distance <= dataRange){
-                grabData(dataPoints[key],requestObject);    //dump the data once and return.
-                console.log('-> Dumping data to data point: ' + dataPoints[key].ID);
-                if(fn!=undefined){
-                    fn('dumping data to dataPoint '+dataPoints[key].ID);
-                }
-                return;
-            }
+            }// end of hasOwnproperty
         }
         // if it is not in any dataPoints range
-        locator.registerDataPoint(socket,{location:requestObject.location,data:Object.keys(requestObject.data),dropRange:dropRange},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
-
 
     }else{
         fn('Dump data requestObject is not well defined.');
@@ -152,11 +177,11 @@ function grabDataFromDataPoints(object){
         if(dataPoints.hasOwnProperty(key)){
             //dataRange = dataPoints[key].range;              // get range of this point
             //distance = util.distanceBetweenPoints(object.location,dataPoints[key].location); // get distance between data and object
-            grabData(object,dataPoints[key]); // try to grab data from all the dataPoints
+            grabDataInRange(object,dataPoints[key]); // try to grab data from all the dataPoints
             //if(distance <= dataRange){
                 // starting transfer data
                 //var data = {dataPath:dataPoints[key].data};// copy data path from dataPoints to person;
-                //grabData(object,dataPoints[key]);
+                //grabDataInRange(object,dataPoints[key]);
             //}
         }
     }
@@ -624,8 +649,8 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
         console.log('register data: ' + JSON.stringify(registerData));
         var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.dropRange,registerData);
         frontend.clients[socket.id].clientType = "dataPointClient";
-        dataPoints[dataPoint.ID] = dataPoint; // reigster dataPoint to the list
-        //console.log('all data points: ' +JSON.stringify(dataPoints));
+        dataPoints[dataPoint.ID] = dataPoint; // reigster dataPoint to the list with its ID as its key
+        console.log('all data points: ' +JSON.stringify(dataPoints));
         if(fn!=undefined){
             fn(dataPoints[socket.id]);
         }

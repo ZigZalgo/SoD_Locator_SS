@@ -188,6 +188,7 @@ exports.distanceBetweenPoints = function (a, b) {
 
     // We check whether the points are in 2D or 3D and do the
     // calculations accordingly
+    //console.log('request: ' + JSON.stringify(a) + ' b: '+ JSON.stringify(b));
     if (a.Z == null) {
         return Math.sqrt(Math.pow(a.X - b.X, 2) + Math.pow(a.Y - b.Y, 2));
     }

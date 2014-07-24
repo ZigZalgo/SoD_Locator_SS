@@ -27,7 +27,7 @@
         $(document).ready(function() {
             $("#dropData").bind("click", function () {
                 console.log('Person '+ $('#dropPersonID').val() + ' drop range: '+ Number($('#dropRange').val()));
-                io.emit('dropData',{ID:$('#dropPersonID').val(),range:Number($('#dropRange').val())});
+                io.emit('dropData',{ID:$('#dropPersonID').val(),dropRange:Number($('#dropRange').val())});
             });
             $('#resetDropData').bind('click',function(){
                 $('#dropPersonID').val('0');
@@ -51,7 +51,7 @@
         <div data-role="fieldContain">
             <label for="dropPersonID">Person ID:</label>
             <input type="text" name="dropPersonID" id="dropPersonID" value="0"  />
-            <label for="dropRange">Range:</label>
+            <label for="dropRange">dropRange:</label>
             <input type="text" name="dropRange" id="dropRange" value="1"  />
 
         </div>

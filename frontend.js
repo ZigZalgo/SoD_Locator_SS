@@ -176,7 +176,11 @@ io.sockets.on('connection', function (socket) {
     });
 });
 
-
+/*
+*   Initialize the server by defined server IP address, and registering existing data files into data Objects
+*
+*
+* **/
 function init(){
     var os = require('os');
     var interfaces = os.networkInterfaces();

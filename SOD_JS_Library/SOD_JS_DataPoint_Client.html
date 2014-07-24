@@ -56,7 +56,7 @@
                 var dataList = [];
                 dataList.push($('#inputDataName_1').val());
                 dataList.push($('#inputDataName_2').val());
-                sod = new SODDataPoint({range:Number($('#inputDataRange').val()),location:{X:Number($('#inputLocationX').val()),Y:Number($('#inputLocationY').val()),
+                sod = new SODDataPoint({dropRange:Number($('#inputDataRange').val()),location:{X:Number($('#inputLocationX').val()),Y:Number($('#inputLocationY').val()),
                     Z:Number($('#inputLocationZ').val())},data:dataList});
                 sod.init(serverURL,socketURL, sod);
 
@@ -105,7 +105,7 @@
         <table>
             <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
                 Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
-                Z<input id='inputLocationZ'  type="text" value='1'><br/> range: <input id='inputDataRange'  type="text" value='0.3'> <br/> Data Name_1: <input id='inputDataName_1'  type="text" value='sample.jpg'> Data Name_2: <input id='inputDataName_2'  type="text" value='vanilla.jpg'>
+                Z<input id='inputLocationZ'  type="text" value='1'><br/> dropRange: <input id='inputDataRange'  type="text" value='0.5'> <br/> Data Name_1: <input id='inputDataName_1'  type="text" value='sample.jpg'> Data Name_2: <input id='inputDataName_2'  type="text" value='vanilla.jpg'>
                     <option>true</option>
                     <option>false</option>
                 </select></td></tr>

@@ -288,9 +288,9 @@ function SODDataPoint(dataPointInfo){
     //this.serverURL = serverURL;
     //this.socketURL = socketURL;
     this.dataPoint = {
-        range : 0,
         location: {X:0,Y:0,Z:0},
-        data: null
+        data: null,
+        dropRange:0
     }
     //setters
     for(var key in dataPointInfo){
