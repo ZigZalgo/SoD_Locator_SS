@@ -2,16 +2,13 @@ var express = require('express.io');
 var app = express().http().io();
 var data = require('./data');
 //var static = require('node-static');
-
 //var fileServer = new static.Server('./images');
-
-
-// getting server IP address
 
 // Server Initilize
 init();
 
-
+//check for port number if specified
+var userPort = process.argv[2];
 
 var http = require('http')
     , server = http.createServer(app)
@@ -26,7 +23,12 @@ var clients = {};
 exports.io = io;
 exports.clients = clients;
 
-server.listen(3000);
+if(isNaN(userPort)){
+    server.listen(3000);
+}
+else{
+    server.listen(userPort);
+}
 
 requestHandler.start();
 
@@ -188,7 +190,7 @@ function init(){
             }
         }
     }
-    console.log('SOD server IP : '+ serverAddress);
+    console.log('SOD server IP: '+ serverAddress + ":" + ((isNaN(process.argv[2])) ? 3000:process.argv[2]));
 
 
     // Initialize all the existing data in the data and convert them into object store them in the locator
