@@ -132,37 +132,41 @@ exports.dropData = function(socket,requestObject,dropRange,fn){
     console.log('drop data request from: '+ JSON.stringify(requestObject));
     var dataPointCounter = 0;
     var dataPointsLength = Object.keys(dataPoints).length;
-    if(requestObject.location!=undefined && dropRange != undefined && Object.keys(requestObject.data).length != 0){
-        //var dropLocation = requestObject.location;
-        for(var key in dataPoints) {
-            if(dataPoints.hasOwnProperty(key)){
-                // if reach the end of the dataPoints list
-                    dataPointCounter ++;
-                    console.log('Current DP: ' + JSON.stringify(dataPoints[key]));
-                    console.log(dataPointCounter+ ' / '+ dataPointsLength);
-                    var distance, dataPointDropRange;
-                    dataPointDropRange = dataPoints[key].dropRange;              // get range of this point
-                    console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
-                    distance = util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
-                    if (distance <= dataPointDropRange) {
-                        grabAllData(dataPoints[key], requestObject);    //dump the data once and return.
-                        console.log('-> Dumping data to data point: ' + dataPoints[key].ID + ' since the distance: ' + distance + ' within dropRange: ' + dropRange);
-                        if (fn != undefined) {
-                            fn('dumping data to dataPoint ' + dataPoints[key].ID);
+    if(requestObject.data!=undefined){
+        if(requestObject.location!=undefined && dropRange != undefined && Object.keys(requestObject.data).length != 0){
+            //var dropLocation = requestObject.location;
+            for(var key in dataPoints) {
+                if(dataPoints.hasOwnProperty(key)){
+                    // if reach the end of the dataPoints list
+                        dataPointCounter ++;
+                        console.log('Current DP: ' + JSON.stringify(dataPoints[key]));
+                        console.log(dataPointCounter+ ' / '+ dataPointsLength);
+                        var distance, dataPointDropRange;
+                        dataPointDropRange = dataPoints[key].dropRange;              // get range of this point
+                        console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
+                        distance = util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
+                        if (distance <= dataPointDropRange) {
+                            grabAllData(dataPoints[key], requestObject);    //dump the data once and return.
+                            console.log('-> Dumping data to data point: ' + dataPoints[key].ID + ' since the distance: ' + distance + ' within dropRange: ' + dropRange);
+                            if (fn != undefined) {
+                                fn('dumping data to dataPoint ' + dataPoints[key].ID);
+                            }
+                            frontend.io.sockets.emit("refreshStationaryLayer", {}); // refresh the fronted layer
+                            return;
+                        }else if(dataPointCounter==dataPointsLength) {
+                            var currentLocation = {X:requestObject.location.X,Y:requestObject.location.Y,Z:requestObject.location.Z};
+                            locator.registerDataPoint(socket,{location:currentLocation,data:Object.keys(requestObject.data),dropRange:dropRange},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
                         }
-                        frontend.io.sockets.emit("refreshStationaryLayer", {}); // refresh the fronted layer
-                        return;
-                    }else if(dataPointCounter==dataPointsLength) {
-                        var currentLocation = {X:requestObject.location.X,Y:requestObject.location.Y,Z:requestObject.location.Z};
-                        locator.registerDataPoint(socket,{location:currentLocation,data:Object.keys(requestObject.data),dropRange:dropRange},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
-                    }
 
-            }// end of hasOwnproperty
+                }// end of hasOwnproperty
+            }
+            // if it is not in any dataPoints range
+
+        }else{
+            fn('Dump data requestObject is not well defined.');
         }
-        // if it is not in any dataPoints range
-
     }else{
-        fn('Dump data requestObject is not well defined.');
+        console.log('Request object does not have any data');
     }
 }
 
@@ -187,6 +191,26 @@ function grabDataFromDataPoints(object){
     }
 }
 
+/**
+ *  Handles the gesture from person performs the action
+ *
+ * */
+function gestureHandler(key,gesture,socket){
+    switch(gesture){
+        case "Grab":
+            console.log("-> GRAB gesture detected from person: " + key + "!");
+            grabDataFromDataPoints(persons[key]); // try to grab data if any data is within range
+            break;
+        case "Release":
+            console.log("-> RELEASE gesture detected from person: " + key + "!");
+            locator.dropData(socket,persons[key],0.5); // set the default drop range to 1 meter for now
+            break;
+        default:
+            console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
+    }
+}
+
+
 exports.updatePersons = function(receivedPerson, socket){
 
     if(Object.keys(persons).length == 0){
@@ -199,7 +223,6 @@ exports.updatePersons = function(receivedPerson, socket){
                 person.currentlyTrackedBy = socket.id;
                 person.gesture = receivedPerson.gesture;
                 persons[person.uniquePersonID] = person;
-				
             }
         }
     }
@@ -222,16 +245,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[key].lastUpdated = new Date();
                         persons[key].gesture = receivedPerson.gesture;
                         if(persons[key].gesture != null){
-                            switch(persons[key].gesture){
-                                case "Grab":
-                                    console.log("GRAB gesture detected from person: " + key + "!");
-                                    break;
-                                case "Release":
-                                    console.log("RELEASE gesture detected from person: " + key + "!");
-                                    break;
-                                default:
-                                    console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
-                            }
+                           gestureHandler(key,persons[key].gesture,socket);
                         }
 
                         if(persons[key].ownedDeviceID != null){
@@ -239,7 +253,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                         }
-                        grabDataFromDataPoints(persons[key]); // try to grab data if any data is within range
+
                     }
                     catch(err){
                         console.log("Error updating person: " + err)
