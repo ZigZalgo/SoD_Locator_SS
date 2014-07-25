@@ -1,8 +1,8 @@
-var minorGridLineWidth = 10;
-var majorGridLineWidth = 50;
+var minorGridLineWidth;
+var majorGridLineWidth;
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
-var pixelsPerMeter = majorGridLineWidth;
+var pixelsPerMeter;
 var ROUND_RATIO  = 10;
 var unpaired_people = {};
 var uniqueDeviceIDToSocketID = {}
@@ -34,6 +34,25 @@ function showNormalStatus(status){
  *
  * */
 function drawGrid() {
+    $(location).attr('href');
+    //pure javascript
+    var pathname = window.location.pathname;
+    // if the url is at mobile page
+    if(pathname.slice(-6)=='mobile'){
+        var screenWidth=$(window).width();
+        var canvasHTML = '<canvas id="cnv" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
+            '<canvas id="cnvStationary" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
+            '<canvas id="cnvSensors" width="'+screenWidth+'" height="'+screenWidth+'"></canvas>'+
+            '<canvas id="cnvBG" width="'+screenWidth+'" height="'+screenWidth+'"></canvas>';
+        $('section#canvas').html(canvasHTML);
+        minorGridLineWidth = document.getElementById("cnv").width/80;
+        majorGridLineWidth = document.getElementById("cnv").width/16;
+        pixelsPerMeter = majorGridLineWidth;
+    }else{
+        minorGridLineWidth = document.getElementById("cnv").width/80;
+        majorGridLineWidth = document.getElementById("cnv").width/16;
+        pixelsPerMeter = majorGridLineWidth;
+    }
     var cnv = document.getElementById("cnvBG");
 
     var gridOptions = {
@@ -52,8 +71,7 @@ function drawGrid() {
 
 
     var color = '1e1e1e';
-    drawCoordinate(cnv,color,50,50,150);
-
+    drawCoordinate(cnv,color,majorGridLineWidth,majorGridLineWidth,majorGridLineWidth*3);
     return;
 }
 
@@ -180,7 +198,7 @@ function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
 function drawSensor(context,X,Y,index,angle,FOV){
     var sensorX = X; //get this from sensor list later on
     var sensorY = Y; //get this from sensor list later on
-    //console.log("X : "+sensorX+"Y: "+sensorY)
+//    /console.log("drawing sensor  ->  X : "+sensorX+"Y: "+sensorY)
     //draw circle for sensor on visualizer
     var angleForDrawing = 270 - angle;
     context.beginPath();
@@ -191,9 +209,9 @@ function drawSensor(context,X,Y,index,angle,FOV){
     context.fill();
     context.strokeStyle = '#292929';
     context.stroke();
-    context.font = "14px Arial";
+    context.font = minorGridLineWidth*2+'px Arial';
     context.fillStyle = '#3370d4';
-    context.fillText('K'+index,shiftXToGridOrigin(sensorX)+10,shiftYToGridOrigin(sensorY)-15);
+    context.fillText('K'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
 }
 
 function printPersonID(ID)
@@ -409,6 +427,7 @@ function updateContentWithObjects(){
                 // get the end point of the gradient
                 var endPointOfGradient = {X:shiftXToGridOrigin((rotatedGradientVector.X)/1000*pixelsPerMeter+sensorX),Z:shiftYToGridOrigin((rotatedGradientVector.Z)/1000*pixelsPerMeter+sensorY)}          // move the point to where it belongs in the canvas
                 //console.log('end point : ' + JSON.stringify(endPointOfGradient));
+                //console.log('->'  +shiftXToGridOrigin(sensorX)+'\t'+ shiftYToGridOrigin(sensorY)+'\t'+ endPointOfGradient.X+'\t'+endPointOfGradient.Z);
                 var grd = ctxSensors.createLinearGradient(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY), endPointOfGradient.X,endPointOfGradient.Z)//shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY) + (data[key].rangeInMM)/1000*pixelsPerMeter);
                 grd.addColorStop(0, 'rgba(51, 112, 212, 0.8)');
                 grd.addColorStop(1, 'rgba(51, 112, 212, 0.0)');
@@ -451,7 +470,7 @@ function updateContentWithObjects(){
             }
             ctx.fillStyle = "#2cd72A"; //green
             ctx.font = "12px Arial";
-            ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+10,shiftYToGridOrigin(zInMeters)+1);
+            ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
         });
 
     }
@@ -472,12 +491,12 @@ function updateContentWithObjects(){
                 var zInMeters = data[key].location.Z*majorGridLineWidth;
                 ctx.beginPath();
                 ctx.fillStyle = "#c82124"; //red
-                ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),10,0,2*Math.PI);
+                ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),minorGridLineWidth,0,2*Math.PI);
                 ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
                 ctx.fill();
                 if(data[key].pairingState == 'paired'){
                     ctx.strokeStyle = "#2cd72A";
-                    ctx.rect(shiftXToGridOrigin(xInMeters)-10,shiftYToGridOrigin(zInMeters)-10,20,20);
+                    ctx.rect(shiftXToGridOrigin(xInMeters)-minorGridLineWidth,shiftYToGridOrigin(zInMeters)-minorGridLineWidth,minorGridLineWidth*2,minorGridLineWidth*2);
                     ctx.stroke();
                     getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters);
                 }
@@ -490,8 +509,8 @@ function updateContentWithObjects(){
                     // Adding device name for paired person
                 }
                 ctx.fillStyle = "#c82124"; //red
-                ctx.font = "18px Arial";
-                ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+5,shiftYToGridOrigin(zInMeters)-5);
+                ctx.font = minorGridLineWidth*2+'px Arial';
+                ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+minorGridLineWidth/2,shiftYToGridOrigin(zInMeters)-minorGridLineWidth/2);
 
                 if(!jQuery.isEmptyObject(data[key].ID)){
                     htmlString += ('<tr>' +
@@ -646,5 +665,6 @@ var matrixTransformation = function(personLocation,angle){
 
 
 io.emit("registerWebClient", {});
-//setInterval(function() {updateCanvasWithPeople(); }, 200); //poll server for people list and display on canvas
-setInterval(function() {updateContentWithObjects(); }, 200); //poll server for sensors, people, and devices and display to the side
+$(document).ready(function(){
+    setInterval(function() {updateContentWithObjects(); }, 200); //poll server for people list and display on canvas
+})

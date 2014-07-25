@@ -245,7 +245,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[key].lastUpdated = new Date();
                         persons[key].gesture = receivedPerson.gesture;
                         if(persons[key].gesture != null){
-                           gestureHandler(key,persons[key].gesture,socket);
+                           gestureHandler(key,persons[key].gesture,socket);//handles the guesture
                         }
 
                         if(persons[key].ownedDeviceID != null){

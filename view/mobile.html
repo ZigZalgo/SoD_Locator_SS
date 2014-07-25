@@ -15,9 +15,32 @@
     <link rel="stylesheet" href="/style-mobile">
     <script src="/jquery"></script>
     <script src="/jquery-mobile"></script>
+    <script src="/overviewJS"></script>
+    <style>
+        #canvas{
+            position:relative;
+            margin-left: 0px;
+        }
+        #cnv{
+            position: relative; left: 0; top: 0; z-index: 10;
+        }
+        #cnvSensors{
+            position: absolute; left: 0; top: 0; z-index: 2;
+        }
 
+        #cnvStationary{
+            position: absolute; left: 0; top: 0; z-index: 5;
+        }
+
+        #cnvBG{
+            z-index:1;
+            background: #ffffff ;
+            position: absolute; left: 0; top: 0; ;
+        }
+        .ui-content{padding:0px !important;}
+
+    </style>
     <script>
-        var io=io.connect();
         // socket part
         io.on("connect", function(){
             io.emit("registerMobileWebClient", {});
@@ -33,12 +56,91 @@
                 $('#dropPersonID').val('0');
                 $('#dropRange').val('1');
             });
+
+            $( window ).on( "orientationchange", function( event ) {
+                $( "#orientation" ).text( "This device's orientaion " + event.orientation + " !" );
+            });
+
         })
+
+        /*$(window).bind("resize", function(){
+            var orientation = window.orientation;
+            var new_orientation = (orientation) ? 0 : 180 + orientation;
+            $('body').css({
+                "-webkit-transform": "rotate(" + new_orientation + "deg)"
+            });
+        });*/
     </script>
 
 </head>
 
-<body>
+<body onload="drawGrid();">
+<div data-role="page" id="canvas_page" data-theme="b">
+    <div data-role="panel" id="menu" data-position="left" data-display="reveal" data-theme="a">
+        <a href="#overview_page">Overview</a>
+    </div><!-- /panel -->
+    <div data-role="header" data-theme="b">
+        <h1>Canvas</h1>
+        <a href="#left-panel" data-theme="d" data-icon="arrow-r" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-icon-nodisc">Open left panel</a>
+        <a href="#overview_panel" data-theme="d" data-icon="arrow-l" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-icon-nodisc">Open right panel</a>
+    </div><!-- /header -->
+
+    <div data-role="content" data-theme="a">
+        <section id="canvas">
+
+        </section>
+
+    </div><!-- /content -->
+    <div data-role="panel" id="overview_panel" data-display="overlay" data-position="right" data-theme="c">
+        <div data-role="content" data-theme="a">
+        <section id="overview">
+            <form>
+                <!--<input type="text" id="message" /> <!--text form to send data to the server-->
+                <div id="contentHeader" >Overview</div> <!--This is where the data from the server is added-->
+
+                <fieldset id="clients">
+                    <legend> Clients </legend>
+                </fieldset>  <!--This is where the data from the server is added-->
+                <fieldset id="sensors" >
+                    <legend> Sensors </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+                <fieldset id="people">
+                    <legend> People </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+                <fieldset id="devices">
+                    <legend> Devices </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+
+                <fieldset id="dataPoints">
+                    <legend> dataPoints </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+
+
+            </form>
+        </section>
+        <a href="#" data-rel="close" data-role="button" data-mini="true" data-inline="true" data-icon="delete" data-iconpos="right">Close</a>
+    </div><!-- /panel -->
+
+    <div data-role="footer">
+        <h4>SOD - ASE 2014</h4>
+    </div><!-- /footer -->
+</div><!-- /page -->
+
+<div data-role="page" id="overview_page" data-theme="b">
+    <div data-role="header" data-theme="b">
+        <h1>Canvas</h1>
+    </div><!-- /header -->
+
+
+
+    </div><!-- /content -->
+
+    <div data-role="footer">
+        <h4>SOD - ASE 2014</h4>
+    </div><!-- /footer -->
+</div><!-- /page -->
+
+
 
 <!-- Start of first page -->
 <div data-role="page" id="foo" data-theme="b">

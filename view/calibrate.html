@@ -24,7 +24,7 @@
             }
 
             var xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(z>>>3)*(Math.tan(sensors[sid].FOV/2))
-            console.log(xInMM);
+            //console.log(xInMM);
             if(canvasID == "cnvSensorOne"){
                 if(sensorOnePoints.length < 2 && z > 0){
                     sensorOnePoints.push({X: xInMM, Y: y, Z: z >>> 3});
