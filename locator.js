@@ -244,6 +244,7 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[key].location.Z = receivedPerson.location.Z.toFixed(3);
                         persons[key].lastUpdated = new Date();
                         persons[key].gesture = receivedPerson.gesture;
+                        // handles the person's gesture.
                         if(persons[key].gesture != null){
                            gestureHandler(key,persons[key].gesture,socket);//handles the guesture
                         }
@@ -262,7 +263,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             delete persons[key];
                         }
                     }
-                    break;
+                    break; // whtat is this break for ??
                 }
                 // this person comes in with a new ID
                 else{
@@ -287,17 +288,9 @@ exports.updatePersons = function(receivedPerson, socket){
                                     console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
                                     persons[key].ID[receivedPerson.ID] = socket.id;
                                     persons[key].gesture = receivedPerson.gesture;
+                                    // handle the person's guesture
                                     if(persons[key].gesture != null){
-                                        switch(persons[key].gesture){
-                                            case "Grab":
-                                                console.log("GRAB gesture detected from person: " + key + "!");
-                                                break;
-                                            case "Release":
-                                                console.log("RELEASE gesture detected from person: " + key + "!");
-                                                break;
-                                            default:
-                                                console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
-                                        }
+                                        gestureHandler(key,persons[key].gesture,socket);//handles the guesture
                                     }
 									console.log('->-> Person ID list ('+Object.keys(persons[key].ID).length+') with details: '+JSON.stringify(persons[key].ID));
                                 }
@@ -313,23 +306,14 @@ exports.updatePersons = function(receivedPerson, socket){
                                     person.lastUpdated = new Date();
                                     person.currentlyTrackedBy = socket.id;
                                     person.gesture = receivedPerson.gesture;
-                                    if(person.gesture != null){
-                                        switch(person.gesture){
-                                            case "Grab":
-                                                console.log("GRAB gesture detected from person: " + key + "!");
-                                                break;
-                                            case "Release":
-                                                console.log("RELEASE gesture detected from person: " + key + "!");
-                                                break;
-                                            default:
-                                                console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
-                                        }
+                                    if(persons[key].gesture != null){
+                                        gestureHandler(key,persons[key].gesture,socket);//handles the guesture
                                     }
                                     persons[person.uniquePersonID] = person;
                                 }
                             }
                         }
-                    }
+                    } // end of "Come of new ID"
                 }
             }
         }
