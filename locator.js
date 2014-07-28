@@ -57,7 +57,7 @@ function isEmpty(str) {
 * **/
 function grabDataInRange(requestObject,targetObject){
     var distance,dataRange;
-    if(targetObject.data != undefined) {
+    if(targetObject.data != undefined && Object.keys(targetObject.data).length != 0) {
         // if there exists data in side of an object, grab all the data
         distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
         for (var dataKey in targetObject.data) {
@@ -67,11 +67,13 @@ function grabDataInRange(requestObject,targetObject){
                 if (requestObject.data[dataKey] == undefined && distance <= dataRange) {
                     // if the data is not exited in the requestObject.
                     requestObject.data[dataKey] = targetObject.data[dataKey];
-                    console.log('-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey]) + ' From targetobject: ' + JSON.stringify(targetObject));
+                    console.log('\t->-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey].name) + ' From targetobject');
                 }
             }
         }
-    }
+    }else{
+		console.log('\t->-> Ojbect grabbed '+'0 data from target.' );
+	}
 }
 //*
 // Request Object grab all the data from targetObject
@@ -82,7 +84,7 @@ function grabAllData(requestObject,targetObject){
         for (var dataKey in targetObject.data) {
             if(targetObject.data.hasOwnProperty(dataKey)) {
                 requestObject.data[dataKey] = targetObject.data[dataKey];
-                console.log('-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey]) + ' From targetobject: ' + JSON.stringify(targetObject));
+                console.log('\t->-> Object grabbed: ' + JSON.stringify(requestObject.data[dataKey].name) + ' From targetobject');
             }
         }
     }
@@ -95,27 +97,27 @@ function grabAllData(requestObject,targetObject){
  *
  * */
 exports.dropData = function(socket,requestObject,dropRange,fn){
-    console.log('drop data request from: '+ JSON.stringify(requestObject) + ' dropRange: '+ dropRange);
     var dataPointCounter = 0;
     var dataPointsLength = Object.keys(dataPoints).length;
     if(requestObject.data!=undefined){
         if(requestObject.location!=undefined && dropRange != undefined && Object.keys(requestObject.data).length != 0){
+		console.log('drop data request from: '+ JSON.stringify(requestObject) + ' dropRange: '+ dropRange);
             //var dropLocation = requestObject.location;
             for(var key in dataPoints) {
                 if(dataPoints.hasOwnProperty(key)){
                     // if reach the end of the dataPoints list
                         dataPointCounter ++;
-                        console.log('Current DP: ' + JSON.stringify(dataPoints[key]));
-                        console.log(dataPointCounter+ ' / '+ dataPointsLength);
+                        //console.log('Current DP: ' + JSON.stringify(dataPoints[key]));
+                        //console.log(dataPointCounter+ ' / '+ dataPointsLength);
                         var distance, dataPointDropRange;
                         dataPointDropRange = dataPoints[key].dropRange;              // get range of this point
-                        console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
+                        //console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
                         distance = util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
                         if (distance <= dataPointDropRange) {
                             grabAllData(dataPoints[key], requestObject);    //dump the data once and return.
                             console.log('-> Dumping data to data point: ' + dataPoints[key].ID + ' since the distance: ' + distance + ' within dropRange: ' + dropRange);
                             if (fn != undefined) {
-                                fn('dumping data to dataPoint ' + dataPoints[key].ID);
+                                fn('\t->-> dumping data to dataPoint ' + dataPoints[key].ID);
                             }
                             frontend.io.sockets.emit("refreshStationaryLayer", {}); // refresh the fronted layer
                             return;
@@ -123,14 +125,14 @@ exports.dropData = function(socket,requestObject,dropRange,fn){
                             var currentLocation = {X:requestObject.location.X,Y:requestObject.location.Y,Z:requestObject.location.Z};
                             locator.registerDataPoint(socket,{location:currentLocation,data:Object.keys(requestObject.data),dropRange:dropRange},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
                         }
-
                 }// end of hasOwnproperty
             }
             // if it is not in any dataPoints range
 
         }else{
+			console.log('\t->-> 0 ' + ' data has been dropped by object '+ requestObject );
             if(fn!=undefined){
-                fn('Dump data requestObject is not well defined.');
+				fn('Dump data requestObject is not well defined.');
             }
         }
     }else{
@@ -251,11 +253,11 @@ exports.updatePersons = function(receivedPerson, socket){
                             // check if the nearest person is within the threshold, merge the person into the existing person
                             if(nearestDistance < 0.4 || persons[key].ID[receivedPerson.ID]!=undefined){
                                 //nearestPerson.ID[receivedPerson.ID] = socket.id; // add the sensor ID to the the nearest person's ID
-								
+								locator.removeUntrackedPersonID(persons[key].ID, receivedPerson.ID,socket);
                                 // if the sensor hasn't been registered to the person's seen-by-sensor list
-                                if(persons[key].ID[receivedPerson.ID]==undefined && util.findKeyWithAttr(person[key].ID,socket.id)==null){
+                                if(persons[key].ID[receivedPerson.ID]==undefined ){
                                     console.log('person '+persons[key].uniquePersonID+' is now tracked by ' + socket.id);
-									locator.removeUntrackedPersonID(persons[key].ID, receivedPerson.ID,socket)
+									//locator.removeUntrackedPersonID(persons[key].ID, receivedPerson.ID,socket)
                     
                                     console.log('merging person to '+persons[key].uniquePersonID+' with nearestDistance : ' + nearestDistance);
                                     persons[key].ID[receivedPerson.ID] = socket.id;
