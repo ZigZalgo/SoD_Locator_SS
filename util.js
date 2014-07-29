@@ -447,6 +447,7 @@ exports.findWithAttrWeak = function (array, attr, query) {
 exports.findKeyWithAttr = function(obj,value){
 	if(typeof(obj) == "object"){
 		for(var key in obj){
+			//console.log('actually finding the key!!!!!!!!!!!!');
 			if(obj[key] == value){
 				return key;
 			}
