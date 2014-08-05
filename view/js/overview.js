@@ -39,7 +39,8 @@ function drawGrid() {
     var pathname = window.location.pathname;
     // if the url is at mobile page
     if(pathname.slice(-6)=='mobile'){
-        var screenWidth=$(window).width();
+        var screenWidth=Math.min($(window).height(),$(window).width()); // take the minimum of max value
+
         var canvasHTML = '<canvas id="cnv" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
             '<canvas id="cnvStationary" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
             '<canvas id="cnvSensors" width="'+screenWidth+'" height="'+screenWidth+'"></canvas>'+

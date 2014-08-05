@@ -17,9 +17,13 @@
     <script src="/jquery-mobile"></script>
     <script src="/overviewJS"></script>
     <style>
+        #canvas_page h1{
+            font-family: "Agency FB",DinRound, Sans-Serif;
+           font-weight:normal;text-shadow:2px 2px 5px grey;
+        }
         #canvas{
             position:relative;
-            margin-left: 0px;
+            margin:0px auto;
         }
         #cnv{
             position: relative; left: 0; top: 0; z-index: 10;
@@ -80,15 +84,17 @@
         <a href="#overview_page">Overview</a>
     </div><!-- /panel -->
     <div data-role="header" data-theme="b">
-        <h1>Canvas</h1>
+        <h1>OVERVIEW</h1>
         <a href="#left-panel" data-theme="d" data-icon="arrow-r" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-icon-nodisc">Open left panel</a>
         <a href="#overview_panel" data-theme="d" data-icon="arrow-l" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-icon-nodisc">Open right panel</a>
     </div><!-- /header -->
 
     <div data-role="content" data-theme="a">
-        <section id="canvas">
 
-        </section>
+        <div class="ui-grid-a">
+            <div class="ui-block-a"><section id="canvas"></section></div>
+            <div class="ui-block-b"><strong>I'm Block B</strong> and text inside will wrap</div>
+        </div><!-- /grid-a -->
 
     </div><!-- /content -->
     <div data-role="panel" id="overview_panel" data-display="overlay" data-position="right" data-theme="c">
