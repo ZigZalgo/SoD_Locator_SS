@@ -276,6 +276,22 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    socket.on('sendDictionaryToDevicesWithSelectionIncludingSelf', function (request, fn) {
+        for (var key in util.filterDevices(socket, request)) {
+            if (locator.devices.hasOwnProperty(key)) {
+                if(request.eventName==undefined){
+                    frontend.clients[key].emit("dictionary", {data: request.data})
+                }
+                else{
+                    frontend.clients[key].emit(request.eventName, {data: request.data})
+                }
+            }
+        }
+        if (fn != undefined) {
+            fn({status: "server: dictionary sent to devices with selection: " + request.selection});
+        }
+    });
+
     socket.on('sendEventToDevicesWithSelection', function(request, fn){
         for (var key in util.filterDevices(socket, request)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
