@@ -90,20 +90,20 @@ nav#mode_selection li{
     margin-left: 10px;
 }
 #cnv{
-    position: absolute; left: 0; top: 0; z-index: 10;
+    position: absolute; left: 0; top: 0; z-index: 10;margin:0px;min-height:300px;
 }
 #cnvSensors{
-    position: absolute; left: 0; top: 0; z-index: 2;
+    position: absolute; left: 0; top: 0; z-index: 2;margin:0px;
 }
 
 #cnvStationary{
-    position: absolute; left: 0; top: 0; z-index: 5;
+    position: absolute; left: 0; top: 0; z-index: 5;margin:0px;
 }
 
 #cnvBG{
     z-index:1;
     background: #ffffff ;
-    position: absolute; left: 0; top: 0; ;
+    position: absolute; left: 0; top: 0;margin:0px;
 }
 /* End canvas section*/
 

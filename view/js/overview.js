@@ -29,6 +29,7 @@ function showNormalStatus(status){
     $('.normal_status').fadeIn(600);
 }
 
+
 /*
  * Visualization
  *
@@ -39,12 +40,21 @@ function drawGrid() {
     var pathname = window.location.pathname;
     // if the url is at mobile page
     if(pathname.slice(-6)=='mobile'){
-        var screenWidth=Math.min($(window).height(),$(window).width()); // take the minimum of max value
+        //var screenWidth=Math.min($(window).height(),$(window).width()); // take the minimum of max value
+        /*var canvasHTML = '<canvas id="cnv" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
+            '<canvas id="cnvStationary" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
+            '<canvas id="cnvSensors" width="'+screenWidth+'" height="'+screenWidth+'"></canvas>'+
+            '<canvas id="cnvBG" width="'+screenWidth+'" height="'+screenWidth+'"></canvas>';*/
 
+
+
+        console.log('screenwidth : ' +window.innerWidth);
+       var  screenWidth = Math.min(window.innerWidth/2,800);
         var canvasHTML = '<canvas id="cnv" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
             '<canvas id="cnvStationary" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
             '<canvas id="cnvSensors" width="'+screenWidth+'" height="'+screenWidth+'"></canvas>'+
             '<canvas id="cnvBG" width="'+screenWidth+'" height="'+screenWidth+'"></canvas>';
+
         $('section#canvas').html(canvasHTML);
         minorGridLineWidth = document.getElementById("cnv").width/80;
         majorGridLineWidth = document.getElementById("cnv").width/16;
@@ -76,7 +86,23 @@ function drawGrid() {
     return;
 }
 
+$(window).resize(function(){
+    console.log('resize is hard with new width:' + window.innerWidth);
+    resizeCanvas();
 
+});
+
+function resizeCanvas(){
+    var canvas = $('#cnv,#cnvStationary,#cnvSensors,#cnvBG');
+    var newWidth = Math.min(window.innerWidth/2,800);
+    canvas.width(newWidth);
+    canvas.height(newWidth);
+    //resize the the math
+    minorGridLineWidth = document.getElementById("cnv").width/80;
+    majorGridLineWidth = document.getElementById("cnv").width/16;
+    pixelsPerMeter = majorGridLineWidth;
+    console.log('cnv new width:' + $('#cnv').width()+'\tcnvStationary width: '+$('#cnvStationary').width() );
+}
 /*
  * Draw Coordinates.
  *

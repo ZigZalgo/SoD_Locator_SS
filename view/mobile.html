@@ -24,22 +24,25 @@
         #canvas{
             position:relative;
             margin:0px auto;
+            min-height:300px;
         }
+        .canvasGrid{min-height:300px !important;}
+
         #cnv{
-            position: relative; left: 0; top: 0; z-index: 10;
+            position: relative; left: 0; top: 0; z-index: 10;margin:0px;
         }
         #cnvSensors{
-            position: absolute; left: 0; top: 0; z-index: 2;
+            position: absolute; left: 0; top: 0; z-index: 2;margin:0px;
         }
 
         #cnvStationary{
-            position: absolute; left: 0; top: 0; z-index: 5;
+            position: absolute; left: 0; top: 0; z-index: 5;margin:0px;
         }
 
         #cnvBG{
             z-index:1;
             background: #ffffff ;
-            position: absolute; left: 0; top: 0; ;
+            position: absolute; left: 0; top: 0; margin:0px;
         }
         .ui-content{padding:0px !important;}
 
@@ -50,6 +53,8 @@
             io.emit("registerMobileWebClient", {});
         });
         // END of socket
+
+
 
         $(document).ready(function() {
             $("#dropData").bind("click", function () {
@@ -91,7 +96,7 @@
 
     <div data-role="content" data-theme="a">
 
-        <div class="ui-grid-a">
+        <div class="ui-grid-a canvasGrid">
             <div class="ui-block-a"><section id="canvas"></section></div>
             <div class="ui-block-b"><strong>I'm Block B</strong> and text inside will wrap</div>
         </div><!-- /grid-a -->
