@@ -230,7 +230,7 @@ SODSensor.prototype = {
         try{
             var i;
             for(i =0;i<numPeople;i++) {
-                var person = {ID:'JS_'+ i.toFixed(0),location:{X:-0.2,Y:1,Z:1}};
+                var person = {ID:'JS_'+ i.toFixed(0),location:{X:-0.2,Y:1,Z:1}, trackingState: 1};
                 this.people.push(person);
             }
             this.socket.emit('personUpdate',this.people);
