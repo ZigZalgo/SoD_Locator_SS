@@ -371,36 +371,25 @@ exports.removeUntrackedPersonID = function(personIDList,receivedPersonID,sensorS
 		}
 	}
 }
-/*
-exports.removeUntrackedPersonID = function(uniquePersonID, personID){
-    for(var key in persons){
-        // for all the people other than this person
-        if(key != uniquePersonID){
-            // for all the keys in the person's ID list
-            for(var IDkey in persons[key].ID){
-                if(IDkey == personID){
-                    delete persons[key].ID[IDkey];
-                    console.log('removing '+personID+' from uniquePersonID: ' + uniquePersonID);
-                }
-            }
-        }
-        try{
-            locator.removeUntrackedPeople();
-        }
-        catch(err){
-            console.log("error while trying to remove untracked people after checking for duplicate instances of tracked people: \n" + err);
-        }
-    }
+
+exports.pairAndNotify = function(deviceSocketID, uniquePersonID){
+    devices[deviceSocketID].ownerID = uniquePersonID;
+    devices[deviceSocketID].pairingState = "paired";
+    frontend.clients[deviceSocketID].emit("devicePaired", {
+        name: devices[deviceSocketID].name,
+        ID: devices[deviceSocketID].uniqueDeviceID,
+        deviceType: devices[deviceSocketID].deviceType,
+        ownerID: uniquePersonID
+    });
 }
-*/
+
 exports.pairDevice = function(deviceSocketID, uniquePersonID,socket){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         "\nPerson ID: " + uniquePersonID;
 
     if(devices[deviceSocketID] != undefined && persons[uniquePersonID] != undefined){
         if(devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
-            devices[deviceSocketID].ownerID = uniquePersonID;
-            devices[deviceSocketID].pairingState = "paired";
+            locator.pairAndNotify(deviceSocketID, uniquePersonID);
             persons[uniquePersonID].ownedDeviceID = deviceSocketID;
             persons[uniquePersonID].pairingState = "paired";
             statusMsg += "\n Pairing successful.";
