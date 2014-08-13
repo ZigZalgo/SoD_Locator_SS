@@ -427,7 +427,7 @@ exports.printPersons = function(){
         }
     }
     catch(err){
-        console.log("Error printing people: " + err);
+        console.log("Error printing people: \t" + err);
         return false;
     }
 	console.log("///////////////////////////////////////////////////////////////");
@@ -440,18 +440,8 @@ exports.setPairingState = function(deviceSocketID){
     }
 }
 
-exports.unpairDevice = function(deviceSocketID){
-    if(devices[deviceSocketID] != undefined){
-        if(devices[deviceSocketID].ownerID != null){
-            try{
-                persons[devices[deviceSocketID].ownerID].pairingState = "unpaired";
-                persons[devices[deviceSocketID].ownerID].ownedDeviceID = null;
-                persons[devices[deviceSocketID].ownerID].orientation = null;
-            }
-            catch(err){
-                console.log(err + "\tError unpairing device > removing person associations > most likely person does not exist?")
-            }
-        }
+exports.unpairDeviceAndPerson = function(deviceSocketID, uniquePersonID){
+    if(devices[deviceSocketID] != undefined && devices[deviceSocketID] != null){
         try{
             devices[deviceSocketID].pairingState = "unpaired";
             devices[deviceSocketID].location.X = null;
@@ -460,11 +450,41 @@ exports.unpairDevice = function(deviceSocketID){
             devices[deviceSocketID].ownerID = null;
         }
         catch(err){
-            console.log(err + "\tError resetting pairing state of device, possibly device is not tracked anymore?")
+            console.log("Failed to unpair device, possibly device no longer tracked: \t" + err);
         }
+        try{
+            frontend.clients[deviceSocketID].emit("deviceUnpaired", {
+                name: devices[deviceSocketID].name,
+                ID: devices[deviceSocketID].uniqueDeviceID,
+                deviceType: devices[deviceSocketID].deviceType
+            });
+        }
+        catch(err){
+            console.log("Failed to emit unpaired event to device: \t" + err);
+        }
+    }
 
+    if(persons[uniquePersonID] != undefined && persons[uniquePersonID] != null){
+        try{
+            persons[uniquePersonID].pairingState = "unpaired";
+            persons[uniquePersonID].ownedDeviceID = null;
+            persons[uniquePersonID].orientation = null;
+        }
+        catch(err){
+            console.log("Failed to unpair person: \t" + err);
+        }
     }
 }
+
+exports.unpairDevice = function(deviceSocketID){
+    try{
+        locator.unpairDeviceAndPerson(deviceSocketID, devices[deviceSocketID].ownerID);
+    }
+    catch(err){
+        console.log("Failed trying to unpair device, perhaps device is no longer tracked: \t" + err)
+    }
+}
+
 exports.unpairAllDevices = function(){
     for(var key in devices){
         if(devices.hasOwnProperty(key)){
@@ -473,21 +493,21 @@ exports.unpairAllDevices = function(){
     }
 }
 
-exports.printDevices = function(){
-    console.log("devices tracked: ");
+exports.unpairPerson = function(uniquePersonID){
     try{
-        for(var key in devices){
-            if(devices.hasOwnProperty(key)){
-                console.log(JSON.stringify(devices));
-            }
-        }
+        locator.unpairDeviceAndPerson(persons[uniquePersonID].ownedDeviceID, uniquePersonID);
     }
     catch(err){
-        console.log("Error printing devices: " + err);
-        return false;
+        console.log("Failed trying to unpair person, perhaps person is no longer tracked: \t" + err);
     }
-    console.log("///////////////////////////////////////////////////////////////");
-    return true;
+}
+
+exports.unpairAllPeople = function(){
+    for(var key in persons){
+        if(persons.hasOwnProperty(key)){
+            locator.unpairPerson(key);
+        }
+    }
 }
 
 exports.updateDeviceOrientation = function(orientation, socket){
@@ -515,42 +535,6 @@ exports.updateDeviceOrientation = function(orientation, socket){
         }
     }
 }
-
-exports.unpairAllPeople = function(){
-    for(var key in persons){
-        if(persons.hasOwnProperty(key)){
-            locator.unpairPerson(key);
-        }
-
-    }
-}
-
-exports.unpairPerson = function(socketID){
-    try{
-        if(persons[socketID] != null){
-            console.log("Unpairing person with ID: " + socketID);
-            persons[socketID].pairingState = 'unpaired';
-            persons[socketID].ownedDeviceID = null;
-            persons[socketID].orientation = null;
-        }
-    }
-    catch(err){
-        console.log("Error unpairing persion: " + err);
-    }
-    if(persons[socketID].ownedDeviceID != null){
-        try{
-            devices[persons[socketID].ownedDeviceID].location = {X: null, Y: null, Z: null};
-            devices[persons[socketID].ownedDeviceID].pairingState = "unpaired";
-            devices[persons[socketID].ownedDeviceID].ownerID = null;
-        }
-        catch(err){
-            console.log(err + "\tError unpairing persons > removing device associations > most likely device does not exist?")
-        }
-
-    }
-}
-
-
 
 /*
 *   clean up the dataPoints that is disconnected
@@ -649,6 +633,7 @@ exports.updateDevice = function(socket,deviceInfo,fn){
         fn(devices[socket]);
     }
 }
+
 /*
 *  Update the data with new information
 * */
@@ -659,7 +644,6 @@ exports.updateData = function(ID,dataInfo,fn){
         }
     }
 }
-
 
 /*
 * Registering data with data info
@@ -679,8 +663,6 @@ exports.registerData = function (dataInfo,fn){
         console.log('Unable to register data due to: '+ err);
     }
 }
-
-
 
  /*
 *   Registering dataPoint with dataPoint info
@@ -740,24 +722,23 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length});
         }
 
-
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
         device.deviceType = deviceInfo.deviceType;
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
         device.deviceIP = socketIP;
-        // for station
+        // for stationary layer refreshes
         if(deviceInfo.stationary == true){
             device.stationary = deviceInfo.stationary;
             device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
+
         // JSclient may register deivce with location as well.
         if(deviceInfo.location!=undefined){
             device.location = {X: deviceInfo.location.X, Y: deviceInfo.location.Y, Z: deviceInfo.location.Z}
         }
-
 
         devices[socket.id] = device; // officially register the device to locator(server)
         console.log("Registering device: " + JSON.stringify(device));
@@ -960,6 +941,7 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
 
     return filterDeviceListByRange(Object.keys(listDevices).length-1, {});
 };
+
 /*
 * get all the devices that is been paried
 * **/
@@ -999,3 +981,19 @@ exports.getDeviceByID = function (ID){
     }
 }
 
+exports.printDevices = function(){
+    console.log("devices tracked: ");
+    try{
+        for(var key in devices){
+            if(devices.hasOwnProperty(key)){
+                console.log(JSON.stringify(devices));
+            }
+        }
+    }
+    catch(err){
+        console.log("Error printing devices: " + err);
+        return false;
+    }
+    console.log("///////////////////////////////////////////////////////////////");
+    return true;
+}
