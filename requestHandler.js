@@ -337,7 +337,7 @@ exports.handleRequest = function (socket) {
         if (persons != null) {
             locator.removeIDsNoLongerTracked(socket, persons);
 			try{
-				locator.removeUntrackedPeople();
+				locator.removeUntrackedPeople(1000);
 			}
 			catch(err){
 				console.log("error trying to remove untracked people: " + err);

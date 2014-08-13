@@ -334,16 +334,24 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 
 
 // Remove all the people doesn have ID in it
-exports.removeUntrackedPeople = function(){
+exports.removeUntrackedPeople = function(timeOutInMS){
 	var now = new Date();
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
-			console.log('-> now: '+now.getTime()/1000);
-			console.log('-> lastUpdated: '+ persons[key].lastUpdated.getTime()/1000);
-			console.log('-> difference: '+ (now.getTime()-persons[key].lastUpdated)/1000);
-            if(Object.keys(persons[key].ID).length == 0 && now.getSeconds()-persons[key].lastUpdated.getSeconds() > 1 ){
-				console.log('-> Time over 3 seconds delete person ' + persons[key].uniquePersonID);
-                delete persons[key];
+			console.log('-> now: '+now.getTime());
+			console.log('-> lastUpdated: '+ persons[key].lastUpdated.getTime());
+			console.log('-> difference: '+ (now.getTime()-persons[key].lastUpdated));
+            if(Object.keys(persons[key].ID).length == 0 && (now.getTime()-persons[key].lastUpdated) > timeOutInMS ){
+				console.log('-> Timed out (' + timeOutInMS + ' ms), deleting person ' + persons[key].uniquePersonID);
+                //could refactor using promises or callback
+                if(persons[key].ownedDeviceID != null){
+                    devices[persons[key].ownedDeviceID].ownerID = null;
+                    devices[persons[key].ownedDeviceID].pairingState = "unpaired";
+                    delete persons[key];
+                }
+                else{
+                    delete persons[key];
+                }
             }
         }
     }
@@ -602,7 +610,7 @@ exports.cleanUpSensor = function(socketID){
                     if(persons[key].ID[IDkey] == socketID){
                         delete persons[key].ID[IDkey];
                         if(counter == 0){
-                            locator.removeUntrackedPeople();
+                            locator.removeUntrackedPeople(0);
                         }
                     }
                 }
@@ -1001,3 +1009,4 @@ exports.getDeviceByID = function (ID){
         console.log('Error trying to get single device with ID(' + ID + '): ' + err);
     }
 }
+
