@@ -489,15 +489,17 @@ function updateContentWithObjects(){
     function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
         var deviceNameString;
         io.emit('getDevicesWithSelection',{selection:['single'+deviceID]},function(data){
-            console.log('got device: '+data[Object.keys(data)].name.length);
-            if(data[Object.keys(data)].name.length>=5){
-                deviceNameString = data[Object.keys(data)].name.substring(0, 4)+'...';
-            }else{
-                deviceNameString = data[Object.keys(data)].name;
+            if(Object.keys(data).length>=0){
+                console.log('got device: '+data[Object.keys(data)].name.length);
+                if(data[Object.keys(data)].name.length>=5){
+                    deviceNameString = data[Object.keys(data)].name.substring(0, 4)+'...';
+                }else{
+                    deviceNameString = data[Object.keys(data)].name;
+                }
+                ctx.fillStyle = "#2cd72A"; //green
+                ctx.font = "12px Arial";
+                ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
             }
-            ctx.fillStyle = "#2cd72A"; //green
-            ctx.font = "12px Arial";
-            ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
         });
 
     }
