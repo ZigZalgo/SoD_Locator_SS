@@ -772,7 +772,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
 // TODO: implement!
 // TODO: test!
 exports.getDevicesInView = function(observerSocketID, devicesInFront){
-    //console.log("devicesInFront: " + JSON.stringify(devicesInFront));
+    console.log("devicesInFront: " + JSON.stringify(devicesInFront));
 	// TODO: test
     //console.log(devices[observerSocketID]);
 	//var returnDevices = {};
@@ -842,9 +842,16 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     //(CB - Should we throw an exception here? Rather then just returning an empty list?)
     try{
         if (observer.location == null || observer.orientation == null)
-             return returnDevices;
-         if (observer.FOV == 0.0)
-             return returnDevices;
+            return returnDevices;
+        if (observer.FOV == 0.0)
+            return returnDevices;
+        if (observer.FOV == 360.0){
+            return Object.keys(deviceList).filter(function(key){
+                if(deviceList[key] != observer && deviceList[key].location != undefined){
+                    return true;
+                }
+            })
+        }
     }
     catch(err){
         console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
@@ -855,8 +862,8 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     try{
         //get the angle to sens
         var angleToSensor =util.getPersonOrientation(observer.location.X,observer.location.Z);
-        var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ 15);
-        var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- 15);
+        var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ (observer.FOV/2));
+        var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- (observer.FOV/2));
 
         //console.log("Left FOV = " + leftFieldOfView)
         //console.log("Right FOV = " + rightFieldOfView)
