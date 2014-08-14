@@ -53,6 +53,14 @@
         })
 
 
+        $('#sampleClients_flip').on('mouseover',function(){
+            $('#sampleClients_list').fadeIn('100');
+        });
+        $('#sampleClients_flip').on('mouseleave',function(){
+            $('#sampleClients_list').fadeOut('100');
+        });
+
+
         // clear the points for sensor one
         $('#clear_master_points').click(function(){
             $('input[name=master_point1X]').val('');
@@ -108,7 +116,13 @@
                 <li id="overview_flip">Overview</li>
                 <li id="calibration_flip">Calibration Mode</li>
                 <li id="dataManage_flip">Data Management</li>
-                <li>More Pages2</li>
+                <li id="sampleClients_flip">Sample Clients
+                <ul id="sampleClients_list" style="display:none;">
+                    <li><a href="/JSDeviceClient" target="_blank">Device Client</a></li>
+                    <li><a href="/JSSensorClient" target="_blank">Sensor Client</a></li>
+                    <li><a href="/JSDataPointClient" target="_blank">DataPoints Client</a></li>
+                </ul>
+                </li>
             </ul>
         </nav>
         <section id="calibration_section">
