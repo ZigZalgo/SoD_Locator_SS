@@ -126,6 +126,22 @@ exports.handleRequest = function (socket) {
         //not checking for fn(callback), since adding a callback here would be costly
         locator.updateDeviceOrientation(request.orientation, socket);
     });
+
+    socket.on('updateObjectLocation', function (request) {
+        //not checking for fn(callback), since adding a callback here would be costly
+        switch(request.objectType){
+            case 'device':
+                console.log('-> update device Location event received with request' +JSON.stringify(request));
+                locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].location = request.newLocation;
+                console.log('ID: '+ locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].uniqueDeviceID+ ' -> ' +JSON.stringify(locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].location));
+                break;
+            case 'dataPoint':
+                console.log('-> update dataPoint location event received with request' +JSON.stringify(request));
+                break;
+            default:
+                console.log('-> Wrong type for udpating location');
+        }
+    });
     socket.on('updateDeviceInfo', function (deviceInfo, fn) {
         locator.updateDevice(socket.id,deviceInfo,fn);
     });

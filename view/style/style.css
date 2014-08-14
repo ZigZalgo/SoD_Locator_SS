@@ -117,7 +117,7 @@ nav#mode_selection li{
 }
 
 #cnvStationary{
-    position: absolute; left: 0; top: 0; z-index: 5;margin:0px;
+    position: absolute; left: 0; top: 0; z-index: 11;margin:0px;
 }
 
 #cnvBG{

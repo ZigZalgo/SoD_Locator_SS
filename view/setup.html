@@ -17,6 +17,8 @@
 
 
     <script src="/dataJS"></script>
+    <script src="/kinetic"> </script>
+
 <script src = "/jquery"> </script>
 <script src="/socket.io/socket.io.js"></script>
 <link href="/style" rel="stylesheet"  />
@@ -103,7 +105,6 @@
 </script>
 <script src="/overviewJS"></script>
 <script src="/calibrateJS"></script>
-
 
 </head>
 <body onload="drawGrid(); refreshSensors();fileList();">
@@ -203,8 +204,8 @@
 
     </section>
     <section id="canvas">
+        <div id="cnvStationary"></div>
         <canvas id="cnv" width="800" height="800" ></canvas>
-        <canvas id="cnvStationary" width="800" height="800" ></canvas>
         <canvas id="cnvSensors" width="800" height="800"></canvas>
         <canvas id="cnvBG" width="800" height="800"></canvas>
     </section>

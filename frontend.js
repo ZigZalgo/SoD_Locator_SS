@@ -51,6 +51,10 @@ app.get('/jquery', function (req, res) {
     res.sendfile(__dirname + '/view/js/jquery-1.11.1.min.js');
 });
 
+app.get('/kinetic', function (req, res) {
+    res.sendfile(__dirname + '/view/js/kinetic-v5.1.0.min.js');
+});
+
 app.get('/jquery-mobile', function (req, res) {
     res.sendfile(__dirname + '/view/js/jquery.mobile-1.4.3.min.js');
 });

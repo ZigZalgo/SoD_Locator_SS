@@ -255,34 +255,6 @@ function printPersonID(ID)
 }
 
 
-/**
- * Draw Stationary Device
- *
- * */
-function drawStationaryDevice(context, X, Z, width, height, ID, orientation, FOV){
-    var xInMeters = X*pixelsPerMeter;
-    var zInMeters = Z*pixelsPerMeter;
-    context.beginPath();
-    context.rect(shiftXToGridOrigin(xInMeters) - (width/2), shiftYToGridOrigin(zInMeters) - (height/2), width, height);
-    context.fillStyle = "rgba(0, 255, 0, 0.7)";
-    context.fill();
-
-    function getDeviceOrientation(deviceX,deviceZ){
-        var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
-        var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
-        return returnDegree;
-    }
-
-    if(orientation != undefined)
-    {
-        drawView(context, xInMeters, zInMeters, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
-    }
-
-    context.fillStyle = "rgba(0, 255, 0, 1.0)"; //
-    context.font = "18px Arial";
-    context.fillText(ID,shiftXToGridOrigin(xInMeters)+(width/2),shiftYToGridOrigin(zInMeters)-(height/2));
-}
-
 
 /*
  * Function that check if a string is empty
@@ -309,10 +281,11 @@ function getDataPath(object) {
 
 
 
+
 function drawDataPoint(ctx,x,z,data){
     console.log('drawing data point X: ' + x + ' Y: ' + z + ' radius: ' + data.range);
     var radius = data.range * pixelsPerMeter;
-    ctx.fillStyle = "#4D4D4D";
+    ctx.fillStyle = "#2CCC72";
     ctx.beginPath();
     ctx.arc(x, z, radius, 0, 2 * Math.PI);
     ctx.fill();
@@ -324,14 +297,121 @@ function drawDataPoint(ctx,x,z,data){
     ctx.fillText(data.ID, x + radius * 0.6, z - radius * 0.6);
 }
 
+
+/**
+ * Draw Stationary Device
+ *
+ * */
+function drawStationaryDevice(ID,X, Z, width, height, ID, orientation, FOV,layer){
+
+    console.log('width: '+ width + ' && height: ' + height);
+   /* var stationaryDevice = new Kinetic.Rect({
+        x: shiftXToGridOrigin(X*pixelsPerMeter) - (width/2),
+        y: shiftXToGridOrigin(Z*pixelsPerMeter) - (height/2),
+        width: width,
+        height: height,
+        fill: 'rgba(0, 255, 0, 0.7)',
+        //stroke: 'black',
+        //strokeWidth: 4,
+        draggable: true
+    });*/
+
+    var stationaryDevice = new Kinetic.Shape({
+        sceneFunc: function(context) {
+            context.beginPath();
+            context.rect(shiftXToGridOrigin(X*pixelsPerMeter) - (width/2), shiftYToGridOrigin(Z*pixelsPerMeter) - (height/2), width, height);
+            context.fillStrokeShape(this);
+            //context.fillStyle = "rgba(0, 255, 0, 0.7)";
+            //context.fill();
+
+            function getDeviceOrientation(deviceX,deviceZ){
+                var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
+                var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+                return returnDegree;
+            }
+
+            drawView(context, X*pixelsPerMeter, Z*pixelsPerMeter, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
+            if(orientation != undefined)
+            {
+                //drawView(context, X*pixelsPerMeter, Z*pixelsPerMeter, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
+            }
+
+            //context.fillStyle = "rgba(0, 255, 0, 1.0)"; //
+            //context.font = "18px Arial";
+            context.fillText(ID,shiftXToGridOrigin(X*pixelsPerMeter)+(width/2),shiftYToGridOrigin(Z*pixelsPerMeter)-(height/2));
+            context.fillStrokeShape(this);
+        },
+        fill: 'rgba(0, 255, 0, 1.0)',
+        opacity: 0.5,
+        //stroke: 'black',
+        //strokeWidth: 4,
+        draggable: true
+    });
+
+    stationaryDevice.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+        this.fill('#31CC00');
+        this.stroke('black');
+        this.strokeWidth('2');
+        layer.draw();
+    });
+    stationaryDevice.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+        this.fill('rgba(0, 255, 0, 1.0)');
+        this.stroke('');
+        this.strokeWidth('0');
+        //this.opacity('rgba(0, 255, 0, 1.0)');
+        layer.draw();
+    });
+
+    stationaryDevice.on('dragstart',function(){
+        //console.log('dragged ' + ID+' -> '+ this.getPosition().x+','+this.getPosition().y);
+    });
+    stationaryDevice.on('dragend',function(){
+        //console.log('dropped ' + ID +' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
+        io.emit('updateObjectLocation',{ID:ID,newLocation:{X:this.getPosition().x/pixelsPerMeter,Y:0,Z:this.getPosition().y/pixelsPerMeter},objectType:'device'});
+    });
+
+    layer.add(stationaryDevice);
+
+    /*context.beginPath();
+    context.rect(shiftXToGridOrigin(xInMeters) - (width/2), shiftYToGridOrigin(zInMeters) - (height/2), width, height);
+    context.fillStyle = "rgba(0, 255, 0, 0.7)";
+    context.fill();
+
+    function getDeviceOrientation(deviceX,deviceZ){
+        var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
+        var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+        return returnDegree;
+    }
+
+    if(orientation != undefined)
+    {
+        drawView(context, xInMeters, zInMeters, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
+    }
+
+    context.fillStyle = "rgba(0, 255, 0, 1.0)"; //
+    context.font = "18px Arial";
+    context.fillText(ID,shiftXToGridOrigin(xInMeters)+(width/2),shiftYToGridOrigin(zInMeters)-(height/2));
+     */
+
+}
+
 /**
  * Stationary Only updates position when this is called
  *
  * */
 function refreshStationaryLayer() {
-    var c = document.getElementById("cnvStationary");
-    var ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height);
+   // var c = document.getElementById("cnvStationary");
+
+    console.log('-> Alright , lets do this!');
+
+    var stage = new Kinetic.Stage({
+        container: 'cnvStationary',
+        width: 800,
+        height: 800
+    });
+    var layer = new Kinetic.Layer();
 
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function (data) {
         for (var key in data) {
@@ -340,13 +420,27 @@ function refreshStationaryLayer() {
                     //console.log("X:" + data[key].location.X)
                     //console.log("Y:" + data[key].location.Y)
                     //console.log("Z:" + data[key].location.Z)
-                    drawStationaryDevice(document.getElementById('cnvStationary').getContext('2d'),
+                    drawStationaryDevice(data.uniqueDeviceID,
                         data[key].location.X, data[key].location.Z, data[key].width / 1000 * pixelsPerMeter,
-                        data[key].height / 1000 * pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV);
+                            data[key].height / 1000 * pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV,layer)
                 }
             }
         }
+        stage.add(layer);
     });
+
+
+    // add cursor styling
+
+
+
+
+
+    /*
+    var ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, c.width, c.height);
+
+
 
     // Update dataPoitns on visualizer
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
@@ -388,7 +482,7 @@ function refreshStationaryLayer() {
             '<th style="">dropRange</th>' +
             '</tr>' + htmlString + '</table>')
     })
-
+    */
 }
 
 
