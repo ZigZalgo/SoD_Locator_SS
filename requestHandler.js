@@ -127,6 +127,7 @@ exports.handleRequest = function (socket) {
         locator.updateDeviceOrientation(request.orientation, socket);
     });
 
+    // update device or data Point location
     socket.on('updateObjectLocation', function (request) {
         //not checking for fn(callback), since adding a callback here would be costly
         switch(request.objectType){

@@ -282,27 +282,12 @@ function getDataPath(object) {
 
 
 
-function drawDataPoint(ctx,x,z,data){
-    console.log('drawing data point X: ' + x + ' Y: ' + z + ' radius: ' + data.range);
-    var radius = data.range * pixelsPerMeter;
-    ctx.fillStyle = "#2CCC72";
-    ctx.beginPath();
-    ctx.arc(x, z, radius, 0, 2 * Math.PI);
-    ctx.fill();
-
-    ctx.globalAlpha = 1;
-
-    ctx.fillStyle = "#4D4D4D";
-    ctx.font = "bold 14px Consolas";
-    ctx.fillText(data.ID, x + radius * 0.6, z - radius * 0.6);
-}
-
 
 /**
  * Draw Stationary Device
  *
  * */
-function drawStationaryDevice(ID,X, Z, width, height, ID, orientation, FOV,layer){
+function drawStationaryDevice(ID,originLocation,X, Z, width, height, ID, orientation, FOV,layer){
 
     console.log('width: '+ width + ' && height: ' + height);
    /* var stationaryDevice = new Kinetic.Rect({
@@ -318,23 +303,23 @@ function drawStationaryDevice(ID,X, Z, width, height, ID, orientation, FOV,layer
 
     var stationaryDevice = new Kinetic.Shape({
         sceneFunc: function(context) {
-            context.beginPath();
-            context.rect(shiftXToGridOrigin(X*pixelsPerMeter) - (width/2), shiftYToGridOrigin(Z*pixelsPerMeter) - (height/2), width, height);
-            context.fillStrokeShape(this);
             //context.fillStyle = "rgba(0, 255, 0, 0.7)";
             //context.fill();
+            context.beginPath();
 
             function getDeviceOrientation(deviceX,deviceZ){
                 var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
                 var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
                 return returnDegree;
             }
-
-            drawView(context, X*pixelsPerMeter, Z*pixelsPerMeter, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
             if(orientation != undefined)
             {
+                drawView(context, X*pixelsPerMeter, Z*pixelsPerMeter, 2000, "#B8B8B8",orientation + getDeviceOrientation(X,Z) + 90, FOV);
                 //drawView(context, X*pixelsPerMeter, Z*pixelsPerMeter, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
             }
+
+            context.rect(shiftXToGridOrigin(X*pixelsPerMeter) - (width/2), shiftYToGridOrigin(Z*pixelsPerMeter) - (height/2), width, height);
+            context.fillStrokeShape(this);
 
             //context.fillStyle = "rgba(0, 255, 0, 1.0)"; //
             //context.font = "18px Arial";
@@ -342,7 +327,7 @@ function drawStationaryDevice(ID,X, Z, width, height, ID, orientation, FOV,layer
             context.fillStrokeShape(this);
         },
         fill: 'rgba(0, 255, 0, 1.0)',
-        opacity: 0.5,
+        opacity: 0.3,
         //stroke: 'black',
         //strokeWidth: 4,
         draggable: true
@@ -359,44 +344,104 @@ function drawStationaryDevice(ID,X, Z, width, height, ID, orientation, FOV,layer
         document.body.style.cursor = 'default';
         this.fill('rgba(0, 255, 0, 1.0)');
         this.stroke('');
+
+        this.strokeWidth('0');
+        this.opacity('0.3');
+        layer.draw();
+    });
+
+    var directionVector = {X:0,Y:0,Z:0};
+    var movedVector={X:0,Y:0,Z:0};
+    stationaryDevice.on('dragstart',function(){
+        console.log('dragged ' + ID+' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
+        movedVector = {X:this.getPosition().x/pixelsPerMeter,Y:0,Z:this.getPosition().y/pixelsPerMeter};
+
+    });
+    stationaryDevice.on('dragend',function(){
+        console.log('dropped ' + ID +' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
+        movedVector.X -= this.getPosition().x/pixelsPerMeter;
+        movedVector.Z -= this.getPosition().y/pixelsPerMeter;
+        directionVector.X += -(movedVector.X);
+        directionVector.Z += -(movedVector.Z);
+        if(Math.abs(movedVector.X)>=0.1|| Math.abs(movedVector.Z)>=0.1){
+            console.log('directionVector : ' + JSON.stringify(directionVector));
+            io.emit('updateObjectLocation',{ID:ID,newLocation:{X:originLocation.X+directionVector.X,Y:0,Z:originLocation.Z+directionVector.Z},objectType:'device'});
+        }
+    });
+    layer.add(stationaryDevice);
+}
+
+
+
+/* The function draws one data within a dataPoint*/
+function drawData(ctx,x,z,data){
+    console.log('drawing data point X: ' + x + ' Y: ' + z + ' radius: ' + data.range);
+    var radius = data.range * pixelsPerMeter;
+    ctx.fillStyle = "#2CCC72";
+    ctx.beginPath();
+    ctx.arc(x, z, radius, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = "#4D4D4D";
+    ctx.font = "bold 14px Consolas";
+    ctx.fillText(data.ID, x + radius * 0.6, z - radius * 0.6);
+}
+/* */
+function drawDataPoint(data,layer){
+    var x = shiftXToGridOrigin(data.location.X * pixelsPerMeter);
+    var z = shiftXToGridOrigin(data.location.Z * pixelsPerMeter);
+    var dataPointGroup = new Kinetic.Group({
+        x: x,
+        y: z,
+        rotation: 0
+    });
+    console.log();
+    var dataDropRange = new Kinetic.Shape({
+        sceneFunc: function(ctx){
+            //console.log(ctx);
+            ctx.beginPath();
+            ctx.arc(x, z, data.dropRange * pixelsPerMeter, 0, 2 * Math.PI,false);
+            ctx.fillStrokeShape(this);
+        },
+        fill: '#CCC',
+        opacity: 0.5,
+        draggable: true
+    })
+    dataPointGroup.add(dataDropRange);
+
+    /*dataPointGroup.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+        this.fill('#31CC00');
+        this.stroke('black');
+        this.strokeWidth('2');
+        layer.draw();
+    });
+    dataPointGroup.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+        this.fill('rgba(0, 255, 0, 1.0)');
+        this.stroke('');
         this.strokeWidth('0');
         //this.opacity('rgba(0, 255, 0, 1.0)');
         layer.draw();
     });
+*/
 
-    stationaryDevice.on('dragstart',function(){
-        //console.log('dragged ' + ID+' -> '+ this.getPosition().x+','+this.getPosition().y);
-    });
-    stationaryDevice.on('dragend',function(){
-        //console.log('dropped ' + ID +' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
-        io.emit('updateObjectLocation',{ID:ID,newLocation:{X:this.getPosition().x/pixelsPerMeter,Y:0,Z:this.getPosition().y/pixelsPerMeter},objectType:'device'});
-    });
+    //radius = data[key].range * pixelsPerMeter
+    //console.log('drawing: '+ data.ID);
 
-    layer.add(stationaryDevice);
 
-    /*context.beginPath();
-    context.rect(shiftXToGridOrigin(xInMeters) - (width/2), shiftYToGridOrigin(zInMeters) - (height/2), width, height);
-    context.fillStyle = "rgba(0, 255, 0, 0.7)";
-    context.fill();
 
-    function getDeviceOrientation(deviceX,deviceZ){
-        var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
-        var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
-        return returnDegree;
-    }
-
-    if(orientation != undefined)
-    {
-        drawView(context, xInMeters, zInMeters, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
-    }
-
-    context.fillStyle = "rgba(0, 255, 0, 1.0)"; //
-    context.font = "18px Arial";
-    context.fillText(ID,shiftXToGridOrigin(xInMeters)+(width/2),shiftYToGridOrigin(zInMeters)-(height/2));
-     */
-
+    //ctx.globalAlpha = 0.3;
+    /*for(var dataKey in data.data){
+        if(data.data.hasOwnProperty(dataKey)) {
+            //console.log(JSON.stringify(data[key].data[dataKey].range));
+            drawData(ctx, x, z, data.data[dataKey])
+        }
+    }*/
+    layer.add(dataPointGroup);
 }
-
 /**
  * Stationary Only updates position when this is called
  *
@@ -420,7 +465,7 @@ function refreshStationaryLayer() {
                     //console.log("X:" + data[key].location.X)
                     //console.log("Y:" + data[key].location.Y)
                     //console.log("Z:" + data[key].location.Z)
-                    drawStationaryDevice(data.uniqueDeviceID,
+                    drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
                         data[key].location.X, data[key].location.Z, data[key].width / 1000 * pixelsPerMeter,
                             data[key].height / 1000 * pixelsPerMeter, data[key].uniqueDeviceID, data[key].orientation, data[key].FOV,layer)
                 }
@@ -428,10 +473,30 @@ function refreshStationaryLayer() {
         }
         stage.add(layer);
     });
+    // drawing data points
+    io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
+        //var c = document.getElementById("cnv");
+        //console.log(JSON.stringify(data));
+        //var ctx = c.getContext("2d");
+        var x, z, radius, htmlString = "";
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                drawDataPoint(data[key],layer);
+                htmlString += '<tr ><td>' + data[key].ID + '</td><td>X:' + data[key].location.X.toFixed(3) + ' Y:' + data[key].location.Y + ' Z:' + data[key].location.Z.toFixed(3) + '</td>' +
+                    '<td>' + getDataPath(data[key]) + '</td><td>' + data[key].dropRange + '</td>' + ' </tr>';
+            }
+        }
+        stage.add(layer);
 
+        //updateDataPointsInOverview(htmlString);
+        $('#dataPoints').html('<legend>Data Points</legend><table style="width:100%"><tr>' +
+            '<th style="">Data Point ID</th>' +
+            '<th>location</th>' +
+            '<th style="">dataPath</th>' +
+            '<th style="">dropRange</th>' +
+            '</tr>' + htmlString + '</table>')
 
-    // add cursor styling
-
+    })
 
 
 
@@ -439,8 +504,6 @@ function refreshStationaryLayer() {
     /*
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height);
-
-
 
     // Update dataPoitns on visualizer
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
@@ -717,7 +780,7 @@ function updateContentWithObjects(){
                 }
                 else{
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
-                        '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
+                        '<td>('+data[key].location.X.toFixed(3)+', '+data[key].location.Y+', '+data[key].location.Z.toFixed(3)+')</td>'+
                         '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>disabled</td>'+
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
