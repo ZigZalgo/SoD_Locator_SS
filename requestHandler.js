@@ -128,7 +128,7 @@ exports.handleRequest = function (socket) {
     });
 
     // update device or data Point location
-    socket.on('updateObjectLocation', function (request) {
+    socket.on('updateObjectLocation', function (request,fn) {
         //not checking for fn(callback), since adding a callback here would be costly
         switch(request.objectType){
             case 'device':
@@ -137,7 +137,14 @@ exports.handleRequest = function (socket) {
                 console.log('ID: '+ locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].uniqueDeviceID+ ' -> ' +JSON.stringify(locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].location));
                 break;
             case 'dataPoint':
-                console.log('-> update dataPoint location event received with request' +JSON.stringify(request));
+                locator.dataPoints[request.ID].location = request.newLocation;
+                console.log('-> update dataPoints Location event received with request' +JSON.stringify(request));
+                console.log('\t->->ID: '+ locator.dataPoints[request.ID].ID+ ' -> ' +JSON.stringify(locator.dataPoints[request.ID].location));
+                console.log(fn);
+                if(fn!=undefined){
+                    fn();
+                }
+                //console.log('-> update dataPoint location event received with request' +JSON.stringify(request));
                 break;
             default:
                 console.log('-> Wrong type for udpating location');

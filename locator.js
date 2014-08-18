@@ -981,6 +981,30 @@ exports.getDeviceByID = function (ID){
     }
 }
 
+exports.getDataPointByID = function (ID){
+    try{
+        var container = {};
+
+        if(ID != undefined){
+            if(devices[ID] != undefined){
+                container[ID] = devices[ID];
+                return container;
+            }
+            else{
+                //no device with that ID
+                return {};
+            }
+        }
+        else{
+            //ID undefined
+            return {};
+        }
+    }
+    catch(err){
+        console.log('Error trying to get single device with ID(' + ID + '): ' + err);
+    }
+}
+
 exports.printDevices = function(){
     console.log("devices tracked: ");
     try{

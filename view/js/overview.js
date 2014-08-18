@@ -352,7 +352,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, ID, orienta
 
     var directionVector = {X:0,Y:0,Z:0};
     var movedVector={X:0,Y:0,Z:0};
-    stationaryDevice.on('dragstart',function(){
+                                                    stationaryDevice.on('dragstart',function(){
         console.log('dragged ' + ID+' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
         movedVector = {X:this.getPosition().x/pixelsPerMeter,Y:0,Z:this.getPosition().y/pixelsPerMeter};
 
@@ -395,10 +395,92 @@ function drawDataPoint(data,layer){
     var dataPointGroup = new Kinetic.Group({
         x: x,
         y: z,
-        rotation: 0
+        rotation: 0,
+        draggable:true
     });
-    console.log();
-    var dataDropRange = new Kinetic.Shape({
+    console.log(JSON.stringify(data));
+
+    /*var circle = new Kinetic.Circle({
+        x: x,
+        y: z,
+        radius: 70,
+        fill: 'red',
+        stroke: 'black',
+        strokeWidth: 4
+    });*/
+
+    //console.log('hello');
+    var dropCircle = new Kinetic.Circle({
+        x: 0,
+        y: 0,
+        radius:data.dropRange*pixelsPerMeter,
+        fill: '#C9C9C9',
+        opacity:0.5
+    });
+    dataPointGroup.add(dropCircle);
+
+    // datas in the for the dataPoints
+    for(var key in data.data) {
+        // anonymous function to induce scope
+        (function() {
+            var dataCircle = new Kinetic.Circle({
+                x: 0,
+                y: 0,
+                radius:data.data[key].range*pixelsPerMeter,
+                fill: '#8A8A8A',
+                opacity:0.3
+            });
+
+            dataPointGroup.add(dataCircle);
+        })();
+    }
+
+    var dataPointID = new Kinetic.Text({
+        x: data.dropRange*pixelsPerMeter/2,
+        y: -(data.dropRange*pixelsPerMeter/2),
+        text: data.ID,
+        fontSize: 15,
+        fontFamily: 'Calibri',
+        fill: 'black'
+    });
+
+    dataPointGroup.add(dataPointID);
+
+    dataPointGroup.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+       //layer.draw();
+    });
+    dataPointGroup.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+        //layer.draw();
+    });
+
+    var directionVector = {X:0,Y:0,Z:0};
+    var movedVector={X:0,Y:0,Z:0};
+    dataPointGroup.on('dragstart',function(){
+        console.log('dragged ' + data.ID+' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
+        movedVector = {X:this.getPosition().x/pixelsPerMeter,Y:0,Z:this.getPosition().y/pixelsPerMeter};
+
+    });
+    dataPointGroup.on('dragend',function(){
+        console.log('dropped ' + data.ID +' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
+        movedVector.X -= this.getPosition().x/pixelsPerMeter;
+        movedVector.Z -= this.getPosition().y/pixelsPerMeter;
+        directionVector.X += -(movedVector.X);
+        directionVector.Z += -(movedVector.Z);
+        if(Math.abs(movedVector.X)>=0.1|| Math.abs(movedVector.Z)>=0.1){
+            console.log('directionVector : ' + JSON.stringify(directionVector));
+            io.emit('updateObjectLocation',{ID:data.ID,newLocation:{X:data.location.X+directionVector.X,Y:0,Z:data.location.Z+directionVector.Z},objectType:'dataPoint'},function(){
+                // refresh the layer after ev
+                refreshStationaryLayer();
+            });
+        }
+    });
+
+
+    //dataPointGroup.add(circle);
+
+   /* var dataDropRange = new Kinetic.Shape({
         sceneFunc: function(ctx){
             //console.log(ctx);
             ctx.beginPath();
@@ -410,7 +492,7 @@ function drawDataPoint(data,layer){
         draggable: true
     })
     dataPointGroup.add(dataDropRange);
-
+    */
     /*dataPointGroup.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
         this.fill('#31CC00');
