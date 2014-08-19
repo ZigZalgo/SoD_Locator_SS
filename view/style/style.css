@@ -306,12 +306,10 @@ section#calibration_section select {
     width: 50%;
     border: none;
     display: inline-block;
-    padding: 10px;
+    padding:5px;
     /* border-radius: 4px; */
     border-radius: 8px;
     cursor: pointer;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     outline: none;
     height: auto;
     overflow: hidden;
@@ -328,7 +326,7 @@ section#calibration_section .calibration_wrap{
     margin:10px 10px;
 }
 
-.canvas_fake{
+.canvas_wrap{
     color:#292929;
     text-align:center;
     vertical-align: middle;
@@ -410,6 +408,7 @@ input[type="file"]
     font-weight: bold;
     border-radius: 10px;
     box-shadow: 0px 1px 3px #888888
+    display:inline-block;
 }
 .button:hover{
     color:#292929;

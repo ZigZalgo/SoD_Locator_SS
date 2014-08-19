@@ -235,8 +235,9 @@ io.on("setCalibrationFrame", function(data){
         }
         // if the frame data is from reference sensor
         if(calibrationFrames["reference"] == data.sourceID){
-            canvas = document.getElementById("cnvSensorOne");
+            var canvas = document.getElementById("cnvSensorOne");
             var ctx = canvas.getContext("2d");
+            ctx.clearRect(0,0,canvas.width,canvas.height);
             // draw the data based on the kinect frameWidth and frame hight
             var bytearray = new Uint8Array(data.payload);
             var imgdata = ctx.getImageData(0,0, sensors[data.sourceID].frameWidth, sensors[data.sourceID].frameHeight);
@@ -260,8 +261,9 @@ io.on("setCalibrationFrame", function(data){
             $('#sensorOneStatus').html(depthMultiplier);
         }
         else if(calibrationFrames["uncalibrated"] == data.sourceID){
-            canvas = document.getElementById("cnvSensorTwo");
+            var canvas = document.getElementById("cnvSensorTwo");
             var ctx = canvas.getContext("2d");
+            ctx.clearRect(0,0,canvas.width,canvas.height);
             var bytearray = new Uint8Array(data.payload);
             var imgdata = ctx.getImageData(0,0, sensors[data.sourceID].frameWidth, sensors[data.sourceID].frameHeight);
             ctx.canvas.width = sensors[data.sourceID].frameWidth;
@@ -309,8 +311,7 @@ $(function(){
         }
         calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
         calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
-        $('.status').html('<span class="normal_status">Getting Frames...</span>');
-        $(".normal_status").fadeIn(600);
+        showNormalStatus('Getting Frames..');
         io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
     });
 
@@ -343,4 +344,3 @@ $(function(){
         }
     })
 });
-io.emit("registerWebClient", {});

@@ -22,6 +22,9 @@
 <script src = "/jquery"> </script>
 <script src="/socket.io/socket.io.js"></script>
 <link href="/style" rel="stylesheet"  />
+    <script src="/overviewJS"></script>
+    <script src="/calibrateJS"></script>
+
 
 
     <script>
@@ -31,6 +34,7 @@
             $("section#overview").hide();
             $('#dataManage').hide();
             $("#calibration_section").fadeIn("fast");
+            refreshSensors();
             $('.status').html('<span class="normal_status">Calibrate Mode!</span>');
             $('.normal_status').fadeIn(600);
         });
@@ -103,9 +107,6 @@
 
     });
 </script>
-<script src="/overviewJS"></script>
-<script src="/calibrateJS"></script>
-
 </head>
 <body onload="drawGrid(); refreshSensors();fileList();">
 <div id="page-wrap">
@@ -138,15 +139,10 @@
                                 <legend>References Sensor</legend>
                                 <div class="calibration_wrap">
                                     <h5>Please Select a reference sensor:</h5>
-                                    <select id="referenceSensorList" size="3" name="referenceSensorList"></select>
-                                    <div class="canvas_fake"> </div>
-
+                                    <select id="referenceSensorList"  name="referenceSensorList"></select>
+                                    <div class="canvas_wrap"><canvas id="cnvSensorOne" width="640" height="480"
+                                                                     style="z-index: 4;"></canvas> </div>
                                     <!--This is where the data from the server is added-->
-
-                                    <canvas id="cnvSensorOne" width="640" height="480"
-                                            style="position: absolute;left: 26px;top: 277px;z-index: 4;"></canvas>
-
-
                                 </div>
                                 <fieldset class="sub_field">
                                     <legend>Points Selected</legend>
@@ -168,13 +164,11 @@
                                 <legend>Sensors Being Calibrated</legend>
                                 <div class="calibration_wrap">
                                     <h5>Please Select a Sensor:</h5>
-                                    <select id="uncalibratedSensorList" size="3" name="uncalibratedSensorList"></select>
-                                    <div class="canvas_fake"> </div>
+                                    <select id="uncalibratedSensorList" name="uncalibratedSensorList"></select>
+                                    <div class="canvas_wrap"><canvas id="cnvSensorTwo" width="640" height="480"
+                                                                     style="z-index: 4;"></canvas>
+                                    </div>
                                     <!--This is where the data from the server is added-->
-
-                                    <canvas id="cnvSensorTwo" width="640" height="480"
-                                            style="position: absolute;left: 725px;top:277px;z-index: 4;"></canvas>
-
 
                                     <fieldset class="sub_field">
                                         <legend>Points Selected</legend>
@@ -249,8 +243,6 @@
                 </section>
             </div>
         </div> <!-- End of dataManage_wrap -->
-        Person ID: <input id="dumpDataPersonID" value = "0">    range:  <input id="dumpDataRange" value = "2">
-        <div id ="dumpData_BTN" class='button'>Dump Data</div>
     </section>
 
 
