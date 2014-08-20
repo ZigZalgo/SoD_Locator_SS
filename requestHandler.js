@@ -44,9 +44,11 @@ exports.handleRequest = function (socket) {
             sensor.rangeInMM = sensorInfo.rangeInMM;
             sensor.frameHeight = sensorInfo.frameHeight;
             sensor.frameWidth = sensorInfo.frameWidth;
-            var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
-                StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
-            sensor.calibration = receivedCalibration;
+            if(sensorInfo.translateRule!=undefined){
+                var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
+                    StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
+                sensor.calibration = receivedCalibration;
+            }
             locator.registerSensor(sensor);
             if (fn != undefined) {
                 fn({"status": 'server: you registered as a "sensor"',sensorNumber:Object.keys(locator.sensors).length})
@@ -54,7 +56,6 @@ exports.handleRequest = function (socket) {
         }else{
             console.log('received null sensor info. Can not register to the server');
         }
-
     });
 
 

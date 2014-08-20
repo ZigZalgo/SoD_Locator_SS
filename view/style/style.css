@@ -247,7 +247,7 @@ section#calibration_section{
     left:0px;
     height:auto;
 }
-.page_menu{margin-top:0px;text-align:center;}
+.page_menu{margin-top:1.5em;text-align:center;}
 
 section#calibration_section form{
     height:auto;
@@ -404,10 +404,11 @@ input[type="file"]
 /* Buttons!! */
 
 .button{
+    border: 1px solid #ECECEC;
     font-family: "Agency FB",DinRound, Sans-Serif;
     font-size: 1.5em;
-    margin: .5em 0;
-    padding: .7em 0.8em;
+    margin: 0 0;
+    padding: 0.5em 0.6em;
     display: inline-block;
     position: relative;
     text-align: center;
@@ -420,9 +421,10 @@ input[type="file"]
 
 }
 .button:hover{
-    color:#CCC;
+    color:#1e1e1e;
     cursor:pointer;
     box-shadow:none;
+    background:#ECECEC;
 }
 
 .points{

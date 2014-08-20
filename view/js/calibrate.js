@@ -306,13 +306,20 @@ $(function(){
 
         var e1 = document.getElementById("referenceSensorList");
         var e2 = document.getElementById("uncalibratedSensorList");
-        while(calibrationFrames.length > 0){
-            calibrationFrames.pop();
+
+
+        if(e1.options[e1.selectedIndex].text!=e2.options[e1.selectedIndex].text){
+            while(calibrationFrames.length > 0){
+                calibrationFrames.pop();
+            }
+            calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
+            calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
+            showNormalStatus('Getting Frames..');
+            io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
+        }else{
+            showRedStatus('reference sensor should be different from sensor for calibrate. ');
         }
-        calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
-        calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
-        showNormalStatus('Getting Frames..');
-        io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
+
     });
 
     $('#resetPointsOne').click(function(){
