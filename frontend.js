@@ -100,6 +100,7 @@ app.get('/dataJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/dataView.js');
 });
 
+
 app.get('/files/:fileName.:ext', data.show);
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {

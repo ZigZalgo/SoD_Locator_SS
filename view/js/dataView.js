@@ -8,7 +8,9 @@ var fileList = function () {
                 var option = document.createElement("option");
                 option.text = file;
                 $('select[name=filesList] option:eq(0)').attr('selected', 'selected');
+            if(filesList!=null && filesList!=undefined){
                 filesList.add(option);
+            }
         })
     });
 };

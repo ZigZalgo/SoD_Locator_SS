@@ -196,12 +196,16 @@ function refreshSensors(){
                 option.text = data[key].socketID;
                 $('select[name=referenceSensorList] option:eq(0)').attr('selected', 'selected');
                 //console.log('adding option: '+option.text + ' to uncalibrtedSensorList');
-                uncalibratedSensorList.add(option);
+                if(uncalibratedSensorList!=null && uncalibratedSensorList!=undefined){
+                    uncalibratedSensorList.add(option);
+                }
                 //console.log('referenceSelected: ' + ($('select[name=referenceSensorList] option:selected').text()));
                 if(data[key].isCalibrated == true){
                     var option2 = document.createElement("option");
                     option2.text = data[key].socketID;
-                    referenceSensorList.add(option2);
+                    if(referenceSensorList!=null && referenceSensorList!=undefined){
+                        referenceSensorList.add(option2);
+                    }
                 }
 
             }

@@ -13,6 +13,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/style-mobile">
+    <script src="/kinetic"> </script>
     <script src="/jquery"></script>
     <script src="/jquery-mobile"></script>
     <script src="/overviewJS"></script>
@@ -45,7 +46,115 @@
             position: absolute; left: 0; top: 0; margin:0px;
         }
         .ui-content{padding:0px !important;}
+        section#overview fieldset{
+            padding: 0.2em 0.5em;
+            margin: 0.1em auto;
+            border:1px solid #292929;;
+            color:black;
+            font-size:90%;
+            height:auto; z-index: 1;
+            background: white;
+            border-radius: 9px;
+            max-width:535px;
+        }
+        section#overview td{
+            text-align:center;
+        }
+        section#overview legend{
+            font-size:1.5em;
+            font-weight:bold;
+        }
+        section#overview #contentHeader{
+            text-align:center;
+            padding-top:5px;
+            font-family:"Agency FB",DinRound, Sans-Serif;
+            font-weight:bold;
+            font-size:2em;
+            color:#292929
+        }
 
+        section#overview{
+            background: #CACACA;
+            margin: 10px auto;
+            /* text-align: center; */
+            max-width: 800px;
+            /* border: 2px solid; */
+            max-height: 790px;
+        }
+        section#overview table{
+            width:100%;
+        }
+        section#overview table td{
+            max-width: 50%;
+            width:50%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        section#overview table th{
+            font-family:oblique,DinRound, Sans-Serif;
+            max-width: 150px;
+            font-size:1.2em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: pre-wrap;
+        }
+
+        fieldset#clients {
+            width:100%;
+            height:auto;
+        }
+        fieldset#clients legend{
+            color:#ffffff;
+            /*padding:2px 1px;*/
+            /*border: 2px solid #A1A2A5;*/
+            background:#292929;
+            box-shadow: 1px 1px 3px #888888;
+        }
+        #clients_table {
+            width:100%;
+            max-width:100%;
+        }
+        section #sensors legend{
+            background: #3370d4;
+            /*border: 2px solid #A1A2A5;*/
+            color: #ffffff;
+            box-shadow: 1px 1px 3px #888888;
+        }
+        section input#getPoints{
+            position:relative;
+        }
+        section #people legend{
+            color:#ffffff;
+            /*border: 2px solid #A1A2A5;;*/
+            background:#d05a47;
+            box-shadow: 1px 1px 3px #888888;
+        }
+
+        section #dataPoints legend{
+            color:#ffffff;
+            /*border: 2px solid #A1A2A5;;*/
+            background:#8A8A8A;
+            box-shadow: 1px 1px 3px #888888;
+        }
+
+        section #devices legend{
+            background: #2cd72A;/*border: solid #A1A2A5;*/color: #ffffff;
+            box-shadow: 1px 1px 3px #888888;
+        }
+        .content_wrap{max-width:1600px;margin:auto;background:#CACACA;}
+        #overview_section_wrap{max-width:800px;
+            background: #CACACA;}
+        #overview_grid{border-left:2px solid #1e1e1e !important;border-right:2px solid #1e1e1e !important;border-bottom:2px solid #1e1e1e !important;}
+        header{
+            max-width: 365px; background: #1e1e1e;
+            margin:10px 0px 10px 50px;
+            padding-top:10px;padding-bottom: 10px;
+            line-height:1;font-family: "Agency FB",DinRound, Sans-Serif;
+            color: #ffffff; text-align: center; font-size: 36px;
+            text-shadow:2px 2px 5px grey;
+            z-index: 2;
+        }
     </style>
     <script>
         // socket part
@@ -84,31 +193,17 @@
 </head>
 
 <body onload="drawGrid();">
-<div data-role="page" id="canvas_page" data-theme="b">
-    <div data-role="panel" id="menu" data-position="left" data-display="reveal" data-theme="a">
-        <a href="#overview_page">Overview</a>
-    </div><!-- /panel -->
+<div data-role="page" id="canvas_page" data-theme="a">
+
     <div data-role="header" data-theme="b">
-        <h1>OVERVIEW</h1>
-        <a href="#left-panel" data-theme="d" data-icon="arrow-r" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-icon-nodisc">Open left panel</a>
-        <a href="#overview_panel" data-theme="d" data-icon="arrow-l" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-icon-nodisc">Open right panel</a>
+        <header>OVERVIEW</header>
     </div><!-- /header -->
 
-    <div data-role="content" data-theme="a">
-
-        <div class="ui-grid-a canvasGrid">
+    <div data-role="content" data-theme="a" class="content_wrap">
+        <div class="ui-grid-a canvasGrid" id="overview_grid">
             <div class="ui-block-a"><section id="canvas"></section></div>
-            <div class="ui-block-b"><strong>I'm Block B</strong> and text inside will wrap</div>
-        </div><!-- /grid-a -->
-
-    </div><!-- /content -->
-    <div data-role="panel" id="overview_panel" data-display="overlay" data-position="right" data-theme="c">
-        <div data-role="content" data-theme="a">
-        <section id="overview">
-            <form>
-                <!--<input type="text" id="message" /> <!--text form to send data to the server-->
-                <div id="contentHeader" >Overview</div> <!--This is where the data from the server is added-->
-
+            <div class="ui-block-b" id="overview_section_wrap">
+            <section id="overview">
                 <fieldset id="clients">
                     <legend> Clients </legend>
                 </fieldset>  <!--This is where the data from the server is added-->
@@ -125,31 +220,19 @@
                 <fieldset id="dataPoints">
                     <legend> dataPoints </legend>
                 </fieldset> <!--This is where the data from the server is added-->
-
-
-            </form>
-        </section>
-        <a href="#" data-rel="close" data-role="button" data-mini="true" data-inline="true" data-icon="delete" data-iconpos="right">Close</a>
-    </div><!-- /panel -->
-
-    <div data-role="footer">
-        <h4>SOD - ASE 2014</h4>
-    </div><!-- /footer -->
-</div><!-- /page -->
-
-<div data-role="page" id="overview_page" data-theme="b">
-    <div data-role="header" data-theme="b">
-        <h1>Canvas</h1>
-    </div><!-- /header -->
-
-
+            </section>
+            </div>
+            </section>
+        </div><!-- /grid-a -->
 
     </div><!-- /content -->
-
-    <div data-role="footer">
-        <h4>SOD - ASE 2014</h4>
-    </div><!-- /footer -->
+    <div data-role="panel" id="overview_panel" data-display="overlay" data-position="right" data-theme="c">
+        <div data-role="content" data-theme="a">
+        <a href="#" data-rel="close" data-role="button" data-mini="true" data-inline="true" data-icon="delete" data-iconpos="right">Close</a>
+        </div><!-- /panel -->
+    </div>
 </div><!-- /page -->
+
 
 
 
@@ -170,7 +253,7 @@
         </div>
         <div class="ui-grid-a">
             <div class="ui-block-a"><button data-icon="delete" id="resetDropData">Reset</button></div>
-            <div class="ui-block-b"><button data-icon="check" id="dropData">Drop</button></div>
+            <div class="ui-block-"><button data-icon="check" id="dropData">Drop</button></div>
         </div><!-- /grid-a -->
 
     </div><!-- /content -->
@@ -181,21 +264,5 @@
 </div><!-- /page -->
 
 
-<!-- Start of second page -->
-<div data-role="page" id="bar">
-
-    <div data-role="header">
-        <h1>Bar</h1>
-    </div><!-- /header -->
-
-    <div data-role="content">
-        <p>I'm the second in the source order so I'm hidden when the page loads. I'm just shown if a link that references my id is beeing clicked.</p>
-        <p><a href="#foo">Back to foo</a></p>
-    </div><!-- /content -->
-
-    <div data-role="footer">
-        <h4>Page Footer</h4>
-    </div><!-- /footer -->
-</div><!-- /page -->
 </body>
 </html>
