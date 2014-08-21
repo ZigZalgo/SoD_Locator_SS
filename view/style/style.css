@@ -247,7 +247,12 @@ section#calibration_section{
     left:0px;
     height:auto;
 }
-.page_menu{margin-top:1.5em;text-align:center;}
+.instruction_menu{margin-top:0.5em;text-align:center;}
+
+.calibration_step{
+    width:50%;
+    margin:10px auto;
+}
 
 section#calibration_section form{
     height:auto;
@@ -402,8 +407,27 @@ input[type="file"]
 /* End Data Section*/
 
 /* Buttons!! */
+/* This has to be declared first !*/
+.buttonSelected {
+    color:#1e1e1e;
+    border: 1px solid #ECECEC;
+    font-family: "Agency FB",DinRound, Sans-Serif;
+    font-size: 1.5em;
+    margin: 0 0;
+    padding: 0.5em 0.6em;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-user-select: none;
+    background:#ECECEC;
+}
 
 .button{
+    color:#ECECEC;
     border: 1px solid #ECECEC;
     font-family: "Agency FB",DinRound, Sans-Serif;
     font-size: 1.5em;
@@ -520,7 +544,6 @@ div#calibration_flip{
 
 .status{
     vertical-align: middle;
-    padding: 5px;
     /* padding-top: 10px; */
     /* padding-bottom: 10px; */
     font-family: "Consolas",DinRound, Sans-Serif;
@@ -539,11 +562,10 @@ div#calibration_flip{
     font-family:"Consolas",DinRound, Sans-Serif;
     border:solid 1px #292929;text-align:left;background:#ffffff;max-height: 200px;}
 .green_status{
-    background: #41cf3a;
+    background: rgba(58, 201, 51, 0.95);
 
     color: #ffffff;
     width: auto;
-    border-radius: 4px;
     padding: 0px 2px;
     margin: 0px;
     font-weight: bold;
@@ -557,7 +579,6 @@ div#calibration_flip{
 
     color: #ffffff;
     width: auto;
-    border-radius: 4px;
     padding: 0px 2px;
     margin: 0px;
     font-weight: bold;
@@ -572,7 +593,6 @@ div#calibration_flip{
 
     color: #ffffff;
     width: auto;
-    border-radius: 4px;
     padding: 0px 2px;
     margin: 0px;
     font-weight: bold;

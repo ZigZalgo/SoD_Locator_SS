@@ -294,7 +294,6 @@ io.on("setCalibrationFrame", function(data){
 $(function(){
 
     $('#getCalibrationFrames').click(function(){ /*listening to the button click using Jquery listener*/
-
         var referenceSensorID = $('select#referenceSensorList option:selected').text();
         // get calibration rule for reference sensor
         io.emit('getSensorsFromServer',{},function(sensors){
@@ -311,17 +310,20 @@ $(function(){
         var e1 = document.getElementById("referenceSensorList");
         var e2 = document.getElementById("uncalibratedSensorList");
 
-
-        if(e1.options[e1.selectedIndex].text!=e2.options[e1.selectedIndex].text){
-            while(calibrationFrames.length > 0){
-                calibrationFrames.pop();
+        if(e1.options[e1.selectedIndex]!=undefined && e2.options[e2.selectedIndex]!=undefined){
+            if(e1.options[e1.selectedIndex].text!=e2.options[e2.selectedIndex].text){
+                while(calibrationFrames.length > 0){
+                    calibrationFrames.pop();
+                }
+                calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
+                calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
+                showNormalStatus('Getting Frames..');
+                io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
+            }else{
+                showRedStatus('reference sensor should be different from sensor for calibrate. ');
             }
-            calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
-            calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
-            showNormalStatus('Getting Frames..');
-            io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
         }else{
-            showRedStatus('reference sensor should be different from sensor for calibrate. ');
+            showRedStatus('Please select reference sensor and sensor needs calibrate');
         }
 
     });
@@ -341,17 +343,14 @@ $(function(){
             io.emit("calibrateSensors", {referenceSensorID: calibrationFrames["reference"], uncalibratedSensorID: calibrationFrames["uncalibrated"],
                 sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){
                 if(data.degree!=null){
-                    $('.status').html('<span class="green_status"> Calibration Success! Angle between sensors: '+JSON.stringify(Math.round(data.degree * ROUND_RATIO)/ROUND_RATIO)+'/<span>')
-                    $('.green_status').fadeIn(800);
+                    showRedStatus('Calibration Success! Angle between sensors: '+JSON.stringify(Math.round(data.degree * ROUND_RATIO)/ROUND_RATIO));
                 }else{
-                    $('.status').html('<span class="red_status"> Calibration Failed! Please reselect the points./<span>')
-                    $('.red_status').fadeIn(800);
+                    showRedStatus('Calibration Failed! Maybe due to the points selected donot match. Please reselect the points.')
                 }
             })
         }
         else{
-            $('.status').html('<span class="red_status">Error: There are not enough points for calibration.</span>');
-            $('.red_status').fadeIn(600);
+           showRedStatus('Error: There are not enough points for calibration.');
         }
     })
 });

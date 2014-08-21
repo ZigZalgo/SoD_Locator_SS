@@ -15,18 +15,21 @@ io = io.connect()
  *
  * */
 function showRedStatus(status){
-    $('.status').html("<span class='red_status'>"+status+"</span>");
-    $('.red_status').fadeIn(600);
+    $('.status').empty();
+    $('.status').html("<div class='red_status'>"+status+"</div>");
+    $('.red_status').fadeIn('200');
 }
 
 function showGreenStatus(status){
-    $('.status').html("<span class='green_status'>"+status+"</span>");
-    $('.green_status').fadeIn(600);
+    $('.status').empty();
+    $('.status').html("<div class='green_status'>"+status+"</div>");
+    $('.green_status').fadeIn('200');
 }
 
 function showNormalStatus(status){
-    $('.status').html("<span class='normal_status'>"+status+"</span>");
-    $('.normal_status').fadeIn(600);
+    $('.status').empty();
+    $('.status').html("<div class='normal_status'>"+status+"</div>");
+    $('.normal_status').fadeIn('200');
 }
 
 

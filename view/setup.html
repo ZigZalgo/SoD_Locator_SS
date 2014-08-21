@@ -35,16 +35,14 @@
             $('#dataManage').hide();
             $("#calibration_section").fadeIn("fast");
             refreshSensors();
-            $('.status').html('<span class="normal_status">Calibrate Mode!</span>');
-            $('.normal_status').fadeIn(600);
+            showNormalStatus('Navigate to Calibration Page!');
         });
         $('#overview_flip').on('click',function(){
             $("#calibration_section").hide();
             $('#dataManage').hide();
             $("section#canvas").fadeIn("fast");
             $("section#overview").fadeIn("fast");
-            $('.status').html('<span class="normal_status">OverView</span>');
-            $('.normal_status').fadeIn(600);
+            showNormalStatus('Navigate to Overview page')
         });
         $('#dataManage_flip').on('click',function(){
             console.log('data flip!');
@@ -52,7 +50,7 @@
             $("section#overview").hide();
             $("#calibration_section").hide();
             $('#dataManage').fadeIn("fast");
-            showNormalStatus('Data Manage Mod');
+            showNormalStatus('Navigate to data mangement page');
         })
         $('#refreshSensors').on('click',function(){
             refreshSensors();
@@ -74,8 +72,7 @@
             $('input[name=master_point2X]').val('');
             $('input[name=master_point2Y]').val('');
             sensorOnePoints.splice(0,sensorOnePoints.length); // clear all the points for sensor one
-            $('.status').html("<span class='green_status'>Reference Sensor Points Cleared!</span>");
-            $('.green_status').fadeIn(600);
+            showGreenStatus('Reference Sensor Points Cleared!');
         });
 
         // clear the points for sensor one
@@ -104,8 +101,13 @@
             });
         })
 
+        $('#calibrate_instruction_flip').on('click',function(){
+            $('#calibration_instruction').slideToggle('200');
+            $(this).toggleClass('button');
+        });
 
-    });
+
+    })
 </script>
 </head>
 <body onload="drawGrid(); refreshSensors();fileList();">
@@ -116,7 +118,7 @@
         <nav id="mode_selection" >
             <ul>
                 <li id="overview_flip">Overview</li>
-                <li id="calibration_flip">Calibration Mode</li>
+                <li id="calibration_flip">Calibration</li>
                 <li id="dataManage_flip">Data Management</li>
                 <li id="sampleClients_flip">Sample Clients
                 <ul id="sampleClients_list" style="display:none;">
@@ -128,13 +130,35 @@
             </ul>
         </nav>
         <section id="calibration_section">
-            <div class="page_menu">
+            <div class="instruction_menu"><div class="buttonSelected button" id="calibrate_instruction_flip">Calibration instruction</div></div>
+
+            <div class="instruction_menu" id="calibration_instruction" style="display:none;">
+                <fieldset class="calibration_step">
+                <legend> Step 1: </legend>
+                    <h3>Click on "Refresh sensors" make sure the sensor list has the most updated sensor ID. </h3>
+                </fieldset>
+                <fieldset class="calibration_step">
+                    <legend> Step 2: </legend>
+                    <h3>Select Sensors from the reference sensor list and the sensor you want to calibrate.</h3>
+                    <h3>Then, Click on the "Get Image" button</h3>
+                </fieldset>
+                <fieldset class="calibration_step">
+                    <legend> Step 3: </legend>
+                    <h3>Select Two Points from each image, make sure the sequence the points you select map the reality.</h3>
+                    <h3> In another word, if you select points AB from reference sensor frame, also select AB from calibrate list.</h3>
+                </fieldset>
+                <fieldset class="calibration_step">
+                    <legend> Step 4: </legend>
+                    <h3>After all four points(two from each image) are selected. Click on the "Calibrate" button </h3>
+                </fieldset>
+            </div>
+            <div class="instruction_menu">
                 <div class="button" id = "refreshSensors">Refresh Sensors</div>
                 <div class="button" id = "getCalibrationFrames">Get Image</div>
                 <div class="button" id="calibrate"> Calibrate </div>
             </div>
             <!--<input id="getCalibrationFrames" type="button" value="Get Calibration Frames"> <!-- Get Image button -->
-            <form>
+            <form id="frame_table">
                 <table>
                     <tr>
                         <td>
