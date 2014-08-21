@@ -85,21 +85,18 @@ function getPosition(canvasID, sid, event)
         }else if(sensorOnePoints.length==2){
             $( 'input[name=master_point2X]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].X*ROUND_RATIO)/ROUND_RATIO));
             $( 'input[name=master_point2Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
-        }else{
-            showRedStatus("Wrong Number of Points for Sensor 1");
+        }else if(z<=0){
+            showNormalStatus('Depth is out of range, please choose another point!');
         }
     }
     else if(canvasID == "cnvSensorTwo"){
         if(sensorTwoPoints.length < 2 && z > 0){
             sensorTwoPoints.push({X: xInMM, Y: y, Z: z});
-            $('.status').html("<span class='green_status'>Point saved!</span>");
-            $('.green_status').fadeIn(600);
+            showGreenStatus('Points Saved');
         }else if(sensorTwoPoints.length >= 2){
-            $('.status').html("<span class='red_status'>Enough Points.</span>");
-            $('.red_status').fadeIn(600);
+            showRedStatus('Enough points');
         }else if(z<=0){
-            $('.status').html("<span class='red_status'>Depth is out of range, please choose another point!</span>");
-            $('.red_status').fadeIn(600);
+            showRedStatus('Depth is out of range, please choose another point!')
         }
         //$('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
         if(sensorTwoPoints.length==1){
@@ -343,7 +340,7 @@ $(function(){
             io.emit("calibrateSensors", {referenceSensorID: calibrationFrames["reference"], uncalibratedSensorID: calibrationFrames["uncalibrated"],
                 sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){
                 if(data.degree!=null){
-                    showRedStatus('Calibration Success! Angle between sensors: '+JSON.stringify(Math.round(data.degree * ROUND_RATIO)/ROUND_RATIO));
+                    showGreenStatus('Calibration Success! Angle between sensors: '+JSON.stringify(Math.round(data.degree * ROUND_RATIO)/ROUND_RATIO) +' degree');
                 }else{
                     showRedStatus('Calibration Failed! Maybe due to the points selected donot match. Please reselect the points.')
                 }
