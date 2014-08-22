@@ -29,7 +29,16 @@ body{background:#bfbfbf;
     height:auto;
     box-shadow: 5px 5px 10px #888888;
 }
-
+a{font-weight:bold;color:#3370d4;text-decoration: none;padding:0.1em 0.3em;}
+a:visited{
+    color:#3370d4;
+}
+a:hover{
+    color:#ECECEC;
+    cursor:pointer;
+    box-shadow:none;
+    background:#3370d4;
+}
 /* top section*/
 header{
     position: relative;
@@ -248,6 +257,20 @@ section#calibration_section{
     height:auto;
 }
 .instruction_menu{margin-top:0.5em;text-align:center;}
+
+section#calibration_section em{
+    background:#b75252;
+    color:white;
+    padding: 0px 2px;
+    margin: 0px;
+    font-weight: bold;
+    font-size: 1.2em;
+    line-height: 1.5em;
+}
+
+section#calibration_section fieldset ul{
+    border-bottom:1px solid white;
+}
 
 .calibration_step{
     width:50%;

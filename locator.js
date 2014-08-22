@@ -338,11 +338,11 @@ exports.removeUntrackedPeople = function(timeOutInMS){
 	var now = new Date();
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
-			console.log('-> now: '+now.getTime());
-			console.log('-> lastUpdated: '+ persons[key].lastUpdated.getTime());
-			console.log('-> difference: '+ (now.getTime()-persons[key].lastUpdated));
+			//console.log('-> now: '+now.getTime());
+			//console.log('-> lastUpdated: '+ persons[key].lastUpdated.getTime());
+			//console.log('-> difference: '+ (now.getTime()-persons[key].lastUpdated));
             if(Object.keys(persons[key].ID).length == 0 && (now.getTime()-persons[key].lastUpdated) > timeOutInMS ){
-				console.log('-> Timed out (' + timeOutInMS + ' ms), deleting person ' + persons[key].uniquePersonID);
+				//console.log('-> Timed out (' + timeOutInMS + ' ms), deleting person ' + persons[key].uniquePersonID);
                 //could refactor using promises or callback
                 if(persons[key].ownedDeviceID != null){
                     devices[persons[key].ownedDeviceID].ownerID = null;

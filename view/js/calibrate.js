@@ -75,7 +75,7 @@ function getPosition(canvasID, sid, event)
         }else if(sensorOnePoints.length >= 2){
             showRedStatus('Enough Points.');
         }else if(z<=0){
-            showNormalStatus('Depth is out of range, please choose another point!');
+            showRedStatus('Depth is out of range, please choose another point!');
         }
 
         //console.log("sensorOnePoints: "+ JSON.stringify(sensorOnePoints));
@@ -86,7 +86,7 @@ function getPosition(canvasID, sid, event)
             $( 'input[name=master_point2X]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].X*ROUND_RATIO)/ROUND_RATIO));
             $( 'input[name=master_point2Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
         }else if(z<=0){
-            showNormalStatus('Depth is out of range, please choose another point!');
+            showRedStatus('Depth is out of range, please choose another point!');
         }
     }
     else if(canvasID == "cnvSensorTwo"){
@@ -94,7 +94,7 @@ function getPosition(canvasID, sid, event)
             sensorTwoPoints.push({X: xInMM, Y: y, Z: z});
             showGreenStatus('Points Saved');
         }else if(sensorTwoPoints.length >= 2){
-            showRedStatus('Enough points');
+            showRedStatus('Enough points.');
         }else if(z<=0){
             showRedStatus('Depth is out of range, please choose another point!')
         }

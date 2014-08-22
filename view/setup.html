@@ -29,6 +29,7 @@
 
     <script>
     $(document).ready(function(){
+
         $("#calibration_flip").click(function(){
             $("section#canvas").hide();
             $("section#overview").hide();
@@ -130,9 +131,18 @@
             </ul>
         </nav>
         <section id="calibration_section">
-            <div class="instruction_menu"><div class="buttonSelected button" id="calibrate_instruction_flip">Calibration instruction</div></div>
+            <div class="instruction_menu"><div class="buttonSelected button" id="calibrate_instruction_flip">Calibration Documentation</div></div>
 
             <div class="instruction_menu" id="calibration_instruction" style="display:none;">
+
+                <fieldset class="calibration_step">
+                    <legend> Preparation: </legend>
+                    <ol style="text-align:left;list-style-type: cjk-ideographic;">
+                        <li>Two or more Kinect2 sensor. Note that each sensor should be facing a common area with at least one another sensor(so that you can calibrate them :P). Also use <a target="_blank" href="https://github.com/ase-lab/SoD_Sensor">SoD Sensor</a> C# client to connect them to SoD Server. </li>
+                        <li>Two water bottles & a desk.</li>
+                    </ol>
+                </fieldset>
+
                 <fieldset class="calibration_step">
                 <legend> Step 1: </legend>
                     <h3>Click on "Refresh sensors" make sure the sensor list has the most updated sensor ID. </h3>
@@ -150,6 +160,14 @@
                 <fieldset class="calibration_step">
                     <legend> Step 4: </legend>
                     <h3>After all four points(two from each image) are selected. Click on the "Calibrate" button </h3>
+                </fieldset>
+                <fieldset class="calibration_step">
+                    <legend> Error Status Explanation: </legend>
+                    <ul>
+                        <li style="text-align:left;"><em>Calibration Failed!... Reselect Points!</em><h3>This can't be cause by two situation:</h3> <ol style="text-align:left;list-style-type: cjk-ideographic;"><li>The points selected from two frame image don't match.</li> <li>Sensor has an translation rule already and been moved afterwards, so the points you selected
+                        still apply the old translation rule that cause the points don't match.</li></ol>
+                            <h3>Solution:</h3> Restart sensor and calibrate them, also make sure two points that you are going to select from two frame image match each other.</li>
+                    </ul>
                 </fieldset>
             </div>
             <div class="instruction_menu">

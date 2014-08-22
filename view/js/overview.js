@@ -7,7 +7,7 @@ var ROUND_RATIO  = 10;
 var unpaired_people = {};
 var uniqueDeviceIDToSocketID = {}
 
-io = io.connect()
+io = io.connect();
 
 
 /*
@@ -51,7 +51,7 @@ function drawGrid() {
 
 
 
-        console.log('screenwidth : ' +window.innerWidth);
+        //console.log('screenwidth : ' +window.innerWidth);
        var  screenWidth = Math.min(window.innerWidth/2,800);
         var canvasHTML = '<canvas id="cnv" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
             '<canvas id="cnvStationary" width="'+screenWidth+'" height="'+screenWidth+'" ></canvas>'+
@@ -63,6 +63,7 @@ function drawGrid() {
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
     }else{
+        showGreenStatus('Welcome to SoD! \tYour window width is '+window.innerWidth+'px.');
         minorGridLineWidth = document.getElementById("cnv").width/80;
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
