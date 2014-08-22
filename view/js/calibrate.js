@@ -45,6 +45,7 @@ function translateToCoordinateSpace(location, translateRules) {
 
 function getPosition(canvasID, sid, event)
 {
+
     var rect = document.getElementById(canvasID).getBoundingClientRect();
     var xInPixels = event.x - rect.left;
     console.log('rect.left : ' + rect.left+ '\trect.top: '+rect.top);
@@ -93,10 +94,8 @@ function getPosition(canvasID, sid, event)
         if(sensorTwoPoints.length < 2 && z > 0){
             sensorTwoPoints.push({X: xInMM, Y: y, Z: z});
             showGreenStatus('Points Saved');
-        }else if(sensorTwoPoints.length >= 2){
+        }else if(sensorTwoPoints.length >= 2) {
             showRedStatus('Enough points.');
-        }else if(z<=0){
-            showRedStatus('Depth is out of range, please choose another point!')
         }
         //$('#sensorTwoStatus').html(JSON.stringify(sensorTwoPoints));
         if(sensorTwoPoints.length==1){
@@ -105,10 +104,9 @@ function getPosition(canvasID, sid, event)
         }else if(sensorTwoPoints.length==2){
             $( 'input[name=sensor_point2X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].X*ROUND_RATIO)/ROUND_RATIO));
             $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
-        }else{
-            showRedStatus("Wrong Number of Points for Sensor 2");
+        }else if(z<=0){
+            showRedStatus('Depth is out of range, please choose another point!')
         }
-
     }
 
 
@@ -190,7 +188,8 @@ function refreshSensors(){
             if(data.hasOwnProperty(key)){
                 sensors[key] = data[key];
                 var option = document.createElement("option");
-                option.text = data[key].socketID;
+                option.text = data[key].ID;
+                //option.text = data[key].socketID;
                 $('select[name=referenceSensorList] option:eq(0)').attr('selected', 'selected');
                 //console.log('adding option: '+option.text + ' to uncalibrtedSensorList');
                 if(uncalibratedSensorList!=null && uncalibratedSensorList!=undefined){
@@ -199,7 +198,8 @@ function refreshSensors(){
                 //console.log('referenceSelected: ' + ($('select[name=referenceSensorList] option:selected').text()));
                 if(data[key].isCalibrated == true){
                     var option2 = document.createElement("option");
-                    option2.text = data[key].socketID;
+                    option2.text=data[key].ID
+                    //option2.text = data[key].socketID;
                     if(referenceSensorList!=null && referenceSensorList!=undefined){
                         referenceSensorList.add(option2);
                     }
@@ -224,6 +224,7 @@ io.on("anything", function(data){
 
 //data is the frame data from sensor
 io.on("setCalibrationFrame", function(data){
+
     //check if data was sent from reference sensor or the sensor selected to be calibrated
     if(calibrationFrames["reference"] == data.sourceID || calibrationFrames["uncalibrated"] == data.sourceID){
         depthArrays[data.sourceID] = data.payload;
@@ -234,8 +235,14 @@ io.on("setCalibrationFrame", function(data){
         else{
             depthMultiplier = 5;//how is this
         }
+
+
         // if the frame data is from reference sensor
         if(calibrationFrames["reference"] == data.sourceID){
+            //empty the canvas before drawing them.
+            $('#reference_wrap').empty();
+            $('#clear_master_points').trigger('click');
+            $('#reference_wrap').html('<canvas id="cnvSensorOne" width="640" height="480"style="z-index: 4;"></canvas>');
             var canvas = document.getElementById("cnvSensorOne");
             var ctx = canvas.getContext("2d");
             ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -256,12 +263,20 @@ io.on("setCalibrationFrame", function(data){
                 imgdata.data[4*i+3] = 255;
             }
             ctx.putImageData(imgdata,0,0)
-            canvas.addEventListener("mousedown", function(event){
+
+            function clickHandler1(event){
+                console.log('!!!!!!!!!!!!!!!!!!get position!');
                 getPosition("cnvSensorOne", data.sourceID, event);
-            }, false);
-            $('#sensorOneStatus').html(depthMultiplier);
+            }
+
+            canvas.addEventListener("mousedown", clickHandler1,false);
+            //$('#sensorOneStatus').html(depthMultiplier);
         }
         else if(calibrationFrames["uncalibrated"] == data.sourceID){
+            //empty the canvas before drawing them.
+            $('#calibrate_wrap').empty();
+            $('#clear_sensorTwo_points').trigger('click');
+            $('#calibrate_wrap').html('<canvas id="cnvSensorTwo" width="640" height="480"style="z-index: 4;">');
             var canvas = document.getElementById("cnvSensorTwo");
             var ctx = canvas.getContext("2d");
             ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -278,11 +293,14 @@ io.on("setCalibrationFrame", function(data){
                 imgdata.data[4*i+2] = depth;
                 imgdata.data[4*i+3] = 255;
             }
-            ctx.putImageData(imgdata,0,0)
-            canvas.addEventListener("mousedown", function(event){
+            function clickHandler2(event){
+                console.log('!!!!!!!!!!!!!!!!!!get position!');
                 getPosition("cnvSensorTwo", data.sourceID, event);
-            }, false);
-            $('#sensorTwoStatus').html(depthMultiplier);
+            }
+
+            ctx.putImageData(imgdata,0,0);
+            canvas.addEventListener("mousedown", clickHandler2,false);
+            //$('#sensorTwoStatus').html(depthMultiplier);
         }
     }
 
@@ -292,36 +310,52 @@ $(function(){
 
     $('#getCalibrationFrames').click(function(){ /*listening to the button click using Jquery listener*/
         var referenceSensorID = $('select#referenceSensorList option:selected').text();
+        var calibrateSensorID = $('select#uncalibratedSensorList option:selected').text();
+        var referenceSensorSocketID,calibrateSensorSocketID;
+
         // get calibration rule for reference sensor
         io.emit('getSensorsFromServer',{},function(sensors){
             for(var key in sensors){
-                if(sensors.hasOwnProperty(key) && key == referenceSensorID){
+                if(sensors.hasOwnProperty(key) && sensors[key].ID == referenceSensorID){
                     //console.log('reference sensor key:'+sensors[key].ID);
                     console.log(JSON.stringify(sensors[key].calibration));
                     referenceSensorCalibration = sensors[key].calibration;
+                    referenceSensorSocketID = sensors[key].socketID;
+                }
+                if(sensors.hasOwnProperty(key) && sensors[key].ID == calibrateSensorID){
+                    calibrateSensorSocketID = sensors[key].socketID;
                 }
             }
+
+            console.log((referenceSensorID.length != 0)+ ' -- ' + (calibrateSensorID.length!=0));
+
+            console.log(referenceSensorSocketID + ' -- ' + calibrateSensorSocketID);
+
+            if((referenceSensorID.length != 0) && (calibrateSensorID.length != 0)){
+                if(referenceSensorSocketID!=calibrateSensorSocketID){
+                    while(calibrationFrames.length > 0){
+                        calibrationFrames.pop();
+                    }
+                    calibrationFrames["reference"] = referenceSensorSocketID;
+                    calibrationFrames["uncalibrated"] = calibrateSensorSocketID;
+                    showNormalStatus('Getting Frames..');
+                    io.emit("getCalibrationFrames", {referenceSensorID: referenceSensorSocketID, uncalibratedSensorID: calibrateSensorSocketID});
+                }else{
+                    showRedStatus('reference sensor should be different from sensor for calibrate. ');
+                }
+            }else{
+                showRedStatus('Please select reference sensor and sensor needs calibrate');
+            }
+
+
         });
+
+
 
 
         var e1 = document.getElementById("referenceSensorList");
         var e2 = document.getElementById("uncalibratedSensorList");
 
-        if(e1.options[e1.selectedIndex]!=undefined && e2.options[e2.selectedIndex]!=undefined){
-            if(e1.options[e1.selectedIndex].text!=e2.options[e2.selectedIndex].text){
-                while(calibrationFrames.length > 0){
-                    calibrationFrames.pop();
-                }
-                calibrationFrames["reference"] = e1.options[e1.selectedIndex].text;
-                calibrationFrames["uncalibrated"] = e2.options[e2.selectedIndex].text;
-                showNormalStatus('Getting Frames..');
-                io.emit("getCalibrationFrames", {referenceSensorID: e1.options[e1.selectedIndex].text, uncalibratedSensorID: e2.options[e2.selectedIndex].text});
-            }else{
-                showRedStatus('reference sensor should be different from sensor for calibrate. ');
-            }
-        }else{
-            showRedStatus('Please select reference sensor and sensor needs calibrate');
-        }
 
     });
 
@@ -336,6 +370,8 @@ $(function(){
     })
 
     $('#calibrate').click(function(){
+
+
         if(sensorOnePoints.length == 2 && sensorTwoPoints.length == sensorOnePoints.length){
             io.emit("calibrateSensors", {referenceSensorID: calibrationFrames["reference"], uncalibratedSensorID: calibrationFrames["uncalibrated"],
                 sensorOnePoints: sensorOnePoints, sensorTwoPoints: sensorTwoPoints}, function(data){

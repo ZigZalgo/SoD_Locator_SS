@@ -63,7 +63,7 @@ function drawGrid() {
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
     }else{
-        showGreenStatus('Welcome to SoD! \tYour window width is '+window.innerWidth+'px.');
+        showGreenStatus('Welcome to SoD! \t Drawing grid for window'+window.innerWidth+'px.');
         minorGridLineWidth = document.getElementById("cnv").width/80;
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
@@ -688,7 +688,7 @@ function updateContentWithObjects(){
                 //console.log("angleAfterCalibration: "+ data[key].calibration["Rotation"]);
                 //console.log("TransformX : "+ sensorX+data[key].calibration["TransformX"]);
                 //console.log("sensorYAfterCalibration: "+ data[key].calibration["Rotation"]);
-                drawSensor(ctxSensors,sensorX,sensorY,Object.keys(data).indexOf(key),angle, data[key].FOV);
+                drawSensor(ctxSensors,sensorX,sensorY,data[key].ID,angle, data[key].FOV);
                 var gradientVector = {X:0,Z:data[key].rangeInMM};
                 // get the vector from sensor point to the end point ot gradient
                 var rotatedGradientVector = matrixTransformation(gradientVector,data[key].calibration["Rotation"]);
@@ -703,6 +703,7 @@ function updateContentWithObjects(){
                 grd.addColorStop(1, 'rgba(51, 112, 212, 0.0)');
                 drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, grd,angle, data[key].FOV);
                 htmlString += ('<tr>' +
+                    '<td>' + data[key].ID + '</td>' +
                     '<td>' + data[key].sensorType + '</td>' +
                     '<td>' + data[key].socketID + '</td>' +
                     '<td>' + data[key].FOV + '</td>' +
@@ -710,7 +711,7 @@ function updateContentWithObjects(){
                     '</tr>')
             }
         };
-        $('#sensors').html('<legend>Sensors</legend><table style="width:100%"><tr>' +
+        $('#sensors').html('<legend>Sensors</legend><table style="width:100%"><tr>' +  '<th>ID</th>' +
             '<th>Type</th>' +
             '<th>socketID</th>' +
             '<th>FOV</th>' +

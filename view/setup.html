@@ -111,7 +111,7 @@
     })
 </script>
 </head>
-<body onload="drawGrid(); refreshSensors();fileList();">
+<body onload="drawGrid();fileList();">
 <div id="page-wrap">
     <section id="top">
         <header>Super Cool SOD Visualizer
@@ -159,7 +159,7 @@
                 </fieldset>
                 <fieldset class="calibration_step">
                     <legend> Step 4: </legend>
-                    <h3>After all four points(two from each image) are selected. Click on the "Calibrate" button </h3>
+                    <h3>After all four points(two from each image) are selected. Click on the "Calibrate" button.<br/>If calibration succeeded, there will be a green status on the left indicates the degree between two sensors. </h3>
                 </fieldset>
                 <fieldset class="calibration_step">
                     <legend> Error Status Explanation: </legend>
@@ -185,8 +185,7 @@
                                 <div class="calibration_wrap">
                                     <h5>Please Select a reference sensor:</h5>
                                     <select id="referenceSensorList"  name="referenceSensorList"></select>
-                                    <div class="canvas_wrap"><canvas id="cnvSensorOne" width="640" height="480"
-                                                                     style="z-index: 4;"></canvas> </div>
+                                    <div class="canvas_wrap" id="reference_wrap"> </div>
                                     <!--This is where the data from the server is added-->
                                 </div>
                                 <fieldset class="sub_field">
@@ -210,8 +209,7 @@
                                 <div class="calibration_wrap">
                                     <h5>Please Select sensor for calibrate:</h5>
                                     <select id="uncalibratedSensorList" name="uncalibratedSensorList"></select>
-                                    <div class="canvas_wrap"><canvas id="cnvSensorTwo" width="640" height="480"
-                                                                     style="z-index: 4;"></canvas>
+                                    <div class="canvas_wrap" id="calibrate_wrap"></canvas>
                                     </div>
                                     <!--This is where the data from the server is added-->
 
