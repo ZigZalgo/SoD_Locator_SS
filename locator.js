@@ -140,6 +140,10 @@ exports.dropData = function(socket,requestObject,dropRange,fn){
     }
 }
 
+function inRangeEvent(){
+    //locator.persons
+}
+
 /*
 * check all the data location and grab data if within range
 *   param: object  -> can be people , devices , dataPoints
@@ -722,6 +726,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length});
         }
 
+        if(deviceInfo.observeRange != undefined) {device.observeRange = deviceInfo.observeRange;};
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
         device.deviceType = deviceInfo.deviceType;

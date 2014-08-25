@@ -31,7 +31,8 @@ function SODDevice(deviceInfo){
         intersectionPoint : {X: 0, Y: 0},
         lastUpdated : new Date(),
         stationary : false,
-        deviceIP : ''
+        deviceIP : '',
+        observeRange:0
     }
     //setters]
     console.log('deviceInfo: '+ JSON.stringify(deviceInfo));

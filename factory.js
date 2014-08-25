@@ -171,6 +171,7 @@ function Device(socket, opts){
         this.lastUpdated = new Date();
         this.stationary = false;
         this.deviceIP = '';
+        this.observeRange = 0;
     }
     catch(err){
     }

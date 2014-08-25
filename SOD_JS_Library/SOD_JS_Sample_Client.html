@@ -63,7 +63,7 @@
                     }
                     console.log('stationary: '+ stationary);
                     sod = new SODDevice({orientation:Number($('input#inputOrientation').val()),FOV:Number($('input#FOV').val()),location:{X:Number($('input#inputLocationX').val()),Y:Number($('input#inputLocationY').val()),Z:Number($('input#inputLocationZ').val())},
-                        width:Number($('input#inputDeviceWith').val()),height:Number($('input#inputDeviceHeight').val()),stationary:stationary});
+                        width:Number($('input#inputDeviceWith').val()),height:Number($('input#inputDeviceHeight').val()),stationary:stationary,observeRange:Number($('#inputObserveRange').val())});
                     sod.init(serverURL,socketURL, sod);
 
                     //ADD LISTENERS////////////////////////////////////////////////
@@ -181,8 +181,9 @@
             <table>
                 <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
                     orientation: <input id='inputOrientation'  type="text" value='12'> FOV: <input id='FOV'  type="text" value='70'> Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
-                    Z<input id='inputLocationZ'  type="text" value='1'><br/> width::<input id='inputDeviceWith'  type="text" value='100'> height:<input id='inputDeviceHeight'  type="text" value='150'>
-                    stationary:<select id="inputStationaryBool">
+                    Z<input id='inputLocationZ'  type="text" value='1'><br/> width::<input id='inputDeviceWith'  type="text" value='500'/> height:<input id='inputDeviceHeight'  type="text" value='500'/>
+                    <label for="inputObserveRange">observeRange:</label><input id='inputObserveRange'  type="text" value='2000'/>
+                    stationary:<select id="inputStationaryBool"><br/>
                             <option>true</option>
                             <option>false</option>
                     </select>
