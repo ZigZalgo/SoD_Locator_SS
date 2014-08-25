@@ -3,7 +3,6 @@ var factory = require('../factory');
 var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
-var Q = require('q');
 
 describe("util.getSpaceTransitionRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
@@ -34,10 +33,17 @@ describe("util.getSpaceTransitionRule()", function() {
 // Testing Sample From Kinect
 describe("util.getTranslationRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
-    var startingLocation1 = {X:-49.3 ,Y:0 ,Z:1901};
-    var endingLocation1   = {X:350.9, Y:0, Z:1772};
-    var startingLocation2 = {X:-235.8 ,Y:0 ,Z:1745};
-    var endingLocation2   = {X:175.8, Y:0, Z:1827};
+    var startingLocation1 = {X:652.1 ,Y:0 ,Z:2056};
+    var endingLocation1   = {X:494.2, Y:0, Z:3555};
+    var startingLocation2 = {X:117.3 ,Y:0 ,Z:3873};
+    var endingLocation2   = {X:-858.2, Y:0, Z:2994};
+
+    it(" Byye testing Final Result of getTranslationRule", function(){
+        expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
+            to.eql({degree:0,xDistance:0,
+                zDistance:0,xSpaceTransition:0,zSpaceTransition: 1732.0533333333333,startingLocation:startingLocation2,}); // objects equal
+    });
+
 /*
     it("testing the calculation inside of getTranslationRule() for vector1)", function(){
         expect(util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:1*1000}); // objects equal

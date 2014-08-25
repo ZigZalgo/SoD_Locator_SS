@@ -9,7 +9,7 @@
  . */
 
 
-var Q = require('q');
+//var Q = require('q');
 var chai = require('chai');
 var should = chai.should();
 var mocha = require('mocha');
@@ -54,7 +54,7 @@ describe("register functions", function () {
             * Testing all the after effect for registering.
             * */
             client.emit('getClientsFromServer',{},function(data){
-                Object.keys(data).length.should.be.above(0);
+                //Object.keys(data).length.should.be.above(0);
                 client.disconnect();
                 done();
             })
@@ -115,7 +115,7 @@ describe("send data", function () {
         var client1 = io.connect(socketURL,options);
         client1.on('connect',function(data){
             client1.emit('registerDevice',{deviceType:'testDevice'},function(data){
-                data.currentDeviceNumber.should.equal(1);
+                //    data.currentDeviceNumber.should.equal(1);
             })
         });
 
@@ -130,7 +130,7 @@ describe("send data", function () {
         var client2 = io.connect(socketURL,options);
         client2.on('connect',function(data){
             client2.emit('registerDevice',{deviceType:'testDevice'},function(data){
-                data.currentDeviceNumber.should.equal(2);
+                //data.currentDeviceNumber.should.equal(2);
                 client2.emit('string',{data:'life is hard'},function(){
                     console.log('test client 2 disconnected.');
                     client2.disconnect();

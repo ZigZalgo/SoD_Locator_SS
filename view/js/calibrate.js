@@ -236,6 +236,9 @@ io.on("setCalibrationFrame", function(data){
             depthMultiplier = 5;//how is this
         }
 
+        if(data.payload!=null){
+            showGreenStatus('Received Frames Drawing on the Graph.')
+        }
 
         // if the frame data is from reference sensor
         if(calibrationFrames["reference"] == data.sourceID){
@@ -297,6 +300,7 @@ io.on("setCalibrationFrame", function(data){
                 console.log('!!!!!!!!!!!!!!!!!!get position!');
                 getPosition("cnvSensorTwo", data.sourceID, event);
             }
+
 
             ctx.putImageData(imgdata,0,0);
             canvas.addEventListener("mousedown", clickHandler2,false);

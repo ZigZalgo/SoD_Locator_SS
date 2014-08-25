@@ -84,6 +84,7 @@ exports.getTranslationRule = function (startingLocation1, endingLocation1, start
                 startingLocation: startingLocation2
             };
         } else {
+            console.log('Couldnot get rotation degree... Reselect Points.');
             return {
                 degree: NaN,
                 xDistance: startingLocation1.X - startingLocation2.X,
