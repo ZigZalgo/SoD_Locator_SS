@@ -656,57 +656,33 @@ function refreshStationaryLayer() {
             '</tr>' + htmlString + '</table>')
 
     })
-
-
-
-
-    /*
-    var ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height);
-
-    // Update dataPoitns on visualizer
-    io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
-        //var c = document.getElementById("cnv");
-        //console.log(JSON.stringify(data));
-        //var ctx = c.getContext("2d");
-        var x, z, radius, htmlString = "";
-        for (var key in data) {
-            if (data.hasOwnProperty(key)) {
-                x = shiftXToGridOrigin(data[key].location.X * pixelsPerMeter);
-                z = shiftXToGridOrigin(data[key].location.Z * pixelsPerMeter);
-                //radius = data[key].range * pixelsPerMeter
-                console.log('drawing: '+ data[key].ID);
-                radius = data[key].dropRange * pixelsPerMeter;
-                console.log(radius);
-                ctx.globalAlpha=0.4;
-                ctx.fillStyle = "#CCC";
-                ctx.beginPath();
-                ctx.arc(x, z, radius, 0, 2 * Math.PI);
-                ctx.fill();
-
-                htmlString += '<tr ><td>' + data[key].ID + '</td><td>X:' + data[key].location.X + ' Y:' + data[key].location.Y + ' Z:' + data[key].location.Z + '</td>' +
-                    '<td>' + getDataPath(data[key]) + '</td><td>' + data[key].dropRange + '</td>' + ' </tr>';
-                //ctx.globalAlpha = 0.3;
-                for(var dataKey in data[key].data){
-                    if(data[key].data.hasOwnProperty(dataKey)) {
-                        //console.log(JSON.stringify(data[key].data[dataKey].range));
-                        drawDataPoint(ctx, x, z, data[key].data[dataKey])
-                    }
-                }
-            }
-
-        }
-        //updateDataPointsInOverview(htmlString);
-        $('#dataPoints').html('<legend>Data Points</legend><table style="width:100%"><tr>' +
-            '<th style="">Data Point ID</th>' +
-            '<th>location</th>' +
-            '<th style="">dataPath</th>' +
-            '<th style="">dropRange</th>' +
-            '</tr>' + htmlString + '</table>')
-    })
-    */
 }
 
+
+function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
+    var deviceNameString;
+    io.emit('getDevicesWithSelection',{selection:['single'+deviceID]},function(data){
+        if(Object.keys(data).length>=0){
+            //console.log('got device: '+data[Object.keys(data)].name.length);
+            if(data[Object.keys(data)].name.length>=5){
+                deviceNameString = data[Object.keys(data)].name.substring(0, 4)+'...';
+            }else{
+                deviceNameString = data[Object.keys(data)].name;
+            }
+            //console.log(JSON.stringify(data[Object.keys(data)[0]].observeRange));
+            ctx.beginPath();
+            ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),data[Object.keys(data)[0]].observeRange*pixelsPerMeter,0,2*Math.PI);
+            ctx.strokeStyle = "green";
+            ctx.stroke();
+
+
+            ctx.fillStyle = "black"; //green
+            ctx.font = "12px Arial";
+            ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
+        }
+    });
+
+}
 
 /**
  *  Update the contents in the canvas and overview section.
@@ -803,23 +779,6 @@ function updateContentWithObjects(){
         return returnDegree;
     }
 
-    function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
-        var deviceNameString;
-        io.emit('getDevicesWithSelection',{selection:['single'+deviceID]},function(data){
-            if(Object.keys(data).length>=0){
-                console.log('got device: '+data[Object.keys(data)].name.length);
-                if(data[Object.keys(data)].name.length>=5){
-                    deviceNameString = data[Object.keys(data)].name.substring(0, 4)+'...';
-                }else{
-                    deviceNameString = data[Object.keys(data)].name;
-                }
-                ctx.fillStyle = "#2cd72A"; //green
-                ctx.font = "12px Arial";
-                ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
-            }
-        });
-
-    }
 
 
 
@@ -828,7 +787,6 @@ function updateContentWithObjects(){
         var htmlString = ""
         var c = document.getElementById("cnv");
         var ctx = c.getContext("2d");
-        var ctx1 = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height);
         for(var key in data){
             if(data.hasOwnProperty(key)){
@@ -842,9 +800,9 @@ function updateContentWithObjects(){
                 ctx.fill();
                 if(data[key].pairingState == 'paired'){
                     ctx.strokeStyle = "#2cd72A";
-                    ctx.rect(shiftXToGridOrigin(xInMeters)-minorGridLineWidth,shiftYToGridOrigin(zInMeters)-minorGridLineWidth,minorGridLineWidth*2,minorGridLineWidth*2);
+                    //ctx.rect(shiftXToGridOrigin(xInMeters)-minorGridLineWidth,shiftYToGridOrigin(zInMeters)-minorGridLineWidth,minorGridLineWidth*2,minorGridLineWidth*2);
                     ctx.stroke();
-                    getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters);
+                    getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters,c);
                 }
 
                 if(data[key].orientation != null){

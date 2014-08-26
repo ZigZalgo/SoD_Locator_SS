@@ -76,6 +76,7 @@ function Person(id, location, socket){
         this.lastUpdated = new Date();
         this.data = {};
         this.gesture = "untracked";
+        this.inRangeOf = {};
     }
     catch(err){
         return false;

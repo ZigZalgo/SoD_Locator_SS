@@ -150,11 +150,17 @@ function inRangeEvent(){
             for(var deviceKey in locator.devices){
                 if(locator.devices.hasOwnProperty(deviceKey)){
                     // if a person in in range of any device fire out broadcast event
-                    if(util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observeRange){
+                    if(locator.persons[personKey].inRangeOf[deviceKey]==undefined && util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observeRange){
                         //console.log(frontend.clients[deviceKey]);
                         //console.log('   person: '+locator.persons[personKey].uniquePersonID+' <-> Device: '+locator.devices[deviceKey].uniqueDeviceID+'   distance: ' + util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location));
                         //frontend.io.sockets.emit('broadcast',{listener:'enter',payload:{observer:locator.devices[deviceKey],invader:locator.persons[personKey].uniquePersonID}})
-                        frontend.io.sockets.emit('enter',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                        locator.persons[personKey].inRangeOf[deviceKey] = locator.devices[deviceKey].uniqueDeviceID;
+                        frontend.io.sockets.emit('enterObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                        console.log('-> enter '+locator.persons[personKey].inRangeOf[deviceKey]);
+                    }else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined && util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)>locator.devices[deviceKey].observeRange){
+                        frontend.io.sockets.emit('leaveObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                        delete locator.persons[personKey].inRangeOf[deviceKey];
+                        console.log('-> leaves '+locator.persons[personKey].inRangeOf[deviceKey]);
                     }
                 }
             }
@@ -164,11 +170,11 @@ function inRangeEvent(){
 
 /* Event handler */
 setInterval(function(){
-    console.log('interval called.');
+    console.log('Event Interval HeartBeat.');
     if(eventsSwitch.inRangeEvents==true){
         inRangeEvent();
     }
-},3000);
+},1000);
 
 
 /*

@@ -81,9 +81,13 @@
                         showGreenStatus('connect to server ..')
                     });
 
-                    sod.addListener('enter',function(data){
+                    sod.addListener('enterObserveRange',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
-                        console.log(JSON.stringify(data.payload));
+                        console.log('->enter!'+JSON.stringify(data.payload));
+                    });
+                    sod.addListener('leaveObserveRange',function(data){
+                        //showNormalStatus(JSON.stringify(data.payload));
+                        console.log('->leaves'+JSON.stringify(data.payload));
                     });
 
                     sod.addListener('request',function(data){
