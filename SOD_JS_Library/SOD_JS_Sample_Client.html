@@ -12,19 +12,26 @@
     <script>
 
 
+        /*
+         * Show status on the status log
+         *
+         * */
         function showRedStatus(status){
-            $('.status').html("<span class='red_status'>"+status+"</span>");
-            $('.red_status').fadeIn(600);
+            $('.status').empty();
+            $('.status').html("<div class='red_status'>"+status+"</div>");
+            $('.red_status').fadeIn('200');
         }
 
         function showGreenStatus(status){
-            $('.status').html("<span class='green_status'>"+status+"</span>");
-            $('.green_status').fadeIn(600);
+            $('.status').empty();
+            $('.status').html("<div class='green_status'>"+status+"</div>");
+            $('.green_status').fadeIn('200');
         }
 
         function showNormalStatus(status){
-            $('.status').html("<span class='normal_status'>"+status+"</span>");
-            $('.normal_status').fadeIn(600);
+            $('.status').empty();
+            $('.status').html("<div class='normal_status'>"+status+"</div>");
+            $('.normal_status').fadeIn('200');
         }
 
         $(document).ready(function(){
@@ -72,6 +79,11 @@
                     sod.addListener('connect',function(data){
                         sod.registerDevice(sod);
                         showGreenStatus('connect to server ..')
+                    });
+
+                    sod.addListener('enter',function(data){
+                        //showNormalStatus(JSON.stringify(data.payload));
+                        console.log(JSON.stringify(data.payload));
                     });
 
                     sod.addListener('request',function(data){
@@ -182,7 +194,7 @@
                 <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
                     orientation: <input id='inputOrientation'  type="text" value='12'> FOV: <input id='FOV'  type="text" value='70'> Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
                     Z<input id='inputLocationZ'  type="text" value='1'><br/> width::<input id='inputDeviceWith'  type="text" value='500'/> height:<input id='inputDeviceHeight'  type="text" value='500'/>
-                    <label for="inputObserveRange">observeRange:</label><input id='inputObserveRange'  type="text" value='2000'/>
+                    <label for="inputObserveRange">observeRange:</label><input id='inputObserveRange'  type="text" value='2'/>
                     stationary:<select id="inputStationaryBool"><br/>
                             <option>true</option>
                             <option>false</option>

@@ -63,7 +63,7 @@ function drawGrid() {
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
     }else{
-        showGreenStatus('Welcome to SoD! \t Drawing grid for window'+window.innerWidth+'px.');
+        showGreenStatus('Welcome to SoD! \t Drawing grid for window width: '+window.innerWidth+'px');
         minorGridLineWidth = document.getElementById("cnv").width/80;
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
@@ -356,10 +356,9 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
     }
 
     var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
-    var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
-    var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
+    //var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
+    //var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
 
-    console.log(actualOrientation);
     var deviceView = new Kinetic.Arc({
         innerRadius: 0,
         outerRadius: 2*pixelsPerMeter,
@@ -394,7 +393,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
     var observeRange = new Kinetic.Circle({
         x: 0,
         y: 0,
-        radius:observeRange/1000*pixelsPerMeter,
+        radius:observeRange*pixelsPerMeter,
         fill: '',
         stroke: 'green',
         strokeWidth:1,
@@ -410,6 +409,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         this.children[1].fill('#31CC00');
         this.children[1].stroke('');
         this.children[1].strokeWidth('0');
+        this.children[3].stroke('#31CC00');
         layer.draw();
     });
     stationaryDevice.on('mouseout', function() {
@@ -417,6 +417,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         this.children[1].fill('green');
         this.children[1].stroke('black');
         this.children[1].strokeWidth('2');
+        this.children[3].stroke('green');
 
         //this.fill('rgba(0, 255, 0, 1.0)');
         ////this.stroke('');

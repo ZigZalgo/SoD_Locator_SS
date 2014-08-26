@@ -168,7 +168,6 @@ function getPosition(canvasID, sid, event)
 // clear the select options
 function clearSelect(IDElement){
     $(IDElement).empty();
-
 }
 
 

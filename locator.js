@@ -12,6 +12,7 @@ var devices = {};
 var sensors = {};
 var datas = {};
 var sensorsReference = null;
+var eventsSwitch = {inRangeEvents:true}
 exports.persons = persons;
 exports.devices = devices;
 exports.sensors = sensors;
@@ -140,9 +141,35 @@ exports.dropData = function(socket,requestObject,dropRange,fn){
     }
 }
 
+
+/* inRangeEvent functions calculate whether a person is in range of a device. */
 function inRangeEvent(){
-    //locator.persons
+    //for all the people that are been tracked
+    for(var personKey in locator.persons){
+        if(locator.persons.hasOwnProperty(personKey)){
+            for(var deviceKey in locator.devices){
+                if(locator.devices.hasOwnProperty(deviceKey)){
+                    // if a person in in range of any device fire out broadcast event
+                    if(util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observeRange){
+                        //console.log(frontend.clients[deviceKey]);
+                        //console.log('   person: '+locator.persons[personKey].uniquePersonID+' <-> Device: '+locator.devices[deviceKey].uniqueDeviceID+'   distance: ' + util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location));
+                        //frontend.io.sockets.emit('broadcast',{listener:'enter',payload:{observer:locator.devices[deviceKey],invader:locator.persons[personKey].uniquePersonID}})
+                        frontend.io.sockets.emit('enter',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                    }
+                }
+            }
+        }
+    }
 }
+
+/* Event handler */
+setInterval(function(){
+    console.log('interval called.');
+    if(eventsSwitch.inRangeEvents==true){
+        inRangeEvent();
+    }
+},3000);
+
 
 /*
 * check all the data location and grab data if within range
@@ -234,6 +261,8 @@ exports.updatePersons = function(receivedPerson, socket){
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                         }
 
+
+
                     }
                     catch(err){
                         console.log("Error updating person: " + err)
@@ -287,7 +316,7 @@ exports.updatePersons = function(receivedPerson, socket){
                                         gestureHandler(key,persons[key].gesture,socket);//handles the guesture
                                     }
                                     persons[person.uniquePersonID] = person;
-									console.log('-> Register new person '+person.uniquePersonID+' sicne the distance off by '+ nearestDistance +' with ID:'+JSON.stringify(person.ID)+' by sensor :' + socket.id);
+									console.log('-> Register new person '+person.uniquePersonID+' since the distance off by '+ nearestDistance +' with ID:'+JSON.stringify(person.ID)+' by sensor :' + socket.id);
                                 }
 								
                             }
@@ -638,16 +667,7 @@ exports.updateDevice = function(socket,deviceInfo,fn){
     }
 }
 
-/*
-*  Update the data with new information
-* */
-exports.updateData = function(ID,dataInfo,fn){
-    for(var key in dataInfo){
-        if(dataInfo.hasOwnProperty(key)){
 
-        }
-    }
-}
 
 /*
 * Registering data with data info
