@@ -291,7 +291,8 @@ function SODDataPoint(dataPointInfo){
     this.dataPoint = {
         location: {X:0,Y:0,Z:0},
         data: null,
-        dropRange:0
+        dropRange:0,
+        observeRange: 0
     }
     //setters
     for(var key in dataPointInfo){
@@ -302,6 +303,7 @@ function SODDataPoint(dataPointInfo){
     this.socket= null;
     this.userListeners = {};
 }
+
 SODDataPoint.prototype = {
     init: function(serverURL,socketURL, _SOD){
         //connect socket register device and hearing events

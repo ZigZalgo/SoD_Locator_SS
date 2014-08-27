@@ -12,7 +12,7 @@ var devices = {};
 var sensors = {};
 var datas = {};
 var sensorsReference = null;
-var eventsSwitch = {inRangeEvents:true}
+var eventsSwitch = {inRangeEvents:true};
 exports.persons = persons;
 exports.devices = devices;
 exports.sensors = sensors;
@@ -39,7 +39,7 @@ exports.registerSensor = function(sensor){
 };
 
 exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
-    console.log("Calibrating sensors...")
+    console.log("Calibrating sensors...");
     return util.getTranslationRule(sensorOnePoints[0], sensorOnePoints[1], sensorTwoPoints[0], sensorTwoPoints[1])
 }
 
@@ -58,9 +58,14 @@ function isEmpty(str) {
 * **/
 function grabDataInRange(requestObject,targetObject){
     var distance,dataRange;
+    distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
+    if(distance<targetObject.observeRange){
+        console.log('-> Grab event emit: person : ' + targetObject.ID + ' grab dataPoint: ' + requestObject.uniquePersonID);
+        frontend.io.sockets.emit('grabInObserveRange',{payload:{observer:{ID:targetObject.ID,type:'dataPoint'},invader:requestObject.uniquePersonID}});
+    }
+
     if(targetObject.data != undefined && Object.keys(targetObject.data).length != 0) {
         // if there exists data in side of an object, grab all the data
-        distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
         for (var dataKey in targetObject.data) {
             if(targetObject.data.hasOwnProperty(dataKey)) {
                 dataRange = targetObject.data[dataKey].range;
@@ -76,6 +81,7 @@ function grabDataInRange(requestObject,targetObject){
 		console.log('\t->-> Ojbect grabbed '+'0 data from target.' );
 	}
 }
+
 //*
 // Request Object grab all the data from targetObject
 // *//
@@ -181,7 +187,7 @@ setInterval(function(){
 * check all the data location and grab data if within range
 *   param: object  -> can be people , devices , dataPoints
 * **/
-function grabDataFromDataPoints(object){
+function grabEventHandler(object){
     //var distance;
     //var dataRange;
     for( var key in dataPoints){
@@ -198,6 +204,7 @@ function grabDataFromDataPoints(object){
     }
 }
 
+
 /**
  *  Handles the gesture from person performs the action
  *  param:
@@ -209,7 +216,7 @@ function gestureHandler(key,gesture,socket){
     switch(gesture){
         case "Grab":
             console.log("-> GRAB gesture detected from person: " + key + "!");
-            grabDataFromDataPoints(persons[key]); // try to grab data if any data is within range
+            grabEventHandler(persons[key]); // try to grab data if any data is within range
             break;
         case "Release":
             console.log("-> RELEASE gesture detected from person: " + key + "!");
@@ -706,7 +713,7 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
             registerData[dataName]=datas[dataName];
         })
         console.log('register data: ' + JSON.stringify(registerData));
-        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.dropRange,registerData);
+        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.dropRange,registerData,dataPointInfo.observeRange);
         frontend.clients[socket.id].clientType = "dataPointClient";
         dataPoints[dataPoint.ID] = dataPoint; // reigster dataPoint to the list with its ID as its key
         console.log('all data points: ' +JSON.stringify(dataPoints));
@@ -718,14 +725,13 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
     }catch(err){
         console.log('failed registering data point due to: '+err);
     }
-
 }
+
 exports.registerDevice = function(socket, deviceInfo,fn){
     if(devices[socket.id] != undefined){
         devices[socket.id].height = deviceInfo.height;
         devices[socket.id].width = deviceInfo.width;
         devices[socket.id].deviceType = deviceInfo.deviceType;
-
         console.log("Device initiated late, updating height and width");
     }
     else{

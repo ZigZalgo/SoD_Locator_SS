@@ -486,13 +486,34 @@ function drawDataPoint(data,layer){
         strokeWidth: 4
     });*/
 
-    //console.log('hello');
+    var observeRange = new Kinetic.Circle({
+        x: 0,
+        y: 0,
+        radius:data.observeRange*pixelsPerMeter,
+        stroke: 'green',
+        strokeWidth:1,
+        opacity:0.5,
+        blurRadius:50
+    });
+    dataPointGroup.add(observeRange);
+
+    var dataPointID = new Kinetic.Text({
+        x: data.dropRange*pixelsPerMeter/2,
+        y: -(data.dropRange*pixelsPerMeter/2),
+        text: data.ID,
+        fontSize: 15,
+        fontFamily: 'Calibri',
+        fill: 'black'
+    });
+
+    dataPointGroup.add(dataPointID);
+
     var dropCircle = new Kinetic.Circle({
         x: 0,
         y: 0,
         radius:data.dropRange*pixelsPerMeter,
         fill: '#C9C9C9',
-        opacity:0.5
+        opacity:0.6
     });
     dataPointGroup.add(dropCircle);
 
@@ -512,24 +533,20 @@ function drawDataPoint(data,layer){
         })();
     }
 
-    var dataPointID = new Kinetic.Text({
-        x: data.dropRange*pixelsPerMeter/2,
-        y: -(data.dropRange*pixelsPerMeter/2),
-        text: data.ID,
-        fontSize: 15,
-        fontFamily: 'Calibri',
-        fill: 'black'
-    });
 
-    dataPointGroup.add(dataPointID);
+
 
     dataPointGroup.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
-       //layer.draw();
+        this.children[0].strokeWidth('4');
+        this.children[1].fontSize('24');
+       layer.draw();
     });
     dataPointGroup.on('mouseout', function() {
         document.body.style.cursor = 'default';
-        //layer.draw();
+        this.children[0].strokeWidth('1');
+        this.children[1].fontSize('15');
+        layer.draw();
     });
 
     var directionVector = {X:0,Y:0,Z:0};

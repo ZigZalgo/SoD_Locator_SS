@@ -89,6 +89,10 @@
                         //showNormalStatus(JSON.stringify(data.payload));
                         console.log('->leaves'+JSON.stringify(data.payload));
                     });
+                    sod.addListener('grabInObserveRange',function(data){
+                        //showNormalStatus(JSON.stringify(data.payload));
+                        console.log('->grab event:'+JSON.stringify(data.payload));
+                    });
 
                     sod.addListener('request',function(data){
                         console.log(JSON.stringify('Requested requestName: '+ JSON.stringify(data)));
