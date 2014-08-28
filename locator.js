@@ -60,8 +60,12 @@ function grabDataInRange(requestObject,targetObject){
     var distance,dataRange;
     distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
     if(distance<targetObject.observeRange){
-        console.log('-> Grab event emit: person : ' + targetObject.ID + ' grab dataPoint: ' + requestObject.uniquePersonID);
-        frontend.io.sockets.emit('grabInObserveRange',{payload:{observer:{ID:targetObject.ID,type:'dataPoint'},invader:requestObject.uniquePersonID}});
+        try{
+            console.log('-> Grab event emit: person : ' + targetObject.ID + ' grab dataPoint: ' + requestObject.uniquePersonID);
+            frontend.io.sockets.emit('grabInObserveRange',{payload:{observer:{ID:targetObject.ID,type:'dataPoint'},invader:requestObject.uniquePersonID}});
+        }catch(err){
+            console.log('*Failed to emit grabInObserveRange event due to: '+err);
+        }
     }
 
     if(targetObject.data != undefined && Object.keys(targetObject.data).length != 0) {
@@ -156,19 +160,23 @@ function inRangeEvent(){
             for(var deviceKey in locator.devices){
                 if(locator.devices.hasOwnProperty(deviceKey)){
                     // if a person in in range of any device fire out broadcast event
-                    if(locator.persons[personKey].inRangeOf[deviceKey]==undefined && util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observeRange){
-                        //console.log(frontend.clients[deviceKey]);
-                        //console.log('   person: '+locator.persons[personKey].uniquePersonID+' <-> Device: '+locator.devices[deviceKey].uniqueDeviceID+'   distance: ' + util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location));
-                        //frontend.io.sockets.emit('broadcast',{listener:'enter',payload:{observer:locator.devices[deviceKey],invader:locator.persons[personKey].uniquePersonID}})
-                        locator.persons[personKey].inRangeOf[deviceKey] = locator.devices[deviceKey].uniqueDeviceID;
-                        frontend.io.sockets.emit('enterObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
-                        console.log('-> enter '+locator.persons[personKey].inRangeOf[deviceKey]);
-                    }else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined && util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)>locator.devices[deviceKey].observeRange){
-                        frontend.io.sockets.emit('leaveObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
-                        delete locator.persons[personKey].inRangeOf[deviceKey];
-                        console.log('-> leaves '+locator.persons[personKey].inRangeOf[deviceKey]);
+                    try{
+                        if(locator.persons[personKey].inRangeOf[deviceKey]==undefined && util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observeRange){
+                            //console.log(frontend.clients[deviceKey]);
+                            //console.log('   person: '+locator.persons[personKey].uniquePersonID+' <-> Device: '+locator.devices[deviceKey].uniqueDeviceID+'   distance: ' + util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location));
+                            //frontend.io.sockets.emit('broadcast',{listener:'enter',payload:{observer:locator.devices[deviceKey],invader:locator.persons[personKey].uniquePersonID}})
+                            locator.persons[personKey].inRangeOf[deviceKey] = locator.devices[deviceKey].uniqueDeviceID;
+                            frontend.io.sockets.emit('enterObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                            console.log('-> enter '+locator.persons[personKey].inRangeOf[deviceKey]);
+                        }else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined && util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)>locator.devices[deviceKey].observeRange){
+                            frontend.io.sockets.emit('leaveObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                            delete locator.persons[personKey].inRangeOf[deviceKey];
+                            console.log('-> leaves '+locator.persons[personKey].inRangeOf[deviceKey]);
+                        }
+                    }catch(err){
+                        console.log('emitting enter and fail event failed ... due to: ' +err);
                     }
-                }
+                }// end of if ownPropertys
             }
         }
     }
