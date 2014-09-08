@@ -647,12 +647,20 @@ function updateContentWithObjects(){
                 grd.addColorStop(0, 'rgba(51, 112, 212, 0.8)');
                 grd.addColorStop(1, 'rgba(51, 112, 212, 0.0)');
                 drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, grd,angle, data[key].FOV);
+
+                var convertCalibrationToButton = function(isCalibrated, key){
+                    var tempString = "<button type=\"button\" onclick=\"sendResetRequest(\'" + key + "\')\">Reset</button>";
+                    console.log(tempString)
+                    if(isCalibrated) return tempString
+                    else return 'false';
+                }
+
                 htmlString += ('<tr>' +
                     '<td>' + data[key].ID + '</td>' +
                     '<td>' + data[key].sensorType + '</td>' +
                     '<td>' + data[key].socketID + '</td>' +
                     '<td>' + data[key].FOV + '</td>' +
-                    '<td>' + data[key].isCalibrated + '</td>' +
+                    '<td>' + convertCalibrationToButton(data[key].isCalibrated, key) + '</td>' +
                     '</tr>')
             }
         };
@@ -854,3 +862,8 @@ io.emit("registerWebClient", {});
 $(document).ready(function(){
     setInterval(function() {updateContentWithObjects(); }, 200); //poll server for people list and display on canvas
 })
+
+var sendResetRequest = function(socketID){
+    console.log('reset request')
+    $.post('/sensors/' + socketID + '/uncalibrate', '')
+}

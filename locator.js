@@ -4,7 +4,6 @@ var locator = require('./locator');
 var util = require('./util');
 var frontend = require('./frontend');
 var events = require("events");
-//var EventEmitter = require("events").EventEmitter;
 
 var dataPoints = {};
 var persons = {};
@@ -1065,4 +1064,9 @@ exports.printDevices = function(){
     }
     console.log("///////////////////////////////////////////////////////////////");
     return true;
+}
+
+exports.uncalibrateSensor = function(sensorSocketID){
+    console.log('received id: ' + sensorSocketID)
+    frontend.clients[sensorSocketID].emit('resetRule', '');
 }

@@ -1,6 +1,7 @@
 var express = require('express.io');
 var app = express().http().io();
 var data = require('./data');
+var sensorsREST = require('./REST/sensors');
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
@@ -10,6 +11,7 @@ init();
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
+var path = require('path');
 io.set('log level',0);
 var requestHandler = require('./requestHandler');
 var fs = require('fs');
@@ -20,6 +22,12 @@ var clients = {};
 exports.io = io;
 exports.clients = clients;
 
+app.configure(function(){
+    app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data' }));
+//app.use(express.bodyParser({uploadDir:'./data'}));
+    app.use(app.router);
+})
+
 if(isNaN(process.argv[2])){
     server.listen(3000);
 }
@@ -28,8 +36,6 @@ else{
 }
 
 requestHandler.start();
-
-app.use(express.bodyParser({uploadDir:'./data'}));
 
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/setup.html');
@@ -100,6 +106,7 @@ app.get('/dataJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/dataView.js');
 });
 
+app.post('/sensors/:id/uncalibrate', sensorsREST.uncalibrate)
 
 app.get('/files/:fileName.:ext', data.show);
 app.get('/filesList', data.fileList);
@@ -220,8 +227,4 @@ function init(){
         //console.log(files);
         console.log('End of initializing data');
     });
-
-
-
-
 }
