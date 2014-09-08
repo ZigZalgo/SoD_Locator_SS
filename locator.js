@@ -1069,4 +1069,14 @@ exports.printDevices = function(){
 exports.uncalibrateSensor = function(sensorSocketID){
     console.log('received id: ' + sensorSocketID)
     frontend.clients[sensorSocketID].emit('resetRule', '');
+
+    //if(this sensor isn't the only calibrated sensor)
+    //sets sensor to uncalibrated
+    for(var key in sensors){
+        if(sensors.hasOwnProperty(key)){
+            if(sensors[key].isCalibrated && key!=sensorSocketID){
+                sensors[sensorSocketID].isCalibrated = false;
+            }
+        }
+    }
 }
