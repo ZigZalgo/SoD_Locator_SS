@@ -9,6 +9,6 @@ exports.uncalibrate = function(req, res){
     console.log("Send resetRule event to sensor.");
     locator.uncalibrateSensor(req.params.id);
 
-    res.status(1337);
-    //res.send(req.params.id)
+    res.status(200);
+    res.send(req.params.id)
 }

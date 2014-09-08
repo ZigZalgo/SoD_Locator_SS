@@ -649,10 +649,8 @@ function updateContentWithObjects(){
                 drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, grd,angle, data[key].FOV);
 
                 var convertCalibrationToButton = function(isCalibrated, key){
-                    var tempString = "<button type=\"button\" onclick=\"sendResetRequest(\'" + key + "\')\">Reset</button>";
-                    console.log(tempString)
-                    if(isCalibrated) return tempString
-                    else return 'false';
+                    if(isCalibrated) return "<button type=\"button\" class=\"resetButtonOn\" onclick=\"sendResetRequest(\'" + key + "\')\">Reset</button>";
+                    else return "<button type=\"button\" class=\"resetButtonOff\" onclick=\"sendResetRequest(\'" + key + "\')\">N/A</button>";
                 }
 
                 htmlString += ('<tr>' +
@@ -860,10 +858,14 @@ var matrixTransformation = function(personLocation,angle){
 
 io.emit("registerWebClient", {});
 $(document).ready(function(){
-    setInterval(function() {updateContentWithObjects(); }, 200); //poll server for people list and display on canvas
+    setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for people list and display on canvas
 })
 
 var sendResetRequest = function(socketID){
     console.log('reset request')
+    $.ajaxSetup({
+        type: 'POST',
+        headers: { "cache-control": "no-cache" }
+    });
     $.post('/sensors/' + socketID + '/uncalibrate', '')
 }
