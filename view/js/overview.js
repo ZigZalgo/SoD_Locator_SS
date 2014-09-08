@@ -85,7 +85,7 @@ function drawGrid() {
     drawGridLines(cnv, gridOptions.majorLines);
 
 
-    var color = '1e1e1e';
+    var color = '#1e1e1e';
     drawCoordinate(cnv,color,majorGridLineWidth,majorGridLineWidth,majorGridLineWidth*3);
     return;
 }
@@ -114,7 +114,7 @@ function resizeCanvas(){
 function drawCoordinate(cnv,color,startingX,startingY,length){
     var gridWidth = cnv.width;
     var gridHeight = cnv.height;
-    var context =   cnv.getContext('2d');;
+    var context =   cnv.getContext('2d');
     context.beginPath();
     context.lineWidth="2";
     context.strokeStyle = color;
@@ -132,12 +132,10 @@ function drawCoordinate(cnv,color,startingX,startingY,length){
     context.font = "bold 15px Arial";
     context.fillText("+X", startingX+length-10,startingY+20);
 
-
     context.fillRect(startingX+pixelsPerMeter-2,startingY-5,3,10);
     context.fillStyle = color;
     context.font = "bold 12px Arial";
     context.fillText('1m', startingX+50,startingY+20);
-
 
     context.beginPath();
     context.lineWidth="2";
@@ -149,8 +147,6 @@ function drawCoordinate(cnv,color,startingX,startingY,length){
     context.lineTo(startingX,startingY+length);
     context.lineTo(startingX+5,startingY+length-10);
     context.stroke();
-
-
 
     context.fillRect(startingX-5,startingY+pixelsPerMeter-2,10,3);
     context.fillStyle = color;
@@ -258,14 +254,13 @@ function printPersonID(ID)
     return htmlString;
 }
 
-
-
 /*
  * Function that check if a string is empty
  * */
 function isEmpty(str) {
     return (!str || 0 === str.length);
 }
+
 /*
  * Pass in the object and return a link if it contains a data
  * */
@@ -283,10 +278,6 @@ function getDataPath(object) {
     return returnHTML;
 }
 
-
-
-
-
 /**
  * Draw Stationary Device
  *
@@ -294,53 +285,6 @@ function getDataPath(object) {
 function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observeRange,layer){
 
     console.log('width: '+ width + ' && height: ' + height);
-   /* var stationaryDevice = new Kinetic.Rect({
-        x: shiftXToGridOrigin(X*pixelsPerMeter) - (width/2),
-        y: shiftXToGridOrigin(Z*pixelsPerMeter) - (height/2),
-        width: width,
-        height: height,
-        fill: 'rgba(0, 255, 0, 0.7)',
-        //stroke: 'black',
-        //strokeWidth: 4,
-        draggable: true
-    });*/
-/*
-    var stationaryDevice = new Kinetic.Shape({
-        sceneFunc: function(context) {
-            //context.fillStyle = "rgba(0, 255, 0, 0.7)";
-            //context.fill();
-            context.beginPath();
-
-            function getDeviceOrientation(deviceX,deviceZ){
-                var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
-                var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
-                return returnDegree;
-            }
-            if(orientation != undefined)
-            {
-                drawView(context, X*pixelsPerMeter, Z*pixelsPerMeter, 2000, "#B8B8B8",orientation + getDeviceOrientation(X,Z) + 90, FOV);
-                //drawView(context, X*pixelsPerMeter, Z*pixelsPerMeter, 2000, "rgba(0, 200, 0, 0.4)",orientation + getDeviceOrientation(X,Z) + 90, FOV);
-            }
-
-            context.rect(shiftXToGridOrigin(X*pixelsPerMeter) - (width/2), shiftYToGridOrigin(Z*pixelsPerMeter) - (height/2), width, height);
-            //context.fillStrokeShape(this);
-
-            //draw observe range
-            if(observeRange!=undefined){
-                context.arc(shiftXToGridOrigin(X*pixelsPerMeter), shiftYToGridOrigin(Z*pixelsPerMeter), observeRange/1000*pixelsPerMeter, 0, 2 * Math.PI);
-            }
-
-
-            //context.fillStyle = "rgba(0, 255, 0, 1.0)"; //
-            //context.font = "18px Arial";
-            context.fillText(ID,shiftXToGridOrigin(X*pixelsPerMeter)+(width/2),shiftYToGridOrigin(Z*pixelsPerMeter)-(height/2));
-            context.fillStrokeShape(this);
-        },
-        fill: 'rgba(0, 255, 0, 1.0)',
-        opacity: 0.3,
-        draggable: true
-    });
-*/
 
     var stationaryDevice = new Kinetic.Group({
         x: shiftXToGridOrigin(X*pixelsPerMeter),
@@ -390,6 +334,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         fill: 'black'
     });
     stationaryDevice.add(deviceID);
+
     var observeRange = new Kinetic.Circle({
         x: 0,
         y: 0,
@@ -402,8 +347,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
     });
     stationaryDevice.add(observeRange);
 
-
-// mouse events
+    // mouse events
     stationaryDevice.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
         this.children[1].fill('#31CC00');
@@ -412,6 +356,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         this.children[3].stroke('#31CC00');
         layer.draw();
     });
+
     stationaryDevice.on('mouseout', function() {
         document.body.style.cursor = 'default';
         this.children[1].fill('green');
@@ -465,6 +410,7 @@ function drawData(ctx,x,z,data){
     ctx.font = "bold 14px Consolas";
     ctx.fillText(data.ID, x + radius * 0.6, z - radius * 0.6);
 }
+
 /* */
 function drawDataPoint(data,layer){
     var x = shiftXToGridOrigin(data.location.X * pixelsPerMeter);
@@ -476,15 +422,6 @@ function drawDataPoint(data,layer){
         draggable:true
     });
     console.log(JSON.stringify(data));
-
-    /*var circle = new Kinetic.Circle({
-        x: x,
-        y: z,
-        radius: 70,
-        fill: 'red',
-        stroke: 'black',
-        strokeWidth: 4
-    });*/
 
     var observeRange = new Kinetic.Circle({
         x: 0,
@@ -533,9 +470,6 @@ function drawDataPoint(data,layer){
         })();
     }
 
-
-
-
     dataPointGroup.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
         this.children[0].strokeWidth('4');
@@ -571,51 +505,6 @@ function drawDataPoint(data,layer){
         }
     });
 
-
-    //dataPointGroup.add(circle);
-
-   /* var dataDropRange = new Kinetic.Shape({
-        sceneFunc: function(ctx){
-            //console.log(ctx);
-            ctx.beginPath();
-            ctx.arc(x, z, data.dropRange * pixelsPerMeter, 0, 2 * Math.PI,false);
-            ctx.fillStrokeShape(this);
-        },
-        fill: '#CCC',
-        opacity: 0.5,
-        draggable: true
-    })
-    dataPointGroup.add(dataDropRange);
-    */
-    /*dataPointGroup.on('mouseover', function() {
-        document.body.style.cursor = 'pointer';
-        this.fill('#31CC00');
-        this.stroke('black');
-        this.strokeWidth('2');
-        layer.draw();
-    });
-    dataPointGroup.on('mouseout', function() {
-        document.body.style.cursor = 'default';
-        this.fill('rgba(0, 255, 0, 1.0)');
-        this.stroke('');
-        this.strokeWidth('0');
-        //this.opacity('rgba(0, 255, 0, 1.0)');
-        layer.draw();
-    });
-*/
-
-    //radius = data[key].range * pixelsPerMeter
-    //console.log('drawing: '+ data.ID);
-
-
-
-    //ctx.globalAlpha = 0.3;
-    /*for(var dataKey in data.data){
-        if(data.data.hasOwnProperty(dataKey)) {
-            //console.log(JSON.stringify(data[key].data[dataKey].range));
-            drawData(ctx, x, z, data.data[dataKey])
-        }
-    }*/
     layer.add(dataPointGroup);
 }
 /**
@@ -623,9 +512,7 @@ function drawDataPoint(data,layer){
  *
  * */
 function refreshStationaryLayer() {
-   // var c = document.getElementById("cnvStationary");
-
-    console.log('-> Alright , lets do this!');
+    console.log('Stationary layer refreshed');
 
     var stage = new Kinetic.Stage({
         container: 'cnvStationary',
@@ -675,7 +562,6 @@ function refreshStationaryLayer() {
     })
 }
 
-
 function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
     var deviceNameString;
     io.emit('getDevicesWithSelection',{selection:['single'+deviceID]},function(data){
@@ -692,13 +578,11 @@ function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
             ctx.strokeStyle = "green";
             ctx.stroke();
 
-
             ctx.fillStyle = "black"; //green
             ctx.font = "12px Arial";
             ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
         }
     });
-
 }
 
 /**
@@ -725,12 +609,7 @@ function updateContentWithObjects(){
             '</tr>' + htmlString + '</table>')
     });
 
-
-
-
-
     /**
-     *
      * Update everything about sensor
      * */
     io.emit('getSensorsFromServer', {}, function(data){
@@ -785,20 +664,14 @@ function updateContentWithObjects(){
             '</tr>' + htmlString + '</table>')
     });
 
-
     /**
      *  Update everything about the person
-     *
      * */
     function getPersonOrientation(personX,personZ){
         var angleTowardsKinect = Math.atan2(personX,personZ);
         var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
         return returnDegree;
     }
-
-
-
-
 
     io.emit('getPeopleFromServer', {}, function(data){
         var htmlString = ""
@@ -920,8 +793,6 @@ function updateContentWithObjects(){
                         '<td>'+data[key].ownerID+'</td>'+'<td>'+data[key].observeRange+'</td>'+
                         '</tr>'
                 }
-
-
             }
         }
 
@@ -934,7 +805,6 @@ function updateContentWithObjects(){
             '</tr>'+
             '' +htmlString+
             '</table>'); /*appending the data on the page using Jquery */
-
     });
 }
 
@@ -951,11 +821,6 @@ io.on("connect", function(){
     io.emit("registerWebClient", {});
     refreshStationaryLayer();
 });
-/*
- io.on("refreshWebClientSensors", function(){
- updateCanvasWithSensors();
- });
- */
 
 $(function(){
     $('#getPoints').click(function(){ /*listening to the button click using Jquery listener*/
@@ -984,7 +849,6 @@ var matrixTransformation = function(personLocation,angle){
     returnLocation.Z = Math.round(returnZ*this.ROUND_RATIO)/this.ROUND_RATIO;
     return returnLocation; // for testing
 }
-
 
 io.emit("registerWebClient", {});
 $(document).ready(function(){

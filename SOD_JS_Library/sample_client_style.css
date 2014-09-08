@@ -34,7 +34,7 @@ input {width: 60px;}
 header{
     position: relative;
     top: -7px;
-    max-width: 195px; background: #1e1e1e;
+    max-width: 250px; background: #1e1e1e;
     margin:10px 0px 10px 50px;
     padding-top:10px;padding-bottom: 10px;
     line-height:1.6;font-family: "Agency FB",DinRound, Sans-Serif;
