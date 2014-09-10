@@ -154,6 +154,15 @@ exports.handleRequest = function (socket) {
     socket.on('updateDeviceInfo', function (deviceInfo, fn) {
         locator.updateDevice(socket.id,deviceInfo,fn);
     });
+    socket.on('updateSensorInfo',function(sensorInfo,fn){
+        if(sensorInfo.translateRule!=undefined){
+            var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
+                StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
+            locator.sensors[socket.id].calibration = receivedCalibration;
+            console.log(JSON.stringify(locator.sensors[socket.id].calibration));
+        }
+
+    });
     socket.on('getPeopleFromServer', function (request, fn) {
         if (fn != undefined) {
             fn((locator.persons));

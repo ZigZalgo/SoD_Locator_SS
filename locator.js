@@ -644,6 +644,9 @@ exports.cleanUpSensor = function(socketID){
         }
     }
 
+
+
+
     /////
     if(sensorsReference.socketID == socketID){
         if(Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)}).length > 0){
@@ -1066,7 +1069,7 @@ exports.printDevices = function(){
     return true;
 }
 
-exports.uncalibrateSensor = function(sensorSocketID){
+exports.uncalibrateSensor = function(sensorSocketID,fn){
     console.log('received id: ' + sensorSocketID)
     frontend.clients[sensorSocketID].emit('resetRule', '');
 
@@ -1076,6 +1079,7 @@ exports.uncalibrateSensor = function(sensorSocketID){
         if(sensors.hasOwnProperty(key)){
             if(sensors[key].isCalibrated && key!=sensorSocketID){
                 sensors[sensorSocketID].isCalibrated = false;
+
             }
         }
     }

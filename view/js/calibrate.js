@@ -235,9 +235,6 @@ io.on("setCalibrationFrame", function(data){
             depthMultiplier = 5;//how is this
         }
 
-        if(data.payload!=null){
-            showGreenStatus('Received Frames Drawing on the Graph.')
-        }
 
         // if the frame data is from reference sensor
         if(calibrationFrames["reference"] == data.sourceID){
@@ -304,6 +301,9 @@ io.on("setCalibrationFrame", function(data){
             ctx.putImageData(imgdata,0,0);
             canvas.addEventListener("mousedown", clickHandler2,false);
             //$('#sensorTwoStatus').html(depthMultiplier);
+        }
+        if(data.payload!=null){
+            showGreenStatus('Received Frames. Drawing on the Graph.')
         }
     }
 
