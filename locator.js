@@ -183,7 +183,7 @@ function inRangeEvent(){
 
 /* Event handler */
 setInterval(function(){
-    console.log('Event Interval HeartBeat.');
+    //console.log('Event Interval HeartBeat.');
     if(eventsSwitch.inRangeEvents==true){
         inRangeEvent();
     }
