@@ -864,58 +864,63 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     var observer = devices[observerSocketID];
     var returnDevices = [];
 
-    //(CB - Should we throw an exception here? Rather then just returning an empty list?)
-    try{
-        if (observer.location == null || observer.orientation == null)
-            return returnDevices;
-        if (observer.FOV == 0.0)
-            return returnDevices;
-        if (observer.FOV == 360.0){
-            return Object.keys(deviceList).filter(function(key){
-                if(deviceList[key] != observer && deviceList[key].location != undefined){
-                    return true;
-                }
-            })
+    // if the FOV type is radial
+    if(observer.FOV.FOVtype =="radial"){
+        //(CB - Should we throw an exception here? Rather then just returning an empty list?)
+        try{
+            if (observer.location == null || observer.orientation == null)
+                return returnDevices;
+            if (observer.FOV.degree == 0.0)
+                return returnDevices;
+            if (observer.FOV.degree == 360.0){
+                return Object.keys(deviceList).filter(function(key){
+                    if(deviceList[key] != observer && deviceList[key].location != undefined){
+                        return true;
+                    }
+                })
+            }
         }
-    }
-    catch(err){
-        console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
-    }
+        catch(err){
+            console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
+        }
 
-	// // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
-	// // We will use angles to represent these vectors.
-    try{
-        //get the angle to sens
-        var angleToSensor =util.getPersonOrientation(observer.location.X,observer.location.Z);
-        var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ (observer.FOV/2));
-        var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- (observer.FOV/2));
+        // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
+        // // We will use angles to represent these vectors.
+        try{
+            //get the angle to sens
+            var angleToSensor =util.getPersonOrientation(observer.location.X,observer.location.Z);
+            var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ (observer.FOV.degree/2));
+            var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- (observer.FOV.degree/2));
 
-        //console.log("Left FOV = " + leftFieldOfView)
-        //console.log("Right FOV = " + rightFieldOfView)
+            //console.log("Left FOV = " + leftFieldOfView)
+            //console.log("Right FOV = " + rightFieldOfView)
 
-        return Object.keys(deviceList).filter(function(key){
-            //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
+            return Object.keys(deviceList).filter(function(key){
+                //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
 
 
-            if(deviceList[key] != observer && deviceList[key].location != undefined){
-                if (leftFieldOfView > rightFieldOfView &&
-                    (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
-                    (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
-                    return true;
-                }
-                else if (leftFieldOfView < rightFieldOfView)
-                {
-                    if ((util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                if(deviceList[key] != observer && deviceList[key].location != undefined){
+                    if (leftFieldOfView > rightFieldOfView &&
+                        (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
                         (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
                         return true;
                     }
+                    else if (leftFieldOfView < rightFieldOfView)
+                    {
+                        if ((util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                            (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
+                            return true;
+                        }
+                    }
                 }
-            }
-        })
+            })
+        }
+        catch(err){
+            console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
+        }
+
     }
-    catch(err){
-        console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
-    }
+
 }
 
 // TODO: test!
