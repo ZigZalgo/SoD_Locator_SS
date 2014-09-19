@@ -183,7 +183,7 @@ function inRangeEvent(){
 
 /* Event handler */
 setInterval(function(){
-    console.log('Event Interval HeartBeat.');
+    //console.log('Event Interval HeartBeat.');
     if(eventsSwitch.inRangeEvents==true){
         inRangeEvent();
     }
@@ -870,9 +870,9 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
         try{
             if (observer.location == null || observer.orientation == null)
                 return returnDevices;
-            if (observer.FOV.degree == 0.0)
+            if (observer.FOV== 0.0)
                 return returnDevices;
-            if (observer.FOV.degree == 360.0){
+            if (observer.FOV== 360.0){
                 return Object.keys(deviceList).filter(function(key){
                     if(deviceList[key] != observer && deviceList[key].location != undefined){
                         return true;
@@ -889,8 +889,8 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
         try{
             //get the angle to sens
             var angleToSensor =util.getPersonOrientation(observer.location.X,observer.location.Z);
-            var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ (observer.FOV.degree/2));
-            var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- (observer.FOV.degree/2));
+            var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ (observer.FOV/2));
+            var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- (observer.FOV/2));
 
             //console.log("Left FOV = " + leftFieldOfView)
             //console.log("Right FOV = " + rightFieldOfView)

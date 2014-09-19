@@ -309,13 +309,14 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
    // var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
     //var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
     //var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
-
-     if(FOV.FOVType=='radial'){
-         var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV.degree/2);
+     var actualOrientation = (360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2));
+     if(FOV.FOVType!='radial'){
+         console.log('getDeviceOrientation:'+getDeviceOrientation(X,Z) + '   FOV/2:'+FOV/2 + '\torientation:'+orientation);
+         var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
          var deviceView = new Kinetic.Arc({
              innerRadius: 0,
              outerRadius: 2*pixelsPerMeter,
-             angle:FOV.degree,
+             angle:FOV,
              rotationDeg:actualOrientation,
              fill: 'rgba(0, 255, 0, 1.0)',
              opacity:0.3
@@ -324,22 +325,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
          stationaryDevice.add(deviceView);
 
 
-     }else if(FOV.FOVType=='rectangular'){
-         ///TODO: add rectangular view for stationary device
-         var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV.degree/2);
-         var deviceView = new Kinetic.Rect({
-             x: 1,
-             y: 1,
-             width: FOV.FOVWidth,
-             height: FOV.FOVHeight,
-             fill: 'green',
-             stroke: 'black',
-             strokeWidth: 4
-         });
-         stationaryDevice.add(deviceView);
      }
-
-    console.log(JSON.stringify(FOV));
 
     var deviceBody = new Kinetic.Rect({
         x: -(width/2),
@@ -419,29 +405,25 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
 
      layer.add(stationaryDevice);
      ///TODO: add FOVGroupController
-    if(FOV.FOVType =='radial'){
+    if(FOV!=undefined){
         var controlGroup = new Kinetic.Group ({
             x: stationaryDevice.getPosition().x,
             y: stationaryDevice.getPosition().y,
             opacity: 0.8, draggable: true
         }); layer.add (controlGroup);
         var originalArc = stationaryDevice.children[0];
-        console.log(originalArc.getRotationDeg());//originalArc.outerRadius()*Math.cos(originalArc.getRotationDeg()*(Math.PI/180)));
 
         var sign = new Kinetic.Path({
-            x: originalArc.outerRadius()*Math.sin((originalArc.getRotationDeg()*(Math.PI/180))) - 0.25*pixelsPerMeter, y:originalArc.outerRadius()*Math.cos(originalArc.getRotationDeg()*(Math.PI/180)- 0.25*pixelsPerMeter),
+            x: -0.25*pixelsPerMeter, y: -deviceView.outerRadius()-0.25*pixelsPerMeter,
             // Path from http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-path-tutorial/
             data: 'M12.582,9.551C3.251,16.237,0.921,29.021,7.08,38.564l-2.36,1.689l4.893,2.262l4.893,2.262l-0.568-5.36l-0.567-5.359l-2.365,1.694c-4.657-7.375-2.83-17.185,4.352-22.33c7.451-5.338,17.817-3.625,23.156,3.824c5.337,7.449,3.625,17.813-3.821,23.152l2.857,3.988c9.617-6.893,11.827-20.277,4.935-29.896C35.591,4.87,22.204,2.658,12.582,9.551z',
             scale: { x:0.5, y:0.5 }, fill: 'black'
         }); controlGroup.add (sign);
 
         var originalDegree = originalArc.getRotationDeg();
-        if(originalDegree>=0&&originalDegree<=180){
-            var X = originalArc.outerRadius()*Math.sin(originalDegree*(Math.PI/180));
-        }
         console.log('object rotation degree: ' + originalArc.getRotationDeg());
         var control = new Kinetic.Circle ({
-            x: originalArc.outerRadius()*Math.sin(originalArc.getRotationDeg()*(Math.PI/180)), y: originalArc.outerRadius()*Math.cos(originalArc.getRotationDeg()*(Math.PI/180)), fill: 'yellow', opacity: 0.2, radius: 0.3*pixelsPerMeter
+            x: 0, y: -deviceView.outerRadius(), fill: 'yellow', opacity: 0, radius: 0.3*pixelsPerMeter
         }); controlGroup.add (control);
         var deviceBody = stationaryDevice.children[1];
 
@@ -460,31 +442,13 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
 
         controlGroup.setDragBoundFunc (function (pos,event) {
             var groupPos = stationaryDevice.getPosition();
-            //console.log('pos: ' + (pos.x + control.getPosition().x) + " " +  (pos.y+control.getPosition().y) + ' groupPos : ' +JSON.stringify(groupPos));
+           console.log('pos: ' + JSON.stringify(pos));
             var rotation = degrees (angle (groupPos.x, groupPos.y, pos.x + control.getPosition().x, pos.y+control.getPosition().y));
             var dis = distance (groupPos.x, groupPos.y, pos.x + control.getPosition().x, pos.y+control.getPosition().y);
-            stationaryDevice.children[0].setRotationDeg (rotation-(FOV.degree/2));
-            console.log("rotation: "+(rotation));
-
-
-            console.log('counter translation: '+ (-(rotation+90))); //360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV.degree/2)
-
+            stationaryDevice.children[0].setRotationDeg (rotation-(FOV/2));
+            console.log("rotation: "+stationaryDevice.children[0].getRotationDeg());
+            //console.log('counter translation: '+ (-(rotation+90))); //360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV.degree/2)
             return pos;
-            /*if(dis<radius){
-                return pos;
-            }else if(Math.abs(pos.x + control.getPosition().x-groupPos.x) > radius/2){
-                console.log('x exceeds');
-                return {y:pos.y,
-                    x:groupPos.x + radius/2
-                }
-            }
-            else if(Math.abs(pos.y + control.getPosition().y-groupPos.y) > radius/2){
-                console.log('y exceeds');
-                return {y:groupPos.y + radius/2,
-                    x:pos.x
-                };
-            }*/
-            //return pos;
         });
 
         function calcSignOpacity() {
@@ -502,16 +466,9 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         stage.getContainer().addEventListener ('mousemove', calcSignOpacity, false);
 
 
-        controlGroup.on ('dragend', function() {
-            // cf. http://stackoverflow.com/questions/3996687/how-do-i-only-allow-dragging-in-a-circular-path
-            //var radius = text.getWidth() * text.getScale().x + 55, angle = group.getRotation(), groupPos = group.getPosition()
-            //controlGroup.setPosition ({
-            //  x: groupPos.x + radius * Math.cos (angle),
-            //  y: groupPos.y + radius * Math.sin (angle)})
 
-            //var dragendArc = stationaryDevice.children[0];
-            //console.log(dragendArc.outerRadius());
-            //controlGroup.move(dragendArc.outerRadius()*Math.sin((dragendArc.getRotationDeg()*(Math.PI/180))),dragendArc.outerRadius()*Math.cos((dragendArc.getRotationDeg()*(Math.PI/180))));
+
+        controlGroup.on ('dragend', function() {
             var dragendArc = stationaryDevice.children[0];
             console.log("stationaryDevice"+ JSON.stringify(stationaryDevice.getPosition()));
             controlGroup.setPosition({
@@ -519,6 +476,21 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
                 y: stationaryDevice.getPosition().y//-dragendArc.outerRadius()*Math.cos((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180))
             });
             layer.draw();
+            console.log(controlGroup.getPosition(0));
+            console.log('degreeChange:' + (-(actualOrientation-(360+dragendArc.getRotationDeg()))));//
+            console.log('udpate orientation request')
+            $.ajaxSetup({
+                type: 'POST',
+                headers: { "cache-control": "no-cache" }
+            });
+            var newOrientation = (orientation+(actualOrientation-(360+dragendArc.getRotationDeg())));
+            $.post('/devices/updateOrientation'+'/' + deviceID.getText()+'/'+ newOrientation, function(data,status){
+                if(status == 'success'){
+                    refreshStationaryLayer();
+                }
+            })
+        //};
+
             // https://github.com/ericdrowell/KineticJS/issues/123
             //line.transitionTo ({points: linePoints (57), duration: 1})
 
