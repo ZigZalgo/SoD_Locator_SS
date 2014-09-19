@@ -194,15 +194,7 @@
                 sod.pairPersonWithID(pairPersonID);
             });
             $('#radialField').hide();
-            $('#inputFOVTypeBool').on('change',function(){
-                if($('#inputFOVTypeBool option:selected').text() === "radial"){
-                    $('#radialField').slideToggle('300');
-                    $('#rectangularField').slideToggle('300');
-                }else if($('#inputFOVTypeBool option:selected').text() === "rectangular"){
-                    $('#radialField').slideToggle('300');
-                    $('#rectangularField').slideToggle('300');
-                }
-            });
+
 
         })// end of document ready
     </script>

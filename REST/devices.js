@@ -13,7 +13,7 @@ exports.updateOrientation= function(req, res){
         if(locator.devices.hasOwnProperty(key)&&locator.devices[key].uniqueDeviceID==req.params.id){
 
             locator.devices[key].orientation = Math.round(req.params.orientation*100)/100;
-            console.log(locator.devices[key].orientation);
+            console.log('udpate device:'+locator.devices[key].uniqueDeviceID+' orientation to: '+locator.devices[key].orientation);
         }
     }
     res.status(200);

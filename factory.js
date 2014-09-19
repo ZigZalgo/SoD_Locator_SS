@@ -34,9 +34,10 @@ function dataPoint(){
     this.location = null;
     this.data = null;
     this.range = null; // how far this data is allow to be seen
-    this.observeRange = null;
+    this.observer = null;
+    this.subscriber = null;
 }
-function dataPoint(location,socketID,dropRange,data,observeRange){
+function dataPoint(location,socketID,dropRange,data,observer,subscriber){
     try{
         if(location.X == null || location.Y == null || location.Z == null){
             var err = new Error("X, Y, or Z is null");
@@ -46,10 +47,11 @@ function dataPoint(location,socketID,dropRange,data,observeRange){
         this.socketID = socketID;
         this.location = location;
         this.dropRange = dropRange;
-        this.observeRange = observeRange;
+        this.observer = observer;
         if(data!=undefined){
             this.data = data;
         }
+        this.subscriber = subscriber;
     }catch(err){
         return false;
     }

@@ -310,7 +310,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
     //var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
     //var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
      var actualOrientation = (360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2));
-     if(FOV.FOVType!='radial'){
+     if(FOV != undefined){
          console.log('getDeviceOrientation:'+getDeviceOrientation(X,Z) + '   FOV/2:'+FOV/2 + '\torientation:'+orientation);
          var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
          var deviceView = new Kinetic.Arc({
@@ -323,8 +323,6 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
          });
          deviceView.clockwise(false);
          stationaryDevice.add(deviceView);
-
-
      }
 
     var deviceBody = new Kinetic.Rect({
@@ -533,16 +531,33 @@ function drawDataPoint(data,layer){
     });
     console.log(JSON.stringify(data));
 
-    var observeRange = new Kinetic.Circle({
-        x: 0,
-        y: 0,
-        radius:data.observeRange*pixelsPerMeter,
-        stroke: 'green',
-        strokeWidth:1,
-        opacity:0.5,
-        blurRadius:50
-    });
-    dataPointGroup.add(observeRange);
+    if(data.observer.observerType=='radial'){
+        var observeRange = new Kinetic.Circle({
+            x: 0,
+            y: 0,
+            radius:data.observeRange*pixelsPerMeter,
+            stroke: 'green',
+            strokeWidth:1,
+            opacity:0.5,
+            blurRadius:50
+        });
+        dataPointGroup.add(observeRange);
+    }else if(data.observer.observerType=='rectangular'){
+        var width = data.observer.observeWidth*pixelsPerMeter;
+        var height = data.observer.observeHeight*pixelsPerMeter;
+        var observeRange = new Kinetic.Rect({
+            x: -(width/2),
+            y: -(height/2),
+            width: width,
+            height: height,
+            fill: '#C9C9C9',
+            stroke: 'black',
+            strokeWidth:1,
+            opacity:0.5
+        });
+        dataPointGroup.add(observeRange);
+    }
+
 
     var dataPointID = new Kinetic.Text({
         x: data.dropRange*pixelsPerMeter/2,
@@ -583,13 +598,13 @@ function drawDataPoint(data,layer){
     dataPointGroup.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
         this.children[0].strokeWidth('4');
-        this.children[1].fontSize('24');
+        //this.children[1].fontSize('24');
        layer.draw();
     });
     dataPointGroup.on('mouseout', function() {
         document.body.style.cursor = 'default';
         this.children[0].strokeWidth('1');
-        this.children[1].fontSize('15');
+        //this.children[1].fontSize('15');
         layer.draw();
     });
 
