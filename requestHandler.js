@@ -345,7 +345,7 @@ exports.handleRequest = function (socket) {
     socket.on('requestDataFromSelection', function (request, fn) {
         for (var key in util.filterDevices(socket, request)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
-                frontend.clients[key].emit("request", {data: request.data}, function (data) {
+                frontend.clients[key].emit("request", {data: request.data, arguments: request.arguments}, function (data) {
                     socket.emit("requestedData", data);
                 })
             }
