@@ -63,9 +63,16 @@ function drawGrid() {
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
     }else{
-        showGreenStatus('Welcome to SoD! \t Drawing grid for window width: '+window.innerWidth+'px');
-        minorGridLineWidth = document.getElementById("cnv").width/80;
-        majorGridLineWidth = document.getElementById("cnv").width/16;
+        if(window.innerWidth==1920){
+            showGreenStatus('Welcome to SoD! \t Drawing grid for window width: '+window.innerWidth+'px');
+        }else{
+            showGreenStatus('Welcome to SoD! \t Drawing grid for window width: '+window.innerWidth+'px\n' + '\n1920*1080' +
+                ' is the optimal screen width for SOD');
+        }
+
+
+        minorGridLineWidth = 800/80;//document.getElementById("cnv").width/80;
+        majorGridLineWidth = 800/16;//document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
     }
     var cnv = document.getElementById("cnvBG");
@@ -92,7 +99,7 @@ function drawGrid() {
 
 $(window).resize(function(){
     console.log('resize is hard with new width:' + window.innerWidth);
-    resizeCanvas();
+    //resizeCanvas();
 
 });
 
