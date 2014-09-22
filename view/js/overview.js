@@ -535,10 +535,11 @@ function drawDataPoint(data,layer){
         var observeRange = new Kinetic.Circle({
             x: 0,
             y: 0,
-            radius:data.observeRange*pixelsPerMeter,
+            radius:data.observer.observeRange*pixelsPerMeter,
+            fill:'green',
             stroke: 'green',
             strokeWidth:1,
-            opacity:0.5,
+            opacity:0.3,
             blurRadius:50
         });
         dataPointGroup.add(observeRange);
@@ -550,10 +551,10 @@ function drawDataPoint(data,layer){
             y: -(height/2),
             width: width,
             height: height,
-            fill: '#C9C9C9',
+            fill:'green',
             stroke: 'black',
             strokeWidth:1,
-            opacity:0.5
+            opacity:0.3
         });
         dataPointGroup.add(observeRange);
     }

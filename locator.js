@@ -207,7 +207,11 @@ function inRangeEvent(){
                                 emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                                 console.log('-> enter '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             }
-                        }// end of rectangualar
+                        }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)<=locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
+                            locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
+                            emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
+                            console.log('-> enter '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
+                        }
                     }else if(locator.persons[personKey].inRangeOf[dataPointKey]!=undefined){
                         if(locator.dataPoints[dataPointKey].observer.observerType=='rectangular'){
                         //console.log('inRange '+ (locator.dataPoints[dataPointKey].location.Z-locator.dataPoints[dataPointKey].observer.observeHeight/2));
@@ -219,7 +223,12 @@ function inRangeEvent(){
                                 emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                                 delete locator.persons[personKey].inRangeOf[dataPointKey];
                            }
-                        }// end of if rectangular
+                        }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)>locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
+                            console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
+                            //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}});
+                            emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
+                            delete locator.persons[personKey].inRangeOf[dataPointKey];
+                        }
                     }// in range of somebdoy ends
                 }
                 }
@@ -772,7 +781,7 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
         var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.dropRange,registerData,dataPointInfo.observer,dataPointInfo.subscriber);
         frontend.clients[socket.id].clientType = "dataPointClient";
         dataPoints[dataPoint.ID] = dataPoint; // reigster dataPoint to the list with its ID as its key
-        console.log('all data points: ' +JSON.stringify(dataPoints));
+        //console.log('all data points: ' +JSON.stringify(dataPoints));
         if(fn!=undefined){
             fn(dataPoints[socket.id]);
         }
