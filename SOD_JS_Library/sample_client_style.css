@@ -338,27 +338,47 @@ section#calibration_section .calibration_wrap{
 
 /* Buttons!! */
 
-.button{
-    color:white;
-    margin: auto;
-    background: #d05a47;
-    padding: 5px 0px;
+.buttonSelected {
+    color:#1e1e1e;
+    border: 1px solid #ECECEC;
+    font-family: "Agency FB",DinRound, Sans-Serif;
+    font-size: 1.5em;
+    margin: 0 0;
+    padding: 0.5em 0.6em;
+    display: inline-block;
+    position: relative;
     text-align: center;
-    font-weight: bold;
-    border-radius: 10px;
-    box-shadow: 0px 1px 3px #888888
-}
-.button:hover{
-    color:#292929;
-    cursor:pointer;
-    box-shadow:none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-user-select: none;
+    background:#ECECEC;
 }
 
-.points{
-    font-weight: bold;
-    color: #1656bf;
-    text-align: left;
-    padding:3px;
+.button{
+    color:#ECECEC;
+    border: 1px solid #ECECEC;
+    font-family: "Agency FB",DinRound, Sans-Serif;
+    font-size: 1.5em;
+    margin: 0 0;
+    padding: 0.5em 0.6em;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-user-select: none;
+    background:#1e1e1e;
+
+}
+.button:hover{
+    color:#1e1e1e;
+    cursor:pointer;
+    box-shadow:none;
+    background:#ECECEC;
 }
 
 #calibrate{
