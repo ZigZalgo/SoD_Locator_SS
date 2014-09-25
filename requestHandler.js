@@ -16,6 +16,7 @@ exports.handleRequest = function (socket) {
         locator.registerData(dataInfo,)
     });*/
     socket.on('registerDevice', function (deviceInfo, fn) {
+        console.log("Something tried to register...")
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         if(fn!=undefined) {
             locator.registerDevice(socket, deviceInfo,fn);
@@ -269,84 +270,44 @@ exports.handleRequest = function (socket) {
     //END LOCATOR SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
     //START SENDING SERVICES/////////////////////////////////////////////////////////////////////////////////////////
-
-    /*
-     * Send string to devices based on selection
-     *   'all'       -- So far we can send to all the devices that are connected to the server,
-     *   'inView'    -- The devices in the view of the device who calls this function.
-     *   ''          -- to nobody. Server still acknowledge the event
-     **/
-    socket.on('sendStringToDevicesWithSelection', function (request, fn) {
-        for (var key in util.filterDevices(socket, request)) {
-            // send to all the devices except the one who calls it.
-            if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
-                //console.log('sending to a ' + locator.devices[key].deviceType);
-                if(request.eventName==undefined){
-                    frontend.clients[key].emit("string", {data: request.data})
-                }
-                else{
-                    frontend.clients[key].emit(request.eventName, {data: request.data})
-                }
-            }
-        }
-        if (fn != undefined) {
-            fn({status: "server: string sent to devices with selection: " + request.selection});
-        }
-    });
-
-    socket.on('sendDictionaryToDevicesWithSelection', function (request, fn) {
-        for (var key in util.filterDevices(socket, request)) {
-            if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
-                if(request.eventName==undefined){
-                    frontend.clients[key].emit("dictionary", {data: request.data})
-                }
-                else{
-                    frontend.clients[key].emit(request.eventName, {data: request.data})
-                }
-            }
-        }
-        if (fn != undefined) {
-            fn({status: "server: dictionary sent to devices with selection: " + request.selection});
-        }
-    });
-
-    socket.on('sendDictionaryToDevicesWithSelectionIncludingSelf', function (request, fn) {
-        for (var key in util.filterDevices(socket, request)) {
+    socket.on('sendEventToDevicesWithSelectionIncludingSelf', function(payload, fn){
+        for (var key in util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key)) {
-                if(request.eventName==undefined){
-                    frontend.clients[key].emit("dictionary", {data: request.data})
+                if(payload.eventName==undefined){
+                    frontend.clients[key].send(payload)
                 }
                 else{
-                    frontend.clients[key].emit(request.eventName, {data: request.data})
+                    frontend.clients[key].emit(payload.eventName, payload)
                 }
             }
         }
         if (fn != undefined) {
-            fn({status: "server: dictionary sent to devices with selection: " + request.selection});
+            fn({status: "server: content sent to devices with selection: " + payload.selection});
         }
     });
 
-    socket.on('sendEventToDevicesWithSelection', function(request, fn){
-        for (var key in util.filterDevices(socket, request)) {
+    socket.on('sendEventToDevicesWithSelection', function(payload, fn){
+        for (var key in util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
-                if(request.eventName==undefined){
-                    frontend.clients[key].emit("content", {data: request.data})
+                if(payload.eventName==undefined){
+                    frontend.clients[key].send(payload.data)
                 }
                 else{
-                    frontend.clients[key].emit(request.eventName, {data: request.data})
+                    frontend.clients[key].emit(payload.eventName, payload.data)
                 }
             }
         }
         if (fn != undefined) {
-            fn({status: "server: content sent to devices with selection: " + request.selection});
+            fn({status: "server: content sent to devices with selection: " + payload.selection});
         }
     });
 
     socket.on('requestDataFromSelection', function (request, fn) {
         for (var key in util.filterDevices(socket, request)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
-                frontend.clients[key].emit("request", {data: request.data, arguments: request.arguments}, function (data) {
-                    socket.emit("requestedData", data);
+                if(request.arguments==undefined) request.arguments = null;
+                frontend.clients[key].emit("request", {dataRequested: request.data, arguments: request.arguments}, function (data) {
+                    socket.emit(request.data, data);
                 })
             }
         }
