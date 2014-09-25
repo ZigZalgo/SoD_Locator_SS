@@ -183,11 +183,17 @@ function inRangeEvent(){
                             //console.log('   person: '+locator.persons[personKey].uniquePersonID+' <-> Device: '+locator.devices[deviceKey].uniqueDeviceID+'   distance: ' + util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location));
                             //frontend.io.sockets.emit('broadcast',{listener:'enter',payload:{observer:locator.devices[deviceKey],invader:locator.persons[personKey].uniquePersonID}})
                             locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
-                            frontend.io.sockets.emit('enterObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+
+                            //frontend.io.sockets.emit('enterObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                            frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+
                             console.log('-> enter '+locator.persons[personKey].inRangeOf[deviceKey]);
                         }else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined && util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)>locator.devices[deviceKey].observeRange){
                             console.log('-> leaves '+locator.persons[personKey].inRangeOf[deviceKey]);
-                            frontend.io.sockets.emit('leaveObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+
+                            //frontend.io.sockets.emit('leaveObserveRange',{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                            frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+
                             delete locator.persons[personKey].inRangeOf[deviceKey];
                         }
                     }catch(err){
