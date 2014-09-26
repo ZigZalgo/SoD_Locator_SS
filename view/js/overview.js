@@ -296,7 +296,7 @@ function degrees (radians) {return radians * (180/Math.PI)}
 function angle (cx, cy, px, py) {var x = cx - px; var y = cy - py; return Math.atan2 (-y, -x)}
 function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x), 2) + Math.pow ((p2y - p1y), 2))}
 
- function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observeRange,layer,stage){
+ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observer,layer,stage){
 
     console.log('width: '+ width + ' && height: ' + height);
 
@@ -353,18 +353,37 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
     });
     stationaryDevice.add(deviceID);
 
-    var observeRangeCircle = new Kinetic.Circle({
-        x: 0,
-        y: 0,
-        radius:observeRange*pixelsPerMeter,
-        fill: '',
-        stroke: 'green',
-        strokeWidth:1,
-        opacity:0.8,
-        blurRadius:50
-    });
-    stationaryDevice.add(observeRangeCircle);
-
+     console.log('Observer:' + JSON.stringify(observer));
+     if(observer.observerType == 'radial') {
+         var observeRange = new Kinetic.Circle({
+             x: 0,
+             y: 0,
+             radius: observeRange * pixelsPerMeter,
+             fill: '',
+             stroke: 'green',
+             strokeWidth: 1,
+             opacity: 0.8,
+             blurRadius: 50
+         });
+         stationaryDevice.add(observeRange);
+     }else if(observer.observerType == 'rectangular'){
+         var width = observer.observeWidth*pixelsPerMeter;
+         var height = observer.observeHeight*pixelsPerMeter;
+         console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
+         var rotatedDirection = matrixTransformation({X:observer.observerDistance*pixelsPerMeter,Y:0,Z:0},-(deviceView.getRotationDeg()+FOV/2));
+         console.log(rotatedDirection);
+         var observeRange = new Kinetic.Rect({
+             x: rotatedDirection.X-(width/2),
+             y: rotatedDirection.Z-(height/2),
+             width: width,
+             height: height,
+             fill:'',
+             stroke: 'green',
+             strokeWidth:1,
+             opacity:0.8
+         });
+         stationaryDevice.add(observeRange);
+     }
     // mouse events
     stationaryDevice.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
@@ -411,6 +430,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
      layer.add(stationaryDevice);
      ///TODO: add FOVGroupController
     if(FOV!=undefined){
+        var rotatedDirection = matrixTransformation({X:stationaryDevice.children[0].outerRadius(),Y:0,Z:0},-(stationaryDevice.children[0].getRotationDeg()+FOV/2));
         var controlGroup = new Kinetic.Group ({
             x: stationaryDevice.getPosition().x,
             y: stationaryDevice.getPosition().y,
@@ -419,16 +439,15 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         var originalArc = stationaryDevice.children[0];
 
         var sign = new Kinetic.Path({
-            x: -0.25*pixelsPerMeter, y: -deviceView.outerRadius()-0.25*pixelsPerMeter,
+            x: rotatedDirection.X-0.25*pixelsPerMeter, y: rotatedDirection.Z-0.25*pixelsPerMeter,
             // Path from http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-path-tutorial/
             data: 'M12.582,9.551C3.251,16.237,0.921,29.021,7.08,38.564l-2.36,1.689l4.893,2.262l4.893,2.262l-0.568-5.36l-0.567-5.359l-2.365,1.694c-4.657-7.375-2.83-17.185,4.352-22.33c7.451-5.338,17.817-3.625,23.156,3.824c5.337,7.449,3.625,17.813-3.821,23.152l2.857,3.988c9.617-6.893,11.827-20.277,4.935-29.896C35.591,4.87,22.204,2.658,12.582,9.551z',
             scale: { x:0.5, y:0.5 }, fill: 'black'
         }); controlGroup.add (sign);
 
         var originalDegree = originalArc.getRotationDeg();
-        console.log('object rotation degree: ' + originalArc.getRotationDeg());
         var control = new Kinetic.Circle ({
-            x: 0, y: -deviceView.outerRadius(), fill: 'yellow', opacity: 0, radius: 0.3*pixelsPerMeter
+            x: rotatedDirection.X, y: rotatedDirection.Z, fill: 'yellow', opacity: 0, radius: 0.3*pixelsPerMeter
         }); controlGroup.add (control);
         var deviceBody = stationaryDevice.children[1];
 
@@ -447,12 +466,23 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
 
         controlGroup.setDragBoundFunc (function (pos,event) {
             var groupPos = stationaryDevice.getPosition();
-           console.log('pos: ' + JSON.stringify(pos));
+           //console.log('pos: ' + JSON.stringify(pos));
             var rotation = degrees (angle (groupPos.x, groupPos.y, pos.x + control.getPosition().x, pos.y+control.getPosition().y));
             var dis = distance (groupPos.x, groupPos.y, pos.x + control.getPosition().x, pos.y+control.getPosition().y);
             stationaryDevice.children[0].setRotationDeg (rotation-(FOV/2));
-            console.log("rotation: "+stationaryDevice.children[0].getRotationDeg());
+            //console.log("rotation: "+stationaryDevice.children[0].getRotationDeg());
             //console.log('counter translation: '+ (-(rotation+90))); //360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV.degree/2)
+
+            if(observer.observerType=='rectangular'){
+                var width = observer.observeWidth*pixelsPerMeter;
+                var height = observer.observeHeight*pixelsPerMeter;
+                var rotatedDirection = matrixTransformation({X:observer.observerDistance*pixelsPerMeter,Y:0,Z:0},-(stationaryDevice.children[0].getRotationDeg()+FOV/2));
+                //console.log(stationaryDevice.children[3].getX());
+                stationaryDevice.children[3].setX(rotatedDirection.X-(width/2));
+                stationaryDevice.children[3].setY(rotatedDirection.Z-(height/2));
+                //layer.draw();
+            }
+
             return pos;
         });
 
@@ -476,9 +506,11 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         controlGroup.on ('dragend', function() {
             var dragendArc = stationaryDevice.children[0];
             console.log("stationaryDevice"+ JSON.stringify(stationaryDevice.getPosition()));
+
+            var rotatedDirection = matrixTransformation({X:stationaryDevice.children[0].outerRadius(),Y:0,Z:0},-(stationaryDevice.children[0].getRotationDeg()+FOV/2));
             controlGroup.setPosition({
-                x: stationaryDevice.getPosition().x,//-dragendArc.outerRadius()*Math.sin((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180)),
-                y: stationaryDevice.getPosition().y//-dragendArc.outerRadius()*Math.cos((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180))
+                x: rotatedDirection.X,//-dragendArc.outerRadius()*Math.sin((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180)),
+                y: rotatedDirection.Z//-dragendArc.outerRadius()*Math.cos((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180))
             });
             layer.draw();
             console.log(controlGroup.getPosition(0));
@@ -663,7 +695,7 @@ function refreshStationaryLayer() {
                     //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
                         data[key].location.X, data[key].location.Z, data[key].width / 1000 * pixelsPerMeter,
-                            data[key].height / 1000 * pixelsPerMeter, data[key].orientation, data[key].FOV,data[key].observeRange,layer,stage)
+                            data[key].height / 1000 * pixelsPerMeter, data[key].orientation, data[key].FOV,data[key].observer,layer,stage)
                 }
             }
         }

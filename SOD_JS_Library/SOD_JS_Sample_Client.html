@@ -76,9 +76,16 @@
                         deviceFOV = {FOVType:"rectangular",FOVWidth:Number($('#inputFOVWidth').val()),FOVHeight:Number($('#inputFOVHeight').val())}
                    }*/
 
+                    var observer  = null;
+                    if($('#inputObserveTypeBool option:selected').text() === "radial"){
+                        observer = {observerType:'radial',observeRange:Number($('#inputObserveRange').val())}
+                    }else if($('#inputObserveTypeBool option:selected').text() === "rectangular"){
+                        observer = {observerType:'rectangular',observeWidth:Number($('#inputObserveWidth').val()),observeHeight:Number($('#inputObserveHeight').val()),observerDistance:Number($('#inputObserverDistance').val())};
+                    }
+
                     console.log('stationary: '+ stationary);
                     sod = new SODDevice({orientation:Number($('input#inputOrientation').val()),FOV:Number($('#inputFOVDegree').val()),location:{X:Number($('input#inputLocationX').val()),Y:Number($('input#inputLocationY').val()),Z:Number($('input#inputLocationZ').val())},
-                        width:Number($('input#inputDeviceWith').val()),height:Number($('input#inputDeviceHeight').val()),stationary:stationary,observeRange:Number($('#inputObserveRange').val())});
+                        width:Number($('input#inputDeviceWith').val()),height:Number($('input#inputDeviceHeight').val()),stationary:stationary,observer:observer});
                     sod.init(serverURL,socketURL, sod);
 
                     //ADD LISTENERS////////////////////////////////////////////////
@@ -193,7 +200,18 @@
                 var pairPersonID = $('#pairPersonID').val();
                 sod.pairPersonWithID(pairPersonID);
             });
+
+            // Observer Field
             $('#radialField').hide();
+            $('#inputObserveTypeBool').on('change',function(){
+                if($('#inputObserveTypeBool option:selected').text() === "radial"){
+                    $('#radialField').slideToggle('300');
+                    $('#rectangularField').slideToggle('300');
+                }else if($('#inputObserveTypeBool option:selected').text() === "rectangular"){
+                    $('#radialField').slideToggle('300');
+                    $('#rectangularField').slideToggle('300');
+                }
+            });
 
 
         })// end of document ready
@@ -212,19 +230,24 @@
                 <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
                     orientation: <input id='inputOrientation'  type="text" value='12'> <br/>
                     FOV:<input id='inputFOVDegree'  type="text" value='70'>
-                    <!--<fieldset>
-                        <legend>FOV</legend>
-                        FOV Type:<select id="inputFOVTypeBool"><br/>
+
+                    <br/>Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
+                    Z<input id='inputLocationZ'  type="text" value='1'><br/> width::<input id='inputDeviceWith'  type="text" value='500'/> height:<input id='inputDeviceHeight'  type="text" value='500'/>
+                    <!--<label for="inputObserveRange">observeRange:</label><input id='inputObserveRange'  type="text" value='2'/>-->
+                    <fieldset>
+                        <legend>Observer</legend>
+                        FOV Type:<select id="inputObserveTypeBool"><br/>
                         <option>rectangular</option>
                         <option>radial</option>
                     </select><br/>
-                        <div id="radialField">FOVDegree: <input id='inputFOVDegree'  type="text" value='70'></div>
-                        <div id="rectangularField">FOVWeight: <input id='inputFOVWidth'  type="text" value='100'>
-                        FOVHeight: <input id='inputFOVHeight'  type="text" value='100'></div>
-                    </fieldset>!-->
-                    <br/>Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
-                    Z<input id='inputLocationZ'  type="text" value='1'><br/> width::<input id='inputDeviceWith'  type="text" value='500'/> height:<input id='inputDeviceHeight'  type="text" value='500'/>
-                    <label for="inputObserveRange">observeRange:</label><input id='inputObserveRange'  type="text" value='2'/>
+                        <div id="radialField">observeRange:<input id='inputObserveRange'  type="text" value='1'></div>
+                        <div id="rectangularField">observeWidth: <input id='inputObserveWidth'  type="text" value='2'><br/>
+                            observeHeight: <input id='inputObserveHeight'  type="text" value='1'><br/>
+                            Distance: <input id="inputObserverDistance" type="number" value = '1'>
+                        </div>
+
+                    </fieldset>
+
                     stationary:<select id="inputStationaryBool"><br/>
                             <option>true</option>
                             <option>false</option>

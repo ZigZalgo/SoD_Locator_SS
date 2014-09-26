@@ -32,7 +32,7 @@ function SODDevice(deviceInfo){
         lastUpdated : new Date(),
         stationary : false,
         deviceIP : '',
-        observeRange:0
+        observer:null
     }
     //setters]
     console.log('deviceInfo: '+ JSON.stringify(deviceInfo));

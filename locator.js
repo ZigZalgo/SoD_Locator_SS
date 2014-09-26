@@ -829,7 +829,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length});
         }
 
-        if(deviceInfo.observeRange != undefined) {device.observeRange = deviceInfo.observeRange;};
+        if(deviceInfo.observer != undefined) {device.observer = deviceInfo.observer;};
         device.height = deviceInfo.height;
         device.width = deviceInfo.width;
         device.deviceType = deviceInfo.deviceType;
