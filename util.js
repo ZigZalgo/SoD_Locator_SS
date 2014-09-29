@@ -210,6 +210,20 @@ exports.angleBetweenPoints = function (start, end) {
     return this.normalizeAngle(unnormalizedDegrees);
 };
 
+// function that check if a point is in inside of an rectangle
+
+exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
+    if(objectLocation.X<=(observerLocation.X - width/2)||(objectLocation.X >=observerLocation.X+width/2)||
+        (objectLocation.Z<=observerLocation.Z - height/2) || objectLocation.Z >= observerLocation.Z + height/2){
+        return false;
+    }else{
+        return true;
+    }
+}
+
+
+
+
 // Tested!
 exports.getIntersectionPoint = function (line1, line2) {
     var IntersectionPoint = null;
@@ -307,7 +321,7 @@ exports.getLinesOfShape = function (device) {
     @return:
             returnDegree    -- degree value of orientation (+/- KINECT_VIEW_RANGE)
 */
-exports.getPersonOrientation = function (personX, personZ) {
+exports.getObjectOrientationToSensor = function (personX, personZ) {
     var angleTowardsKinect = Math.atan2(personX, personZ);
     var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
     return returnDegree;
@@ -326,6 +340,16 @@ exports.getDistanceToKinect = function (personX, personZ) {
     var returnDistance = Math.sqrt(personX * personX + personZ * personZ);
     return returnDistance;
 };
+
+/*
+* Get a observerLocation of a object with orientation and observer (such as device objects)
+* */
+exports.getObserverLocation = function(objectWithObserver){
+    var actualOrientation = 360 - (objectWithObserver.orientation + util.getObjectOrientationToSensor(objectWithObserver.location.X,objectWithObserver.location.Z) + 90+ objectWithObserver.FOV/2);
+    var rotatedDirection = util.matrixTransformation({X:objectWithObserver.observer.observerDistance,Y:0,Z:0},-(actualOrientation+objectWithObserver.FOV/2));
+    var observerLocation = {X:rotatedDirection.X+objectWithObserver.location.X,Y:rotatedDirection.Y+objectWithObserver.location.Y,Z:rotatedDirection.Z+objectWithObserver.location.Z};
+    return observerLocation;
+}
 
 
 // Tested!

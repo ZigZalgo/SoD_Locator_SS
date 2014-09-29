@@ -211,10 +211,10 @@ describe("util.getDegreeOfTwoVectors()", function(){
 describe("util.getPersonAngle()", function(){
     // Get example when the angle of X=0.5,, should out put 14.292786284569123
     it("should output angle 18.43494882292201 when person is at X = 1,Z = 3", function(){
-        assert.equal(util.getPersonOrientation(1,3), 18.43494882292201);
+        assert.equal(util.getObjectOrientationToSensor(1,3), 18.43494882292201);
     });
     it("should return angle 27 when X = 1, Z = 0",function(){
-        assert.equal(util.getPersonOrientation(0,1),0);
+        assert.equal(util.getObjectOrientationToSensor(0,1),0);
     });
 });
 

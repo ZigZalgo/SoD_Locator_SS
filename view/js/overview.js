@@ -319,7 +319,6 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
      var actualOrientation = (360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2));
      if(FOV != undefined){
          console.log('getDeviceOrientation:'+getDeviceOrientation(X,Z) + '   FOV/2:'+FOV/2 + '\torientation:'+orientation);
-         var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
          var deviceView = new Kinetic.Arc({
              innerRadius: 0,
              outerRadius: 2*pixelsPerMeter,
@@ -358,7 +357,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
          var observeRange = new Kinetic.Circle({
              x: 0,
              y: 0,
-             radius: observeRange * pixelsPerMeter,
+             radius: observer.observeRange * pixelsPerMeter,
              fill: '',
              stroke: 'green',
              strokeWidth: 1,
@@ -371,7 +370,6 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
          var height = observer.observeHeight*pixelsPerMeter;
          console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
          var rotatedDirection = matrixTransformation({X:observer.observerDistance*pixelsPerMeter,Y:0,Z:0},-(deviceView.getRotationDeg()+FOV/2));
-         console.log(rotatedDirection);
          var observeRange = new Kinetic.Rect({
              x: rotatedDirection.X-(width/2),
              y: rotatedDirection.Z-(height/2),
@@ -575,8 +573,8 @@ function drawDataPoint(data,layer){
             x: 0,
             y: 0,
             radius:data.observer.observeRange*pixelsPerMeter,
-            fill:'green',
-            stroke: 'green',
+            fill:'#C9BC61',
+            stroke: 'black',
             strokeWidth:1,
             opacity:0.3,
             blurRadius:50
@@ -590,7 +588,7 @@ function drawDataPoint(data,layer){
             y: -(height/2),
             width: width,
             height: height,
-            fill:'green',
+            fill:'#C9BC61',
             stroke: 'black',
             strokeWidth:1,
             opacity:0.3
@@ -954,14 +952,14 @@ function updateContentWithObjects(){
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
                         '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
                         '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
-                        '<td>'+data[key].ownerID+'</td>'+'<td>'+data[key].observeRange+'</td>'+
+                        '<td>'+data[key].ownerID+'</td>'+'<td>'+data[key].observer.observerType+'</td>'+
                         '</tr>'
                 }
                 else{
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
                         '<td>('+data[key].location.X.toFixed(3)+', '+data[key].location.Y+', '+data[key].location.Z.toFixed(3)+')</td>'+
                         '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>disabled</td>'+
-                        '<td>'+data[key].ownerID+'</td>'+'<td>'+data[key].observeRange+'</td>'+
+                        '<td>'+data[key].ownerID+'</td>'+'<td>'+data[key].observer.observerType+'</td>'+
                         '</tr>'
                 }
             }
