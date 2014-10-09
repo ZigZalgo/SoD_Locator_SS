@@ -2,6 +2,7 @@ var express = require('express.io');
 var app = express().http().io();
 var data = require('./data');
 var sensorsREST = require('./REST/sensors');
+var devicesREST = require('./REST/devices');
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
@@ -107,6 +108,7 @@ app.get('/dataJS', function (req, res) {
 });
 
 app.post('/sensors/:id/uncalibrate', sensorsREST.uncalibrate)
+app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrientation)
 
 app.get('/files/:fileName.:ext', data.show);
 app.get('/filesList', data.fileList);

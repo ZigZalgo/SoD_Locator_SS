@@ -63,9 +63,16 @@ function drawGrid() {
         majorGridLineWidth = document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
     }else{
-        showGreenStatus('Welcome to SoD! \t Drawing grid for window width: '+window.innerWidth+'px');
-        minorGridLineWidth = document.getElementById("cnv").width/80;
-        majorGridLineWidth = document.getElementById("cnv").width/16;
+        if(window.innerWidth==1920){
+            showGreenStatus('Welcome to SoD! \t Drawing grid for window width: '+window.innerWidth+'px');
+        }else{
+            showGreenStatus('Welcome to SoD! \t Drawing grid for window width: '+window.innerWidth+'px\n' + '\n1920*1080' +
+                ' is the optimal screen width for SOD');
+        }
+
+
+        minorGridLineWidth = 800/80;//document.getElementById("cnv").width/80;
+        majorGridLineWidth = 800/16;//document.getElementById("cnv").width/16;
         pixelsPerMeter = majorGridLineWidth;
     }
     var cnv = document.getElementById("cnvBG");
@@ -92,7 +99,7 @@ function drawGrid() {
 
 $(window).resize(function(){
     console.log('resize is hard with new width:' + window.innerWidth);
-    resizeCanvas();
+    //resizeCanvas();
 
 });
 
@@ -282,7 +289,14 @@ function getDataPath(object) {
  * Draw Stationary Device
  *
  * */
-function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observeRange,layer){
+function radians (degrees) {return degrees * (Math.PI/180)}
+function degrees (radians) {return radians * (180/Math.PI)}
+// Calculate the angle between two points.
+// cf. http://stackoverflow.com/a/12221474/257568
+function angle (cx, cy, px, py) {var x = cx - px; var y = cy - py; return Math.atan2 (-y, -x)}
+function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x), 2) + Math.pow ((p2y - p1y), 2))}
+
+ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observeRange,layer,stage){
 
     console.log('width: '+ width + ' && height: ' + height);
 
@@ -299,20 +313,24 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         return returnDegree;
     }
 
-    var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
+   // var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
     //var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
     //var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
-
-    var deviceView = new Kinetic.Arc({
-        innerRadius: 0,
-        outerRadius: 2*pixelsPerMeter,
-        angle:FOV,
-        rotationDeg:actualOrientation,
-        fill: 'rgba(0, 255, 0, 1.0)',
-        opacity:0.3
-    });
-    deviceView.clockwise(false);
-    stationaryDevice.add(deviceView);
+     var actualOrientation = (360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2));
+     if(FOV != undefined){
+         console.log('getDeviceOrientation:'+getDeviceOrientation(X,Z) + '   FOV/2:'+FOV/2 + '\torientation:'+orientation);
+         var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
+         var deviceView = new Kinetic.Arc({
+             innerRadius: 0,
+             outerRadius: 2*pixelsPerMeter,
+             angle:FOV,
+             rotationDeg:actualOrientation,
+             fill: 'rgba(0, 255, 0, 1.0)',
+             opacity:0.3
+         });
+         deviceView.clockwise(false);
+         stationaryDevice.add(deviceView);
+     }
 
     var deviceBody = new Kinetic.Rect({
         x: -(width/2),
@@ -335,7 +353,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
     });
     stationaryDevice.add(deviceID);
 
-    var observeRange = new Kinetic.Circle({
+    var observeRangeCircle = new Kinetic.Circle({
         x: 0,
         y: 0,
         radius:observeRange*pixelsPerMeter,
@@ -345,7 +363,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         opacity:0.8,
         blurRadius:50
     });
-    stationaryDevice.add(observeRange);
+    stationaryDevice.add(observeRangeCircle);
 
     // mouse events
     stationaryDevice.on('mouseover', function() {
@@ -353,7 +371,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         this.children[1].fill('#31CC00');
         this.children[1].stroke('');
         this.children[1].strokeWidth('0');
-        this.children[3].stroke('#31CC00');
+        //this.children[3].stroke('#31CC00');
         layer.draw();
     });
 
@@ -362,7 +380,7 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         this.children[1].fill('green');
         this.children[1].stroke('black');
         this.children[1].strokeWidth('2');
-        this.children[3].stroke('green');
+        //this.children[3].stroke('green');
 
         //this.fill('rgba(0, 255, 0, 1.0)');
         ////this.stroke('');
@@ -390,7 +408,104 @@ function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation
         }
     });
 
-    layer.add(stationaryDevice);
+     layer.add(stationaryDevice);
+     ///TODO: add FOVGroupController
+    if(FOV!=undefined){
+        var controlGroup = new Kinetic.Group ({
+            x: stationaryDevice.getPosition().x,
+            y: stationaryDevice.getPosition().y,
+            opacity: 0.8, draggable: true
+        }); layer.add (controlGroup);
+        var originalArc = stationaryDevice.children[0];
+
+        var sign = new Kinetic.Path({
+            x: -0.25*pixelsPerMeter, y: -deviceView.outerRadius()-0.25*pixelsPerMeter,
+            // Path from http://www.html5canvastutorials.com/kineticjs/html5-canvas-kineticjs-path-tutorial/
+            data: 'M12.582,9.551C3.251,16.237,0.921,29.021,7.08,38.564l-2.36,1.689l4.893,2.262l4.893,2.262l-0.568-5.36l-0.567-5.359l-2.365,1.694c-4.657-7.375-2.83-17.185,4.352-22.33c7.451-5.338,17.817-3.625,23.156,3.824c5.337,7.449,3.625,17.813-3.821,23.152l2.857,3.988c9.617-6.893,11.827-20.277,4.935-29.896C35.591,4.87,22.204,2.658,12.582,9.551z',
+            scale: { x:0.5, y:0.5 }, fill: 'black'
+        }); controlGroup.add (sign);
+
+        var originalDegree = originalArc.getRotationDeg();
+        console.log('object rotation degree: ' + originalArc.getRotationDeg());
+        var control = new Kinetic.Circle ({
+            x: 0, y: -deviceView.outerRadius(), fill: 'yellow', opacity: 0, radius: 0.3*pixelsPerMeter
+        }); controlGroup.add (control);
+        var deviceBody = stationaryDevice.children[1];
+
+        // ANIMATIONS
+        var signOpacity = 0; var animationTick = 0
+        var signOpacityAnimation = new Kinetic.Animation (function (frame) {
+            var opacity = controlGroup.getOpacity()
+            //status.setText ('animationTick: ' + animationTick++)
+            //status.setText ('signOpacity: ' + signOpacity + '; opacity: ' + opacity)
+            if (opacity == signOpacity) {signOpacityAnimation.stop(); return}
+            if (opacity < signOpacity) opacity += frame.timeDiff / 200; else opacity -= frame.timeDiff / 200
+            if (opacity < 0) opacity = 0; if (opacity > 1) opacity = 1
+            controlGroup.setOpacity (opacity)
+            //line.setOpacity (opacity / 2)
+        }, layer); signOpacityAnimation.start()
+
+        controlGroup.setDragBoundFunc (function (pos,event) {
+            var groupPos = stationaryDevice.getPosition();
+           console.log('pos: ' + JSON.stringify(pos));
+            var rotation = degrees (angle (groupPos.x, groupPos.y, pos.x + control.getPosition().x, pos.y+control.getPosition().y));
+            var dis = distance (groupPos.x, groupPos.y, pos.x + control.getPosition().x, pos.y+control.getPosition().y);
+            stationaryDevice.children[0].setRotationDeg (rotation-(FOV/2));
+            console.log("rotation: "+stationaryDevice.children[0].getRotationDeg());
+            //console.log('counter translation: '+ (-(rotation+90))); //360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV.degree/2)
+            return pos;
+        });
+
+        function calcSignOpacity() {
+            var mousePos = stage.getPointerPosition();
+            if (mousePos) {
+                var controlPos = controlGroup.getPosition(), groupPos = stationaryDevice.getPosition()
+                var dis = Math.min (
+                    distance (mousePos.x, mousePos.y, controlPos.x, controlPos.y),
+                    distance (mousePos.x, mousePos.y, groupPos.x, groupPos.y))
+                //status.setText ('distance: ' + dis)
+                signOpacity = dis <= 2.5*pixelsPerMeter ? 1 : 0
+            } else signOpacity = 0
+            if (controlGroup.getOpacity() != signOpacity && !signOpacityAnimation.isRunning()) signOpacityAnimation.start()
+        }
+        stage.getContainer().addEventListener ('mousemove', calcSignOpacity, false);
+
+
+
+
+        controlGroup.on ('dragend', function() {
+            var dragendArc = stationaryDevice.children[0];
+            console.log("stationaryDevice"+ JSON.stringify(stationaryDevice.getPosition()));
+            controlGroup.setPosition({
+                x: stationaryDevice.getPosition().x,//-dragendArc.outerRadius()*Math.sin((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180)),
+                y: stationaryDevice.getPosition().y//-dragendArc.outerRadius()*Math.cos((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180))
+            });
+            layer.draw();
+            console.log(controlGroup.getPosition(0));
+            console.log('degreeChange:' + (-(actualOrientation-(360+dragendArc.getRotationDeg()))));//
+            console.log('udpate orientation request')
+            $.ajaxSetup({
+                type: 'POST',
+                headers: { "cache-control": "no-cache" }
+            });
+            var newOrientation = (orientation+(actualOrientation-(360+dragendArc.getRotationDeg())));
+            $.post('/devices/updateOrientation'+'/' + deviceID.getText()+'/'+ newOrientation, function(data,status){
+                if(status == 'success'){
+                    refreshStationaryLayer();
+                }
+            })
+        //};
+
+            // https://github.com/ericdrowell/KineticJS/issues/123
+            //line.transitionTo ({points: linePoints (57), duration: 1})
+
+        })
+
+
+    }//END of radial FOV
+
+    ///END reading.
+
 }
 
 
@@ -423,16 +538,34 @@ function drawDataPoint(data,layer){
     });
     console.log(JSON.stringify(data));
 
-    var observeRange = new Kinetic.Circle({
-        x: 0,
-        y: 0,
-        radius:data.observeRange*pixelsPerMeter,
-        stroke: 'green',
-        strokeWidth:1,
-        opacity:0.5,
-        blurRadius:50
-    });
-    dataPointGroup.add(observeRange);
+    if(data.observer.observerType=='radial'){
+        var observeRange = new Kinetic.Circle({
+            x: 0,
+            y: 0,
+            radius:data.observer.observeRange*pixelsPerMeter,
+            fill:'green',
+            stroke: 'green',
+            strokeWidth:1,
+            opacity:0.3,
+            blurRadius:50
+        });
+        dataPointGroup.add(observeRange);
+    }else if(data.observer.observerType=='rectangular'){
+        var width = data.observer.observeWidth*pixelsPerMeter;
+        var height = data.observer.observeHeight*pixelsPerMeter;
+        var observeRange = new Kinetic.Rect({
+            x: -(width/2),
+            y: -(height/2),
+            width: width,
+            height: height,
+            fill:'green',
+            stroke: 'black',
+            strokeWidth:1,
+            opacity:0.3
+        });
+        dataPointGroup.add(observeRange);
+    }
+
 
     var dataPointID = new Kinetic.Text({
         x: data.dropRange*pixelsPerMeter/2,
@@ -473,13 +606,13 @@ function drawDataPoint(data,layer){
     dataPointGroup.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
         this.children[0].strokeWidth('4');
-        this.children[1].fontSize('24');
+        //this.children[1].fontSize('24');
        layer.draw();
     });
     dataPointGroup.on('mouseout', function() {
         document.body.style.cursor = 'default';
         this.children[0].strokeWidth('1');
-        this.children[1].fontSize('15');
+        //this.children[1].fontSize('15');
         layer.draw();
     });
 
@@ -530,7 +663,7 @@ function refreshStationaryLayer() {
                     //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
                         data[key].location.X, data[key].location.Z, data[key].width / 1000 * pixelsPerMeter,
-                            data[key].height / 1000 * pixelsPerMeter, data[key].orientation, data[key].FOV,data[key].observeRange,layer)
+                            data[key].height / 1000 * pixelsPerMeter, data[key].orientation, data[key].FOV,data[key].observeRange,layer,stage)
                 }
             }
         }

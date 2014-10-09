@@ -56,8 +56,23 @@
                 var dataList = [];
                 dataList.push($('#inputDataName_1').val());
                 dataList.push($('#inputDataName_2').val());
+                var observer;
+                if($('#inputObserveTypeBool option:selected').text() === "radial"){
+                    observer = {observerType:'radial',observeRange:Number($('#inputObserveRange').val())}
+                }else if($('#inputObserveTypeBool option:selected').text() === "rectangular"){
+                    observer = {observerType:'rectangular',observeWidth:Number($('#inputObserveWidth').val()),observeHeight:Number($('#inputObserveHeight').val())};
+                }
+
+                var subscribers = [];
+                if($('fieldset#subscriberFieldset').find('div').length!=0){
+                    $('fieldset#subscriberFieldset div input').each(function(input){
+                        console.log(subscribers);
+                        subscribers.push({subscriberType:'device',ID:Number($(this).val())});
+                    })
+                }
+                console.log(subscribers);
                 sod = new SODDataPoint({dropRange:Number($('#inputDataRange').val()),location:{X:Number($('#inputLocationX').val()),Y:Number($('#inputLocationY').val()),
-                    Z:Number($('#inputLocationZ').val())},data:dataList,observeRange:Number($('#inputObserveRange').val())});
+                    Z:Number($('#inputLocationZ').val())},data:dataList,observer:observer,subscriber:subscribers});
                 sod.init(serverURL,socketURL, sod);
 
                 //ADD LISTENERS////////////////////////////////////////////////
@@ -86,8 +101,32 @@
                 showRedStatus('Can not register this client again. One page only can register one device.');
             }
 
-        })
-    }) // end of click
+
+        })// end of click
+
+
+        $('#radialField').hide();
+        $('#inputObserveTypeBool').on('change',function(){
+            if($('#inputObserveTypeBool option:selected').text() === "radial"){
+                $('#radialField').slideToggle('300');
+                $('#rectangularField').slideToggle('300');
+            }else if($('#inputObserveTypeBool option:selected').text() === "rectangular"){
+                $('#radialField').slideToggle('300');
+                $('#rectangularField').slideToggle('300');
+            }
+        });
+
+        $('#addSubscriber_btn').on('click',function(){
+            $('fieldset#subscriberFieldset').append('<div class="newSubscriber" style="display:none;vertical-align: middle;">deviceID: <input class="deviceSubscriberID" type="number" value="0"> <span class="button deleteSubscriber" style="font-size:1.2em;line-height:1.2em;font-weight:bold;padding: 0em 0.3em;">DELETE</span></div>');
+            $('fieldset#subscriberFieldset').find('.newSubscriber:last').slideToggle('300');;
+        });
+        $('fieldset#subscriberFieldset').on('click','.deleteSubscriber',function(){
+            $(this).parent().slideToggle('300',function(e){
+                $(this).remove();
+            });
+        });
+
+    }) //end of doc ready
 
 
 </script>
@@ -96,7 +135,7 @@
 <body onload="">
 <div id="page-wrap">
     <section id="top">
-        <header>SOD Client
+        <header>SOD DataPoint Client
         </header>
     </section>
 
@@ -105,10 +144,24 @@
         <table>
             <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
                 Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
-                Z<input id='inputLocationZ'  type="text" value='1'><br/> dropRange: <input id='inputDataRange'  type="text" value='0.5'> observeRange: <input id='inputObserveRange'  type="text" value='1'> <br/> Data Name_1: <input id='inputDataName_1'  type="text" value='sample.jpg'> Data Name_2: <input id='inputDataName_2'  type="text" value='vanilla.jpg'>
-                    <option>true</option>
-                    <option>false</option>
-                </select></td></tr>
+                Z<input id='inputLocationZ'  type="text" value='1'><br/> dropRange: <input id='inputDataRange'  type="text" value='0'>   <br/> Data Name_1: <input id='inputDataName_1'  type="text" value=''> Data Name_2: <input id='inputDataName_2'  type="text" value=''> <!-- sample.jpg -->
+                <fieldset>
+                    <legend>Observer</legend>
+                    FOV Type:<select id="inputObserveTypeBool"><br/>
+                    <option>rectangular</option>
+                    <option>radial</option>
+                </select><br/>
+                    <div id="radialField">observeRange:<input id='inputObserveRange'  type="text" value='1'></div>
+                    <div id="rectangularField">observeWidth: <input id='inputObserveWidth'  type="text" value='2'><br/>
+                        observeHeight: <input id='inputObserveHeight'  type="text" value='1'></div>
+                </fieldset>
+
+                <fieldset id="subscriberFieldset">
+                    <legend>Subscriber(Optional)</legend>
+                    <span id="addSubscriber_btn" class="button" style="font-size:1.2em;line-height:1.2em;font-weight:bold;">Add Subscriber</span>
+                    <br>if the field is empty events gonna send to All devices
+                </fieldset>
+            </td></tr>
         </table>
     </nav>
     <div class="status_wrap">
