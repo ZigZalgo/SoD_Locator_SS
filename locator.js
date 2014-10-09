@@ -361,14 +361,16 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                         if(Object.keys(persons[key].ID).length > 1){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
-							if(persons[key].currentlyTrackedBy == socket.id){
-								do{
-									console.log('\t->->-> Do while loop : ' + persons[key].uniquePersonID);
-									persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
-								}while(persons[key].currentlyTrackedBy == socket.id)
-								
-								console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
-							}
+                            if(persons[key].currentlyTrackedBy == socket.id){
+                                var i = 0;  // counter for person in person id list
+                                do{
+                                    console.log('\t->->-> Do while loop : ' + persons[key].uniquePersonID);
+                                    persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[i]];//Object.keys(persons[key].ID)[0];
+                                    i++;
+                                }while(persons[key].currentlyTrackedBy == socket.id && i <= 15)
+
+                                console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
+                            }
                         }else{
 								delete persons[key].ID[IDkey];
 								console.log('-> Delete Person '+persons[key].uniquePersonID+ ' it is seen by '+ Object.keys(persons[key].ID).length + ' sensors');
