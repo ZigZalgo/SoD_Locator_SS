@@ -213,8 +213,9 @@ exports.angleBetweenPoints = function (start, end) {
 // function that check if a point is in inside of an rectangle
 
 exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
+    console.log((height));
     if(objectLocation.X<=(observerLocation.X - width/2)||(objectLocation.X >=observerLocation.X+width/2)||
-        (objectLocation.Z<=observerLocation.Z - height/2) || objectLocation.Z >= observerLocation.Z + height/2){
+        (objectLocation.Z<=(observerLocation.Z - height/2)) || objectLocation.Z >= (observerLocation.Z + height/2)){
         return false;
     }else{
         return true;

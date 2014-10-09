@@ -181,18 +181,19 @@ function inRangeEvent(){
                     try{
                         if(locator.persons[personKey].inRangeOf[deviceKey]==undefined) // handles enter event
                         {
+                            //console.log(JSON.stringify(locator.devices[deviceKey].observer));
                             if(locator.devices[deviceKey].observer.observerType == 'radial' &&
                                 util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observer.observeRange)
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
-                                console.log('-> enter '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
+                                console.log('-> enter radial'+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                             }else if(locator.devices[deviceKey].observer.observerType == 'rectangular'
-                                && util.isInRect(locator.persons[personKey].location,util.getObserverLocation(locator.devices[deviceKey]),locator.devices[deviceKey].observer.observeWidth,locator.devices[deviceKey].observeHeight) == true) // handles rectangular
+                                && util.isInRect(locator.persons[personKey].location,util.getObserverLocation(locator.devices[deviceKey]),locator.devices[deviceKey].observer.observeWidth,locator.devices[deviceKey].observer.observeHeight) == true) // handles rectangular
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
-                                console.log('-> enter '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
+                                console.log('-> enter rect '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                             }
                         }
                         else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined) // handles leaves event
@@ -203,7 +204,7 @@ function inRangeEvent(){
                                 delete locator.persons[personKey].inRangeOf[deviceKey];
                             }
                             if (locator.devices[deviceKey].observer.observerType == 'rectangular'
-                                && util.isInRect(locator.persons[personKey].location, util.getObserverLocation(locator.devices[deviceKey]), locator.devices[deviceKey].observer.observeWidth, locator.devices[deviceKey].observeHeight) == false) // handles rectangular
+                                && util.isInRect(locator.persons[personKey].location, util.getObserverLocation(locator.devices[deviceKey]), locator.devices[deviceKey].observer.observeWidth, locator.devices[deviceKey].observer.observeHeight) == false) // handles rectangular
                             {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, invader: locator.persons[personKey].uniquePersonID}});
@@ -221,17 +222,17 @@ function inRangeEvent(){
                 if(locator.dataPoints.hasOwnProperty(dataPointKey)){
                     if(locator.persons[personKey].inRangeOf[dataPointKey]==undefined){ // handles enter event
                         if(locator.dataPoints[dataPointKey].observer.observerType=='rectangular'){
-                            if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer.observeHeight)==true){
+                            if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer)==true){
                                 console.log('person inside of dataPoint: '+dataPointKey );
                                 locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                                 //TODO: add sendMessageToSubscriber function call
                                 emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
-                                console.log('-> enter '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
+                                console.log('-> enter rec '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             }
                         }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)<=locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                             emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
-                            console.log('-> enter '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
+                            console.log('-> enter radial '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                         }
                     }else if(locator.persons[personKey].inRangeOf[dataPointKey]!=undefined){ // handles leave event
                         if(locator.dataPoints[dataPointKey].observer.observerType=='rectangular'){
