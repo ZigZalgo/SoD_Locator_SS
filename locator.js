@@ -431,7 +431,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                                     console.log('\t->->-> Do while loop : ' + persons[key].uniquePersonID);
                                     persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[i]];//Object.keys(persons[key].ID)[0];
                                     i++;
-                                }while(persons[key].currentlyTrackedBy == socket.id && i <= 15)
+                                }while(persons[key].currentlyTrackedBy == socket.id && i <= 15);
 
                                 console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
                             }
