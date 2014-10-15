@@ -547,7 +547,7 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket){
 exports.printPersons = function(){
 	console.log("People tracked: ");
     var output;
-    console.log(persons);
+    //console.log(persons);
     try{
         console.log("There are "+object.keys(persons).length+" people in this view."); // adding sensor ID if possible
 
@@ -555,7 +555,7 @@ exports.printPersons = function(){
             if(persons.hasOwnProperty(key)){
                 console.log("The "+object.keys(persons).indexOf(key)+"th Person --> "
                     + JSON.stringify(persons[key], null, 2));
-                console.log(JSON.stringify(persons[key].uniquePersonID))
+                //console.log(JSON.stringify(persons[key].uniquePersonID))
             }
         }
     }

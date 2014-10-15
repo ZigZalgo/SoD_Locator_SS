@@ -297,8 +297,10 @@ function angle (cx, cy, px, py) {var x = cx - px; var y = cy - py; return Math.a
 function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x), 2) + Math.pow ((p2y - p1y), 2))}
 
  function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observer,layer,stage){
+     console.log('width: '+ width + ' && height: ' + height);
+     var width = width*pixelsPerMeter;
+     var height = height*pixelsPerMeter;
 
-    console.log('width: '+ width + ' && height: ' + height);
 
     var stationaryDevice = new Kinetic.Group({
         x: shiftXToGridOrigin(X*pixelsPerMeter),
@@ -354,7 +356,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
 
      console.log('Observer:' + JSON.stringify(observer));
      if(observer.observerType == 'radial') {
-         var observeRange = new Kinetic.Circle({
+         var observeRangeVisual = new Kinetic.Circle({
              x: 0,
              y: 0,
              radius: observer.observeRange * pixelsPerMeter,
@@ -364,13 +366,15 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
              opacity: 0.8,
              blurRadius: 50
          });
-         stationaryDevice.add(observeRange);
+         stationaryDevice.add(observeRangeVisual);
      }else if(observer.observerType == 'rectangular'){
          var width = observer.observeWidth*pixelsPerMeter;
          var height = observer.observeHeight*pixelsPerMeter;
          console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
+         //console.log(width+'-'+height);
          var rotatedDirection = matrixTransformation({X:observer.observerDistance*pixelsPerMeter,Y:0,Z:0},-(deviceView.getRotationDeg()+FOV/2));
-         var observeRange = new Kinetic.Rect({
+         console.log();
+         var observeRangeVisual = new Kinetic.Rect({
              x: rotatedDirection.X-(width/2),
              y: rotatedDirection.Z-(height/2),
              width: width,
@@ -378,9 +382,9 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
              fill:'',
              stroke: 'green',
              strokeWidth:1,
-             opacity:0.8
+             opacity:1
          });
-         stationaryDevice.add(observeRange);
+         stationaryDevice.add(observeRangeVisual);
      }
     // mouse events
     stationaryDevice.on('mouseover', function() {
@@ -569,7 +573,7 @@ function drawDataPoint(data,layer){
     console.log(JSON.stringify(data));
 
     if(data.observer.observerType=='radial'){
-        var observeRange = new Kinetic.Circle({
+        var observeRangeVisual = new Kinetic.Circle({
             x: 0,
             y: 0,
             radius:data.observer.observeRange*pixelsPerMeter,
@@ -579,11 +583,11 @@ function drawDataPoint(data,layer){
             opacity:0.3,
             blurRadius:50
         });
-        dataPointGroup.add(observeRange);
+        dataPointGroup.add(observeRangeVisual);
     }else if(data.observer.observerType=='rectangular'){
         var width = data.observer.observeWidth*pixelsPerMeter;
         var height = data.observer.observeHeight*pixelsPerMeter;
-        var observeRange = new Kinetic.Rect({
+        var observeRangeVisual = new Kinetic.Rect({
             x: -(width/2),
             y: -(height/2),
             width: width,
@@ -593,7 +597,7 @@ function drawDataPoint(data,layer){
             strokeWidth:1,
             opacity:0.3
         });
-        dataPointGroup.add(observeRange);
+        dataPointGroup.add(observeRangeVisual);
     }
 
 
@@ -692,8 +696,8 @@ function refreshStationaryLayer() {
                     //console.log("Y:" + data[key].location.Y)
                     //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
-                        data[key].location.X, data[key].location.Z, data[key].width / 1000 * pixelsPerMeter,
-                            data[key].height / 1000 * pixelsPerMeter, data[key].orientation, data[key].FOV,data[key].observer,layer,stage)
+                        data[key].location.X, data[key].location.Z, data[key].width,
+                            data[key].height, data[key].orientation, data[key].FOV,data[key].observer,layer,stage)
                 }
             }
         }
@@ -736,10 +740,6 @@ function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
                 deviceNameString = data[Object.keys(data)].name;
             }
             //console.log(JSON.stringify(data[Object.keys(data)[0]].observeRange));
-            ctx.beginPath();
-            ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),data[Object.keys(data)[0]].observeRange*pixelsPerMeter,0,2*Math.PI);
-            ctx.strokeStyle = "green";
-            ctx.stroke();
 
             ctx.fillStyle = "black"; //green
             ctx.font = "12px Arial";
