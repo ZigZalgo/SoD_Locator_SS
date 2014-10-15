@@ -520,6 +520,9 @@ exports.filterDevices = function(socket, request){
                     case "all":
                         return filterSelection(i + 1, (listDevices)); //just in case
                         break;
+                    case "allExclusive":
+                        return filterSelection(i + 1, (locator.getAllDevicesExceptSelf(socket, listDevices)));
+                        break;
                     case "inView":
                         return filterSelection(i + 1, locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
                         break;

@@ -13,7 +13,7 @@ var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
 var path = require('path');
-io.set('log level',0);
+io.set('log level',5);
 var requestHandler = require('./requestHandler');
 var fs = require('fs');
 var factory = require('./factory');

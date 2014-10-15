@@ -767,8 +767,6 @@ exports.updateDevice = function(socket,deviceInfo,fn){
     }
 }
 
-
-
 /*
 * Registering data with data info
 *
@@ -1070,6 +1068,11 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
 
     return filterDeviceListByRange(Object.keys(listDevices).length-1, {});
 };
+
+exports.getAllDevicesExceptSelf = function (ownSocket, deviceList){
+    delete deviceList[key];
+    return deviceList;
+}
 
 /*
 * get all the devices that is been paried
