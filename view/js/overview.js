@@ -510,24 +510,45 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
             console.log("stationaryDevice"+ JSON.stringify(stationaryDevice.getPosition()));
 
             var rotatedDirection = matrixTransformation({X:stationaryDevice.children[0].outerRadius(),Y:0,Z:0},-(stationaryDevice.children[0].getRotationDeg()+FOV/2));
-            controlGroup.setPosition({
-                x: rotatedDirection.X,//-dragendArc.outerRadius()*Math.sin((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180)),
-                y: rotatedDirection.Z//-dragendArc.outerRadius()*Math.cos((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180))
-            });
-            layer.draw();
-            console.log(controlGroup.getPosition(0));
+
+            console.log("controlgroup: " + JSON.stringify(controlGroup.getPosition()));
+
             console.log('degreeChange:' + (-(actualOrientation-(360+dragendArc.getRotationDeg()))));//
             console.log('udpate orientation request')
             $.ajaxSetup({
                 type: 'POST',
                 headers: { "cache-control": "no-cache" }
             });
+
+
+            // update and reposition orientation
+            function updateOrientationAndRefresh(){
+                controlGroup.setPosition({
+                    x: rotatedDirection.X,//-dragendArc.outerRadius()*Math.sin((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180)),
+                    y: rotatedDirection.Z//-dragendArc.outerRadius()*Math.cos((dragendArc.getRotationDeg()+ FOV.degree)*(Math.PI/180))
+                });
+                refreshStationaryLayer();
+            }
+            var timer;
+            timer = window.setTimeout(function(){
+                updateOrientationAndRefresh();
+            },1500);
+            function ajaxError(jqXHR, textStatus, errorThrown) {
+                window.clearTimeout(timer);
+                console.log('$.post error: ' + textStatus +  ':'+ jqXHR.status + ' : ' + errorThrown);
+                updateOrientationAndRefresh();
+            };
             var newOrientation = (orientation+(actualOrientation-(360+dragendArc.getRotationDeg())));
             $.post('/devices/updateOrientation'+'/' + deviceID.getText()+'/'+ newOrientation, function(data,status){
-                if(status == 'success'){
-                    refreshStationaryLayer();
+                console.log("success? " + status);
+                if(status == 'success') {
+                    window.clearTimeout(timer);
+                    updateOrientationAndRefresh();
                 }
-            })
+
+            }).fail(ajaxError);
+
+
         //};
 
             // https://github.com/ericdrowell/KineticJS/issues/123
