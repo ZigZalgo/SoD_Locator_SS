@@ -838,10 +838,6 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         else{
             device.name = "Device " + device.ID;
         }
-        if (fn != undefined) {
-            console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
-            fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length});
-        }
 
         if(deviceInfo.observer != undefined) {device.observer = deviceInfo.observer;};
         device.height = deviceInfo.height;
@@ -852,6 +848,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         device.deviceIP = socketIP;
         // for stationary layer refreshes
         if(deviceInfo.stationary == true){
+            device.orientation = deviceInfo.orientation;
             device.stationary = deviceInfo.stationary;
             device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             frontend.io.sockets.emit("refreshStationaryLayer", {});
@@ -865,6 +862,11 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         devices[socket.id] = device; // officially register the device to locator(server)
         console.log("Registering device: " + JSON.stringify(device));
         console.log('emitting registered device ID : '+ deviceInfo.ID);
+        if (fn != undefined) {
+            console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
+            fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
+        }
+
         frontend.clients[socket.id].emit('registered',{deviceID:deviceInfo.ID});
     }
 }

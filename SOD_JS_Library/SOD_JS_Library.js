@@ -46,6 +46,9 @@ function SODDevice(deviceInfo){
     }
     this.socket= null;
     this.userListeners = {};
+    this.sendToDevices = null;
+
+
     //this.device = device;
 }
 
@@ -56,7 +59,7 @@ SODDevice.prototype = {
             _SOD.socket = io.connect(serverURL);
             _SOD.socket.on('connect',function(data){
                 console.log('Socket Connected ...');
-
+                _SOD.sendToDevices = new sendToDevices(_SOD.socket);
                 //add any listeners that failed to add before socket was initialized
                 for(var key in _SOD.userListeners){
                     if(_SOD.userListeners.hasOwnProperty(key)){
@@ -139,10 +142,27 @@ SODDevice.prototype = {
     pairPersonWithID : function(personID){
         console.log('pairing with person' + personID);
         this.socket.emit('pairDeviceWithPerson',{deviceSocketID:this.socket.id,uniquePersonID:personID});
+    },
+    sendEventToDevices : function(eventName,payload,deviceList){
+        console.log('sending string to devices: ' + eventName+" - "+payload+" - "+deviceList);
     }
+};
 
-
+var sendToDevices = function(socket){
+    this.socket = socket;
 }
+sendToDevices.prototype = {
+    all : function(eventName,payload){
+        console.log(this);
+        this.socket.emit("sendEventToDevicesWithSelection",{selection:['all'],eventName:eventName,data:payload},function(data){
+            console.log(data);
+        });
+    },
+    inView : function(){
+
+    }
+}
+
 
 
 /************************************************************************************************************

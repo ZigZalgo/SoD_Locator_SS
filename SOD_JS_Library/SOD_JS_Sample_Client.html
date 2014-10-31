@@ -213,6 +213,33 @@
                 }
             });
 
+            // sendEvent
+            $('#sendStringToAll').on('click',function(){
+                sod.sendToDevices.all('string','hello this is world!');
+
+            })
+
+            function convertImgToBase64(url, callback, outputFormat){
+                var canvas = document.createElement('CANVAS'),
+                        ctx = canvas.getContext('2d'),
+                        img = new Image;
+                img.crossOrigin = 'Anonymous';
+                img.onload = function(){
+                    var dataURL;
+                    canvas.height = img.height;
+                    canvas.width = img.width;
+                    ctx.drawImage(img, 0, 0);
+                    dataURL = canvas.toDataURL(outputFormat);
+                    callback.call(this, dataURL);
+                    canvas = null;
+                };
+                img.src = url;
+            }
+
+            convertImgToBase64('http://ilarge.listal.com/image/6821045/936full-harold-finch.jpg', function(base64Img){
+                // Base64DataURL
+                console.log(base64Img);
+            });
 
         })// end of document ready
     </script>
@@ -273,6 +300,13 @@
                 <tr><td><li id="updateDeviceInfo">Update Device info</li></td>
                 <td>Name: <input id='updateName'  type="text" value='JSUpdateName'></td></tr>
                 <tr><td><li id="pairDeviceWithPersonID">pairWithPerson</li></td><td>Person ID: <input id='pairPersonID'  type="text" value='1'></td></tr>
+                <tr><td><li id="sendStringToAll">send String</li></td><td>string: <input id='stringToSend'  type="text" value="hello I'm from JS client.">
+                    selection:<select id="sendStringSelection"><br/>
+                        <option>all</option>
+                        <option>inView</option>
+                    </select>
+
+                </td></tr>
             </table>
         </nav>
     <div class="status_wrap">

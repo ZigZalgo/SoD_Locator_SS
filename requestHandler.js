@@ -287,6 +287,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('sendEventToDevicesWithSelection', function(payload, fn){
+        console.log(payload);
         for (var key in util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(payload.eventName==undefined){
