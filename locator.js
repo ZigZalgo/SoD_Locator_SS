@@ -516,7 +516,7 @@ exports.pairAndNotify = function(deviceSocketID, uniquePersonID){
     });
 }
 
-exports.pairDevice = function(deviceSocketID, uniquePersonID,socket){
+exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         "\nPerson ID: " + uniquePersonID;
 
@@ -526,6 +526,7 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket){
             persons[uniquePersonID].ownedDeviceID = deviceSocketID;
             persons[uniquePersonID].pairingState = "paired";
             statusMsg += "\n Pairing successful.";
+            frontend.clients[deviceSocketID].emit("gotPaired",{device:devices[deviceSocketID].uniqueDeviceID,person:persons[uniquePersonID].uniquePersonID,status:"success"});
         }
         else{
             statusMsg += "\nPairing attempt unsuccessful";
@@ -535,12 +536,15 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket){
             if(persons[uniquePersonID].pairingState != "unpaired"){
                 statusMsg += "Person unavailable for pairing.";
             }
+            frontend.clients[deviceSocketID].emit("gotPaired",{device:devices[deviceSocketID].uniqueDeviceID,person:persons[uniquePersonID],status:statusMsg});
         }
     }
     else{
         statusMsg += "Pairing attempt unsuccessful. One or both objects were not found.";
+        frontend.clients[deviceSocketID].emit("gotPaired",{deviceID:devices[deviceSocketID].uniqueDeviceID,personID:persons[uniquePersonID],status:statusMsg});
     }
     socket.send(JSON.stringify({"status": statusMsg, "ownerID": uniquePersonID}));
+    callback();
 }
 
 //tested
