@@ -712,7 +712,7 @@ function refreshStationaryLayer() {
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function (data) {
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
-                if (data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null) {
+                if (data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null && data[key].observer != undefined) {
                     //console.log("X:" + data[key].location.X)
                     //console.log("Y:" + data[key].location.Y)
                     //console.log("Z:" + data[key].location.Z)
@@ -970,17 +970,17 @@ function updateContentWithObjects(){
             if(data.hasOwnProperty(key)){
                 //console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP);
                 if(!data[key].stationary){
-                    htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
+                    htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
                         '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
                         '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
-                        '<td>'+data[key].ownerID+'</td>'+'<td>'+data[key].observer.observerType+'</td>'+
+                        '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }
                 else{
-                    htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+
+                    htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
                         '<td>('+data[key].location.X.toFixed(3)+', '+data[key].location.Y+', '+data[key].location.Z.toFixed(3)+')</td>'+
                         '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>disabled</td>'+
-                        '<td>'+data[key].ownerID+'</td>'+'<td>'+data[key].observer.observerType+'</td>'+
+                        '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }
             }
@@ -988,10 +988,9 @@ function updateContentWithObjects(){
 
         $('#devices').html('<legend>Devices</legend>' +
             '<table id = "device_table">' +
-            '<tr><th>ID</th><th>Name</th><th>location</th> <th>orientation</th>'+
+            '<tr><th>ID</th><th>Name</th><th>Type</th><th>location</th> <th>orientation</th>'+
             '<th>Pairing State</th>'+
             '<th>Owner</th>'+
-            '<th>observeRange</th>'+
             '</tr>'+
             '' +htmlString+
             '</table>'); /*appending the data on the page using Jquery */

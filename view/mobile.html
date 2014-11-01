@@ -16,154 +16,36 @@
     <script src="/kinetic"> </script>
     <script src="/jquery"></script>
     <script src="/jquery-mobile"></script>
-    <script src="/overviewJS"></script>
-    <style>
-        #canvas_page h1{
-            font-family: "Agency FB",DinRound, Sans-Serif;
-           font-weight:normal;text-shadow:2px 2px 5px grey;
-        }
-        #canvas{
-            position:relative;
-            margin:0px auto;
-            min-height:300px;
-        }
-        .canvasGrid{min-height:300px !important;}
+    <script src="/SoDLibrary"></script>
 
-        #cnv{
-            position: relative; left: 0; top: 0; z-index: 10;margin:0px;
-        }
-        #cnvSensors{
-            position: absolute; left: 0; top: 0; z-index: 2;margin:0px;
-        }
-
-        #cnvStationary{
-            position: absolute; left: 0; top: 0; z-index: 5;margin:0px;
-        }
-
-        #cnvBG{
-            z-index:1;
-            background: #ffffff ;
-            position: absolute; left: 0; top: 0; margin:0px;
-        }
-        .ui-content{padding:0px !important;}
-        section#overview fieldset{
-            padding: 0.2em 0.5em;
-            margin: 0.1em auto;
-            border:1px solid #292929;;
-            color:black;
-            font-size:90%;
-            height:auto; z-index: 1;
-            background: white;
-            border-radius: 9px;
-            max-width:535px;
-        }
-        section#overview td{
-            text-align:center;
-        }
-        section#overview legend{
-            font-size:1.5em;
-            font-weight:bold;
-        }
-        section#overview #contentHeader{
-            text-align:center;
-            padding-top:5px;
-            font-family:"Agency FB",DinRound, Sans-Serif;
-            font-weight:bold;
-            font-size:2em;
-            color:#292929
-        }
-
-        section#overview{
-            background: #CACACA;
-            margin: 10px auto;
-            /* text-align: center; */
-            max-width: 800px;
-            /* border: 2px solid; */
-            max-height: 790px;
-        }
-        section#overview table{
-            width:100%;
-        }
-        section#overview table td{
-            max-width: 50%;
-            width:50%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        section#overview table th{
-            font-family:oblique,DinRound, Sans-Serif;
-            max-width: 150px;
-            font-size:1.2em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: pre-wrap;
-        }
-
-        fieldset#clients {
-            width:100%;
-            height:auto;
-        }
-        fieldset#clients legend{
-            color:#ffffff;
-            /*padding:2px 1px;*/
-            /*border: 2px solid #A1A2A5;*/
-            background:#292929;
-            box-shadow: 1px 1px 3px #888888;
-        }
-        #clients_table {
-            width:100%;
-            max-width:100%;
-        }
-        section #sensors legend{
-            background: #3370d4;
-            /*border: 2px solid #A1A2A5;*/
-            color: #ffffff;
-            box-shadow: 1px 1px 3px #888888;
-        }
-        section input#getPoints{
-            position:relative;
-        }
-        section #people legend{
-            color:#ffffff;
-            /*border: 2px solid #A1A2A5;;*/
-            background:#d05a47;
-            box-shadow: 1px 1px 3px #888888;
-        }
-
-        section #dataPoints legend{
-            color:#ffffff;
-            /*border: 2px solid #A1A2A5;;*/
-            background:#8A8A8A;
-            box-shadow: 1px 1px 3px #888888;
-        }
-
-        section #devices legend{
-            background: #2cd72A;/*border: solid #A1A2A5;*/color: #ffffff;
-            box-shadow: 1px 1px 3px #888888;
-        }
-        .content_wrap{max-width:1600px;margin:auto;background:#CACACA;}
-        #overview_section_wrap{max-width:800px;
-            background: #CACACA;}
-        #overview_grid{border-left:2px solid #1e1e1e !important;border-right:2px solid #1e1e1e !important;border-bottom:2px solid #1e1e1e !important;}
-        header{
-            max-width: 365px; background: #1e1e1e;
-            margin:10px 0px 10px 50px;
-            padding-top:10px;padding-bottom: 10px;
-            line-height:1;font-family: "Agency FB",DinRound, Sans-Serif;
-            color: #ffffff; text-align: center; font-size: 36px;
-            text-shadow:2px 2px 5px grey;
-            z-index: 2;
-        }
-    </style>
     <script>
         // socket part
-        io.on("connect", function(){
+
+        /*io.on("connect", function(){
             io.emit("registerMobileWebClient", {});
-        });
+        });*/
+
+
         // END of socket
 
 
+        var isMobile = {
+            Android: function() {
+                return /Android/i.test(navigator.userAgent);
+            },
+            BlackBerry: function() {
+                return /BlackBerry/i.test(navigator.userAgent);
+            },
+            iOS: function() {
+                return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            },
+            Windows: function() {
+                return /IEMobile/i.test(navigator.userAgent);
+            },
+            any: function() {
+                return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
+            }
+        };
 
         $(document).ready(function() {
             $("#dropData").bind("click", function () {
@@ -175,9 +57,32 @@
                 $('#dropRange').val('1');
             });
 
-            $( window ).on( "orientationchange", function( event ) {
-                $( "#orientation" ).text( "This device's orientaion " + event.orientation + " !" );
+
+
+
+
+            var SOD;
+            $('#connect').bind("click",function(){
+                console.log("hah");
+                var port = $('input#serverPort').val();
+                var serverIP = $('input#serverIP').val();
+                var serverURL = "http://"+serverIP+":"+port;
+                var socketURL = serverURL+"/socket.io/socket.io.js";
+                SOD = new SODDevice();
+                SOD.init(serverURL,socketURL, SOD);
+                SOD.addListener('connect',function(data){
+                    SOD.registerDevice(SOD);
+                });
+                alert("true?");
             });
+
+            window.addEventListener("deviceorientation", function(event) {
+                // process event.alpha, event.beta and event.gamma
+                $('#orientationOnChangeAlpha').val(event.alpha);
+                $('#orientationOnChangeBeta').val(event.beta);
+                $('#orientationOnChangeGamma').val(event.gamma);
+            }, true);
+
 
         });
 
@@ -188,72 +93,36 @@
                 "-webkit-transform": "rotate(" + new_orientation + "deg)"
             });
         });*/
+
     </script>
 
 </head>
 
-<body onload="drawGrid();">
-<div data-role="page" id="canvas_page" data-theme="a">
-
-    <div data-role="header" data-theme="b">
-        <header>OVERVIEW</header>
-    </div><!-- /header -->
-
-    <div data-role="content" data-theme="a" class="content_wrap">
-        <div class="ui-grid-a canvasGrid" id="overview_grid">
-            <div class="ui-block-a"><section id="canvas"></section></div>
-            <div class="ui-block-b" id="overview_section_wrap">
-            <section id="overview">
-                <fieldset id="clients">
-                    <legend> Clients </legend>
-                </fieldset>  <!--This is where the data from the server is added-->
-                <fieldset id="sensors" >
-                    <legend> Sensors </legend>
-                </fieldset> <!--This is where the data from the server is added-->
-                <fieldset id="people">
-                    <legend> People </legend>
-                </fieldset> <!--This is where the data from the server is added-->
-                <fieldset id="devices">
-                    <legend> Devices </legend>
-                </fieldset> <!--This is where the data from the server is added-->
-
-                <fieldset id="dataPoints">
-                    <legend> dataPoints </legend>
-                </fieldset> <!--This is where the data from the server is added-->
-            </section>
-            </div>
-            </section>
-        </div><!-- /grid-a -->
-
-    </div><!-- /content -->
-    <div data-role="panel" id="overview_panel" data-display="overlay" data-position="right" data-theme="c">
-        <div data-role="content" data-theme="a">
-        <a href="#" data-rel="close" data-role="button" data-mini="true" data-inline="true" data-icon="delete" data-iconpos="right">Close</a>
-        </div><!-- /panel -->
-    </div>
-</div><!-- /page -->
-
-
-
+<body>
 
 <!-- Start of first page -->
-<div data-role="page" id="foo" data-theme="b">
+<div data-role="page" id="mobileHome" data-theme="b">
 
     <div data-role="header" data-theme="b">
-        <h1>Data</h1>
+        <h1>Home-Mobile</h1>
     </div><!-- /header -->
 
     <div data-role="content" >
         <div data-role="fieldContain">
-            <label for="dropPersonID">Person ID:</label>
+            <!--<label for="dropPersonID">Person ID:</label>
             <input type="text" name="dropPersonID" id="dropPersonID" value="0"  />
             <label for="dropRange">dropRange:</label>
-            <input type="text" name="dropRange" id="dropRange" value="1"  />
+            <input type="text" name="dropRange" id="dropRange" value="1"  />-->
+            <label for="orientationOnChangeAlpha">Alpha</label><input id='orientationOnChangeAlpha' type="number" value='0'/>
+            <label for="orientationOnChangeBeta">Beta</label><input id='orientationOnChangeBeta' type="number" value='0'/>
+            <label for="orientationOnChangeGamma">Gamma</label><input id='orientationOnChangeGamma' type="number" value='0'/>
+
 
         </div>
+        <label for="serverIP">Server IP</label><input type="text" name="serverIP" id="serverIP" value="localhost"/>
+        <label for="serverPort">Server IP</label><input type="text" name="serverIP" id="serverPort" value="3000"/>
         <div class="ui-grid-a">
-            <div class="ui-block-a"><button data-icon="delete" id="resetDropData">Reset</button></div>
-            <div class="ui-block-"><button data-icon="check" id="dropData">Drop</button></div>
+            <div class="ui-block-"><button data-icon="check" id="connect">Connect</button></div>
         </div><!-- /grid-a -->
 
     </div><!-- /content -->

@@ -14,6 +14,7 @@
 *   Param: set any device property with JSON string such as {orientation:200}
 *
 **/
+
 function SODDevice(deviceInfo){
     //this.serverURL = serverURL;
     //this.socketURL = socketURL;
@@ -33,7 +34,43 @@ function SODDevice(deviceInfo){
         stationary : false,
         deviceIP : '',
         observer:null
+    };
+
+
+    this.isMobile = {
+        Android: function() {
+            return /Android/i.test(navigator.userAgent);
+        },
+        BlackBerry: function() {
+            return /BlackBerry/i.test(navigator.userAgent);
+        },
+        iOS: function() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        },
+        Windows: function() {
+            return /IEMobile/i.test(navigator.userAgent);
+        },
+        any: function() {
+            return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
+        }
+    };
+
+    if(this.isMobile.any()==true){
+        if(this.isMobile.iOS()==true){
+            this.device.deviceType = "IPhone";
+        }else if(this.isMobile.BlackBerry()==true){
+            this.device.deviceType = "BlackBerry";
+        }else if(this.isMobile.Windows()==true){
+            this.device.deviceType = "WindowsPhone";
+        }else if(this.isMobile.Android()){
+            this.device.deviceType = "Android";
+        }
+    }else{
+        alert("not a mobile device!");
     }
+
+
+
     //setters]
     console.log('deviceInfo: '+ JSON.stringify(deviceInfo));
     for(var key in deviceInfo){
@@ -49,8 +86,10 @@ function SODDevice(deviceInfo){
     this.sendToDevices = null;
 
 
+
     //this.device = device;
 }
+
 
 SODDevice.prototype = {
     init: function(serverURL,socketURL, _SOD){
@@ -161,7 +200,7 @@ sendToDevices.prototype = {
     inView : function(){
 
     }
-}
+};
 
 
 
