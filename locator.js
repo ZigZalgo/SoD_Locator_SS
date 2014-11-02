@@ -544,7 +544,7 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
         frontend.clients[deviceSocketID].emit("gotPaired",{deviceID:devices[deviceSocketID].uniqueDeviceID,personID:persons[uniquePersonID],status:statusMsg});
     }
     socket.send(JSON.stringify({"status": statusMsg, "ownerID": uniquePersonID}));
-    if(callback()!=undefined){
+    if(callback!=undefined){
         try{
             callback();
         }catch(e){
