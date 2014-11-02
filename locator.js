@@ -544,7 +544,16 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
         frontend.clients[deviceSocketID].emit("gotPaired",{deviceID:devices[deviceSocketID].uniqueDeviceID,personID:persons[uniquePersonID],status:statusMsg});
     }
     socket.send(JSON.stringify({"status": statusMsg, "ownerID": uniquePersonID}));
-    callback();
+    console.log("callback : " + callback());
+    if(callback()!=undefined){
+        try{
+            callback();
+        }catch(e){
+            console.log("unable to call callback function " + e);
+        }
+    }else{
+        console.log("no callback has been defined.");
+    }
 }
 
 //tested
@@ -867,7 +876,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         console.log("Registering device: " + JSON.stringify(device));
         console.log('emitting registered device ID : '+ deviceInfo.ID);
         if (fn != undefined) {
-            console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
+            //console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
             fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
 

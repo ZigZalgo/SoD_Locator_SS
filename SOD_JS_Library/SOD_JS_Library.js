@@ -51,7 +51,7 @@ function SODDevice(deviceInfo){
             return /IEMobile/i.test(navigator.userAgent);
         },
         any: function() {
-            return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
+            return (this.Android() || this.BlackBerry() || this.iOS() || this.Windows());
         }
     };
 
