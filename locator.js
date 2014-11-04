@@ -3,7 +3,8 @@ var _ = require('underscore');
 var locator = require('./locator');
 var util = require('./util');
 var frontend = require('./frontend');
-var events = require("events");
+//var events = require("events");
+
 
 var dataPoints = {};
 var persons = {};
@@ -11,7 +12,7 @@ var devices = {};
 var sensors = {};
 var datas = {};
 var sensorsReference = null;
-var eventsSwitch = {inRangeEvents:true};
+
 exports.persons = persons;
 exports.devices = devices;
 exports.sensors = sensors;
@@ -256,16 +257,6 @@ function inRangeEvent(){
 
     }
 }
-
-
-/* Event handler */
-setInterval(function(){
-    //console.log('Event Interval HeartBeat.');
-    if(eventsSwitch.inRangeEvents==true){
-        inRangeEvent();
-
-    }
-},1000);
 
 
 /*
@@ -558,8 +549,6 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
 //tested
 exports.printPersons = function(){
     console.log("People tracked: ");
-    var output;
-    //console.log(persons);
     try{
         console.log("There are "+object.keys(persons).length+" people in this view."); // adding sensor ID if possible
 

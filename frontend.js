@@ -22,6 +22,10 @@ var util = require('./util');
 var clients = {};
 exports.io = io;
 exports.clients = clients;
+/* starting heartbeat*/
+var pulse = require('./pulse');
+pulse.start();
+
 
 app.configure(function(){
     app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data' }));
@@ -195,7 +199,9 @@ io.sockets.on('connection', function (socket) {
 function init(){
     var os = require('os');
     var interfaces = os.networkInterfaces();
-    exports.serverAddress;
+    //exports.serverAddress;
+
+
 // setting up server IP and display in the console
     for (var k in interfaces) {
         for (k2 in interfaces[k]) {
