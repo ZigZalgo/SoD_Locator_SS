@@ -875,7 +875,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
 // TODO: implement!
 // TODO: test!
 exports.getDevicesInView = function(observerSocketID, devicesInFront){
-    console.log("devicesInFront: " + JSON.stringify(devicesInFront));
+    //console.log("devicesInFront: " + JSON.stringify(devicesInFront));
     // TODO: test
     //console.log(devices[observerSocketID]);
     //var returnDevices = {};
@@ -898,13 +898,13 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
                         sides.forEach(function (side) {
                             var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
                             if (intPoint != null) {
-                                console.log("Added an intersection point")
+                                //console.log("Added an intersection point")
                                 intersectionPoints.push(intPoint);
                             }
                         });
 
                         if (intersectionPoints.length != 0) {
-                            console.log("intersection points not empty");
+                            //console.log("intersection points not empty");
                             //this.continue;
                             var nearestPoint = intersectionPoints[0];
                             var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].location, nearestPoint);
@@ -921,7 +921,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
 
                             devices[devicesInFront[i]].intersectionPoint.X = ratioOnScreen.X;
                             devices[devicesInFront[i]].intersectionPoint.Y = ratioOnScreen.Y;
-                            console.log("Pushed a target for sending!");
+                            //console.log("Pushed a target for sending!");
                             returnDevices[devicesInFront[i]] = devices[devicesInFront[i]];
                         }
                     }

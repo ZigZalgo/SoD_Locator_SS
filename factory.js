@@ -177,6 +177,8 @@ function Device(socket, opts){
         this.stationary = false;
         this.deviceIP = '';
         this.observer = null;
+        this.inRangeOf = {};
+        this.inViewList = {};
     }
     catch(err){
     }

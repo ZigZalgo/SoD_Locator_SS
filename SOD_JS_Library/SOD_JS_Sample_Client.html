@@ -100,6 +100,15 @@
                         //showNormalStatus(JSON.stringify(data.payload));
                         console.log('->enter!'+JSON.stringify(data.payload));
                     });
+
+                    sod.addListener('enterView',function(data){
+                        //showNormalStatus(JSON.stringify(data.payload));
+                        console.log('->enterView!'+JSON.stringify(data));
+                    });
+                    sod.addListener('leaveView',function(data){
+                        //showNormalStatus(JSON.stringify(data.payload));
+                        console.log('->leaveView!'+JSON.stringify(data));
+                    });
                     sod.addListener('leaveObserveRange',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
                         console.log('->leaves'+JSON.stringify(data.payload));

@@ -502,6 +502,7 @@ exports.getDeviceSocketIDByID = function (ID) {
 };
 
 exports.filterDevices = function(socket, request){
+    //console.log('request-> '+ JSON.stringify(request) );
     if(request.selection == undefined || request.selection == null || request.selection[0] == undefined || request.selection[0] == null){
         return(locator.devices)
     }

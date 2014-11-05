@@ -10,7 +10,7 @@ var frontend = require('./frontend');
 //var events = require("events");
 var pulse = require('./pulse');
 exports.initPulseInterval = 500;
-exports.eventsSwitch = {inRangeEvents:true};
+exports.eventsSwitch = {inRangeEvents:true,inViewEvents:true};
 
 /* Event handler */
 // exposing the heartbeat
@@ -19,14 +19,58 @@ exports.start = function(){
         try{
             setInterval(function(){
                 //console.log('Event Interval HeartBeat.');
-                if(pulse.eventsSwitch.inRangeEvents==true){
+                if(pulse.eventsSwitch.inRangeEvents == true){
                     inRangeEvent();
                 }
+
+                if(pulse.eventsSwitch.inViewEvents == true){
+                    inViewEvent();
+                }
+
             },pulse.initPulseInterval);
         }catch(e){
             console.log('unable to start heartbeat due to: '+ e);
         }
 };
+
+
+// all the event handlers
+function inViewEvent(){
+    for(var deviceKey in locator.devices){
+        // interating through all the devices
+        if(locator.devices.hasOwnProperty(deviceKey)){
+            var CurrentInViewDeviceList = util.filterDevices(frontend.clients[locator.devices[deviceKey].socketID],{"selection":["inView"]});
+            for(var currentInViewDevicesKey in CurrentInViewDeviceList){
+                if(locator.devices[deviceKey].inViewList[currentInViewDevicesKey] == undefined){
+                    locator.devices[deviceKey].inViewList[currentInViewDevicesKey] = {type:'device',ID:CurrentInViewDeviceList[currentInViewDevicesKey].uniqueDeviceID}
+                    console.log('added-> ' +JSON.stringify(locator.devices[deviceKey].inViewList)  + ' to inViewlist');
+                    try{
+                        frontend.clients[locator.devices[deviceKey].socketID].emit("enterView",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},
+                            visitor:locator.devices[deviceKey].inViewList[currentInViewDevicesKey]});
+                    }catch(e){
+                        console.log("unable to send enterView event message due to: "+ e);
+                    }
+
+                }
+            }// end of for CurrentInViewDevicelist
+            for(var inViewListKey in locator.devices[deviceKey].inViewList){
+                if(locator.devices[deviceKey].inViewList.hasOwnProperty(inViewListKey)){
+                    if(locator.devices[deviceKey].inViewList[inViewListKey] != undefined && CurrentInViewDeviceList[inViewListKey] ==undefined) {  // if the inViewList device
+                        console.log('deleting->' +  JSON.stringify(locator.devices[deviceKey].inViewList));
+                        try{
+                            frontend.clients[locator.devices[deviceKey].socketID].emit("leaveView",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},
+                                visitor:locator.devices[deviceKey].inViewList[inViewListKey]});
+                        }catch(e){
+                            console.log("unable to send leaveView message due to: "+ e);
+                        }
+
+                        delete locator.devices[deviceKey].inViewList[inViewListKey];
+                    }
+                }// End of if hasProperty
+            }
+        }
+    }// end of inView Event
+}
 
 
 /* inRangeEvent functions calculate whether a person is in range of a device. */
