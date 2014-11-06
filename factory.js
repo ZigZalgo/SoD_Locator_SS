@@ -199,6 +199,9 @@ exports.make2DPoint = function (x, y) {
 
 // tested
 exports.makeLineUsingPoints = function (start, end) {
+    //console.log(end);
+
+    ///if(start.X == end.X)
     var line = {startPoint: {X: start.X, Y: start.Y, Z: start.Z},
         endPoint: {X: end.X, Y: end.Y, Z: end.Z},
         slope: null,
@@ -206,18 +209,20 @@ exports.makeLineUsingPoints = function (start, end) {
         isVerticalLine: null,
         x: null,
         isLineSegment: true};
-
-    if (line.endPoint.X === line.startPoint.X) {
+    if (start.X == end.X) {
         line.isVerticalLine = true;
         line.x = line.startPoint.X;
+        return line;
     }
     else {
         line.isVerticalLine = false;
-        line.slope = (line.endPoint.Z - line.startPoint.Z) / (line.endPoint.X - line.startPoint.X);
-        line.zIntercept = line.startPoint.Z - line.slope * line.startPoint.X;
+        line.slope = (line.endPoint.Y - line.startPoint.Y) / (line.endPoint.X - line.startPoint.X);
+        line.zIntercept = line.startPoint.Y - line.slope * line.startPoint.X;
+        //console.log("zIntercept: "+line.zIntercept + ' slope: '+ line.slope + ' - startPoint:' + JSON.stringify(line.startPoint) + ' - endPoint ' + JSON.stringify(line.endPoint) );
+        return line;
     }
 
-    return line;
+
 };
 
 // TODO: test!

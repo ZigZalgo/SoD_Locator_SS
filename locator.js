@@ -880,7 +880,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
     //console.log(devices[observerSocketID]);
     //var returnDevices = {};
     var returnDevices = {};
-    var observerLineOfSight = factory.makeLineUsingOrientation(devices[observerSocketID].location, devices[observerSocketID].orientation);
+    var observerLineOfSight = factory.makeLineUsingOrientation(locator.devices[observerSocketID].location, locator.devices[observerSocketID].orientation);
 
     if(devicesInFront!=undefined) {
         for (var i = 0; i <= devicesInFront.length; i++) {
@@ -896,13 +896,15 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
                         //console.log("Sides: " + JSON.stringify(sides))
 
                         sides.forEach(function (side) {
+                           // console.log(side);
                             var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
                             if (intPoint != null) {
-                                //console.log("Added an intersection point")
+                                //console.log("Added an intersection point: " + JSON.stringify(intPoint))
                                 intersectionPoints.push(intPoint);
                             }
                         });
 
+                        //console.log(intersectionPoints);
                         if (intersectionPoints.length != 0) {
                             //console.log("intersection points not empty");
                             //this.continue;
@@ -918,7 +920,7 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
                             });
 
                             var ratioOnScreen = util.GetRatioPositionOnScreen(devicesInFront[i], nearestPoint);
-
+                            console.log(ratioOnScreen);
                             devices[devicesInFront[i]].intersectionPoint.X = ratioOnScreen.X;
                             devices[devicesInFront[i]].intersectionPoint.Y = ratioOnScreen.Y;
                             //console.log("Pushed a target for sending!");

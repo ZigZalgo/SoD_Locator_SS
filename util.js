@@ -219,7 +219,7 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
     }else{
         return true;
     }
-}
+};
 
 
 
@@ -227,6 +227,7 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
 // Tested!
 exports.getIntersectionPoint = function (line1, line2) {
     var IntersectionPoint = null;
+
 
     //if lines are parallel
     if (line1.isVerticalLine && line2.isVerticalLine || line1.slope == line2.slope)
@@ -241,8 +242,11 @@ exports.getIntersectionPoint = function (line1, line2) {
     }
     else {
         var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
+        //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
+        //console.log(xValue);
         var yValue = line1.slope * xValue + line1.zIntercept;
         IntersectionPoint = factory.make2DPoint(xValue, yValue);
+        console.log("intersection point: " + JSON.stringify(IntersectionPoint) + "X->" + xValue + " Y->" + yValue + "from line1 "+JSON.stringify(line1) + " line2: " +JSON.stringify(line2));
     }
 
     if (line1.isLineSegement) {
@@ -300,6 +304,7 @@ exports.getLinesOfShape = function (device) {
         returnLines.push(bottomSide);
         returnLines.push(leftSide);
 
+        console.log(returnLines);
         return returnLines;
     }
 
@@ -359,10 +364,10 @@ exports.getCornersOfShape = function (device) {
     try {
         var deviceLocation = device.location;
 
-        intPoints.push(factory.make2DPoint(deviceLocation.X + device.Width / 2, deviceLocation.Z + device.Height / 2));
-        intPoints.push(factory.make2DPoint(deviceLocation.X + device.Width / 2, deviceLocation.Z - device.Height / 2));
-        intPoints.push(factory.make2DPoint(deviceLocation.X - device.Width / 2, deviceLocation.Z - device.Height / 2));
-        intPoints.push(factory.make2DPoint(deviceLocation.X - device.Width / 2, deviceLocation.Z + device.Height / 2));
+        intPoints.push(factory.make2DPoint(deviceLocation.X + device.width / 2, deviceLocation.Z + device.height / 2));
+        intPoints.push(factory.make2DPoint(deviceLocation.X + device.width / 2, deviceLocation.Z - device.height / 2));
+        intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z - device.height / 2));
+        intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z + device.height / 2));
     }
     catch (err) {
         // Device does not have a location
@@ -400,11 +405,12 @@ exports.getCornersOfShape = function (device) {
 
 // Tested!
 exports.GetRatioPositionOnScreen = function (target, intersection) {
-    var cornersOfShape = this.getCornersOfShape(target);
+    var cornersOfShape = this.getCornersOfShape(locator.devices[target]);
     if (cornersOfShape.length < 1) {
         // Device does not have a location
         return factory.make2DPoint(-1, -1);
     }
+    //console.log(intersection)
     var distance1 = this.distanceBetweenPoints(intersection, cornersOfShape[0]);
     var distance2 = this.distanceBetweenPoints(intersection, cornersOfShape[1]);
     var distance3 = this.distanceBetweenPoints(cornersOfShape[0], cornersOfShape[1]);
