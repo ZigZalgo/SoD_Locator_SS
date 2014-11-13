@@ -10,11 +10,14 @@ var frontend = require('./frontend');
 //var events = require("events");
 var pulse = require('./pulse');
 exports.initPulseInterval = 500;
-exports.eventsSwitch = {inRangeEvents:true,inViewEvents:true};
-
+exports.eventsSwitch = {inRangeEvents:true,inViewEvents:true,sendIntersectionPoints:true};
+exports.intervals = {};
 /* Event handler */
 // exposing the heartbeat
 exports.start = function(){
+    pulse.intervals = {
+        sendIntersectionPoints : null
+    }
     console.log(' * Starting heartbeat on '+pulse.initPulseInterval + ' ms interval With pulse switch: ' + JSON.stringify(pulse.eventsSwitch));
         try{
             setInterval(function(){
@@ -28,13 +31,33 @@ exports.start = function(){
                 }
 
             },pulse.initPulseInterval);
+            if(pulse.eventsSwitch.sendIntersectionPoints == true){
+                var sendIntersectionPointsInterval = setInterval(function(){
+                        sendIntersectionPoints();
+                    },pulse.initPulseInterval
+                );
+                pulse.intervals.sendIntersectionPoints = sendIntersectionPointsInterval;
+            }
+
         }catch(e){
             console.log('unable to start heartbeat due to: '+ e);
         }
 };
 
 
+
 // all the event handlers
+function sendIntersectionPoints(){
+    for(var deviceKey in locator.devices){
+        if(locator.devices.hasOwnProperty(deviceKey)){
+            var socketID = locator.devices[deviceKey].socketID;
+            var intersections =  locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(socketID, locator.devices));
+            console.log('intersections: ' + JSON.stringify(intersections));
+        }
+    }
+}
+
+
 function inViewEvent(){
     for(var deviceKey in locator.devices){
         // interating through all the devices
@@ -44,6 +67,7 @@ function inViewEvent(){
                 if(locator.devices[deviceKey].inViewList[currentInViewDevicesKey] == undefined){
                     locator.devices[deviceKey].inViewList[currentInViewDevicesKey] = {type:'device',ID:CurrentInViewDeviceList[currentInViewDevicesKey].uniqueDeviceID}
                     console.log('added-> ' +JSON.stringify(locator.devices[deviceKey].inViewList)  + ' to inViewlist');
+
                     try{
                         frontend.clients[locator.devices[deviceKey].socketID].emit("enterView",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},
                             visitor:locator.devices[deviceKey].inViewList[currentInViewDevicesKey]});

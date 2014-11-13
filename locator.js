@@ -3,6 +3,9 @@ var _ = require('underscore');
 var locator = require('./locator');
 var util = require('./util');
 var frontend = require('./frontend');
+var Q = require('q');
+var async = require("async");
+
 //var events = require("events");
 
 
@@ -862,83 +865,99 @@ exports.registerDevice = function(socket, deviceInfo,fn){
 
         devices[socket.id] = device; // officially register the device to locator(server)
         console.log("Registering device: " + JSON.stringify(device));
-        console.log('emitting registered device ID : '+ deviceInfo.ID);
+        console.log('emitting registered device ID : '+ locator.devices[socket.id].uniqueDeviceID);
         if (fn != undefined) {
             //console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
             fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
 
-        frontend.clients[socket.id].emit('registered',{deviceID:deviceInfo.ID});
+        frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});
     }
 }
 
 // TODO: implement!
 // TODO: test!
-exports.getDevicesInView = function(observerSocketID, devicesInFront){
+exports.calcIntersectionPoints = function(observerSocketID, devicesInFront){
     //console.log("devicesInFront: " + JSON.stringify(devicesInFront));
     // TODO: test
     //console.log(devices[observerSocketID]);
     //var returnDevices = {};
     var returnDevices = {};
-    var observerLineOfSight = factory.makeLineUsingOrientation(locator.devices[observerSocketID].location, locator.devices[observerSocketID].orientation);
+    util.translateOrientationToReference(locator.devices[observerSocketID],
+    function(orientationToReference){
+        console.log('got orientation to reference: ' + orientationToReference);
+        var observerLineOfSight = factory.makeLineUsingOrientation(locator.devices[observerSocketID].location, orientationToReference);
 
-    if(devicesInFront!=undefined) {
-        for (var i = 0; i <= devicesInFront.length; i++) {
+        if(devicesInFront!=undefined) {
+            for (var i = 0; i <= devicesInFront.length; i++) {
 
-            if (i == devicesInFront.length) {
-                return returnDevices;
-            }
-            else {
-                if (devices[devicesInFront[i]] != undefined) {
-                    if (devices[devicesInFront[i]].width != null) {
-                        var sides = util.getLinesOfShape(devices[devicesInFront[i]]);
-                        var intersectionPoints = [];
-                        //console.log("Sides: " + JSON.stringify(sides))
-
-                        sides.forEach(function (side) {
-                           // console.log(side);
-                            var intPoint = util.getIntersectionPoint(observerLineOfSight, side);
-                            if (intPoint != null) {
-                                //console.log("Added an intersection point: " + JSON.stringify(intPoint))
-                                intersectionPoints.push(intPoint);
-                            }
-                        });
-
-                        //console.log(intersectionPoints);
-                        if (intersectionPoints.length != 0) {
-                            //console.log("intersection points not empty");
-                            //this.continue;
-                            var nearestPoint = intersectionPoints[0];
-                            var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].location, nearestPoint);
-
-                            intersectionPoints.forEach(function (point) {
-                                var distance = util.distanceBetweenPoints(devices[observerSocketID].location, point);
-                                if (distance < shortestDistance) {
-                                    nearestPoint = point;
-                                    shortestDistance = distance;
-                                }
-                            });
-
-                            var ratioOnScreen = util.GetRatioPositionOnScreen(devicesInFront[i], nearestPoint);
-                            console.log(ratioOnScreen);
-                            devices[devicesInFront[i]].intersectionPoint.X = ratioOnScreen.X;
-                            devices[devicesInFront[i]].intersectionPoint.Y = ratioOnScreen.Y;
-                            //console.log("Pushed a target for sending!");
-                            returnDevices[devicesInFront[i]] = devices[devicesInFront[i]];
-                        }
-                    }
+                if (i == devicesInFront.length) {
+                    return returnDevices;
                 }
                 else {
-                    console.log("devices:\n " + JSON.stringify(devices))
-                    console.log("devicesInFront:\n " + JSON.stringify(devicesInFront));
-                    console.log("i:\n " + JSON.stringify(i));
-                }
+                    if (devices[devicesInFront[i]] != undefined) {
+                        if (devices[devicesInFront[i]].width != null) {
+                            var sides = util.getLinesOfShape(devices[devicesInFront[i]]);
+                            var intersectionPoints = [];
+                            console.log("Sides: " + JSON.stringify(sides))
 
-            }
-        };
-    }else{
-        return {};
-    }// end for checking devicesInfront undefined
+
+                            sides.forEach(function (side) {
+                                util.getIntersectionPoint(observerLineOfSight, side).then(
+                                    function(IntersectionPoint){
+                                        console.log("intersection point: " + JSON.stringify(IntersectionPoint));
+                                        if (IntersectionPoint != null) {
+                                            //console.log("Added an intersection point: " + JSON.stringify(intPoint))
+                                            intersectionPoints.push(IntersectionPoint);
+                                        }
+                                    }
+                                );
+                                //console.log("intersection point: " + JSON.stringify(IntersectionPoint) + "X->" + xValue + " Y->" + yValue + "from line1 "+JSON.stringify(line1) + " line2: " +JSON.stringify(line2));
+                            });
+
+                            console.log('intersection distance');
+                            if (intersectionPoints.length != 0) {
+                                //console.log("intersection points not empty");
+                                //this.continue;
+                                intersectionPoints.forEach(function(intPoint){
+                                    var distance = util.distanceBetweenPoints(devices[observerSocketID].location, intPoint)
+                                    console.log(distance);
+                                })
+                                /* var nearestPoint = intersectionPoints[0];
+                                 var shortestDistance = util.distanceBetweenPoints(devices[observerSocketID].location, nearestPoint);
+
+                                 intersectionPoints.forEach(function (point) {
+                                 var distance = util.distanceBetweenPoints(devices[observerSocketID].location, point);
+                                 if (distance < shortestDistance) {
+                                 nearestPoint = point;
+                                 shortestDistance = distance;
+                                 }
+                                 });
+
+                                 var ratioOnScreen = util.GetRatioPositionOnScreen(devicesInFront[i], nearestPoint);
+                                 console.log("ratio on screen: " + JSON.stringify(nearestPoint));
+                                 devices[devicesInFront[i]].intersectionPoint.X = ratioOnScreen.X;
+                                 devices[devicesInFront[i]].intersectionPoint.Y = ratioOnScreen.Y;
+                                 //console.log("Pushed a target for sending!");
+                                 returnDevices[devicesInFront[i]] = devices[devicesInFront[i]];
+                                 */
+                            }
+
+
+                        }
+                    }
+                    else {
+                        console.log("devices:\n " + JSON.stringify(devices))
+                        console.log("devicesInFront:\n " + JSON.stringify(devicesInFront));
+                        console.log("i:\n " + JSON.stringify(i));
+                    }
+
+                }
+            };
+        }else{
+            return {};
+        }// end for checking devicesInfront undefined
+    })// end of reference wit callback
 }
 
 // TODO: implement!
@@ -946,25 +965,28 @@ exports.getDevicesInView = function(observerSocketID, devicesInFront){
 exports.getDevicesInFront = function(observerSocketID, deviceList){
     // TODO: implement!
     // List<Device> returnDevices = new List<Device>();
-    var observer = devices[observerSocketID];
+    var observer = locator.devices[observerSocketID];
     var returnDevices = [];
-
+    console.log(observerSocketID + ' - ' + JSON.stringify(deviceList));
     //(CB - Should we throw an exception here? Rather then just returning an empty list?)
-    try{
-        if (observer.location == null || observer.orientation == null)
-            return returnDevices;
-        if (observer.FOV == 0.0)
-            return returnDevices;
-        if (observer.FOV == 360.0){
-            return Object.keys(deviceList).filter(function(key){
-                if(deviceList[key] != observer && deviceList[key].location != undefined){
-                    return true;
-                }
-            })
+    function filterFOV(observer,deviceList){
+        try{
+            if (observer.location == null || observer.orientation == null)
+                return returnDevices;
+            if (observer.FOV == 0.0)
+                return returnDevices;
+            if (observer.FOV == 360.0){
+                return Object.keys(deviceList).filter(function(key){
+                    if(deviceList[key] != observer && deviceList[key].location != undefined){
+                        return true;
+                    }
+                })
+            }
         }
-    }
-    catch(err){
-        console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
+        catch(err){
+            console.log("Error getting devices in front of device " + ": " + err);
+        }
+
     }
 
     // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
@@ -999,7 +1021,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
         })
     }
     catch(err){
-        console.log("Error getting devices in front of device " + devices[observerSocketID].uniqueDeviceID + ": " + err);
+        console.log("Error getting devices in front of device " + ": " + err);
     }
 }
 

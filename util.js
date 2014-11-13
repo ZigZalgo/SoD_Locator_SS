@@ -1,6 +1,7 @@
 var factory = require('./factory');
 var locator = require('./locator');
 var util = require('./util');
+var Q = require('q');
 
 exports.DEFAULT_FIELD_OF_VIEW = 25.0;
 exports.KINECT_VIEW_RANGE = 28.5;               // not being used yet
@@ -159,12 +160,21 @@ exports.getDegreeOfTwoVectors = function (vector1, vector2) {
  @return:
  returnLocation   -- location after transformation
  */
-exports.matrixTransformation = function (personLocation, angle) {
+exports.matrixTransformation = function (personLocation, angle, callback) {
     var returnLocation = {X: 0, Y: 0, Z: 0};
     var returnX = personLocation.X * Math.cos(angle * DEGREES_TO_RADIANS) + personLocation.Z * Math.sin(angle * DEGREES_TO_RADIANS);
     var returnZ = personLocation.Z * Math.cos(angle * DEGREES_TO_RADIANS) - (personLocation.X * Math.sin(angle * DEGREES_TO_RADIANS));
     returnLocation.X = Math.round(returnX * this.ROUND_RATIO) / this.ROUND_RATIO;
     returnLocation.Z = Math.round(returnZ * this.ROUND_RATIO) / this.ROUND_RATIO;
+    if(callback != undefined){
+        try{
+            callback();
+        }catch(e){
+            console.log(' error in callback: '+ e);
+        }
+    }else{
+        //callback is empty
+    }
     return returnLocation; // for testing
 };
 
@@ -226,10 +236,33 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
 
 // Tested!
 exports.getIntersectionPoint = function (line1, line2) {
-    var IntersectionPoint = null;
-
-
     //if lines are parallel
+    var isGreater = util.isGreater;
+    var isLess = util.isLess;
+    return calculatePossibleInt(line1,line2).then(
+        function(IntersectionPoint){
+            if (line1.isLineSegement) {
+                if (isGreater(IntersectionPoint.X, line1.startPoint.X) && isGreater(IntersectionPoint.X, line1.endPoint.X) ||
+                    isLess(IntersectionPoint.X, line1.startPoint.X) && isLess(IntersectionPoint.X, line1.endPoint.X) ||
+                    isGreater(IntersectionPoint.Z, line1.startPoint.Z) && isGreater(IntersectionPoint.Z, line1.endPoint.Z) ||
+                    isLess(IntersectionPoint.Z, line1.startPoint.Z) && isLess(IntersectionPoint.Z, line1.endPoint.Z))
+                {return Q(null)}else{return Q(IntersectionPoint)};
+            }else{return Q(IntersectionPoint)}
+        },function(error){console.log(error)}).
+        then(function(IntersectionPoint){
+            if (line2.isLineSegment) {
+                if (((IntersectionPoint.X > line2.startPoint.X) && (IntersectionPoint.X > line2.endPoint.X)) ||
+                    ((IntersectionPoint.X < line2.startPoint.X) && (IntersectionPoint.X < line2.endPoint.X)) ||
+                    ((IntersectionPoint.Z > line2.startPoint.Z) && (IntersectionPoint.Z > line2.endPoint.Z)) ||
+                    ((IntersectionPoint.Z < line2.startPoint.Z) && (IntersectionPoint.Z < line2.endPoint.Z)))
+                {return Q(null)}else {return Q(IntersectionPoint)}}
+            else {return Q(IntersectionPoint)}
+        },function(error){console.log(error)})
+
+};
+
+function calculatePossibleInt(line1,line2){
+    var IntersectionPoint = null;
     if (line1.isVerticalLine && line2.isVerticalLine || line1.slope == line2.slope)
         return null;
     else if (line1.isVerticalLine) {
@@ -243,35 +276,17 @@ exports.getIntersectionPoint = function (line1, line2) {
     else {
         var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
         //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
-        //console.log(xValue);
+        // console.log(" = " + xValue);
         var yValue = line1.slope * xValue + line1.zIntercept;
         IntersectionPoint = factory.make2DPoint(xValue, yValue);
-        console.log("intersection point: " + JSON.stringify(IntersectionPoint) + "X->" + xValue + " Y->" + yValue + "from line1 "+JSON.stringify(line1) + " line2: " +JSON.stringify(line2));
     }
-
-    if (line1.isLineSegement) {
-        if (isGreater(IntersectionPoint.X, line1.startPoint.X) && isGreater(IntersectionPoint.X, line1.endPoint.X) ||
-            isLess(IntersectionPoint.X, line1.startPoint.X) && isLess(IntersectionPoint.X, line1.endPoint.X) ||
-            isGreater(IntersectionPoint.Y, line1.startPoint.Z) && isGreater(IntersectionPoint.Y, line1.endPoint.Z) ||
-            isLess(IntersectionPoint.Y, line1.startPoint.Z) && isLess(IntersectionPoint.Y, line1.endPoint.Z))
-            return null;
-    }
-
-    if (line2.isLineSegement) {
-        if (isGreater(IntersectionPoint.X, line2.startPoint.X) && isGreater(IntersectionPoint.X, line2.endPoint.X) ||
-            isLess(IntersectionPoint.X, line2.startPoint.X) && isLess(IntersectionPoint.X, line2.endPoint.X) ||
-            isGreater(IntersectionPoint.Y, line2.startPoint.Z) && isGreater(IntersectionPoint.Y, line2.endPoint.Z) ||
-            isLess(IntersectionPoint.Y, line2.startPoint.Z) && isLess(IntersectionPoint.Y, line2.endPoint.Z))
-            return null;
-    }
-
-    return IntersectionPoint;
-};
-
+    return Q(IntersectionPoint);
+}
 // Tested!
 exports.isGreater = function (num1, num2) {
     var answer = num1 - num2;
     answer = Math.round(answer * 1000) / 1000;
+    console.log("answer:  " + answer);
     if (answer > 0) {
         return true;
     }
@@ -292,7 +307,7 @@ exports.isLess = function (num1, num2) {
 exports.getLinesOfShape = function (device) {
     var returnLines = [];
     var corners = this.getCornersOfShape(device);
-
+    //onsole.log("corners -> "+ JSON.stringify(corners));
     try {
         var topSide = factory.makeLineUsingPoints(corners[0], corners[1]);
         var rightSide = factory.makeLineUsingPoints(corners[1], corners[2]);
@@ -304,7 +319,7 @@ exports.getLinesOfShape = function (device) {
         returnLines.push(bottomSide);
         returnLines.push(leftSide);
 
-        console.log(returnLines);
+        //console.log(returnLines[0].startPoint);
         return returnLines;
     }
 
@@ -326,13 +341,43 @@ exports.getLinesOfShape = function (device) {
     @return:
             returnDegree    -- degree value of orientation (+/- KINECT_VIEW_RANGE)
 */
-exports.getObjectOrientationToSensor = function (personX, personZ) {
+exports.getObjectOrientationToSensor = function (personX, personZ,callback) {
     var angleTowardsKinect = Math.atan2(personX, personZ);
     var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+    if(callback != undefined){
+        try{
+            callback(returnDegree);
+        }catch(e){
+            console.log(' error in callback: '+ e);
+        }
+    }else{
+        //callback is empty
+    }
     return returnDegree;
 };
 
+/*
+*   Translate Orientation of a device to a reference space
+* */
+exports.translateOrientationToReference = function(device,callback){
+    if(device!=undefined) {
+        this.getObjectOrientationToSensor(device.location.X,device.location.Z,function(orientationToSensor){
+            //console.log('Get orientation to Sensor: '+ (orientationToSensor+device.orientation));
+            if(callback != undefined){
+                try{
+                    callback(-(90+(orientationToSensor+device.orientation)));
+                }catch(e){
+                    console.log(' error in callback: '+ e);
+                }
+            }else{
+                //callback is empty
+            }
+        });
 
+    }else{
+        console.log('orientation is not defined in translateOrietationToReference');
+    }
+}
 /*
  get Distance from person to kinect
  @param:
@@ -358,7 +403,7 @@ exports.getObserverLocation = function(objectWithObserver){
 
 
 // Tested!
-exports.getCornersOfShape = function (device) {
+exports.getCornersOfShape = function (device,callback) {
     var returnPoints = [];
     var intPoints = [];
     try {
@@ -368,6 +413,7 @@ exports.getCornersOfShape = function (device) {
         intPoints.push(factory.make2DPoint(deviceLocation.X + device.width / 2, deviceLocation.Z - device.height / 2));
         intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z - device.height / 2));
         intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z + device.height / 2));
+
     }
     catch (err) {
         // Device does not have a location
@@ -392,19 +438,35 @@ exports.getCornersOfShape = function (device) {
         return intPoints;
     }
 
-    intPoints.forEach(function (point) {
+    /*intPoints.forEach(function (point) {
         var xValue = (point.X - deviceLocation.X) * Math.cos(angle) - (point.Y - deviceLocation.Z) * Math.sin(angle) + deviceLocation.X;
         var yValue = (point.Y - deviceLocation.Z) * Math.cos(angle) + (point.X - deviceLocation.X) * Math.sin(angle) + deviceLocation.Z;
-
         var newPoint = factory.make2DPoint(xValue, yValue);
         returnPoints.push(newPoint);
-    });
+    });*/
+    returnPoints = intPoints;
+    console.log("points -> "+ JSON.stringify(intPoints));
+
+    if(callback != undefined){
+        try{
+            callback(returnPoints);
+        }catch(e){
+            console.log(' error in callback: '+ e);
+        }
+    }else{
+        //callback is empty
+    }
 
     return returnPoints;
 };
 
+/**/
+exports.intersectionOnDevice = function(intersection,corners){
+    return Q(corners);
+}
+
 // Tested!
-exports.GetRatioPositionOnScreen = function (target, intersection) {
+exports.GetRatioPositionOnScreen = function (target, intersection,callback) {
     var cornersOfShape = this.getCornersOfShape(locator.devices[target]);
     if (cornersOfShape.length < 1) {
         // Device does not have a location
@@ -530,7 +592,7 @@ exports.filterDevices = function(socket, request){
                         return filterSelection(i + 1, (locator.getAllDevicesExceptSelf(socket, listDevices)));
                         break;
                     case "inView":
-                        return filterSelection(i + 1, locator.getDevicesInView(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
+                        return filterSelection(i + 1, locator.getDevicesInFront(socket.id, listDevices));// locator.calcIntersectionPoints(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
                         break;
                     case "paired":
                         return filterSelection(i + 1, locator.getPairedDevice(listDevices));
@@ -554,5 +616,21 @@ exports.filterDevices = function(socket, request){
             }
         }
         return (filterSelection(0, locator.devices));
+    }
+}
+
+
+/*
+*   Handles the callbacks of SOD
+* */
+exports.callbackHandler= function(callback){
+    if(callback != undefined){
+        try{
+            callback();
+        }catch(e){
+            console.log(' error in callback: '+ e);
+        }
+    }else{
+        //callback is empty
     }
 }

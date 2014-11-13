@@ -179,6 +179,7 @@ function Device(socket, opts){
         this.observer = null;
         this.inRangeOf = {};
         this.inViewList = {};
+        this.subscribeToEvents ={receiveIntersectionPoints:true,receiveInViewList:true};
     }
     catch(err){
     }
@@ -192,15 +193,15 @@ exports.Device = Device;
 
 
 // tested
-exports.make2DPoint = function (x, y) {
+exports.make2DPoint = function (x, z) {
     return {X: x,
-        Y: y};
+        Y: 0,Z: z};
 };
 
 // tested
 exports.makeLineUsingPoints = function (start, end) {
-    //console.log(end);
-
+    console.log('start: '+JSON.stringify(start));
+    console.log('end: '+JSON.stringify(end));
     ///if(start.X == end.X)
     var line = {startPoint: {X: start.X, Y: start.Y, Z: start.Z},
         endPoint: {X: end.X, Y: end.Y, Z: end.Z},
@@ -216,9 +217,9 @@ exports.makeLineUsingPoints = function (start, end) {
     }
     else {
         line.isVerticalLine = false;
-        line.slope = (line.endPoint.Y - line.startPoint.Y) / (line.endPoint.X - line.startPoint.X);
-        line.zIntercept = line.startPoint.Y - line.slope * line.startPoint.X;
-        //console.log("zIntercept: "+line.zIntercept + ' slope: '+ line.slope + ' - startPoint:' + JSON.stringify(line.startPoint) + ' - endPoint ' + JSON.stringify(line.endPoint) );
+        line.slope = (line.endPoint.Z - line.startPoint.Z) / (line.endPoint.X - line.startPoint.X);
+        line.zIntercept = line.startPoint.Z - line.slope * line.startPoint.X;
+        console.log("zIntercept: "+line.zIntercept + ' slope: '+ line.slope + ' - startPoint:' + JSON.stringify(line.startPoint) + ' - endPoint ' + JSON.stringify(line.endPoint) );
         return line;
     }
 
@@ -226,7 +227,7 @@ exports.makeLineUsingPoints = function (start, end) {
 };
 
 // TODO: test!
-exports.makeLineUsingOrientation = function (start, orientation) {
+exports.makeLineUsingOrientation = function(start, orientation) {
     var line = {startPoint: {X: start.X, Y: start.Y, Z: start.Z},
         endPoint: {X: null, Y: null, Z: null},
         slope: null,
