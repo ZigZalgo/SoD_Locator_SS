@@ -14,6 +14,7 @@ exports.updateOrientation= function(req, res){
 
             locator.devices[key].orientation = Math.round(req.params.orientation*100)/100;
             console.log('udpate device:'+locator.devices[key].uniqueDeviceID+' orientation to: '+locator.devices[key].orientation);
+            console.log('devices list: '+ JSON.stringify(locator.devices));
         }
     }
     res.status(200);

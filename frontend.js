@@ -24,7 +24,6 @@ exports.io = io;
 exports.clients = clients;
 /* starting heartbeat*/
 var pulse = require('./pulse');
-pulse.start();
 
 
 app.configure(function(){
@@ -200,6 +199,8 @@ function init(){
     var os = require('os');
     var interfaces = os.networkInterfaces();
     //exports.serverAddress;
+    setTimeout(function(){pulse.start();}, 3000); // three second after heartbeat
+
 
 
 // setting up server IP and display in the console

@@ -9,7 +9,7 @@ exports.ROUND_RATIO         = 150;         // the round ratio for dealing with n
 
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
-
+var tolerance = 0.05;
 
 
 /*
@@ -242,19 +242,19 @@ exports.getIntersectionPoint = function (line1, line2) {
     return calculatePossibleInt(line1,line2).then(
         function(IntersectionPoint){
             if (line1.isLineSegement) {
-                if (isGreater(IntersectionPoint.X, line1.startPoint.X) && isGreater(IntersectionPoint.X, line1.endPoint.X) ||
-                    isLess(IntersectionPoint.X, line1.startPoint.X) && isLess(IntersectionPoint.X, line1.endPoint.X) ||
-                    isGreater(IntersectionPoint.Z, line1.startPoint.Z) && isGreater(IntersectionPoint.Z, line1.endPoint.Z) ||
-                    isLess(IntersectionPoint.Z, line1.startPoint.Z) && isLess(IntersectionPoint.Z, line1.endPoint.Z))
+                if (((IntersectionPoint.X > line1.startPoint.X+tolerance) && (IntersectionPoint.X > line1.endPoint.X+tolerance)) ||
+                    ((IntersectionPoint.X < line1.startPoint.X-tolerance) && (IntersectionPoint.X < line1.endPoint.X-tolerance)) ||
+                    ((IntersectionPoint.Z > line1.startPoint.Z+tolerance) && (IntersectionPoint.Z > line1.endPoint.Z+tolerance)) ||
+                    ((IntersectionPoint.Z < line1.startPoint.Z-tolerance) && (IntersectionPoint.Z < line1.endPoint.Z-tolerance)))
                 {return Q(null)}else{return Q(IntersectionPoint)};
             }else{return Q(IntersectionPoint)}
         },function(error){console.log(error)}).
         then(function(IntersectionPoint){
             if (line2.isLineSegment) {
-                if (((IntersectionPoint.X > line2.startPoint.X) && (IntersectionPoint.X > line2.endPoint.X)) ||
-                    ((IntersectionPoint.X < line2.startPoint.X) && (IntersectionPoint.X < line2.endPoint.X)) ||
-                    ((IntersectionPoint.Z > line2.startPoint.Z) && (IntersectionPoint.Z > line2.endPoint.Z)) ||
-                    ((IntersectionPoint.Z < line2.startPoint.Z) && (IntersectionPoint.Z < line2.endPoint.Z)))
+                if (((IntersectionPoint.X > line2.startPoint.X+tolerance) && (IntersectionPoint.X > line2.endPoint.X+tolerance)) ||
+                    ((IntersectionPoint.X < line2.startPoint.X-tolerance) && (IntersectionPoint.X < line2.endPoint.X-tolerance)) ||
+                    ((IntersectionPoint.Z > line2.startPoint.Z+tolerance) && (IntersectionPoint.Z > line2.endPoint.Z+tolerance)) ||
+                    ((IntersectionPoint.Z < line2.startPoint.Z-tolerance) && (IntersectionPoint.Z < line2.endPoint.Z-tolerance)))
                 {return Q(null)}else {return Q(IntersectionPoint)}}
             else {return Q(IntersectionPoint)}
         },function(error){console.log(error)})
@@ -286,7 +286,7 @@ function calculatePossibleInt(line1,line2){
 exports.isGreater = function (num1, num2) {
     var answer = num1 - num2;
     answer = Math.round(answer * 1000) / 1000;
-    console.log("answer:  " + answer);
+    //console.log("answer:  " + answer);
     if (answer > 0) {
         return true;
     }

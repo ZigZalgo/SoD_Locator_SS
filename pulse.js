@@ -51,8 +51,13 @@ function sendIntersectionPoints(){
     for(var deviceKey in locator.devices){
         if(locator.devices.hasOwnProperty(deviceKey)){
             var socketID = locator.devices[deviceKey].socketID;
-            var intersections =  locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(socketID, locator.devices));
-            console.log('intersections: ' + JSON.stringify(intersections));
+            locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(socketID, locator.devices),function(intersectionPoint){
+                console.log('calling back? '+ JSON.stringify(intersectionPoint));
+                if(intersectionPoint!=null){
+                    frontend.clients[intersectionPoint.socketID].emit("intersected",{intersectionPoint: intersectionPoint.intersectionPoint,intersectedBy:{type:"device",ID:locator.devices[intersectionPoint.socketID].uniqueDeviceID}});
+                }
+            });
+            //console.log('intersections: ' + JSON.stringify(intersections));
         }
     }
 }
@@ -62,7 +67,7 @@ function inViewEvent(){
     for(var deviceKey in locator.devices){
         // interating through all the devices
         if(locator.devices.hasOwnProperty(deviceKey)){
-            var CurrentInViewDeviceList = util.filterDevices(frontend.clients[locator.devices[deviceKey].socketID],{"selection":["inView"]});
+            var CurrentInViewDeviceList = util.filterDevices(frontend.clients[deviceKey],{"selection":["inView"]});
             for(var currentInViewDevicesKey in CurrentInViewDeviceList){
                 if(locator.devices[deviceKey].inViewList[currentInViewDevicesKey] == undefined){
                     locator.devices[deviceKey].inViewList[currentInViewDevicesKey] = {type:'device',ID:CurrentInViewDeviceList[currentInViewDevicesKey].uniqueDeviceID}

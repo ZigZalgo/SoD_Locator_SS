@@ -96,11 +96,16 @@
                         showGreenStatus('connect to server ..')
                     });
 
+                    sod.addListener('intersected',function(data){
+                        //showNormalStatus(JSON.stringify(data.payload));
+                        console.log('->intersected!'+JSON.stringify(data));
+                    });
+
+
                     sod.addListener('enterObserveRange',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
                         console.log('->enter!'+JSON.stringify(data.payload));
                     });
-
                     sod.addListener('enterView',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
                         console.log('->enterView!'+JSON.stringify(data));

@@ -817,10 +817,15 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
 }
 
 exports.registerDevice = function(socket, deviceInfo,fn){
+    console.log("Devices: "+JSON.stringify(locator.devices));
     if(devices[socket.id] != undefined){
         devices[socket.id].height = deviceInfo.height;
         devices[socket.id].width = deviceInfo.width;
         devices[socket.id].deviceType = deviceInfo.deviceType;
+        devices[socket.id].location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
+        if(deviceInfo.location!=undefined){
+            devices[socket.id].location = {X: deviceInfo.location.X, Y: deviceInfo.location.Y, Z: deviceInfo.location.Z}
+        }
         console.log("Device initiated late, updating height and width");
     }
     else{
@@ -877,7 +882,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
 
 // TODO: implement!
 // TODO: test!
-exports.calcIntersectionPoints = function(observerSocketID, devicesInFront){
+exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,callback){
     //console.log("devicesInFront: " + JSON.stringify(devicesInFront));
     // TODO: test
     //console.log(devices[observerSocketID]);
@@ -885,9 +890,8 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront){
     var returnDevices = {};
     util.translateOrientationToReference(locator.devices[observerSocketID],
     function(orientationToReference){
-        console.log('got orientation to reference: ' + orientationToReference);
+        //console.log('got orientation to reference: ' + orientationToReference);
         var observerLineOfSight = factory.makeLineUsingOrientation(locator.devices[observerSocketID].location, orientationToReference);
-
         if(devicesInFront!=undefined) {
             for (var i = 0; i <= devicesInFront.length; i++) {
 
@@ -899,10 +903,53 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront){
                         if (devices[devicesInFront[i]].width != null) {
                             var sides = util.getLinesOfShape(devices[devicesInFront[i]]);
                             var intersectionPoints = [];
+                            var intersectionPoint = {intersectionPoint:null,distance:1000,socketID:locator.devices[observerSocketID].socketID};
                             console.log("Sides: " + JSON.stringify(sides))
+                            async.each(sides,
+                                // 2nd param is the function that each item is passed to
+                                function(side, callback){
+                                    util.getIntersectionPoint(observerLineOfSight, side).then(
+                                        function(IntersectionPoint){
+                                            console.log("intersection point: " + JSON.stringify(IntersectionPoint));
+                                            if (IntersectionPoint != null) {
+                                                //console.log("Added an intersection point: " + JSON.stringify(intPoint))
+                                                var distance = util.distanceBetweenPoints(devices[observerSocketID].location, IntersectionPoint);
+                                                if(distance<=intersectionPoint.distance){
+                                                    intersectionPoint.intersectionPoint = IntersectionPoint;
+                                                    intersectionPoint.distance = distance;
+                                                }
+                                            }
+                                            callback(); // callback when this iteration is done
+                                        }
+                                    );
+                                },
+                                // 3rd param is the function to call when everything's done
+                                function(err){
+                                    console.log(intersectionPoint);
+                                    console.log("slides length" + sides.length);
+
+                                    if(callback != undefined){
+                                        try{
+                                            if(intersectionPoint.distance!=1000){
+                                                callback(intersectionPoint);
+                                            }else{
+                                                callback(null);
+                                            }
+                                        }catch(e){
+                                            console.log(' error in callback: '+ e);
+                                        }
+                                    }else{
+                                        //callback is empty
+                                    }
+                                    /*intersectionPoints.forEach(function(intPoint){
+                                        //var distance = util.distanceBetweenPoints(devices[observerSocketID].location, intPoint)
+
+                                    })*/
+                                }
+                            );
 
 
-                            sides.forEach(function (side) {
+                            /*sides.forEach(function (side) {
                                 util.getIntersectionPoint(observerLineOfSight, side).then(
                                     function(IntersectionPoint){
                                         console.log("intersection point: " + JSON.stringify(IntersectionPoint));
@@ -913,10 +960,9 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront){
                                     }
                                 );
                                 //console.log("intersection point: " + JSON.stringify(IntersectionPoint) + "X->" + xValue + " Y->" + yValue + "from line1 "+JSON.stringify(line1) + " line2: " +JSON.stringify(line2));
-                            });
+                            });*/
 
-                            console.log('intersection distance');
-                            if (intersectionPoints.length != 0) {
+                            /*if (intersectionPoints.length != 0) {
                                 //console.log("intersection points not empty");
                                 //this.continue;
                                 intersectionPoints.forEach(function(intPoint){
@@ -940,9 +986,7 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront){
                                  devices[devicesInFront[i]].intersectionPoint.Y = ratioOnScreen.Y;
                                  //console.log("Pushed a target for sending!");
                                  returnDevices[devicesInFront[i]] = devices[devicesInFront[i]];
-                                 */
-                            }
-
+                            }*/
 
                         }
                     }
@@ -967,7 +1011,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     // List<Device> returnDevices = new List<Device>();
     var observer = locator.devices[observerSocketID];
     var returnDevices = [];
-    console.log(observerSocketID + ' - ' + JSON.stringify(deviceList));
+    //console.log(observerSocketID + ' - ' + JSON.stringify(deviceList));
     //(CB - Should we throw an exception here? Rather then just returning an empty list?)
     function filterFOV(observer,deviceList){
         try{
@@ -1002,8 +1046,6 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
 
         return Object.keys(deviceList).filter(function(key){
             //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
-
-
             if(deviceList[key] != observer && deviceList[key].location != undefined){
                 if (leftFieldOfView > rightFieldOfView &&
                     (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&

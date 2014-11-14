@@ -23,7 +23,6 @@ exports.handleRequest = function (socket) {
         }else{
             locator.registerDevice(socket,deviceInfo)
         }
-        console.log('deviceInfo:' + JSON.stringify(deviceInfo));
         try{
             socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID,deviceType: deviceInfo.deviceType});
         }
