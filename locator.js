@@ -664,12 +664,13 @@ exports.updateDeviceOrientation = function(orientation, socket){
         }
     }
     else{
-        if(orientation != undefined){
+        /*if(orientation != undefined){
             var device = new factory.Device(socket);
             device.orientation = orientation;
             device.lastUpdated = new Date();
             devices[socket.id] = device;
-        }
+        }*/
+        console.log("update orientaion of a device hasn't registered");
     }
 }
 
@@ -817,7 +818,7 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
 }
 
 exports.registerDevice = function(socket, deviceInfo,fn){
-    console.log("Devices: "+JSON.stringify(locator.devices));
+    console.log(JSON.stringify(devices[socket.id]) + '\tdeviceInfo: '+ JSON.stringify(deviceInfo));
     if(devices[socket.id] != undefined){
         devices[socket.id].height = deviceInfo.height;
         devices[socket.id].width = deviceInfo.width;
@@ -903,20 +904,20 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,callb
                         if (devices[devicesInFront[i]].width != null) {
                             var sides = util.getLinesOfShape(devices[devicesInFront[i]]);
                             var intersectionPoints = [];
-                            var intersectionPoint = {intersectionPoint:null,distance:1000,socketID:locator.devices[observerSocketID].socketID};
-                            console.log("Sides: " + JSON.stringify(sides))
+                            var intersectionPointWrap = {intersectionPoint:null,distance:1000,observerSocketID:locator.devices[observerSocketID].socketID,intersectedSocketID:locator.devices[devicesInFront[i]].socketID,relevance:0};
+                            //console.log("Sides: " + JSON.stringify(sides))
                             async.each(sides,
                                 // 2nd param is the function that each item is passed to
                                 function(side, callback){
                                     util.getIntersectionPoint(observerLineOfSight, side).then(
                                         function(IntersectionPoint){
-                                            console.log("intersection point: " + JSON.stringify(IntersectionPoint));
+                                            //console.log("intersection point: " + JSON.stringify(IntersectionPoint));
                                             if (IntersectionPoint != null) {
                                                 //console.log("Added an intersection point: " + JSON.stringify(intPoint))
                                                 var distance = util.distanceBetweenPoints(devices[observerSocketID].location, IntersectionPoint);
-                                                if(distance<=intersectionPoint.distance){
-                                                    intersectionPoint.intersectionPoint = IntersectionPoint;
-                                                    intersectionPoint.distance = distance;
+                                                if(distance<=intersectionPointWrap.distance){
+                                                    intersectionPointWrap.intersectionPoint = IntersectionPoint;
+                                                    intersectionPointWrap.distance = distance;
                                                 }
                                             }
                                             callback(); // callback when this iteration is done
@@ -925,13 +926,11 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,callb
                                 },
                                 // 3rd param is the function to call when everything's done
                                 function(err){
-                                    console.log(intersectionPoint);
-                                    console.log("slides length" + sides.length);
-
                                     if(callback != undefined){
                                         try{
-                                            if(intersectionPoint.distance!=1000){
-                                                callback(intersectionPoint);
+                                            if(intersectionPointWrap.distance!=1000){
+                                                intersectionPointWrap.relevance = intersectionPointWrap.intersectionPoint.X - locator.devices[intersectionPointWrap.intersectedSocketID].location.X;
+                                                callback(intersectionPointWrap);
                                             }else{
                                                 callback(null);
                                             }

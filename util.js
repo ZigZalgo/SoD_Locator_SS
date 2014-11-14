@@ -445,7 +445,7 @@ exports.getCornersOfShape = function (device,callback) {
         returnPoints.push(newPoint);
     });*/
     returnPoints = intPoints;
-    console.log("points -> "+ JSON.stringify(intPoints));
+    //console.log("points -> "+ JSON.stringify(intPoints));
 
     if(callback != undefined){
         try{

@@ -16,7 +16,7 @@ exports.handleRequest = function (socket) {
         locator.registerData(dataInfo,)
     });*/
     socket.on('registerDevice', function (deviceInfo, fn) {
-        console.log("Something tried to register...")
+        console.log("Something tried to register...");
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         if(fn!=undefined) {
             locator.registerDevice(socket, deviceInfo,fn);

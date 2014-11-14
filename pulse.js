@@ -52,9 +52,9 @@ function sendIntersectionPoints(){
         if(locator.devices.hasOwnProperty(deviceKey)){
             var socketID = locator.devices[deviceKey].socketID;
             locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(socketID, locator.devices),function(intersectionPoint){
-                console.log('calling back? '+ JSON.stringify(intersectionPoint));
+                //console.log('calling back? '+ JSON.stringify(intersectionPoint));
                 if(intersectionPoint!=null){
-                    frontend.clients[intersectionPoint.socketID].emit("intersected",{intersectionPoint: intersectionPoint.intersectionPoint,intersectedBy:{type:"device",ID:locator.devices[intersectionPoint.socketID].uniqueDeviceID}});
+                    frontend.clients[intersectionPoint.intersectedSocketID].emit("intersected", {relevance:intersectionPoint.relevance,intersectionPoint: intersectionPoint.intersectionPoint,intersectedBy:{type:"device",ID:locator.devices[intersectionPoint.observerSocketID].uniqueDeviceID}});
                 }
             });
             //console.log('intersections: ' + JSON.stringify(intersections));
@@ -72,7 +72,6 @@ function inViewEvent(){
                 if(locator.devices[deviceKey].inViewList[currentInViewDevicesKey] == undefined){
                     locator.devices[deviceKey].inViewList[currentInViewDevicesKey] = {type:'device',ID:CurrentInViewDeviceList[currentInViewDevicesKey].uniqueDeviceID}
                     console.log('added-> ' +JSON.stringify(locator.devices[deviceKey].inViewList)  + ' to inViewlist');
-
                     try{
                         frontend.clients[locator.devices[deviceKey].socketID].emit("enterView",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},
                             visitor:locator.devices[deviceKey].inViewList[currentInViewDevicesKey]});

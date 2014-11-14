@@ -8,13 +8,12 @@ var locator = require('../locator');
 
 exports.updateOrientation= function(req, res){
     //locator.updateDeviceOrientation(req.params.orientation,req.params.id);
-    console.log('-> received udpateOrientation request for device:'+req.params.id +'\t new orientation:'+ req.params.id);
+    console.log('-> received udpateOrientation request for device:'+req.params.id +'\t new orientation:'+ req.params.orientation);
     for(var key in locator.devices){
         if(locator.devices.hasOwnProperty(key)&&locator.devices[key].uniqueDeviceID==req.params.id){
 
             locator.devices[key].orientation = Math.round(req.params.orientation*100)/100;
             console.log('udpate device:'+locator.devices[key].uniqueDeviceID+' orientation to: '+locator.devices[key].orientation);
-            console.log('devices list: '+ JSON.stringify(locator.devices));
         }
     }
     res.status(200);

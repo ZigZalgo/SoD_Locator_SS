@@ -132,6 +132,7 @@ app.post('/upload', function(req, res) {
 io.sockets.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });
     console.log("something connected with sessionID [" + socket.id + "] and IP [" + socket.handshake.address.address + "]");
+
     requestHandler.handleRequest(socket);
 
     clients[socket.id] = socket;
