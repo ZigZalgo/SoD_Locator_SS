@@ -605,7 +605,7 @@ exports.unpairDeviceAndPerson = function(deviceSocketID, uniquePersonID){
         try{
             persons[uniquePersonID].pairingState = "unpaired";
             persons[uniquePersonID].ownedDeviceID = null;
-            persons[uniquePersonID].orientation = null;
+            persons[uniquePersonID].orientation.yaw = null;
         }
         catch(err){
             console.log("Failed to unpair person: \t" + err);
@@ -839,7 +839,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         }else{
             socketIP = socket.handshake.address.address;
         }
-        console.log("IP: "+socketIP);
+        console.log("Orientation: "+JSON.stringify(deviceInfo.orientation));
         //console.log('got deviceInfo.ID'+ deviceInfo.ID);
         var device = new factory.Device(socket, {ID: deviceInfo.ID, orientation: deviceInfo.orientation});
         if(deviceInfo.name != null && deviceInfo.name != undefined){
@@ -982,7 +982,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     //(CB - Should we throw an exception here? Rather then just returning an empty list?)
     function filterFOV(observer,deviceList){
         try{
-            if (observer.location == null || observer.orientation == null)
+            if (observer.location == null || observer.orientation.yaw == null)
                 return returnDevices;
             if (observer.FOV == 0.0)
                 return returnDevices;
@@ -1005,8 +1005,8 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     try{
         //get the angle to sens
         var angleToSensor =util.getObjectOrientationToSensor(observer.location.X,observer.location.Z);
-        var leftFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 - angleToSensor+ (observer.FOV/2));
-        var rightFieldOfView = util.normalizeAngle(360 - observer.orientation  - 90 -angleToSensor- (observer.FOV/2));
+        var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw  - 90 - angleToSensor+ (observer.FOV/2));
+        var rightFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw  - 90 -angleToSensor- (observer.FOV/2));
 
         //console.log("Left FOV = " + leftFieldOfView)
         //console.log("Right FOV = " + rightFieldOfView)

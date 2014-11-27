@@ -125,6 +125,7 @@ exports.handleRequest = function (socket) {
     //START LOCATOR SERVICES/////////////////////////////////////////////////////////////////////////////////////////
     socket.on('updateOrientation', function (request) {
         //not checking for fn(callback), since adding a callback here would be costly
+        console.log(request.orientation);
         locator.updateDeviceOrientation(request.orientation, socket);
     });
 

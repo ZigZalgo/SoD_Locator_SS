@@ -373,11 +373,10 @@ exports.translateOrientationToReference = function(device,callback){
                 //callback is empty
             }
         });
-
     }else{
         console.log('orientation is not defined in translateOrietationToReference');
     }
-}
+};
 /*
  get Distance from person to kinect
  @param:
