@@ -718,7 +718,7 @@ function refreshStationaryLayer() {
                     //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
                         data[key].location.X, data[key].location.Z, data[key].width,
-                            data[key].height, data[key].orientation.yaw, data[key].FOV,data[key].observer,layer,stage)
+                            data[key].depth, data[key].orientation.yaw, data[key].FOV,data[key].observer,layer,stage)
                 }
             }
         }

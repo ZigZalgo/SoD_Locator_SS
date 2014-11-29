@@ -86,7 +86,7 @@
                     console.log('stationary: '+ stationary);
                     sod = new SODDevice({orientation:{yaw:Number($('input#inputOrientationYaw').val()),pitch:Number($('input#inputOrientationPitch').val())}
                         ,FOV:Number($('#inputFOVDegree').val()),location:{X:Number($('input#inputLocationX').val()),Y:Number($('input#inputLocationY').val()),Z:Number($('input#inputLocationZ').val())},
-                        width:Number($('input#inputDeviceDepth').val()),height:Number($('input#inputDeviceHeight').val()),stationary:stationary,observer:observer});
+                        width:Number($('input#inputDeviceWidth').val()),depth:Number($('input#inputDeviceDepth').val()),stationary:stationary,observer:observer});
                     sod.init(serverURL,socketURL, sod);
 
                     //ADD LISTENERS////////////////////////////////////////////////
@@ -286,8 +286,8 @@
                     orientation:yaw <input id='inputOrientationYaw'  type="text" value='30'> pitch: <input id='inputOrientationPitch'  type="text" value='45'> <br/>
                     FOV:<input id='inputFOVDegree'  type="text" value='70'>
 
-                    <br/>Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='0'>
-                    Z<input id='inputLocationZ'  type="text" value='1'><br/> depth::<input id='inputDeviceDepth'  type="text" value='0.5'/> height:<input id='inputDeviceHeight'  type="text" value='0.5'/>
+                    <br/>Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='1'>
+                    Z<input id='inputLocationZ'  type="text" value='1'><br/> width:<input id="inputDeviceWidth" type="text" value='0.5'/> depth:<input id='inputDeviceDepth'  type="text" value='0.5'/>
                     <!--<label for="inputObserveRange">observeRange:</label><input id='inputObserveRange'  type="text" value='2'/>-->
                     <fieldset>
                         <legend>Observer</legend>

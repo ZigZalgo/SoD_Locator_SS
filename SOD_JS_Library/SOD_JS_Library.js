@@ -25,7 +25,7 @@ function SODDevice(deviceInfo){
         location : {X: 0, Y: 0, Z:0},
         orientation : 0,
         FOV : 0,
-        height : 0,
+        depth : 0,
         width :  0,
         ownerID : null,
         pairingState : "unpaired",

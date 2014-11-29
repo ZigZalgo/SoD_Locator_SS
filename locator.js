@@ -820,7 +820,7 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
 exports.registerDevice = function(socket, deviceInfo,fn){
     console.log(JSON.stringify(devices[socket.id]) + '\tdeviceInfo: '+ JSON.stringify(deviceInfo));
     if(devices[socket.id] != undefined){
-        devices[socket.id].height = deviceInfo.height;
+        devices[socket.id].depth = deviceInfo.depth;
         devices[socket.id].width = deviceInfo.width;
         devices[socket.id].deviceType = deviceInfo.deviceType;
         devices[socket.id].location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
@@ -850,7 +850,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         }
 
         if(deviceInfo.observer != undefined) {device.observer = deviceInfo.observer;};
-        device.height = deviceInfo.height;
+        device.depth = deviceInfo.depth;
         device.width = deviceInfo.width;
         device.deviceType = deviceInfo.deviceType;
         device.FOV = deviceInfo.FOV;

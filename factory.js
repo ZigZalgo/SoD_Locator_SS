@@ -169,7 +169,7 @@ function Device(socket, opts){
         this.deviceType = "Not specified";
         this.location = {X: null, Y: null, Z:null};
         this.FOV = util.DEFAULT_FIELD_OF_VIEW;
-        this.height = null;
+        this.depth = null;
         this.width =  null;
         this.ownerID = null;
         this.pairingState = "unpaired";

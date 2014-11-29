@@ -408,11 +408,10 @@ exports.getCornersOfShape = function (device,callback) {
     try {
         var deviceLocation = device.location;
 
-        intPoints.push(factory.make2DPoint(deviceLocation.X + device.width / 2, deviceLocation.Z + device.height / 2));
-        intPoints.push(factory.make2DPoint(deviceLocation.X + device.width / 2, deviceLocation.Z - device.height / 2));
-        intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z - device.height / 2));
-        intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z + device.height / 2));
-
+        intPoints.push(factory.make2DPoint(deviceLocation.X + device.width / 2, deviceLocation.Z + device.depth / 2));
+        intPoints.push(factory.make2DPoint(deviceLocation.X + device.width / 2, deviceLocation.Z - device.depth / 2));
+        intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z - device.depth / 2));
+        intPoints.push(factory.make2DPoint(deviceLocation.X - device.width / 2, deviceLocation.Z + device.depth / 2));
     }
     catch (err) {
         // Device does not have a location
