@@ -718,7 +718,7 @@ function refreshStationaryLayer() {
                     //console.log("Z:" + data[key].location.Z)
                     drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
                         data[key].location.X, data[key].location.Z, data[key].width,
-                            data[key].height, data[key].orientation, data[key].FOV,data[key].observer,layer,stage)
+                            data[key].height, data[key].orientation.yaw, data[key].FOV,data[key].observer,layer,stage)
                 }
             }
         }
@@ -889,7 +889,7 @@ function updateContentWithObjects(){
                     var orientationToSensor = getPersonOrientation(data[key].location.X,data[key].location.Z);
                     //console.log(" personOrientationToSensor: " + orientationToSensor);
                     //console.log("device orientation: "+data[key].orientation+" personOrientationToSensor: " + orientationToSensor + " Sum up: " + (data[key].orientation+orientationToSensor+90));
-                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation+orientationToSensor+90), 30);
+                    drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation.yaw+orientationToSensor+90), 30);
                     // Adding device name for paired person
                 }
                 ctx.fillStyle = "#c82124"; //red
@@ -972,14 +972,14 @@ function updateContentWithObjects(){
                 if(!data[key].stationary){
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
                         '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
-                        '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
+                        '<td>'+Math.round(data[key].orientation.yaw*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }
                 else{
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
                         '<td>('+data[key].location.X.toFixed(3)+', '+data[key].location.Y+', '+data[key].location.Z.toFixed(3)+')</td>'+
-                        '<td>'+Math.round(data[key].orientation*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>disabled</td>'+
+                        '<td>'+Math.round(data[key].orientation.yaw*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>disabled</td>'+
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }

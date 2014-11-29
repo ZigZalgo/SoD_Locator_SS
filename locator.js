@@ -884,21 +884,12 @@ exports.registerDevice = function(socket, deviceInfo,fn){
 // TODO: implement!
 // TODO: test!
 exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done){
-    //console.log("devicesInFront: " + JSON.stringify(devicesInFront));
-    // TODO: test
-    //console.log(devices[observerSocketID]);
-    //var returnDevices = {};
     var returnDevices = {};
     util.translateOrientationToReference(locator.devices[observerSocketID],
     function(orientationToReference){
         //console.log('got orientation to reference: ' + orientationToReference);
         var observerLineOfSight = factory.makeLineUsingOrientation(locator.devices[observerSocketID].location, orientationToReference);
         if(devicesInFront!=undefined) {
-            /*for (var i = 0; i <= devicesInFront.length; i++) {
-                if (i == devicesInFront.length) {
-                    return returnDevices;
-                }
-                else {*/
             var intersectionPoints = [];
             async.each(devicesInFront,
                 function(deviceInFront,deviceInFrontCallback){
@@ -982,6 +973,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     //(CB - Should we throw an exception here? Rather then just returning an empty list?)
     function filterFOV(observer,deviceList){
         try{
+
             if (observer.location == null || observer.orientation.yaw == null)
                 return returnDevices;
             if (observer.FOV == 0.0)
@@ -995,7 +987,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
             }
         }
         catch(err){
-            console.log("Error getting devices in front of device " + ": " + err);
+            console.log("Error getting devices in front of device FOV/Location" + ": " + err);
         }
 
     }
@@ -1078,7 +1070,6 @@ exports.getNearestDevice = function (observer, listDevices) {
 
 // TODO: test!
 exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
-
     var filterDeviceListByRange = function (keyIndexOfDeviceList, listDevicesToReturn) {
         if (keyIndexOfDeviceList >= 0) {
             if(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].uniqueDeviceID == observer.uniqueDeviceID){

@@ -365,7 +365,7 @@ exports.translateOrientationToReference = function(device,callback){
             //console.log('Get orientation to Sensor: '+ (orientationToSensor+device.orientation));
             if(callback != undefined){
                 try{
-                    callback(-(90+(orientationToSensor+device.orientation)));
+                    callback(-(90+(orientationToSensor+device.orientation.yaw)));
                 }catch(e){
                     console.log(' error in callback: '+ e);
                 }
@@ -617,6 +617,9 @@ exports.filterDevices = function(socket, request){
         return (filterSelection(0, locator.devices));
     }
 }
+
+
+exports.getHeightFrom
 
 
 /*

@@ -255,7 +255,7 @@ io.on("setCalibrationFrame", function(data){
             for(var i=0;i<(imgdatalen/4);i++){
                 var depth = (data.payload[i]>>>3)*255/depthMultiplier; // what is this 255?
 
-              //   console.log('depth :' +depth);
+              //   console.log('width :' +width);
                 imgdata.data[4*i] = depth;
                 imgdata.data[4*i+1] = depth;
                 imgdata.data[4*i+2] = depth;

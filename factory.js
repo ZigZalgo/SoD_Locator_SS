@@ -142,24 +142,25 @@ function Device(socket, opts){
             this.uniqueDeviceID = uniqueDeviceCounter++;
         }
 
+        console.log("Options: "+JSON.stringify(opts));
         if(opts['orientation']['yaw']){
             if(intRegex.test(opts['orientation']['yaw'])) {
                 if(0 <= opts['orientation'] && opts['orientation']['yaw'] <= 360){
                     console.log("Device orientation: " + opts['orientation']['yaw']);
-                    this.orientation.yaw = opts['orientation']['yaw'];
+                    this.orientation = opts['orientation'];
                 }
                 else{
                     console.log("Device specified an invalid angle for orientation (0 - 360).");
-                    this.orientation.yaw = null;
+                    this.orientation = null;
                 }
             }
             else{
                 console.log("Device specified an invalid (non-integer) orientation during registration.");
-                this.orientation.yaw = null;
+                this.orientation = null;
             }
         }
         else{
-            this.orientation.yaw = null;
+            this.orientation = null;
         }
 
         this.name = null;
