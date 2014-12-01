@@ -170,6 +170,7 @@ function Device(socket, opts){
         this.location = {X: null, Y: null, Z:null};
         this.FOV = util.DEFAULT_FIELD_OF_VIEW;
         this.depth = null;
+        this.height = null;
         this.width =  null;
         this.ownerID = null;
         this.pairingState = "unpaired";
@@ -198,6 +199,7 @@ exports.make2DPoint = function (x, z) {
     return {X: x,
         Y: 0,Z: z};
 };
+
 
 // tested
 exports.makeLineUsingPoints = function (start, end) {

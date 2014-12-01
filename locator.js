@@ -852,6 +852,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         if(deviceInfo.observer != undefined) {device.observer = deviceInfo.observer;};
         device.depth = deviceInfo.depth;
         device.width = deviceInfo.width;
+        device.height = deviceInfo.height;
         device.deviceType = deviceInfo.deviceType;
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
@@ -892,12 +893,12 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done)
         if(devicesInFront!=undefined) {
             var intersectionPoints = [];
             async.each(devicesInFront,
-                function(deviceInFront,deviceInFrontCallback){
+                function(deviceInFront,deviceInFrontCallback){ // using async each function to iterate through the whole array
                     if (devices[deviceInFront] != undefined) {
                         if (devices[deviceInFront].width != null) {
                             var sides = util.getLinesOfShape(devices[deviceInFront]);
 
-                            var intersectionPointWrap = {intersectionPoint:null,distance:1000,observerSocketID:locator.devices[observerSocketID].socketID,intersectedSocketID:locator.devices[deviceInFront].socketID,relevance:0};
+                            var intersectionPointWrap = {intersectionPoint:null,distance:1000,observerSocketID:locator.devices[observerSocketID].socketID,intersectedSocketID:locator.devices[deviceInFront].socketID,relevance:{X:0,Y:0}};
                             //console.log("Sides: " + JSON.stringify(sides))
                             async.each(sides,
                                 // 2nd param is the function that each item is passed to
@@ -922,10 +923,14 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done)
                                     if(deviceInFrontCallback != undefined){
                                         try{
                                             if(intersectionPointWrap.distance!=1000){
-                                                intersectionPointWrap.relevance = intersectionPointWrap.intersectionPoint.X - locator.devices[intersectionPointWrap.intersectedSocketID].location.X;
+                                                intersectionPointWrap.relevance.X = (intersectionPointWrap.intersectionPoint.X - locator.devices[intersectionPointWrap.intersectedSocketID].location.X)/locator.devices[intersectionPointWrap.intersectedSocketID].width/2;
+                                                // got which side the intersection point first hit. Added yValue of the intersection point in
+                                                var yValue = (Math.tan(-30/180*Math.PI)*intersectionPointWrap.distance)////+devices[observerSocketID].height; // calculate
+                                                intersectionPointWrap.intersectionPoint.Y = yValue+devices[observerSocketID].height;
+                                                intersectionPointWrap.relevance.Y = yValue/(locator.devices[intersectionPointWrap.intersectedSocketID].height/2);  //Math.round((intersectionPointWrap.relevance/(devices[deviceInFront].width/2))*100)/100;
                                                 intersectionPoints.push(intersectionPointWrap);
-                                                deviceInFrontCallback();
-                                                //callback(intersectionPointWrap);
+                                                console.log(intersectionPointWrap.relevance.X+" - " +intersectionPointWrap.relevance.Y + "(yValue:"+yValue+")");
+                                                deviceInFrontCallback(); // interation callback for outer each function
                                             }else{
                                                 deviceInFrontCallback(null);
                                             }

@@ -275,10 +275,11 @@ function calculatePossibleInt(line1,line2){
     }
     else {
         var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
+        var yValue = 0;
         //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
-        // console.log(" = " + xValue);
-        var yValue = line1.slope * xValue + line1.zIntercept;
-        IntersectionPoint = factory.make2DPoint(xValue, yValue);
+        //console.log(" Y: " + yValue + "pitch: "+ );
+        var zValue = line1.slope * xValue + line1.zIntercept;
+        IntersectionPoint = {X:xValue,Y: yValue,Z:zValue};
     }
     return Q(IntersectionPoint);
 }
