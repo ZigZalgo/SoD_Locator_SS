@@ -52,27 +52,28 @@ function sendIntersectionPoints(){
     for(var deviceKey in locator.devices){
         if(locator.devices.hasOwnProperty(deviceKey)){
             var socketID = locator.devices[deviceKey].socketID;
-            locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(socketID, locator.devices),function(intersectionList){
-                //console.log('calling back? '+ JSON.stringify(intersectionPoint));
-                if(intersectionList!=null){
-                    try{
-                        // forEach is also sync
-                        async.each(intersectionList,
-                            function(intersectionPointWrapper,callback){
-                                frontend.clients[intersectionPointWrapper.intersectedSocketID].emit("intersected", {relevance:intersectionPointWrapper.relevance,intersectionPoint: intersectionPointWrapper.intersectionPoint,intersectedBy:{type:"device",ID:locator.devices[intersectionPointWrapper.observerSocketID].uniqueDeviceID}});
-                                callback();
-                            },function(err){
-                               // handles when all the events are fired
-                            }
-                        );
-                        //console.log(locator.devices[intersectionList.observerSocketID].uniqueDeviceID+'->'+locator.devices[intersectionList.intersectedSocketID].uniqueDeviceID);
-                        //frontend.clients[intersectionPoint.intersectedSocketID].emit("intersected", {relevance:intersectionPoint.relevance,intersectionPoint: intersectionList.intersectionPoint,intersectedBy:{type:"device",ID:locator.devices[intersectionPoint.observerSocketID].uniqueDeviceID}});
+                locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(socketID, locator.devices), function (intersectionList) {
+                    //console.log('calling back? '+ JSON.stringify(intersectionPoint));
+                    if (intersectionList != null) {
+                        try {
+                            // forEach is also sync
+                            async.each(intersectionList,
+                                function (intersectionPointWrapper, callback) {
+                                    frontend.clients[intersectionPointWrapper.intersectedSocketID].emit("intersected", {relevance: intersectionPointWrapper.relevance, intersectionPoint: intersectionPointWrapper.intersectionPoint, intersectedBy: {type: "device", ID: locator.devices[intersectionPointWrapper.observerSocketID].uniqueDeviceID}});
+                                    callback();
+                                }, function (err) {
+                                    // handles when all the events are fired
+                                }
+                            );
+                            //console.log(locator.devices[intersectionList.observerSocketID].uniqueDeviceID+'->'+locator.devices[intersectionList.intersectedSocketID].uniqueDeviceID);
+                            //frontend.clients[intersectionPoint.intersectedSocketID].emit("intersected", {relevance:intersectionPoint.relevance,intersectionPoint: intersectionList.intersectionPoint,intersectedBy:{type:"device",ID:locator.devices[intersectionPoint.observerSocketID].uniqueDeviceID}});
 
-                    }catch(e){
-                        console.log("unable to send intersection events dueto: "+ e);
+                        } catch (e) {
+                            console.log("unable to send intersection events dueto: " + e);
+                        }
                     }
-                }
-            });
+                });
+            //}// error checking for orientation
             //console.log('intersections: ' + JSON.stringify(intersections));
         }
     }
