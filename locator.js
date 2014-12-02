@@ -923,9 +923,9 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done)
                                     if(deviceInFrontCallback != undefined){
                                         try{
                                             if(intersectionPointWrap.distance!=1000){
-                                                intersectionPointWrap.relevance.X = (intersectionPointWrap.intersectionPoint.X - locator.devices[intersectionPointWrap.intersectedSocketID].location.X)/locator.devices[intersectionPointWrap.intersectedSocketID].width/2;
+                                                intersectionPointWrap.relevance.X = (intersectionPointWrap.intersectionPoint.X - locator.devices[intersectionPointWrap.intersectedSocketID].location.X)/(locator.devices[intersectionPointWrap.intersectedSocketID].width/2);
                                                 // got which side the intersection point first hit. Added yValue of the intersection point in
-                                                var yValue = (Math.tan(-30/180*Math.PI)*intersectionPointWrap.distance)////+devices[observerSocketID].height; // calculate
+                                                var yValue = (Math.tan(locator.devices[observerSocketID].orientation.pitch/180*Math.PI)*intersectionPointWrap.distance)////+devices[observerSocketID].height; // calculate
                                                 intersectionPointWrap.intersectionPoint.Y = yValue+devices[observerSocketID].height;
                                                 intersectionPointWrap.relevance.Y = yValue/(locator.devices[intersectionPointWrap.intersectedSocketID].height/2);  //Math.round((intersectionPointWrap.relevance/(devices[deviceInFront].width/2))*100)/100;
                                                 intersectionPoints.push(intersectionPointWrap);
