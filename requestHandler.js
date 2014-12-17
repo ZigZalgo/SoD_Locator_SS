@@ -151,6 +151,7 @@ exports.handleRequest = function (socket) {
             default:
                 console.log('-> Wrong type for udpating location');
         }
+        locator.refreshStationarylayer(); // refresh all the stationary layer.
     });
     socket.on('updateDeviceInfo', function (deviceInfo, fn) {
         locator.updateDevice(socket.id,deviceInfo,fn);

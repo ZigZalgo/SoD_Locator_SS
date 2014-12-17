@@ -1208,3 +1208,20 @@ exports.uncalibrateSensor = function(sensorSocketID,fn){
         }
     }
 }
+
+// send refreshstationaryLayer event to all the webclients
+exports.refreshStationarylayer = function(){
+    console.log("Refreshing stationary layer....");
+    for(var key in frontend.clients){
+        if(frontend.clients.hasOwnProperty(key)){
+            //console.log(frontend.clients[key].clientType);
+            if(frontend.clients[key].clientType == "webClient"){
+                try{
+                    frontend.clients[key].emit("refreshStationaryLayer");
+                }catch(e){
+                    console.log("unable to send refreshstationtaryLayer to webClients due to: "+ e);
+                }
+            }
+        }
+    }
+}
