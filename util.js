@@ -591,7 +591,7 @@ exports.filterDevices = function(socket, request){
                         return filterSelection(i + 1, (locator.getAllDevicesExceptSelf(socket, listDevices)));
                         break;
                     case "inView":
-                        return filterSelection(i + 1, locator.getDevicesInFront(socket.id, listDevices));// locator.calcIntersectionPoints(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
+                        return filterSelection(i + 1, locator.getDevicesInView(socket.id, listDevices));// locator.calcIntersectionPoints(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
                         break;
                     case "paired":
                         return filterSelection(i + 1, locator.getPairedDevice(listDevices));

@@ -102,6 +102,9 @@
                         console.log('->intersected!'+JSON.stringify(data));
                     });
 
+                    sod.addListener("SuperSecretData", function(data){
+                        console.log("You were sent the data you requested: " + data.data);
+                    });
 
                     sod.addListener('enterObserveRange',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));

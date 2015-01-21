@@ -193,7 +193,6 @@ exports.handleRequest = function (socket) {
     socket.on('getDevicesWithSelection', function (request, fn) {
         //console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
         //console.log(util.filterDevices(socket, request.selection));
-        //console.log(request.selection)
         fn(util.filterDevices(socket, request));
     })
 
@@ -305,6 +304,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('requestDataFromSelection', function (request, fn) {
+        console.log("Got request: " + JSON.stringify(request));
         for (var key in util.filterDevices(socket, request)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(request.arguments==undefined) request.arguments = null;

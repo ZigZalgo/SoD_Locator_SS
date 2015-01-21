@@ -84,7 +84,7 @@ function inViewEvent(){
     for(var deviceKey in locator.devices){
         // interating through all the devices
         if(locator.devices.hasOwnProperty(deviceKey)){
-            var CurrentInViewDeviceList = util.filterDevices(frontend.clients[deviceKey],{"selection":["inView"]});
+            var CurrentInViewDeviceList = locator.getDevicesInFront(frontend.clients[deviceKey].id,locator.devices);
             //console.log("key: "+  JSON.stringify(CurrentInViewDeviceList));
             for(var currentInViewDevicesKey in CurrentInViewDeviceList){
                 if(locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] == undefined){

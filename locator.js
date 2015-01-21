@@ -931,7 +931,7 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done)
                                                 intersectionPointWrap.relevance.Y = (intersectionPointWrap.intersectionPoint.Y-devices[observerSocketID].location.Y)/(locator.devices[intersectionPointWrap.intersectedSocketID].height/2);  //Math.round((intersectionPointWrap.relevance/(devices[deviceInFront].width/2))*100)/100;
                                                 intersectionPoints.push(intersectionPointWrap);
                                                 //console.log(intersectionPointWrap.relevance.X+" - " +intersectionPointWrap.relevance.Y + "(yValue:"+yValue+")");
-                                                console.log("Observer location: "+ JSON.stringify(locator.devices[observerSocketID].location));
+                                                //console.log("Observer location: "+ JSON.stringify(locator.devices[observerSocketID].location));
                                                 deviceInFrontCallback(); // interation callback for outer each function
                                             }else{
                                                 deviceInFrontCallback(null);
@@ -969,13 +969,24 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done)
     })// end of reference wit callback
 }
 
-// TODO: implement!
-// TODO: test!
+// get all the devices that are in the view of the devices
+exports.getDevicesInView = function(observerSocketID,deviceList){
+    console.log("inView Function ");
+    var devicesKeysInFront = this.getDevicesInFront(observerSocketID,deviceList);
+    console.log(devicesKeysInFront);
+    var returnList = {};
+    // fill up the returnlist as the devices that are inFront ie. in the FOV
+    for(var i=0;i<devicesKeysInFront.length;i++){
+        returnList[devicesKeysInFront[i]] = locator.devices[devicesKeysInFront[i]];
+    }
+    return returnList;
+}
+
+/// Get all the devices that are in the FOV of the device
 exports.getDevicesInFront = function(observerSocketID, deviceList){
-    // TODO: implement!
     // List<Device> returnDevices = new List<Device>();
     var observer = locator.devices[observerSocketID];
-    var returnDevices = [];
+    var returnDevices = {};
     //console.log("Observer: "+ JSON.stringify(observer));
     //console.log(observerSocketID + ' - ' + JSON.stringify(deviceList));
     //(CB - Should we throw an exception here? Rather then just returning an empty list?)
@@ -1010,7 +1021,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
             var rightFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw  - 90 -angleToSensor- (observer.FOV/2));
 
             //console.log("Left FOV = " + leftFieldOfView)
-            //console.log("Right FOV = " + rightFieldOfView)
+            //console.log("Right FOV = " + rightFieldOfView)s
 
             return Object.keys(deviceList).filter(function(key){
                 //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
@@ -1028,7 +1039,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
                         }
                     }
                 }
-            })
+            });
         }
         catch(err){
             console.log("Error getting devices in front of device " + ": " + err);
