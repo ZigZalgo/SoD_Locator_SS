@@ -1,8 +1,9 @@
+// Starting SoD Locator Services
 var express = require('express.io');
 var app = express().http().io();
-var data = require('./data');
-var sensorsREST = require('./REST/sensors');
-var devicesREST = require('./REST/devices');
+var data = require('./locatorServices/data');
+var sensorsREST = require('./locatorServices/REST/sensors');
+var devicesREST = require('./locatorServices/REST/devices');
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
@@ -14,21 +15,21 @@ var http = require('http')
     , io = require('socket.io').listen(server);
 var path = require('path');
 io.set('log level',0);
-var requestHandler = require('./requestHandler');
+var requestHandler = require('./locatorServices/requestHandler');
 var fs = require('fs');
-var factory = require('./factory');
+var factory = require('./locatorServices/factory');
 var locator = requestHandler.locator;
-var util = require('./util');
+var util = require('./locatorServices/util');
 var clients = {};
 exports.io = io;
 exports.clients = clients;
 /* starting heartbeat*/
-var pulse = require('./pulse');
+var pulse = require('./locatorServices/pulse');
 
 
 app.configure(function(){
     app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data' }));
-//app.use(express.bodyParser({uploadDir:'./data'}));
+    //app.use(express.bodyParser({uploadDir:'./data'}));
     app.use(app.router);
 })
 
@@ -221,9 +222,9 @@ function init(){
     var fs = require('fs');
     var dataDirectory = 'data/';
 //var thumbnailSize = 400;
-    var util = require('./util');
+    var util = require('./locatorServices/util');
     var mime = require('mime');
-    var locator = require('./locator');
+    var locator = require('./locatorServices/locator');
 
     var walk    = require('walk');
     var files   = [];

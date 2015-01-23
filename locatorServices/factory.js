@@ -142,7 +142,7 @@ function Device(socket, opts){
             this.uniqueDeviceID = uniqueDeviceCounter++;
         }
 
-        console.log("Options: "+JSON.stringify(opts));
+        //console.log("Options: "+JSON.stringify(opts));
         this.orientation = {pitch:0,yaw:0}
         if(opts['orientation']['yaw']){
             if(intRegex.test(opts['orientation']['yaw'])) {

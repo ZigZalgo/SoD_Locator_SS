@@ -2,7 +2,7 @@ var factory = require('./factory');
 var _ = require('underscore');
 var locator = require('./locator');
 var util = require('./util');
-var frontend = require('./frontend');
+var frontend = require('./../frontend');
 var Q = require('q');
 var async = require("async");
 
@@ -818,7 +818,7 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
 }
 
 exports.registerDevice = function(socket, deviceInfo,fn){
-    console.log(JSON.stringify(devices[socket.id]) + '\tdeviceInfo: '+ JSON.stringify(deviceInfo));
+    //console.log(JSON.stringify(devices[socket.id]) + '\tdeviceInfo: '+ JSON.stringify(deviceInfo));
     if(devices[socket.id] != undefined){
         devices[socket.id].depth = deviceInfo.depth;
         devices[socket.id].width = deviceInfo.width;
@@ -839,7 +839,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         }else{
             socketIP = socket.handshake.address.address;
         }
-        console.log("Orientation: "+JSON.stringify(deviceInfo.orientation));
+        //console.log("Orientation: "+JSON.stringify(deviceInfo.orientation));
         //console.log('got deviceInfo.ID'+ deviceInfo.ID);
         var device = new factory.Device(socket, {ID: deviceInfo.ID, orientation: deviceInfo.orientation});
         if(deviceInfo.name != null && deviceInfo.name != undefined){
@@ -872,8 +872,8 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         }
 
         devices[socket.id] = device; // officially register the device to locator(server)
-        console.log("Registering device: " + JSON.stringify(device));
-        console.log('emitting registered device ID : '+ locator.devices[socket.id].uniqueDeviceID);
+        console.log("Registering device: " + JSON.stringify(device)+"\n");
+        //console.log('emitting registered device ID : '+ locator.devices[socket.id].uniqueDeviceID);
         if (fn != undefined) {
             //console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
             fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
@@ -971,9 +971,8 @@ exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done)
 
 // get all the devices that are in the view of the devices
 exports.getDevicesInView = function(observerSocketID,deviceList){
-    console.log("inView Function ");
+    // get all the devices in front
     var devicesKeysInFront = this.getDevicesInFront(observerSocketID,deviceList);
-    console.log(devicesKeysInFront);
     var returnList = {};
     // fill up the returnlist as the devices that are inFront ie. in the FOV
     for(var i=0;i<devicesKeysInFront.length;i++){

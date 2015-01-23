@@ -1,5 +1,5 @@
-var util = require('../util');
-var factory = require('../factory');
+var util = require('../locatorServices/util');
+var factory = require('../locatorServices/factory');
 var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
@@ -31,7 +31,7 @@ describe("util.getSpaceTransitionRule()", function() {
 });
 
 // Testing Sample From Kinect
-describe("util.getTranslationRule()", function() {
+/*describe("util.getTranslationRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
     var startingLocation1 = {X:652.1 ,Y:0 ,Z:2056};
     var endingLocation1   = {X:494.2, Y:0, Z:3555};
@@ -41,9 +41,9 @@ describe("util.getTranslationRule()", function() {
     it(" Byye testing Final Result of getTranslationRule", function(){
         expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
             to.eql({degree:0,xDistance:0,
-                zDistance:0,xSpaceTransition:0,zSpaceTransition: 1732.0533333333333,startingLocation:startingLocation2,}); // objects equal
+                zDistance:0,xSpaceTransition:0,zSpaceTransition: 1732.0533333333333,startingLocation:startingLocation2}); // objects equal
     });
-
+*/
 /*
     it("testing the calculation inside of getTranslationRule() for vector1)", function(){
         expect(util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:1*1000}); // objects equal
@@ -68,10 +68,10 @@ describe("util.getTranslationRule()", function() {
             to.eql({degree:-29.133,xDistance:-186,
                 zDistance:-156,startingLocation:startingLocation2}); // objects equal
     });*/
-});
+//});
 
 
-describe("util.getTranslationRule()", function() {
+describe("util.getTranslationRule() standarded example", function() {
     // starting and ending point for each kinect sensor sees the same project
     var startingLocation1 = {X:1000 ,Y:0 ,Z:1000};
     var endingLocation1   = {X:(1+Math.sqrt(3))*1000, Y:0, Z:2000};
@@ -96,7 +96,7 @@ describe("util.getTranslationRule()", function() {
         expect(util.matrixTransformation(vector2,degree).Z).to.eql(-2000); // objects equal
     });
 
-    it("testing Final Result of getTranslationRule", function(){
+    it("testing Final Result of getTranslationRule in (1,1)-(1+sqt[3],2) (-2,2)-(-2+sqt[3],1)", function(){
         expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
             to.eql({degree:-degree,xDistance:3000,
                 zDistance:-1000,xSpaceTransition: 3732.050807568877,zSpaceTransition: 1732.0533333333333,startingLocation:startingLocation2}); // objects equal

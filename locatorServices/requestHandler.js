@@ -1,6 +1,6 @@
 var locator = require('./locator');
 var factory = require('./factory');
-var frontend = require('./frontend');
+var frontend = require('./../frontend');
 var util = require('./util');
 
 // TODO: test!
