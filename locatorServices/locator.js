@@ -858,6 +858,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
     if(devices[socket.id] != undefined){
         devices[socket.id].depth = deviceInfo.depth;
         devices[socket.id].width = deviceInfo.width;
+        devices[socket.id].height = deviceInfo.height;
         devices[socket.id].deviceType = deviceInfo.deviceType;
         devices[socket.id].location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
         if(deviceInfo.location!=undefined){
@@ -912,7 +913,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         //console.log('emitting registered device ID : '+ locator.devices[socket.id].uniqueDeviceID);
         if (fn != undefined) {
             //console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
-            fn({deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
+            fn({status:"registered",entity:devices[socket.id]});
         }
 
         frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});

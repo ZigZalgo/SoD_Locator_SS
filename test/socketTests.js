@@ -32,8 +32,9 @@ var device = {  ID : null,
     location : {X: 1, Y: 2, Z:3},
     orientation : 12,
     FOV : 12,
-    height : 12,
-    width :  12,
+    height : 1,
+    width :  1,
+    depth: 1,
     ownerID : null,
     pairingState : "unpaired",
     lastUpdated : new Date(),
@@ -123,10 +124,8 @@ describe("register functions", function () {
                 data.should.have.property('status','registered');
                 //data['status'].should.equal('registered');
                 data['entity'].sensorType.should.equal('iBeacon');
-                setTimeout(function(){
-                    client.disconnect();
-                    done();
-                },1800);
+                client.disconnect();
+                done();
             });
         })
         //        recursiveDisconnect([client1,client2,client3],done);
@@ -139,8 +138,12 @@ describe("register functions", function () {
             // register sensor
             try{
                 client1.emit('registerDevice', device, function(data){
-                    expect(data.socketID).to.equal(client1.socket.transport.sessid);
-                    expect(data.orientation).to.equal(device.orientation);
+                    data.should.have.property('status','registered');
+                    expect(data.entity.socketID).to.equal(client1.socket.transport.sessid);
+                    expect(data.entity.orientation).to.equal(device.orientation);
+                    expect(data.entity.depth).to.equal(device.depth);
+                    expect(data.entity.height).to.equal(device.height);
+                    expect(data.entity.width).to.equal(device.width);
                     client1.disconnect();
                     done();
                 })
@@ -157,7 +160,7 @@ describe("register functions", function () {
 
 
 //testing send data
-describe("send data", function () {
+/*describe("send data", function () {
 
-});
+});*/
 
