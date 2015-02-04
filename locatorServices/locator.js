@@ -886,18 +886,27 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             device.name = "Device " + device.ID;
         }
 
-        if(deviceInfo.observer != undefined) {device.observer = deviceInfo.observer;};
-        device.depth = deviceInfo.depth;
+        if(deviceInfo.observer != undefined) {device.observer = deviceInfo.observer;}
+        if(deviceInfo.depth!=undefined){
+            device.depth = deviceInfo.depth;
+        }else{
+            console.log("depth value is not defined in the depth value. Setting it to default : 1");
+            device.depth = 1;
+        }
         device.width = deviceInfo.width;
         device.height = deviceInfo.height;
         device.deviceType = deviceInfo.deviceType;
         device.FOV = deviceInfo.FOV;
         device.lastUpdated = new Date();
         device.deviceIP = socketIP;
-        device.orientation = deviceInfo.orientation;
+        if(typeof(deviceInfo.orientation)=="number"){
+            console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting yaw to default : 0");
+            device.orientation = {pitch:deviceInfo.orientation,yaw:0};
+        }else{
+            device.orientation = deviceInfo.orientation;
+        }
         // for stationary layer refreshes
         if(deviceInfo.stationary == true){
-            device.orientation = deviceInfo.orientation;
             device.stationary = deviceInfo.stationary;
             device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             frontend.io.sockets.emit("refreshStationaryLayer", {});
@@ -913,7 +922,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         //console.log('emitting registered device ID : '+ locator.devices[socket.id].uniqueDeviceID);
         if (fn != undefined) {
             //console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
-            fn({status:"registered",entity:devices[socket.id]});
+            fn({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
 
         frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});
