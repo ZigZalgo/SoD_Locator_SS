@@ -900,8 +900,8 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         device.lastUpdated = new Date();
         device.deviceIP = socketIP;
         if(typeof(deviceInfo.orientation)=="number"){
-            console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting yaw to default : 0");
-            device.orientation = {pitch:deviceInfo.orientation,yaw:0};
+            console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting pitch to default : 0");
+            device.orientation = {pitch:0,yaw:deviceInfo.orientation};
         }else{
             device.orientation = deviceInfo.orientation;
         }
