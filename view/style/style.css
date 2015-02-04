@@ -642,7 +642,7 @@ div#calibration_flip{
 }
 /* END Break word*/
 
-/* START Sensor Calibration Reset Button */
+/* START Kinect Calibration Reset Button */
 .resetButton {
     -moz-box-shadow:inset 0px 1px 0px 0px #caefab;
     -webkit-box-shadow:inset 0px 1px 0px 0px #caefab;
@@ -687,7 +687,7 @@ div#calibration_flip{
      position:relative;
      top:1px;
  }
-/* END Sensor Calibration Reset Button */
+/* END Kinect Calibration Reset Button */
 
 .resetButtonOn {
     -moz-box-shadow:inset 0px 1px 0px 0px #caefab;

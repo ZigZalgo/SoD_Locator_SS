@@ -363,7 +363,7 @@ exports.getObjectOrientationToSensor = function (personX, personZ,callback) {
 exports.translateOrientationToReference = function(device,callback){
     if(device!=undefined) {
         this.getObjectOrientationToSensor(device.location.X,device.location.Z,function(orientationToSensor){
-            //console.log('Get orientation to Sensor: '+ (orientationToSensor+device.orientation));
+            //console.log('Get orientation to Kinect: '+ (orientationToSensor+device.orientation));
             if(callback != undefined){
                 try{
                     callback(-(90+(orientationToSensor+device.orientation.yaw)));
@@ -618,8 +618,20 @@ exports.filterDevices = function(socket, request){
     }
 }
 
-
-exports.getHeightFrom
+//delete related key item in a list and its sublist
+exports.recursiveDeleteKey = function(list,keyForDelete){
+    //console.log("Looking for "+keyForDelete + "");
+    for(var key in list){
+        //console.log(key);
+        for(var subListKey in list[key]){
+            if(subListKey == keyForDelete){
+                console.log("deleted -> "+subListKey+" from "+key +" list");
+                delete list[key][subListKey];
+                return Q(key);
+            }
+        }
+    }
+}
 
 
 /*

@@ -34,27 +34,16 @@ exports.handleRequest = function (socket) {
         //console.log('registering dataPoint with info: ' + JSON.stringify(dataPointInfo));
         locator.registerDataPoint(socket,dataPointInfo,fn);
     });
+
+    // registerSensor event listener
     socket.on('registerSensor', function (sensorInfo, fn) {
         console.log('registering with sensorInfo: '+JSON.stringify(sensorInfo));
-        if(Object.keys(sensorInfo).length != 0){
-            frontend.clients[socket.id].clientType = "sensor";
-            var sensor = new factory.Sensor(socket);
-            sensor.sensorType = sensorInfo.sensorType;
-            sensor.FOV = sensorInfo.FOV;
-            sensor.rangeInMM = sensorInfo.rangeInMM;
-            sensor.frameHeight = sensorInfo.frameHeight;
-            sensor.frameWidth = sensorInfo.frameWidth;
-            if(sensorInfo.translateRule!=undefined){
-                var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
-                    StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
-                sensor.calibration = receivedCalibration;
+        try{
+            if(sensorInfo.sensorType!=null){
+                locator.registerSensor(socket,sensorInfo.sensorType,sensorInfo,fn);
             }
-            locator.registerSensor(sensor);
-            if (fn != undefined) {
-                fn({"status": 'server: you registered as a "sensor"',sensorNumber:Object.keys(locator.sensors).length})
-            }
-        }else{
-            console.log('received null sensor info. Can not register to the server');
+        }catch(e) {
+            console.log("Error Register Sensor with SensorInfo: " + JSON.stringify(sensorInfo)+"\n\tdue to: "+e);
         }
     });
 

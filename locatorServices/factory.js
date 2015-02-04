@@ -95,11 +95,13 @@ Person.prototype = {
 
 exports.Person = Person;
 
-function Sensor(socket){
+
+// Kinect constructor
+function Kinect(socket){
     try{
         this.ID = uniqueSensorCounter ++;
         this.socketID = socket.id;
-        this.sensorType = "";
+        this.sensorType = "kinect";
         this.FOV = 0;
         this.lastUpdated = new Date();
         this.calibration = {Rotation: null, TransformX: null, TransformY: null,xSpaceTransition:null,ySpaceTransition:null, StartingLocation: {X: 0, Y: 0, Z: 0}};
@@ -111,7 +113,28 @@ function Sensor(socket){
     }
 }
 
-exports.Sensor = Sensor;
+exports.Kinect = Kinect;
+
+
+// Leap motion constructor
+function leapMotion(socket){
+    try{
+        this.ID = uniqueSensorCounter ++;
+        this.socketID = socket.id;
+        this.sensorType = "leapMotion";
+        //this.FOV = 0;
+        this.lastUpdated = new Date();
+        //this.calibration = {Rotation: null, TransformX: null, TransformY: null,xSpaceTransition:null,ySpaceTransition:null, StartingLocation: {X: 0, Y: 0, Z: 0}};
+        //this.isCalibrated = false;
+        //console.log("constructing sensor: "+ JSON.stringify(this.calibration));
+    }
+    catch(err){
+        return false;
+    }
+}
+
+exports.leapMotion = leapMotion;
+
 
 // TODO: TEST
 function Device(socket, opts){

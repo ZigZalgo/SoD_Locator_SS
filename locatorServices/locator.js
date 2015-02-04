@@ -1,6 +1,8 @@
 var factory = require('./factory');
 var _ = require('underscore');
-var locator = require('./locator');
+var locator = require('./locator')
+    var kinectService = require('./Sensors/kinect');
+    var leapMotionService = require('./Sensors/leapMotion');
 var util = require('./util');
 var frontend = require('./../frontend');
 var Q = require('q');
@@ -12,10 +14,9 @@ var async = require("async");
 var dataPoints = {};
 var persons = {};
 var devices = {};
-var sensors = {};
-var datas = {};
-var sensorsReference = null;
-
+var sensors = {kinects:{},leapMotions:{},iBeacons:{}};
+var data = {};
+exports.kinectSensorsReference = null;
 exports.persons = persons;
 exports.devices = devices;
 exports.sensors = sensors;
@@ -25,28 +26,36 @@ exports.start = function(){
     // Do initialization here, if any
 };
 
-exports.registerSensor = function(sensor){
-    frontend.io.sockets.emit("refreshWebClientSensors", {});
-    console.log('received sensor: ' +JSON.stringify(sensor));
-    console.log("REFERENCE IS: " + sensorsReference);
-    if(sensorsReference == null){
-        //sensor.calibration = {Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
-        sensor.isCalibrated = true;
-        sensorsReference = sensor;
-        console.log("setting default reference");
-        sensors[sensor.socketID] = sensor;
-    }
-    else{
-        sensors[sensor.socketID] = sensor;
-    }
-};
 
-exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
-    console.log("Calibrating sensors...");
-    return util.getTranslationRule(sensorOnePoints[0], sensorOnePoints[1], sensorTwoPoints[0], sensorTwoPoints[1])
+exports.registerSensor = function(socket,type,sensorInfo,callback){
+    // switch for type of sensor handler.
+    frontend.clients[socket.id].clientType = "sensor";
+    switch(sensorInfo.sensorType.toLowerCase()){
+        case "kinect":
+            console.log("Register Kinect Inc");
+            kinectService.registerKinectHandler(socket,sensorInfo,callback);
+            break;
+        case "kinect2":
+            console.log("Register Kinect Inc");
+            kinectService.registerKinectHandler(socket,sensorInfo,callback);
+            break;
+        case "leapmotion":
+            console.log("Register Leap Inc");
+            leapMotionService.registerLeapMotionHandler(socket,sensorInfo,callback);
+            break;
+        case "ibeacon":
+            console.log("Register iBeacon Inc");
+            break;
+        default:
+            console.log("Unkonwn Sensor Type: "+ sensorInfo.sensorType);
+    }
 }
 
-
+// calibration to sensors
+exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
+    console.log("Calibrating Kinect...");
+    return util.getTranslationRule(sensorOnePoints[0], sensorOnePoints[1], sensorTwoPoints[0], sensorTwoPoints[1])
+}
 
 /*
  * Function that check if a string is empty
@@ -708,51 +717,75 @@ exports.cleanUpDevice = function(socketID){
     frontend.io.sockets.emit("refreshStationaryLayer", {});
 }
 
+
+// handles clean up sensor request
 exports.cleanUpSensor = function(socketID){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
-    delete sensors[socketID];
-    var counter = Object.keys(persons).length;
-
-    for(var key in persons){
-        counter--;
-        if(persons.hasOwnProperty(key)){
-            for(var IDkey in persons[key].ID){
-                if(persons[key].ID.hasOwnProperty(IDkey)){
-                    if(persons[key].ID[IDkey] == socketID){
-                        delete persons[key].ID[IDkey];
-                        if(counter == 0){
-                            locator.removeUntrackedPeople(0);
+    //delete sensors[socketID];
+    util.recursiveDeleteKey(locator.sensors,socketID).then(function(callback){
+        switch(callback.toLowerCase()) {
+            case 'kinect':
+                console.log("a kinect disconnected");
+                var counter = Object.keys(persons).length;
+                console.log("here");
+                //delete sensor keys in people object list
+                for (var key in persons) {
+                    counter--;
+                    if (persons.hasOwnProperty(key)) {
+                        for (var IDkey in persons[key].ID) {
+                            if (persons[key].ID.hasOwnProperty(IDkey)) {
+                                if (persons[key].ID[IDkey] == socketID) {
+                                    delete persons[key].ID[IDkey];
+                                    if (counter == 0) {
+                                        locator.removeUntrackedPeople(0);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
 
-    /////
-    if(sensorsReference.socketID == socketID){
-        if(Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)}).length > 0){
-            var secondCalibratedSensor = sensors[Object.keys(sensors).filter(function(key){return(sensors[key].isCalibrated)})[0]];
-            // set the second calibrat
-            secondCalibratedSensor.isCalibrated = true;
-            secondCalibratedSensor.calibration = secondCalibratedSensor.calibration; //{Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
-            sensorsReference = secondCalibratedSensor;
-            console.log('Reference sensor is set to ' + JSON.stringify(sensorsReference));
-        }
-        else{
-            if(Object.keys(sensors).length != 0){
-                sensors[Object.keys(sensors)[0]].isCalibrated = true;
-                sensorsReference = sensors[Object.keys(sensors)[0]]
-            }
-            else{
-                sensorsReference = null;
-            }
-        }
-    }
-    else{
-        console.log("All good, removed sensor is not reference");
-    }
-}
+                // handles reference sensor for locator
+                if (locator.kinectSensorsReference.socketID == socketID) {
+                    if (Object.keys(sensors.kinects).filter(function (key) {
+                        return(sensors.kinects[key].isCalibrated)
+                    }).length > 0) {
+                        var secondCalibratedSensor = sensors.kinects[Object.keys(sensors.kinects).filter(function (key) {
+                            return(sensors.kinects[key].isCalibrated)
+                        })[0]];
+                        // set the second calibrat
+                        secondCalibratedSensor.isCalibrated = true;
+                        secondCalibratedSensor.calibration = secondCalibratedSensor.calibration; //{Rotation: 0, TransformX: 0, TransformY: 0,xSpaceTransition:0,ySpaceTransition:0, StartingLocation: {X: 0, Y: 0, Z: 0}};
+                        locator.kinectSensorsReference = secondCalibratedSensor;
+                        console.log('Reference sensor is set to ' + JSON.stringify(locator.kinectSensorsReference));
+                    }
+                    else {
+                        if (Object.keys(sensors.kinects).length != 0) {
+                            sensors.kinects[Object.keys(sensors.kinects)[0]].isCalibrated = true;
+                            locator.kinectSensorsReference = sensors.kinects[Object.keys(sensors.kinects)[0]]
+                        }
+                        else {
+                            locator.kinectSensorsReference = null;
+                        }
+                    }
+                }
+                else {
+                    console.log("All good, removed sensor is not reference");
+                };
+                break;
+            case "leapmotion":
+                //TODO: Handle leapMotion Deletion Process
+                console.log("leapMotion disconnected .. ");
+
+                break;
+            case "ibeacon":
+                console.log("iBeacon disconnnected");
+                break;
+            default:
+                console.log("unknown type sensor dc'ed" + callback);
+        }// end of check type
+    }).catch(function(error){console.log("error on delete sensor from list: " + error);}).done();// End of 1st then
+};
 /*
  Update a registered device with a new device info
  */
@@ -779,10 +812,10 @@ exports.updateDevice = function(socket,deviceInfo,fn){
 exports.registerData = function (dataInfo,fn){
     //console.log('received data: ' + JSON.stringify(dataInfo));
     try{
-        if(datas[dataInfo.name]==undefined){
+        if(data[dataInfo.name]==undefined){
             var newData = new factory.data(dataInfo.name,dataInfo.type,dataInfo.dataPath,dataInfo.range);
-            datas[newData.name] = newData;
-            console.log('-> registered data: '+ JSON.stringify(datas[newData.name]));
+            data[newData.name] = newData;
+            console.log('-> registered data: '+ JSON.stringify(data[newData.name]));
         }else{
             console.log('-> '+ dataInfo.name+  ' has been registered');
         }
@@ -800,7 +833,7 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
     try{
         var registerData;
         dataPointInfo.data.forEach(function(dataName){
-            registerData[dataName]=datas[dataName];
+            registerData[dataName]=data[dataName];
         })
         console.log('register data: ' + JSON.stringify(registerData));
         var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.dropRange,registerData,dataPointInfo.observer,dataPointInfo.subscriber);
@@ -1207,12 +1240,13 @@ exports.uncalibrateSensor = function(sensorSocketID,fn){
     console.log('received id: ' + sensorSocketID)
     frontend.clients[sensorSocketID].emit('resetRule', '');
 
+
     //if(this sensor isn't the only calibrated sensor)
     //sets sensor to uncalibrated
-    for(var key in sensors){
-        if(sensors.hasOwnProperty(key)){
-            if(sensors[key].isCalibrated && key!=sensorSocketID){
-                sensors[sensorSocketID].isCalibrated = false;
+    for(var key in sensors.kinects){
+        if(sensors.kinects.hasOwnProperty(key)){
+            if(sensors.kinects[key].isCalibrated && key!=sensorSocketID){
+                sensors.kinects[sensorSocketID].isCalibrated = false;
 
             }
         }

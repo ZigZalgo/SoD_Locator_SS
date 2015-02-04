@@ -134,7 +134,7 @@ function getPosition(canvasID, sid, event)
                 $( 'input[name=master_point2X]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].X*ROUND_RATIO)/ROUND_RATIO));
                 $( 'input[name=master_point2Y]' ).val(JSON.stringify(Math.round(sensorOnePoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
             }else{
-                showRedStatus("Wrong Number of Points for Sensor 1");
+                showRedStatus("Wrong Number of Points for Kinect 1");
             }
         }
         else if(canvasID == "cnvSensorTwo"){
@@ -157,7 +157,7 @@ function getPosition(canvasID, sid, event)
             $( 'input[name=sensor_point2X]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].X*ROUND_RATIO)/ROUND_RATIO));
             $( 'input[name=sensor_point2Y]' ).val(JSON.stringify(Math.round(sensorTwoPoints[1].Z*ROUND_RATIO)/ROUND_RATIO));
             }else{
-                showRedStatus("Wrong Number of Points for Sensor 2");
+                showRedStatus("Wrong Number of Points for Kinect 2");
             }
 
         }

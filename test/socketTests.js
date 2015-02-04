@@ -79,28 +79,38 @@ describe("register functions", function () {
         })
     });
 
-    it('should be able to register sensor', function(done){
+    it('SoD should be able to allow register kinect', function(done){
         var client1 = io.connect(socketURL,options);
-        var sampleSensor = {sensorType:'sampleType',FOV:10,rangeInMM:1,frameHeight:10,frameWidth:10,translateRule:{
+        var sampleKinectSensor = {sensorType:'kinect2',FOV:10,rangeInMM:1,frameHeight:10,frameWidth:10,translateRule:{
             changeInOrientation:10,dX:10,dZ:10,xSpace:10,zSpace:10,startingLocation:{X:0,Y:0,Z:0}}};
         client1.on('connect',function(data){
             // register sensor
-            client1.emit('registerSensor',sampleSensor,function(data){
-                data.sensorNumber.should.equal(1);
+            client1.emit('registerSensor',sampleKinectSensor,function(data){
+                //console.log("register Kinect callback" + JSON.stringify(data));
+                data.should.have.property('status','registered');
+                //data['status'].should.equal('registered');
+                data['entity'].sensorType.should.equal('kinect');
+                client1.disconnect();
+                done();
             });
         })
-        var client2 = io.connect(socketURL,options);
-        client2.on('connect',function(data){
-            client2.emit('registerSensor',sampleSensor,function(data){
-            data.sensorNumber.should.equal(2);
-            client1.disconnect();
-            client2.disconnect();
-            done();
-        })
-        })
+    });
 
-
-            //        recursiveDisconnect([client1,client2,client3],done);
+    it('SoD should be able to allow register LeapMotion', function(done){
+        var client = io.connect(socketURL,options);
+        var sampleLeapSensor = {sensorType:'LeapMotion'};
+        client.on('connect',function(data){
+            // register sensor
+            client.emit('registerSensor',sampleLeapSensor,function(data){
+                console.log("register Kinect callback" + JSON.stringify(data));
+                data.should.have.property('status','registered');
+                //data['status'].should.equal('registered');
+                data['entity'].sensorType.should.equal('LeapMotion');
+                client.disconnect();
+                done();
+            });
+        })
+        //        recursiveDisconnect([client1,client2,client3],done);
     })
 
     it('should be able to register device', function(done){

@@ -642,7 +642,7 @@ function drawDataPoint(data,layer){
     });
     dataPointGroup.add(dropCircle);
 
-    // datas in the for the dataPoints
+    // data in the for the dataPoints
     for(var key in data.data) {
         // anonymous function to induce scope
         (function() {
@@ -796,31 +796,32 @@ function updateContentWithObjects(){
     /**
      * Update everything about sensor
      * */
-    io.emit('getSensorsFromServer', {}, function(data){
+    io.emit('getSensorsFromServer', {}, function(sensorList){
         var htmlString = ""
         var cSensors = document.getElementById("cnvSensors");
         var ctxSensors = cSensors.getContext("2d");
         ctxSensors.clearRect(0, 0, cSensors.width, cSensors.height);
-        for(var key in data){
-            if(data.hasOwnProperty(key)){
+        var kinectList = sensorList.kinects;
+        for(var key in kinectList){
+            if(kinectList.hasOwnProperty(key)){
                 //console.log("SensorKey: "+key+"\tcalibration: "+JSON.stringify(data[key].calibration));
                 //console.log("ySpaceTransition: "+JSON.stringify(data[key].calibration.ySpaceTransition));
                 var sensorX = 0; //get this from sensor list later on
                 var sensorY=  0;
                 var angle = 270;
-                if(data[key].calibration["Rotation"]!=0&&data[key].calibration["Rotation"]!=null){
-                    sensorX += (data[key].calibration["xSpaceTransition"]*pixelsPerMeter/1000); //changed from += to -= probably because sensor see mirror image?
-                    sensorY += (data[key].calibration["ySpaceTransition"]*pixelsPerMeter/1000);
-                    angle += data[key].calibration["Rotation"];
+                if(kinectList[key].calibration["Rotation"]!=0&&kinectList[key].calibration["Rotation"]!=null){
+                    sensorX += (kinectList[key].calibration["xSpaceTransition"]*pixelsPerMeter/1000); //changed from += to -= probably because sensor see mirror image?
+                    sensorY += (kinectList[key].calibration["ySpaceTransition"]*pixelsPerMeter/1000);
+                    angle += kinectList[key].calibration["Rotation"];
                 }
                 //console.log("X: "+sensorX+"  Y: "+sensorY+"  Angle: "+angle);
                 //console.log("angleAfterCalibration: "+ data[key].calibration["Rotation"]);
                 //console.log("TransformX : "+ sensorX+data[key].calibration["TransformX"]);
                 //console.log("sensorYAfterCalibration: "+ data[key].calibration["Rotation"]);
-                drawSensor(ctxSensors,sensorX,sensorY,data[key].ID,angle, data[key].FOV);
-                var gradientVector = {X:0,Z:data[key].rangeInMM};
+                drawSensor(ctxSensors,sensorX,sensorY,kinectList[key].ID,angle, kinectList[key].FOV);
+                var gradientVector = {X:0,Z:kinectList[key].rangeInMM};
                 // get the vector from sensor point to the end point ot gradient
-                var rotatedGradientVector = matrixTransformation(gradientVector,data[key].calibration["Rotation"]);
+                var rotatedGradientVector = matrixTransformation(gradientVector,kinectList[key].calibration["Rotation"]);
                 //console.log('rotated: ' + JSON.stringify(rotatedGradientVector));
                 //console.log('sensorX: ' + sensorX + '\tsensorY: ' + sensorY);
                 // get the end point of the gradient
@@ -830,7 +831,7 @@ function updateContentWithObjects(){
                 var grd = ctxSensors.createLinearGradient(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY), endPointOfGradient.X,endPointOfGradient.Z)//shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY) + (data[key].rangeInMM)/1000*pixelsPerMeter);
                 grd.addColorStop(0, 'rgba(51, 112, 212, 0.8)');
                 grd.addColorStop(1, 'rgba(51, 112, 212, 0.0)');
-                drawView(ctxSensors, sensorX, sensorY, data[key].rangeInMM, grd,angle, data[key].FOV);
+                drawView(ctxSensors, sensorX, sensorY, kinectList[key].rangeInMM, grd,angle, kinectList[key].FOV);
 
                 var convertCalibrationToButton = function(isCalibrated, key){
                     if(isCalibrated) return "<button type=\"button\" class=\"resetButtonOn\" onclick=\"sendResetRequest(\'" + key + "\')\">Reset</button>";
@@ -838,11 +839,11 @@ function updateContentWithObjects(){
                 }
 
                 htmlString += ('<tr>' +
-                    '<td>' + data[key].ID + '</td>' +
-                    '<td>' + data[key].sensorType + '</td>' +
-                    '<td>' + data[key].socketID + '</td>' +
-                    '<td>' + data[key].FOV + '</td>' +
-                    '<td>' + convertCalibrationToButton(data[key].isCalibrated, key) + '</td>' +
+                    '<td>' + kinectList[key].ID + '</td>' +
+                    '<td>' + kinectList[key].sensorType + '</td>' +
+                    '<td>' + kinectList[key].socketID + '</td>' +
+                    '<td>' + kinectList[key].FOV + '</td>' +
+                    '<td>' + convertCalibrationToButton(kinectList[key].isCalibrated, key) + '</td>' +
                     '</tr>')
             }
         };
@@ -921,8 +922,8 @@ function updateContentWithObjects(){
             '<th >Paired Device</th>' +
             '<th >orientation</th>' +
             '<th >data</th>' +
-            //'<th style="width:100px">orientation to Sensor</th>' +
-            //'<th style="width:100px">Distance to Sensor</th>' +
+            //'<th style="width:100px">orientation to Kinect</th>' +
+            //'<th style="width:100px">Distance to Kinect</th>' +
             '</tr>' + htmlString + '</table>')
     });
 

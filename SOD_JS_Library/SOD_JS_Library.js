@@ -269,10 +269,10 @@ SODSensor.prototype = {
             this.userListeners[eventName] = callback;
         }
     },
-    registerSensor: function(callbackFunction){
+    registerKinect: function(callbackFunction){
         try{
             console.log("Registering Senosr..." + JSON.stringify(this.sensor))
-            this.socket.emit('registerSensor', this.sensor, callbackFunction)
+            this.socket.emit('registerKinect', this.sensor, callbackFunction)
         }
         catch(err){
             console.log(err)
@@ -283,7 +283,7 @@ SODSensor.prototype = {
         if(!this.socket.socket.connected){ //is this right?
             this.initialize();
         }else{
-            console.log('Sensor is already connected');
+            console.log('Kinect is already connected');
         }
     },
     addPeople: function(numPeople){
@@ -294,7 +294,7 @@ SODSensor.prototype = {
                 this.people.push(person);
             }
             this.socket.emit('personUpdate',this.people);
-            console.log('JS Sensor Client generated '+numPeople+' people and pushed to the server');
+            console.log('JS Kinect Client generated '+numPeople+' people and pushed to the server');
         }catch(err){
             console.log(err)
             console.log("Failed to add people");

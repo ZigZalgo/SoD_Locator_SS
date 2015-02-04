@@ -140,7 +140,7 @@ io.sockets.on('connection', function (socket) {
     clients[socket.id].clientType = null;
 
     socket.on('disconnect', function() {
-        console.log('Got disconnect!');
+        console.log('Something disconnect...');
         // if the socket is a device socket
         if(locator.dataPoints[socket.id]!=undefined){
             console.log('dataPoints disconnected -> ID: ' + locator.dataPoints[socket.id].ID +' with data: ' + JSON.stringify(Object.keys(locator.dataPoints[socket.id].data)));
