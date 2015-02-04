@@ -136,6 +136,25 @@ function leapMotion(socket){
 exports.leapMotion = leapMotion;
 
 
+// Leap motion constructor
+function iBeacon(socket){
+    try{
+        this.ID = uniqueSensorCounter ++;
+        this.socketID = socket.id;
+        this.sensorType = "iBeacon";
+        //this.FOV = 0;
+        this.lastUpdated = new Date();
+        //this.calibration = {Rotation: null, TransformX: null, TransformY: null,xSpaceTransition:null,ySpaceTransition:null, StartingLocation: {X: 0, Y: 0, Z: 0}};
+        //this.isCalibrated = false;
+        //console.log("constructing sensor: "+ JSON.stringify(this.calibration));
+    }
+    catch(err){
+        return false;
+    }
+}
+
+exports.iBeacon = iBeacon;
+
 // TODO: TEST
 function Device(socket, opts){
     try{

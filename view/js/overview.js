@@ -847,6 +847,34 @@ function updateContentWithObjects(){
                     '</tr>')
             }
         };
+        var leapList = sensorList.leapMotions;
+        for(var key in leapList){
+            if(leapList.hasOwnProperty(key)){
+                //console.log(key);
+                htmlString += ('<tr>' +
+                    '<td>' + leapList[key].ID + '</td>' +
+                    '<td>' + leapList[key].sensorType + '</td>' +
+                    '<td>' + leapList[key].socketID + '</td>' +
+                    '<td>' + "Life is?" + '</td>' +
+                    '<td>' + "..HARD" + '</td>' +
+                    '</tr>')
+            }
+        }
+
+        var iBeaconList = sensorList.iBeacons;
+        for(var key in iBeaconList){
+            if(iBeaconList.hasOwnProperty(key)){
+                //console.log(key);
+                htmlString += ('<tr>' +
+                    '<td>' + iBeaconList[key].ID + '</td>' +
+                    '<td>' + iBeaconList[key].sensorType + '</td>' +
+                    '<td>' + iBeaconList[key].socketID + '</td>' +
+                    '<td>' + "Life is?" + '</td>' +
+                    '<td>' + "..HARD" + '</td>' +
+                    '</tr>')
+            }
+        }
+
         $('#sensors').html('<legend>Sensors</legend><table style="width:100%"><tr>' +  '<th>ID</th>' +
             '<th>Type</th>' +
             '<th>socketID</th>' +

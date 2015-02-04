@@ -158,7 +158,7 @@ io.sockets.on('connection', function (socket) {
         if(clients[socket.id] != undefined){
             switch(clients[socket.id].clientType){
                 case 'sensor':
-                    console.log("CLEANING UP SENSOR");
+                    console.log("\tSensor Disconnected");
                     locator.cleanUpSensor(socket.id);
                     break;
                 case 'webClient':

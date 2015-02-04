@@ -1,8 +1,6 @@
 var factory = require('./factory');
 var _ = require('underscore');
 var locator = require('./locator')
-    var kinectService = require('./Sensors/kinect');
-    var leapMotionService = require('./Sensors/leapMotion');
 var util = require('./util');
 var frontend = require('./../frontend');
 var Q = require('q');
@@ -21,6 +19,10 @@ exports.persons = persons;
 exports.devices = devices;
 exports.sensors = sensors;
 exports.dataPoints = dataPoints;
+exports.kinectService = require('./Sensors/kinect');
+exports.leapMotionService = require('./Sensors/leapMotion');
+exports.iBeaconService = require('./Sensors/iBeacon');
+
 // TODO: test!
 exports.start = function(){
     // Do initialization here, if any
@@ -33,18 +35,19 @@ exports.registerSensor = function(socket,type,sensorInfo,callback){
     switch(sensorInfo.sensorType.toLowerCase()){
         case "kinect":
             console.log("Register Kinect Inc");
-            kinectService.registerKinectHandler(socket,sensorInfo,callback);
+            locator.kinectService.registerKinectHandler(socket,sensorInfo,callback);
             break;
         case "kinect2":
             console.log("Register Kinect Inc");
-            kinectService.registerKinectHandler(socket,sensorInfo,callback);
+            locator.kinectService.registerKinectHandler(socket,sensorInfo,callback);
             break;
         case "leapmotion":
             console.log("Register Leap Inc");
-            leapMotionService.registerLeapMotionHandler(socket,sensorInfo,callback);
+            locator.leapMotionService.registerLeapMotionHandler(socket,sensorInfo,callback);
             break;
         case "ibeacon":
             console.log("Register iBeacon Inc");
+            locator.iBeaconService.registerIBeaconHandler(socket,sensorInfo,callback);
             break;
         default:
             console.log("Unkonwn Sensor Type: "+ sensorInfo.sensorType);

@@ -102,12 +102,31 @@ describe("register functions", function () {
         client.on('connect',function(data){
             // register sensor
             client.emit('registerSensor',sampleLeapSensor,function(data){
-                console.log("register Kinect callback" + JSON.stringify(data));
+                console.log("register Leap callback" + JSON.stringify(data));
                 data.should.have.property('status','registered');
                 //data['status'].should.equal('registered');
                 data['entity'].sensorType.should.equal('LeapMotion');
                 client.disconnect();
                 done();
+            });
+        })
+        //        recursiveDisconnect([client1,client2,client3],done);
+    })
+
+    it('SoD should be able to allow register iBeacon', function(done){
+        var client = io.connect(socketURL,options);
+        var sampleLeapSensor = {sensorType:'iBeacon'};
+        client.on('connect',function(data){
+            // register sensor
+            client.emit('registerSensor',sampleLeapSensor,function(data){
+                console.log("register iBeacon callback" + JSON.stringify(data));
+                data.should.have.property('status','registered');
+                //data['status'].should.equal('registered');
+                data['entity'].sensorType.should.equal('iBeacon');
+                setTimeout(function(){
+                    client.disconnect();
+                    done();
+                },1800);
             });
         })
         //        recursiveDisconnect([client1,client2,client3],done);
@@ -131,13 +150,9 @@ describe("register functions", function () {
                 console.log("Failed to register device.")
             }
         })
-
-
-
-
-        //recursiveDisconnect([client1,client2,client3],done);
-
     })
+
+
 });
 
 

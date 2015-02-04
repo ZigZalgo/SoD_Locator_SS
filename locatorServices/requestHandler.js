@@ -12,9 +12,6 @@ exports.locator = locator;
 
 exports.handleRequest = function (socket) {
     //START REGISTRATION EVENTS//////////////////////////////////////////////////////////////////////////////////////
-    /*socket.on('registerData',function(dataInfo,fn){
-        locator.registerData(dataInfo,)
-    });*/
     socket.on('registerDevice', function (deviceInfo, fn) {
         console.log("Something tried to register...");
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
@@ -171,7 +168,6 @@ exports.handleRequest = function (socket) {
         var selectedValues = {};
         for (var key in frontend.clients) {
             selectedValues[key] = {socketID: frontend.clients[key].id, clientType: frontend.clients[key].clientType}
-
         };
 
         if (fn != undefined) {
