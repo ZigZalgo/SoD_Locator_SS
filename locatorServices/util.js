@@ -395,7 +395,7 @@ exports.getDistanceToKinect = function (personX, personZ) {
 * Get a observerLocation of a object with orientation and observer (such as device objects)
 * */
 exports.getObserverLocation = function(objectWithObserver){
-    var actualOrientation = 360 - (objectWithObserver.orientation + util.getObjectOrientationToSensor(objectWithObserver.location.X,objectWithObserver.location.Z) + 90+ objectWithObserver.FOV/2);
+    var actualOrientation = 360 - (objectWithObserver.orientation.yaw + util.getObjectOrientationToSensor(objectWithObserver.location.X,objectWithObserver.location.Z) + 90+ objectWithObserver.FOV/2);
     var rotatedDirection = util.matrixTransformation({X:objectWithObserver.observer.observerDistance,Y:0,Z:0},-(actualOrientation+objectWithObserver.FOV/2));
     var observerLocation = {X:rotatedDirection.X+objectWithObserver.location.X,Y:rotatedDirection.Y+objectWithObserver.location.Y,Z:rotatedDirection.Z+objectWithObserver.location.Z};
     return observerLocation;

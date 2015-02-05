@@ -140,7 +140,7 @@ describe("register functions", function () {
                 client1.emit('registerDevice', device, function(data){
                     data.should.have.property('status','registered');
                     expect(data.entity.socketID).to.equal(client1.socket.transport.sessid);
-                    expect(data.entity.orientation).to.equal(device.orientation);
+                    expect(data.entity.orientation.yaw).to.equal(device.orientation);
                     expect(data.entity.depth).to.equal(device.depth);
                     expect(data.entity.height).to.equal(device.height);
                     expect(data.entity.width).to.equal(device.width);

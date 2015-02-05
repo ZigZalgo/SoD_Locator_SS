@@ -272,7 +272,7 @@ SODSensor.prototype = {
     registerKinect: function(callbackFunction){
         try{
             console.log("Registering Senosr..." + JSON.stringify(this.sensor))
-            this.socket.emit('registerKinect', this.sensor, callbackFunction)
+            this.socket.emit('registerSensor', this.sensor, callbackFunction)
         }
         catch(err){
             console.log(err)

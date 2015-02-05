@@ -146,8 +146,8 @@ exports.handleRequest = function (socket) {
         if(sensorInfo.translateRule!=undefined){
             var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
                 StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
-            locator.sensors[socket.id].calibration = receivedCalibration;
-            console.log(JSON.stringify(locator.sensors[socket.id].calibration));
+            locator.sensors.kinects[socket.id].calibration = receivedCalibration;
+            console.log(JSON.stringify(locator.sensors.kinects[socket.id].calibration));
         }
 
     });
@@ -363,9 +363,9 @@ exports.handleRequest = function (socket) {
     socket.on('calibrateSensors', function (request, fn) {
         var translateRule = locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints);
         frontend.clients[request.uncalibratedSensorID].emit('setTranslateRule', locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints))
-        locator.sensors[request.uncalibratedSensorID].calibration =
+        locator.sensors.kinects[request.uncalibratedSensorID].calibration =
         {Rotation: translateRule.degree, TransformX: translateRule.xDistance, TransformY: translateRule.zDistance, xSpaceTransition: translateRule.xSpaceTransition, ySpaceTransition: translateRule.zSpaceTransition, StartingLocation: translateRule.startingLocation};
-        locator.sensors[request.uncalibratedSensorID].isCalibrated = true;
+        locator.sensors.kinects[request.uncalibratedSensorID].isCalibrated = true;
 
         fn(locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints));
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)

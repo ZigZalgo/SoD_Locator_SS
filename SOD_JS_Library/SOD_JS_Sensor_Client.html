@@ -50,7 +50,7 @@
                 var serverURL = "http://"+serverIP+":"+port;
                 var socketURL = serverURL+"/socket.io/socket.io.js";
                 var libraryURL= serverURL+"/SOD_JS_Library"
-                sod = new SODSensor({sensorType:$('#sensorType').val(),FOV:Number($('#FOV').val()),rangeInMM:Number($('#rangeInMM').val()),translateRule:{startingLocation:{X:Number($('#calibrationStartingLocationX').val()),Y:Number($('#calibrationStartingLocationY').val()),Z:Number($('#calibrationStartingLocationZ').val())},
+                sod = new SODSensor({sensorType:"kinect",FOV:Number($('#FOV').val()),rangeInMM:Number($('#rangeInMM').val()),translateRule:{startingLocation:{X:Number($('#calibrationStartingLocationX').val()),Y:Number($('#calibrationStartingLocationY').val()),Z:Number($('#calibrationStartingLocationZ').val())},
                     changeInOrientation: Number($('#calibrationRotation').val()),xSpace:Number($('#calibrationXSpace').val()),zSpace:Number($('#calibrationYSpace').val()),dX:Number($('#calibrationDX').val()),dZ:Number($('#calibrationDY').val())}});
 
                 sod.init(serverURL,socketURL, sod);

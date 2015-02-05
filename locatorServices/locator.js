@@ -166,7 +166,7 @@ exports.dropData = function(socket,requestObject,dropRange,fn){
     }
 }
 // send message to subscriber if defined, otherwise send message to All
-function emitEventToSubscriber(eventName,message,subscribers){
+exports.emitEventToSubscriber = function(eventName,message,subscribers){
     console.log('emitting evetns to subscriber: ' + JSON.stringify(message));
     if(subscribers.length!=0){
         //for
@@ -209,7 +209,7 @@ function inRangeEvent(){
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
-                                console.log('-> enter rect '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
+                                console.log('-> enter rect! '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                             }
                         }
                         else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined) // handles leaves event
@@ -242,12 +242,12 @@ function inRangeEvent(){
                                 console.log('person inside of dataPoint: '+dataPointKey );
                                 locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                                 //TODO: add sendMessageToSubscriber function call
-                                emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
+                                locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                                 console.log('-> enter rec '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             }
                         }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)<=locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
-                            emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
+                            locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                             console.log('-> enter radial '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                         }
                     }else if(locator.persons[personKey].inRangeOf[dataPointKey]!=undefined){ // handles leave event
@@ -256,13 +256,13 @@ function inRangeEvent(){
                             if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer.observeHeight)==false){
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                                 //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}});
-                                emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
+                                locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                                 delete locator.persons[personKey].inRangeOf[dataPointKey];
                             }
                         }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)>locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}});
-                            emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
+                            locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                             delete locator.persons[personKey].inRangeOf[dataPointKey];
                         }
                     }// in range of somebdoy ends
@@ -727,18 +727,17 @@ exports.cleanUpSensor = function(socketID){
     //delete sensors[socketID];
     util.recursiveDeleteKey(locator.sensors,socketID).then(function(callback){
         switch(callback.toLowerCase()) {
-            case 'kinect':
+            case 'kinects':
                 console.log("a kinect disconnected");
-                var counter = Object.keys(persons).length;
-                console.log("here");
+                var counter = Object.keys(locator.persons).length;
                 //delete sensor keys in people object list
-                for (var key in persons) {
+                for (var key in locator.persons) {
                     counter--;
-                    if (persons.hasOwnProperty(key)) {
-                        for (var IDkey in persons[key].ID) {
-                            if (persons[key].ID.hasOwnProperty(IDkey)) {
-                                if (persons[key].ID[IDkey] == socketID) {
-                                    delete persons[key].ID[IDkey];
+                    if (locator.persons.hasOwnProperty(key)) {
+                        for (var IDkey in locator.persons[key].ID) {
+                            if (locator.persons[key].ID.hasOwnProperty(IDkey)) {
+                                if (locator.persons[key].ID[IDkey] == socketID) {
+                                    delete locator.persons[key].ID[IDkey];
                                     if (counter == 0) {
                                         locator.removeUntrackedPeople(0);
                                     }
@@ -776,16 +775,16 @@ exports.cleanUpSensor = function(socketID){
                     console.log("All good, removed sensor is not reference");
                 };
                 break;
-            case "leapmotion":
+            case "leapmotions":
                 //TODO: Handle leapMotion Deletion Process
                 console.log("leapMotion disconnected .. ");
 
                 break;
-            case "ibeacon":
+            case "ibeacons":
                 console.log("iBeacon disconnnected");
                 break;
             default:
-                console.log("unknown type sensor dc'ed" + callback);
+                console.log("unknown type sensor dc'ed: " + callback);
         }// end of check type
     }).catch(function(error){console.log("error on delete sensor from list: " + error);}).done();// End of 1st then
 };
