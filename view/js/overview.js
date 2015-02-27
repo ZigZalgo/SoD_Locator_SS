@@ -753,12 +753,12 @@ function refreshStationaryLayer() {
 function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
     var deviceNameString;
     io.emit('getDevicesWithSelection',{selection:['single'+deviceID]},function(data){
-        if(Object.keys(data).length>=0){
+        if(Object.keys(data).length==1){
             //console.log('got device: '+data[Object.keys(data)].name.length);
-            if(data[Object.keys(data)].name.length>=5){
-                deviceNameString = data[Object.keys(data)].name.substring(0, 4)+'...';
+            if(data[Object.keys(data)[0]].name.length>=5){
+                deviceNameString = data[Object.keys(data)[0]].name.substring(0, 4)+'...';
             }else{
-                deviceNameString = data[Object.keys(data)].name;
+                deviceNameString = data[Object.keys(data)[0]].name;
             }
             //console.log(JSON.stringify(data[Object.keys(data)[0]].observeRange));
 
