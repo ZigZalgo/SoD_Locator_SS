@@ -1281,3 +1281,20 @@ exports.refreshStationarylayer = function(){
         }
     }
 }
+
+// Emit event to paired device of a person
+exports.emitEventToPairedDevice = function(person,eventName,payload){
+    if(person.pairingState=="paired" && person.ownedDeviceID!=undefined){
+        try{
+            if(person.pairingState == "paired"){
+                console.log("Emiting: "+eventName+" with palyload "+JSON.stringify(payload)+
+                    " to "+locator.devices[person.ownedDeviceID].uniqueDeviceID+" with person:"+JSON.stringify(person));
+                frontend.clients[person.ownedDeviceID].emit(eventName,payload);
+            }
+        }catch(e){
+            console.log("Unable to emit to person's ownDevice due to: "+e);
+        }
+    }else{
+        console.log("Person is not paired. Or the ownedDeviceID is undefined: " + JSON.stringify(person));
+    }
+}

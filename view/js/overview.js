@@ -750,21 +750,39 @@ function refreshStationaryLayer() {
     })
 }
 
-function getDeviceNameByID(deviceID,ctx,xInMeters,zInMeters){
+function getDeviceInfoByID(deviceID,ctx,xInMeters,zInMeters,personLocation){
     var deviceNameString;
-    io.emit('getDevicesWithSelection',{selection:['single'+deviceID]},function(data){
-        if(Object.keys(data).length==1){
+    console.log("device ID:"+deviceID);
+    io.emit('getDevicesWithSelection',{selection:['all']},function(data){
+        if(data.hasOwnProperty(deviceID)){
             //console.log('got device: '+data[Object.keys(data)].name.length);
             if(data[Object.keys(data)[0]].name.length>=5){
-                deviceNameString = data[Object.keys(data)[0]].name.substring(0, 4)+'...';
+                deviceNameString = data[deviceID].name.substring(0, 4)+'...';
             }else{
-                deviceNameString = data[Object.keys(data)[0]].name;
+                deviceNameString = data[deviceID].name;
             }
             //console.log(JSON.stringify(data[Object.keys(data)[0]].observeRange));
 
             ctx.fillStyle = "black"; //green
             ctx.font = "12px Arial";
             ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
+
+            console.log("Paired Device Observer: "+JSON.stringify(data[deviceID].observer));
+            switch(data[deviceID].observer.observerType){
+                case "radial":
+                    /*console.log("radial device person location:"+JSON.stringify(personLocation));
+                    ctx.beginPath();
+                    ctx.arc(shiftXToGridOrigin(personLocation.X*pixelsPerMeter),shiftYToGridOrigin(personLocation.Y*pixelsPerMeter), data[deviceID].observer.observeRange*pixelsPerMeter, 0, 2 * Math.PI, false);
+                    ctx.strokeStyle = '#003300';
+                    ctx.stroke();
+                    ctx.lineWidth = 1;*/
+                    break;
+                case "rectangular":
+                    break;
+                default:
+                    console.log("Unknown Observer type");
+            }
+
         }
     });
 }
@@ -911,7 +929,7 @@ function updateContentWithObjects(){
                     ctx.strokeStyle = "#2cd72A";
                     //ctx.rect(shiftXToGridOrigin(xInMeters)-minorGridLineWidth,shiftYToGridOrigin(zInMeters)-minorGridLineWidth,minorGridLineWidth*2,minorGridLineWidth*2);
                     ctx.stroke();
-                    getDeviceNameByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters,c);
+                    getDeviceInfoByID(data[key].ownedDeviceID,ctx,xInMeters,zInMeters,data[key].location,c);
                 }
 
                 if(data[key].orientation != null){
