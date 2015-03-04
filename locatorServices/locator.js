@@ -167,7 +167,7 @@ exports.dropData = function(socket,requestObject,dropRange,fn){
 }
 // send message to subscriber if defined, otherwise send message to All
 exports.emitEventToSubscriber = function(eventName,message,subscribers){
-    console.log('emitting evetns to subscriber: ' + JSON.stringify(message));
+    console.log('emitting evetns to subscriber: '+JSON.stringify(subscribers) + JSON.stringify(message));
     if(subscribers.length!=0){
         //for
         subscribers.forEach(function(subscriber){

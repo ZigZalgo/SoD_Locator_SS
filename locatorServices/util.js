@@ -227,6 +227,7 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
         (objectLocation.Z<=(observerLocation.Z - height/2)) || objectLocation.Z >= (observerLocation.Z + height/2)){
         return false;
     }else{
+        //console.log("object:"+JSON.stringify(objectLocation)+" observer: "+JSON.stringify(observerLocation) + " width: "+width+" height: "+JSON.stringify(height));
         return true;
     }
 };

@@ -129,7 +129,7 @@ function inRangeEvent(){
             for(var deviceKey in locator.devices){
                 if(locator.devices.hasOwnProperty(deviceKey)){
                     // if a person in in range of any device fire out broadcast event
-                    try{
+                    //try{
                         // if the person is not in range of this device yet
                         if(locator.persons[personKey].inRangeOf[deviceKey]==undefined) // handles enter event
                         {
@@ -138,8 +138,20 @@ function inRangeEvent(){
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:{type:"person",ID:locator.persons[personKey].uniquePersonID}}});
-
-                                locator.emitEventToPairedDevice(locator.persons[personKey],"enterObserveRange",{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:{type:"device",ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}}})
+                                if(locator.persons[personKey].pairingState=="paired") {
+                                    locator.emitEventToPairedDevice(locator.persons[personKey], "enterObserveRange", {
+                                        payload: {
+                                            observer: {
+                                                ID: locator.devices[deviceKey].uniqueDeviceID,
+                                                type: 'device'
+                                            },
+                                            invader: {
+                                                type: "device",
+                                                ID: locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID
+                                            }
+                                        }
+                                    })
+                                }
                                 console.log('-> enter radial'+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                             }else if(locator.devices[deviceKey].observer.observerType == 'rectangular'
                                 && util.isInRect(locator.persons[personKey].location,util.getObserverLocation(locator.devices[deviceKey]),locator.devices[deviceKey].observer.observeWidth,locator.devices[deviceKey].observer.observeHeight) == true) // handles rectangular
@@ -147,7 +159,10 @@ function inRangeEvent(){
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:{type:"person",ID:locator.persons[personKey].uniquePersonID}}});
                                 console.log('-> enter rect '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
-                                locator.emitEventToPairedDevice(locator.persons[personKey],"enterObserveRange",{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:{type:"device",ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}}})
+                                if(locator.persons[personKey].pairingState=="paired"){
+                                    locator.emitEventToPairedDevice(locator.persons[personKey],"enterObserveRange",{payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:{type:"device",ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}}})
+                                }
+
                             }
                         }
                         else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined) // handles leaves event
@@ -155,7 +170,21 @@ function inRangeEvent(){
                             if (locator.devices[deviceKey].observer.observerType == 'radial' && util.distanceBetweenPoints(locator.persons[personKey].location, locator.devices[deviceKey].location) > locator.devices[deviceKey].observer.observeRange) {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, invader: {type:"person",ID:locator.persons[personKey].uniquePersonID}}});
-                                locator.emitEventToPairedDevice(locator.persons[personKey],"leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, invader: {type:"device",ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}}})
+                                if(locator.persons[personKey].pairingState=="paired") {
+                                    locator.emitEventToPairedDevice(locator.persons[personKey], "leaveObserveRange", {
+                                        payload: {
+                                            observer: {
+                                                ID: locator.devices[deviceKey].uniqueDeviceID,
+                                                type: 'device'
+                                            },
+                                            invader: {
+                                                type: "device",
+                                                ID: locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID
+                                            }
+                                        }
+                                    })
+
+                                }
                                 delete locator.persons[personKey].inRangeOf[deviceKey];
                             }
                             if (locator.devices[deviceKey].observer.observerType == 'rectangular'
@@ -163,22 +192,35 @@ function inRangeEvent(){
                             {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, invader: {type:"person",ID:locator.persons[personKey].uniquePersonID}}});
-                                locator.emitEventToPairedDevice(locator.persons[personKey],"leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, invader: {type:"device",ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}}})
-                                delete locator.persons[personKey].inRangeOf[deviceKey];
+                                if(locator.persons[personKey].pairingState=="paired") {
+                                    locator.emitEventToPairedDevice(locator.persons[personKey], "leaveObserveRange", {
+                                        payload: {
+                                            observer: {
+                                                ID: locator.devices[deviceKey].uniqueDeviceID,
+                                                type: 'device'
+                                            },
+                                            invader: {
+                                                type: "device",
+                                                ID: locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID
+                                            }
+                                        }
+                                    })
+                                }delete locator.persons[personKey].inRangeOf[deviceKey];
                             }
                         }
-                    }catch(err){
-                        console.log('emitting enter and fail event failed ... due to: ' +err);
-                    }
+                    /*}catch(err){
+                        console.log('emitting enter and  ... due to: ' +err);
+                    }*/
                 }// end of if ownPropertys
             }// end of all devices
 
             // start checking all the dataPoints
             for(var dataPointKey in locator.dataPoints){
                 if(locator.dataPoints.hasOwnProperty(dataPointKey)){
+                    // if the person is not inrange of the deivce
                     if(locator.persons[personKey].inRangeOf[dataPointKey]==undefined){ // handles enter event
                         if(locator.dataPoints[dataPointKey].observer.observerType=='rectangular'){
-                            if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer)==true){
+                            if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer.observeHeight)==true){
                                 console.log('person inside of dataPoint: '+dataPointKey );
                                 locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                                 //TODO: add sendMessageToSubscriber function call
