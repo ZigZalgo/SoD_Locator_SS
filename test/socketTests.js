@@ -167,7 +167,7 @@ describe("Sensor functions -", function () {
         var sampleLeapSensor = {sensorType:'LeapMotion',location:{X:0,Y:0,Z:0}};
         var updateLeftHandData = {whichHand:"left",ID:10,gesture:"Hold"};
         var updateRightHandData = {whichHand:"right",ID:11,gesture:"Swipe"};
-        var person = {ID:'Test_'+ '0',location:{X:-0.2,Y:1,Z:1}, trackingState: 1};
+        var person = {ID:'Test_'+ '0',location:{X:-0.3,Y:1,Z:1}, trackingState: 1};
         var people = [person];
         client.on('connect',function(data){
             /*

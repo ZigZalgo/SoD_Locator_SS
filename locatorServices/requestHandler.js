@@ -328,7 +328,9 @@ exports.handleRequest = function (socket) {
             persons.forEach(function (person) {
                 locator.updatePersons(person, socket);
             });
-            fn();
+            if(fn!=undefined) {
+                fn();
+            }
         }
         else {
             console.log("request was null");

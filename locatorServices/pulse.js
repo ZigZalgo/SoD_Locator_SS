@@ -23,9 +23,13 @@ exports.start = function(){
         try{
             setInterval(function(){
                 //console.log('Event Interval HeartBeat.');
+
+                cleaner();
+
                 if(pulse.eventsSwitch.inRangeEvents == true){
                     inRangeEvent();
                 }
+
 
                 if(pulse.eventsSwitch.inViewEvents == true){
                     inViewEvent();
@@ -79,7 +83,14 @@ function sendIntersectionPoints(){
     }
 }
 
+function cleaner(){
+    locator.leapMotionService.purgeUnusedHands();
+}
 
+
+
+
+// the handler for all the inview event
 function inViewEvent(){
     for(var deviceKey in locator.devices){
         // interating through all the devices

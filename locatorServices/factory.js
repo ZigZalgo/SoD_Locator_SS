@@ -81,7 +81,7 @@ function Person(id, location, socket){
         this.data = {};
         this.gesture = "untracked";
         this.inRangeOf = {};
-        this.hands = {left:{ID:null,gesture:null,sensorID:null},right:{ID:null,gesture:null,sensorID:null}}
+        this.hands = {left:{ID:null,gesture:null,sensorID:null,lastUpdated:null},right:{ID:null,gesture:null,sensorID:null,lastUpdated:null}}
     }
     catch(err){
         return false;
