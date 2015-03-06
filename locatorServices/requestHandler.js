@@ -328,12 +328,24 @@ exports.handleRequest = function (socket) {
             persons.forEach(function (person) {
                 locator.updatePersons(person, socket);
             });
+            fn();
         }
         else {
             console.log("request was null");
         }
-
         //locator.printPersons();
+    });
+
+
+
+    socket.on('handsUpdate',function(data,fn){
+        console.log("Hand update with data: "+JSON.stringify(data));
+        data.socketID = socket.id;
+        data.sensorID = locator.sensors.leapMotions[socket.id].ID
+        locator.leapMotionService.updatePersonWithHandData(data,function(callback){
+            console.log(callback);
+            fn(callback);
+        })
     });
 
     socket.on('error', function (err) {
@@ -371,4 +383,8 @@ exports.handleRequest = function (socket) {
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....
     });
+
+
+
+
 };

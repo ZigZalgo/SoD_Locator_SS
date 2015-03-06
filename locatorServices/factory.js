@@ -81,6 +81,7 @@ function Person(id, location, socket){
         this.data = {};
         this.gesture = "untracked";
         this.inRangeOf = {};
+        this.hands = {left:{ID:null,gesture:null,sensorID:null},right:{ID:null,gesture:null,sensorID:null}}
     }
     catch(err){
         return false;
@@ -124,6 +125,7 @@ function leapMotion(socket){
         this.sensorType = "leapMotion";
         //this.FOV = 0;
         this.lastUpdated = new Date();
+        this.location = {X:null,Y:null,Z:null};
         //this.calibration = {Rotation: null, TransformX: null, TransformY: null,xSpaceTransition:null,ySpaceTransition:null, StartingLocation: {X: 0, Y: 0, Z: 0}};
         //this.isCalibrated = false;
         //console.log("constructing sensor: "+ JSON.stringify(this.calibration));

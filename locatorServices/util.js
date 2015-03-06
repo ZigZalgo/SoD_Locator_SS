@@ -2,6 +2,7 @@ var factory = require('./factory');
 var locator = require('./locator');
 var util = require('./util');
 var Q = require('q');
+var async = require('async');
 
 exports.DEFAULT_FIELD_OF_VIEW = 25.0;
 exports.KINECT_VIEW_RANGE = 28.5;               // not being used yet
@@ -647,5 +648,47 @@ exports.callbackHandler= function(callback){
         }
     }else{
         //callback is empty
+    }
+}
+
+exports.getNearest = function(subject,objectList,functionCallback){
+    var nearestDistance = 1000,nearestObject = null;
+    // use async.each handle callback after everything is done.
+    async.eachSeries(Object.keys(objectList),function(index,itrCallback){
+        //console.log(index);
+        //console.log("\t"+JSON.stringify(subject)+"\n\t"+ JSON.stringify(objectList[index]));
+        util.getDistanceOfTwoLocation(subject.location,objectList[index].location,function(distance){
+            if(distance<nearestDistance){
+                nearestDistance = distance;
+                nearestObject = objectList[index];
+                itrCallback();
+            }else{
+                itrCallback();
+            }
+
+        })
+    },function(err){
+        // if any of the file processing produced an error, err would equal that error
+        if( err ) {
+            // One of the iterations produced an error.
+            // All processing will now stop.
+            console.log('A person failed to process');
+        } else {
+            console.log('All persons were processed successfully');
+            functionCallback({nearestObject: nearestObject,distance:nearestDistance});
+        }
+    })
+}
+
+exports.getDistanceOfTwoLocation = function(location1,location2,callback){
+    if(location1.location!=undefined && location2.location!= undefined) {
+        callback(Math.sqrt(
+                (location1.X - location2.X) * (location1.X - location2.X)
+                +
+                (location1.Z - location2.Z) * (location1.Z - location2.Z))
+        );
+    }else{
+        console.log("   *Distance is not defined");
+        callback(null);
     }
 }
