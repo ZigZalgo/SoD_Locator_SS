@@ -280,6 +280,19 @@ describe("util.distanceBetweenPoints()", function(){
     });
 });
 
+describe("util.getVector()", function(){
+    var vectorA={X:1, Y:0.11, Z: 2};
+    var vectorB={X:2,Y:0.11,Z:1};
+
+    it("given A = (1,2) B = (2,1) should return 30 degree)", function(){
+        expect(util.getVector(vectorA,vectorB)).to.eql({X:1,Y:0,Z:-1}); // objects equal
+    });
+});
+
+
+
+
+
 // old test starts
 // isGreater
 /*

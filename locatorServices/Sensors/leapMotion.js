@@ -123,9 +123,9 @@ exports.purgeUnusedHands = function(){
         if( err ) {
             // One of the iterations produced an error.
             // All processing will now stop.
-            console.log('A person failed to process');
+            console.log('A person failed to process'+err);
         } else {
-            console.log('All persons were processed successfully');
+            //console.log('All persons were processed successfully');
         }
     });
 

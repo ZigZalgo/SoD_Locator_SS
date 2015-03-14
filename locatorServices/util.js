@@ -692,3 +692,4 @@ exports.getDistanceOfTwoLocation = function(location1,location2,callback){
         callback(null);
     }
 }
+
