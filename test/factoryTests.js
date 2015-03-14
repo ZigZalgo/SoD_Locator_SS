@@ -1,12 +1,50 @@
-/*
-var util = require('../util');
-var locator = require('../locator');
-var factory = require('../factory');
+//var util = require('../locatorServices/util');
+var locator = require('../locatorServices/locator');
+var factory = require('../locatorServices/factory');
 var chai = require('chai');
 var assert = chai.assert;
+var expect = chai.expect;
+
+
+describe("factory.Room()", function(){
+    var location = {X:0,Y:0,Z:0};
+    var length = 6;
+    var depth = 8;
+    var height = 4;
+
+    it("create room with {X:0,Y:0,Z:0} l:6 d:8 h:4", function(){
+        var testRoom = new factory.Room(location,length,depth,height);
+        //console.log(testRoom);
+        expect(testRoom.location).to.eql(location);
+        expect(testRoom.length).to.eql(length);
+        expect(testRoom.depth).to.eql(depth);
+        expect(testRoom.height).to.eql(height);
+        expect(testRoom.walls).to.eql(
+            {
+                top:{
+                    startingPoint:{X:-3,Y:4,Z:4},
+                    endingPoint:{X:3,Y:4,Z:4}
+                },
+                left:{
+                    startingPoint:{X:-3,Y:4,Z:4},
+                    endingPoint:{X:-3,Y:4,Z:-4}
+                },
+                right:{
+                    startingPoint:{X:3,Y:4,Z:4},
+                    endingPoint:{X:3,Y:4,Z:-4}
+                },
+                bottom:{
+                    startingPoint:{X:-3,Y:4,Z:-4},
+                    endingPoint:{X:3,Y:4,Z:-4}
+                }
+            }
+        )
+        expect(testRoom.ceiling).to.eql({length:length,height:height,depth:depth})
+    });
+});
 
 // makePerson
-describe("factory.makePerson()", function(){
+/*describe("factory.makePerson()", function(){
     // regular make case
     it("should return 'Person' if passed 'Person.ID' and 'Person.location'", function(){
         var Person = {ID: 5,

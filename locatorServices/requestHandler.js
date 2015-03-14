@@ -4,9 +4,9 @@ var frontend = require('./../frontend');
 var util = require('./util');
 
 // TODO: test!
-exports.start = function () {
+/*exports.start = function () {
     locator.start();
-};
+};*/
 
 exports.locator = locator;
 

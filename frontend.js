@@ -40,7 +40,7 @@ else{
     server.listen(process.argv[2]);
 }
 
-requestHandler.start();
+//requestHandler.start();
 
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/setup.html');

@@ -22,11 +22,13 @@ exports.dataPoints = dataPoints;
 exports.kinectService = require('./Sensors/kinect');
 exports.leapMotionService = require('./Sensors/leapMotion');
 exports.iBeaconService = require('./Sensors/iBeacon');
+var room = new factory.Room({X:0,Y:0,Z:0},6, 8, 4);
+exports.room = room;
 
 // TODO: test!
-exports.start = function(){
+/*exports.start = function(){
     // Do initialization here, if any
-};
+};*/
 
 
 exports.registerSensor = function(socket,type,sensorInfo,callback){
@@ -928,9 +930,15 @@ exports.registerDevice = function(socket, deviceInfo,fn){
     }
 }
 
+exports.calcIntersectionPointsForRoom = function(observerOrientation,callback){
+    console.log("Observer Orientation: "+ JSON.stringify(observerOrientation));
+
+};
+
+
 // TODO: implement!
 // TODO: test!
-exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done){
+exports.calcIntersectionPointsForDevices = function(observerSocketID, devicesInFront,done){
     var returnDevices = {};
     util.translateOrientationToReference(locator.devices[observerSocketID],
     function(orientationToReference){

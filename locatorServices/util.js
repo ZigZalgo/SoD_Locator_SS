@@ -169,7 +169,7 @@ exports.matrixTransformation = function (personLocation, angle, callback) {
     returnLocation.Z = Math.round(returnZ * this.ROUND_RATIO) / this.ROUND_RATIO;
     if(callback != undefined){
         try{
-            callback();
+            callback(returnLocation);
         }catch(e){
             console.log(' error in callback: '+ e);
         }
@@ -233,8 +233,50 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
     }
 };
 
+/*
+*   The observer could be a device.
+*   location, height, width shall all be defined.
+* */
+exports.getXZProjectionFromOrientation = function(observer,callback){
+    console.log("In Projection observerOrientation: "+ JSON.stringify(observer.orientation));
+    // pitch as z rotation, yaw as Y rotation
+    var room = locator.room;
+    var observerHeight = observer.location.Y;
+    var pitchRad = observer.orientation.pitch * DEGREES_TO_RADIANS;
+    var projectionFromHeight = Math.tan(pitchRad)*observerHeight;
 
+    if(observer.orientation.pitch>=0){ // if the observer is looking up
+        var projectionFromHeight = Math.tan(pitchRad)*observerHeight;
+        //callback(projectionFromHeight)
+    }else{  // if the observer is looking down
+    // TODO: Assume orientation.yaw is 0, what the vector looks like
+        var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
 
+        var rotatedVector = util.matrixTransformation(initialVector,observer.orientation.yaw,function(data){
+            if(callback!=undefined){
+                callback(data)
+            }else{
+                console.log("callback undefined in function util.getXZProjectionFromOrientation()");
+            }
+        })
+        return rotatedVector;
+        //callback(projectionFromHeight)
+    }
+
+}
+
+// in 2D
+exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
+    util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
+        console.log(locationOfPoint);
+        var ratioToDistance = result/distance;
+        callback({
+            X:locationOfPoint.X+ratioToDistance*moveDirectionVector.X,
+            Y:locationOfPoint.Y,
+            Z:locationOfPoint.Z+ratioToDistance*moveDirectionVector.Z
+        });
+    })
+}
 
 // Tested!
 exports.getIntersectionPoint = function (line1, line2) {
@@ -593,7 +635,7 @@ exports.filterDevices = function(socket, request){
                         return filterSelection(i + 1, (locator.getAllDevicesExceptSelf(socket, listDevices)));
                         break;
                     case "inView":
-                        return filterSelection(i + 1, locator.getDevicesInView(socket.id, listDevices));// locator.calcIntersectionPoints(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
+                        return filterSelection(i + 1, locator.getDevicesInView(socket.id, listDevices));// locator.calcIntersectionPointsForDevices(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
                         break;
                     case "paired":
                         return filterSelection(i + 1, locator.getPairedDevice(listDevices));
@@ -681,7 +723,7 @@ exports.getNearest = function(subject,objectList,functionCallback){
 }
 
 exports.getDistanceOfTwoLocation = function(location1,location2,callback){
-    if(location1.location!=undefined && location2.location!= undefined) {
+    if(location1.X!=undefined && location2.Z!= undefined) {
         callback(Math.sqrt(
                 (location1.X - location2.X) * (location1.X - location2.X)
                 +

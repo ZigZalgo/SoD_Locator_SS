@@ -280,16 +280,38 @@ describe("util.distanceBetweenPoints()", function(){
     });
 });
 
-describe("util.getVector()", function(){
-    var vectorA={X:1, Y:0.11, Z: 2};
-    var vectorB={X:2,Y:0.11,Z:1};
 
-    it("given A = (1,2) B = (2,1) should return 30 degree)", function(){
-        expect(util.getVector(vectorA,vectorB)).to.eql({X:1,Y:0,Z:-1}); // objects equal
+
+
+describe("util.getXZProjectionFromOrientation()", function(){
+    var location = {X:0,Y:0,Z:0};
+    var length = 6;
+    var depth = 8;
+    var height = 4;
+    var device = {ID:1, orientation:{pitch:-45,yaw:30},location:{X:0,Y:1,Z:1}};
+    it(" should get the projection towards X-Z space ", function(done){
+        var testRoom = new factory.Room(location,length,depth,height);
+        util.getXZProjectionFromOrientation(device,function(data){
+            expect(data.X).to.be.closeTo(-0.5,0.05);
+            //data.X.should.equal(-0.66)
+            done()
+        });
+
     });
 });
 
-
+describe("util.pointMoveToDirection()",function(){
+    var originalLocation = {X:0,Y:1,Z:1};
+    var directionVector = {X:-0.5,Y:0,Z:Math.sqrt(3)/2};
+    var distance = 1;
+    it(" should move a point to a dedicated direction by a certain distance ", function(done) {
+        util.pointMoveToDirection(originalLocation,directionVector,distance,function(data){
+            expect(data.X).to.be.closeTo(-0.5,0.01);
+            expect(data.Z).to.be.closeTo(1.86,0.01);
+            done()
+        })
+    })
+})
 
 
 

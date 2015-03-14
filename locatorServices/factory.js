@@ -297,3 +297,45 @@ exports.makeLineUsingOrientation = function(start, orientation) {
 
     return line;
 };
+
+
+/*
+*   Location is a JSON object ie, {X:0,Y:0,Z:0} indicates the location of the device
+*   walls property:
+*       top,left,right,bottom - as in two D space
+*       relative computation are basically using projection
+* */
+function Room(location,Length,Depth,Height){
+    this.location = location;
+    this.length = Length;
+    this.depth = Depth;
+    this.height = Height;
+    this.walls = {
+        top:{
+            startingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2},
+            endingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2}
+        },
+        left:{
+            startingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2},
+            endingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2}
+        },
+        right:{
+            startingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2},
+            endingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2}
+        },
+        bottom:{
+            startingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2},
+            endingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2}
+        }
+    }
+    this.ceiling = {        //ceiling in 2D
+        length:this.length,
+        depth: this.depth,
+        height:this.height
+    }
+
+}
+Room.prototype = {
+
+};
+exports.Room = Room;

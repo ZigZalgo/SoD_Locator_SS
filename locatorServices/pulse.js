@@ -56,7 +56,7 @@ function sendIntersectionPoints(){
     for(var deviceKey in locator.devices){
         if(locator.devices.hasOwnProperty(deviceKey)){
             var socketID = locator.devices[deviceKey].socketID;
-                locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(socketID, locator.devices), function (intersectionList) {
+                locator.calcIntersectionPointsForDevices(socketID, locator.getDevicesInFront(socketID, locator.devices), function (intersectionList) {
                     //console.log('calling back? '+ JSON.stringify(intersectionPoint));
                     if (intersectionList != null) {
                         try {
