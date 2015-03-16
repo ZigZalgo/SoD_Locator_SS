@@ -362,7 +362,7 @@ exports.getObjectOrientationToSensor = function (personX, personZ,callback) {
 *   Translate Orientation of a device to a reference space
 * */
 exports.translateOrientationToReference = function(device,callback){
-    if(device!=undefined) {
+    if(device!=undefined && device.location!=undefined) {
         this.getObjectOrientationToSensor(device.location.X,device.location.Z,function(orientationToSensor){
             //console.log('Get orientation to Kinect: '+ (orientationToSensor+device.orientation));
             if(callback != undefined){
@@ -376,7 +376,7 @@ exports.translateOrientationToReference = function(device,callback){
             }
         });
     }else{
-        console.log('orientation is not defined in translateOrietationToReference');
+        console.log('device is not defined in translateOrietationToReference: '+JSON.stringify(device));
     }
 };
 /*

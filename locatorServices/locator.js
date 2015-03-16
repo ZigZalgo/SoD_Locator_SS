@@ -662,11 +662,12 @@ exports.unpairAllPeople = function(){
 exports.updateDeviceOrientation = function(orientation, socket){
     if(devices[socket.id] != undefined){
         try{
-            devices[socket.id].orientation = orientation;
-            devices[socket.id].lastUpdated = new Date();
+            locator.devices[socket.id].orientation = orientation;
+            locator.devices[socket.id].lastUpdated = new Date();
             if(devices[socket.id].ownerID != null){
-                persons[devices[socket.id].ownerID].orientation = orientation;
+                locator.persons[devices[socket.id].ownerID].orientation = orientation;
             }
+            //console.log("update orientation: "+JSON.stringify(locator.devices[socket.id]));
         }
         catch(err){
             //if null or cannot read for some other reason... remove null
@@ -853,7 +854,7 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
 }
 
 exports.registerDevice = function(socket, deviceInfo,fn){
-    //console.log(JSON.stringify(devices[socket.id]) + '\tdeviceInfo: '+ JSON.stringify(deviceInfo));
+    console.log(JSON.stringify(devices[socket.id]) + '\tdeviceInfo: '+ JSON.stringify(deviceInfo));
     if(devices[socket.id] != undefined){
         devices[socket.id].depth = deviceInfo.depth;
         devices[socket.id].width = deviceInfo.width;
@@ -914,6 +915,10 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         // JSclient may register deivce with location as well.
         if(deviceInfo.location!=undefined){
             device.location = {X: deviceInfo.location.X, Y: deviceInfo.location.Y, Z: deviceInfo.location.Z}
+        }else{
+            if(deviceInfo.locationX !=undefined){
+                device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
+            }
         }
 
         devices[socket.id] = device; // officially register the device to locator(server)
@@ -1034,62 +1039,65 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
     //console.log("Observer: "+ JSON.stringify(observer));
     //console.log(observerSocketID + ' - ' + JSON.stringify(deviceList));
     //(CB - Should we throw an exception here? Rather then just returning an empty list?)
-    if(observer.orientation!=null){ // check if observer orientation is null
-        function filterFOV(observer,deviceList){
-            try{
+    if(observer!=undefined) {
+        if (observer.orientation != undefined) { // check if observer orientation is null
+            function filterFOV(observer, deviceList) {
+                try {
 
-                if (observer.location == null || observer.orientation.yaw == null)
-                    return returnDevices;
-                if (observer.FOV == 0.0)
-                    return returnDevices;
-                if (observer.FOV == 360.0){
-                    return Object.keys(deviceList).filter(function(key){
-                        if(deviceList[key] != observer && deviceList[key].location != undefined){
-                            return true;
-                        }
-                    })
-                }
-            }
-            catch(err){
-                console.log("Error getting devices in front of device FOV/Location" + ": " + err);
-            }
-
-        }
-
-        // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
-        // // We will use angles to represent these vectors.
-        try{
-            //get the angle to sens
-            var angleToSensor =util.getObjectOrientationToSensor(observer.location.X,observer.location.Z);
-            var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw  - 90 - angleToSensor+ (observer.FOV/2));
-            var rightFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw  - 90 -angleToSensor- (observer.FOV/2));
-
-            //console.log("Left FOV = " + leftFieldOfView)
-            //console.log("Right FOV = " + rightFieldOfView)s
-
-            return Object.keys(deviceList).filter(function(key){
-                //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
-                if(deviceList[key] != observer && deviceList[key].location != undefined){
-                    if (leftFieldOfView > rightFieldOfView &&
-                        (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
-                        (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
-                        return true;
-                    }
-                    else if (leftFieldOfView < rightFieldOfView)
-                    {
-                        if ((util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
-                            (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView){
-                            return true;
-                        }
+                    if (observer.location == null || observer.orientation.yaw == null)
+                        return returnDevices;
+                    if (observer.FOV == 0.0)
+                        return returnDevices;
+                    if (observer.FOV == 360.0) {
+                        return Object.keys(deviceList).filter(function (key) {
+                            if (deviceList[key] != observer && deviceList[key].location != undefined) {
+                                return true;
+                            }
+                        })
                     }
                 }
-            });
+                catch (err) {
+                    console.log("Error getting devices in front of device FOV/Location" + ": " + err);
+                }
+
+            }
+
+            // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
+            // // We will use angles to represent these vectors.
+            try {
+                //get the angle to sens
+                var angleToSensor = util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
+                var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
+                var rightFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor - (observer.FOV / 2));
+
+                //console.log("Left FOV = " + leftFieldOfView)
+                //console.log("Right FOV = " + rightFieldOfView)s
+
+                return Object.keys(deviceList).filter(function (key) {
+                    //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
+                    if (deviceList[key] != observer && deviceList[key].location != undefined) {
+                        if (leftFieldOfView > rightFieldOfView &&
+                            (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
+                            (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                            return true;
+                        }
+                        else if (leftFieldOfView < rightFieldOfView) {
+                            if ((util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                                (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                                return true;
+                            }
+                        }
+                    }
+                });
+            }
+            catch (err) {
+                console.log("Error getting devices in front of device " + ": " + err);
+            }
+        } else { // end of checking observer orientation
+            console.log("observer " + observer.uniqueDeviceID + " orientation is null.");
         }
-        catch(err){
-            console.log("Error getting devices in front of device " + ": " + err);
-        }
-    }else{ // end of checking observer orientation
-        console.log("observer "+observer.uniqueDeviceID+" orientation is null.");
+    }else{
+        console.log("Observer is undefined in get Devices in front");
     }
 }
 
