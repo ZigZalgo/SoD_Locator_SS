@@ -55,8 +55,9 @@ exports.start = function(){
 function sendIntersectionPoints(){
     for(var deviceKey in locator.devices){
         if(locator.devices.hasOwnProperty(deviceKey)){
-            var socketID = locator.devices[deviceKey].socketID;
-                locator.calcIntersectionPointsForDevices(socketID, locator.getDevicesInFront(socketID, locator.devices), function (intersectionList) {
+
+            var socketID = deviceKey;
+                locator.calcIntersectionPoints(socketID, locator.getDevicesInFront(deviceKey, locator.devices), function (intersectionList) {
                     //console.log('calling back? '+ JSON.stringify(intersectionPoint));
                     if (intersectionList != null) {
                         try {
@@ -107,7 +108,6 @@ function inViewEvent(){
                     }catch(e){
                         console.log("unable to send enterView event message due to: "+ e);
                     }
-
                 }
             }// end of for CurrentInViewDevicelist
             for(var inViewListKey in locator.devices[deviceKey].inViewList){
@@ -122,8 +122,6 @@ function inViewEvent(){
                         }catch(e){
                             console.log("unable to send leaveView message due to: "+ e);
                         }
-
-
                     }
                 }// End of if hasProperty
             }
@@ -138,10 +136,11 @@ function inRangeEvent(){
     for(var personKey in locator.persons){
         if(locator.persons.hasOwnProperty(personKey)){
             for(var deviceKey in locator.devices){
-                if(locator.devices.hasOwnProperty(deviceKey)){
+                if(locator.devices.hasOwnProperty(deviceKey) && locator.devices.observer!=undefined){
                     // if a person in in range of any device fire out broadcast event
                     //try{
                         // if the person is not in range of this device yet
+
                         if(locator.persons[personKey].inRangeOf[deviceKey]==undefined) // handles enter event
                         {
                             if(locator.devices[deviceKey].observer.observerType == 'radial' &&
@@ -223,6 +222,9 @@ function inRangeEvent(){
                         console.log('emitting enter and  ... due to: ' +err);
                     }*/
                 }// end of if ownPropertys
+                else{
+                    //console.log("No observer detected for device "+locator.devices[deviceKey].uniqueDeviceID);
+                }
             }// end of all devices
 
             // start checking all the dataPoints
