@@ -226,9 +226,16 @@ exports.angleBetweenPoints = function (start, end) {
 exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
     if(objectLocation.X<=(observerLocation.X - width/2)||(objectLocation.X >=observerLocation.X+width/2)||
         (objectLocation.Z<=(observerLocation.Z - height/2)) || objectLocation.Z >= (observerLocation.Z + height/2)){
+        if(fn!=undefined){
+            fn(false)
+        }
         return false;
+
     }else{
         //console.log("object:"+JSON.stringify(objectLocation)+" observer: "+JSON.stringify(observerLocation) + " width: "+width+" height: "+JSON.stringify(height));
+        if(fn!=undefined){
+            fn(true)
+        }
         return true;
     }
 };
@@ -246,20 +253,29 @@ exports.getXZProjectionFromOrientation = function(observer,callback){
     var projectionFromHeight = Math.tan(pitchRad)*observerHeight;
 
     if(observer.orientation.pitch>=0){ // if the observer is looking up
-        var projectionFromHeight = Math.tan(pitchRad)*observerHeight;
-        //callback(projectionFromHeight)
     }else{  // if the observer is looking down
     // TODO: Assume orientation.yaw is 0, what the vector looks like
         var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
 
-        var rotatedVector = util.matrixTransformation(initialVector,observer.orientation.yaw,function(data){
-            if(callback!=undefined){
-                callback(data)
-            }else{
-                console.log("callback undefined in function util.getXZProjectionFromOrientation()");
+        // use water fall to chain the tasks.
+        async.waterfall([
+            function(wfcallback) {
+                util.matrixTransformation(initialVector,observer.orientation.yaw,function(data){
+                    wfcallback(null,data)
+                })
+            },
+            function(arg1, wfcallback) {
+                // arg1 now equals data
+                util.pointMoveToDirection(observer.location,arg1,Math.abs(projectionFromHeight),function(movedLocation){
+                    wfcallback(null,movedLocation);
+                })
             }
-        })
-        return rotatedVector;
+        ], function (err, result) {
+            // result now equals 'done'
+            callback(result);
+        });
+
+        //return rotatedVector;
         //callback(projectionFromHeight)
     }
 
@@ -268,7 +284,6 @@ exports.getXZProjectionFromOrientation = function(observer,callback){
 // in 2D
 exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
     util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
-        console.log(locationOfPoint);
         var ratioToDistance = result/distance;
         callback({
             X:locationOfPoint.X+ratioToDistance*moveDirectionVector.X,
@@ -735,3 +750,17 @@ exports.getDistanceOfTwoLocation = function(location1,location2,callback){
     }
 }
 
+
+// check if objectLocation is in the room
+exports.inRoom = function(objectLocation,callback){
+    var room = locator.room;
+    //since room is a rect we use inRect to check if the object is on the roof or ceiling
+    if(objectLocation.Y>room.height||objectLocation.Y<0){
+        callback(false);
+    }else{
+        util.isInRect(objectLocation,room.location,room.length,room.depth,function(bool){
+            callback(bool);
+        });
+    }
+
+}

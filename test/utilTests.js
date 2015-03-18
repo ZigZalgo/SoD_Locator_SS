@@ -3,6 +3,7 @@ var factory = require('../locatorServices/factory');
 var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
+var async = require("async");
 
 describe("util.getSpaceTransitionRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
@@ -289,14 +290,13 @@ describe("util.getXZProjectionFromOrientation()", function(){
     var depth = 8;
     var height = 4;
     var device = {ID:1, orientation:{pitch:-45,yaw:30},location:{X:0,Y:1,Z:1}};
-    it(" should get the projection towards X-Z space ", function(done){
+    it(" should get the projection towards X-Z space ", function(okay){
         var testRoom = new factory.Room(location,length,depth,height);
         util.getXZProjectionFromOrientation(device,function(data){
             expect(data.X).to.be.closeTo(-0.5,0.05);
             //data.X.should.equal(-0.66)
-            done()
+            okay()
         });
-
     });
 });
 
@@ -311,6 +311,46 @@ describe("util.pointMoveToDirection()",function(){
             done()
         })
     })
+})
+
+describe("util.inRoom()",function(){
+    var location = {X:0,Y:0,Z:0};
+    var length = 6;
+    var depth = 8;
+    var height = 4;
+    var device = {ID:1, orientation:{pitch:-45,yaw:30},location:{X:0,Y:1,Z:1}};
+    it(" should  check wether the location is in the room ", function(okay){
+        var testRoom = new factory.Room(location,length,depth,height);
+        util.getXZProjectionFromOrientation(device,function(data){
+            console.log(data);
+            //data.X.should.equal(-0.66)
+            async.parallel([
+                    function(paCallback){
+                        util.inRoom(data,function(bool){
+                            expect(bool).to.eql(true);
+                            paCallback(null);
+                        });
+                    },
+                    function(paCallback){
+                        util.inRoom({X:2.9,Y:3.9,Z:3.9},function(bool){
+                            expect(bool).to.eql(true);
+                            paCallback(null);
+                        });
+                    },
+                    function(paCallback){
+                        util.inRoom({X:2.9,Y:4.1,Z:4.1},function(bool){
+                            expect(bool).to.eql(false);
+                            paCallback(null);
+                        });
+                    }
+                ],
+                function(err,results){
+                    okay()
+                }
+
+            )
+        });
+    });
 })
 
 
