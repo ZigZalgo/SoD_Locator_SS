@@ -278,10 +278,9 @@ exports.getXZProjectionFromOrientation = function(observer,callback){
         },
         function(wfcallback) {
             // arg1 now equals data
-            /*util.getIntersectedWall(observerSightIn2D,function(result){
+            util.getIntersectedWall(observer,function(result){
                 wfcallback(null,result)
-            })*/
-            wfcallback(null);
+            })
         }
     ], function (err, result) {
         // result now equals 'done'
@@ -309,42 +308,21 @@ exports.getIntersectedWall = function(observer,callback){
                 util.getIntersectionPoint(observerSight,top).then(function(data){
                     //console.log("haha"+JSON.stringify(data));
                     paCallback(null,{intersectedPoint:data,side:'top'});
-                    /*if(data!=null){
-                        paCallback(null,{intersectedPoint:data,side:'top'});
-                    }else{
-                        paCallback(null);
-                    }*/
                 })
             },function(paCallback){
                 util.getIntersectionPoint(observerSight,left).then(function(data){
                     paCallback(null,{intersectedPoint:data,side:'left'});
-                    /*if(data!=null){
-                        paCallback(null,{intersectedPoint:data,side:'left'});
-                    }else{
-                        paCallback(null);
-                    }*/
                 })
             },function(paCallback){
                 util.getIntersectionPoint(observerSight,right).then(function(data){
                     paCallback(null,{intersectedPoint:data,side:'right'});
-                    /*if(data!=null){
-                        paCallback(null,{intersectedPoint:data,side:'right'});
-                    }else{
-                        paCallback(null);
-                    }*/
                 })
             },function(paCallback){
                 util.getIntersectionPoint(observerSight,bottom).then(function(data){
                     paCallback(null,{intersectedPoint:data,side:'bottom'});
-                    /*if(data!=null){
-                        paCallback(null,{intersectedPoint:data,side:'bottom'});
-                    }else{
-                        paCallback(null);
-                    }*/
                 })
             }
         ],function(err,results){
-            console.log("YO! you here?");
             if(callback!=undefined){
                 var intersectedPoints=[];
                 results.forEach(function(result){
@@ -352,7 +330,40 @@ exports.getIntersectedWall = function(observer,callback){
                         intersectedPoints.push(result);
                     }
                 })
-                callback(intersectedPoints)
+                if(intersectedPoints.length>1){
+                    // pick a direction vector rotate with orientation it to compare the distance
+                    // the shorter the distance is ,the closer towards
+                    var directionVectorScale = locator.room.length/2;
+                    var directionVector = {X:directionVectorScale,Y:0,Z:0};
+                    // negate the orientation before the rotation since matrixTransformation is clockwise,
+                    //      but our Z coordinate system is towards down
+                    util.matrixTransformation(directionVector,-orientationToReference,function(rotatedMatrix){
+                        //console.log("rotated: "+JSON.stringify(rotatedMatrix));
+                        util.pointMoveToDirection(observer.location,rotatedMatrix,directionVectorScale,function(orientationDirectionPoint){
+                            var closestPoint,closestDistance=10000;
+                            async.eachSeries(intersectedPoints,function(intPoint,interCallback){
+                                util.getDistanceOfTwoLocation(intPoint.intersectedPoint,orientationDirectionPoint,function(distance){
+                                    if(distance<closestDistance){
+                                        closestDistance = distance;
+                                        closestPoint=intPoint;
+                                        //console.log(JSON.stringify(orientationDirectionPoint) + " with distance: "+distance);
+                                        interCallback();
+                                    }else{
+                                        //console.log(JSON.stringify(orientationDirectionPoint) + " with distance: "+distance);
+                                        interCallback();
+                                    }
+                                })
+                            },function(err){
+                                // All the points are finished processing
+                                //console.log("Done processing all points")
+                                callback([closestPoint])
+                            })
+                        })
+                    })
+                    //
+                }else{
+                    callback(intersectedPoints)
+                }
             }
         })
     })
@@ -361,6 +372,7 @@ exports.getIntersectedWall = function(observer,callback){
 // in 2D
 exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
     util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
+        //console.log("vector distance: "+result+"\t direction: "+JSON.stringify(moveDirectionVector));
         var ratioToDistance = result/distance;
         callback({
             X:locationOfPoint.X+ratioToDistance*moveDirectionVector.X,
@@ -432,8 +444,8 @@ function calculatePossibleInt(line1,line2){
        var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
        var yValue = 0;
        //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
-       //console.log(" Y: " + yValue + "pitch: "+ );
        var zValue = line1.slope * xValue + line1.zIntercept;
+       //console.log(" Y: " + zValue + " X:" +xValue);
        IntersectionPoint = {X:xValue,Y: yValue,Z:zValue};
    }
     return Q(IntersectionPoint);

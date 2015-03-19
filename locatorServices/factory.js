@@ -299,7 +299,6 @@ exports.makeLineUsingOrientation = function(start, orientation) {
         line.slope = Math.tan(line.slope);
         line.zIntercept = line.startPoint.Z - line.slope * line.startPoint.X;
     }
-
     return line;
 };
 

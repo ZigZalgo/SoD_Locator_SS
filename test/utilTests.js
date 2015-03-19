@@ -293,10 +293,10 @@ describe("util.getXZProjectionFromOrientation()", function(){
     var height = 4;
     var device = {ID:1, orientation:{pitch:-45,yaw:30},location:{X:0,Y:1,Z:1}};
     it(" should get the projection towards X-Z space ", function(okay){
-        var testRoom = new factory.Room(location,length,depth,height);
+        console.log();
         util.getXZProjectionFromOrientation(device,function(data){
             try{
-                console.log(data);
+                console.log("!:"+JSON.stringify(data));
                 expect(data.X).to.be.closeTo(-0.5,0.05);
             }catch(e){
                 console.log(e);
@@ -320,6 +320,25 @@ describe("util.pointMoveToDirection()",function(){
         })
     })
 })
+
+describe("util.pointMoveToDirection()",function(){
+    var originalLocation = {X:0,Y:1,Z:1};
+    var directionVector = {X:1,Y:0,Z:0};
+    var distance = 1;
+    it(" should move a point to a dedicated direction by a certain distance with actual data", function(done) {
+        util.matrixTransformation(directionVector,-120,function(rotatedMatrix){
+            console.log("rotated: "+JSON.stringify(rotatedMatrix));
+            util.pointMoveToDirection(originalLocation,rotatedMatrix,distance,function(data){
+
+                console.log(data);
+                //expect(data.X).to.be.closeTo(-0.5,0.01);
+                //expect(data.Z).to.be.closeTo(1.86,0.01);
+                done()
+            })
+        })
+    })
+})
+
 
 describe("util.inRoom()",function(){
     var location = {X:0,Y:0,Z:0};
@@ -422,12 +441,12 @@ describe("util.getIntersectedWall() ",function(){
 
     //var line2 = factory.makeLineUsingOrientation({X:0,Y:1,Z:1},{pitch:-45,yaw:30})
     it(" should get 1 value return with which wall gets hit with yaw = 30", function(okay){
-
+        var origin = {X:0,Y:1,Z:1};
             util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:30}}, function (data) {
-                console.log(data);
                 try {
+                    console.log(data);
                     expect(data.length).to.eql(1);
-                    //expect(data.intersectedPoint.side).to.eql('top');
+                    expect(data[0].intersectedPoint.X).to.be.closeTo(-2.886,0.005);
                     okay()
                 }catch(e) {
                     okay(e)
@@ -440,6 +459,7 @@ describe("util.getIntersectedWall() ",function(){
             console.log(data);
             try {
                 expect(data.length).to.eql(1);
+                expect(data[0].intersectedPoint.X).to.be.closeTo(-3,0.005);
                 //expect(data.intersectedPoint.side).to.eql('top');
                 okay()
             }catch(e) {
