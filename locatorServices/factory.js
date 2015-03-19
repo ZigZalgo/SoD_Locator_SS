@@ -261,6 +261,7 @@ exports.makeLineUsingPoints = function (start, end) {
     if (start.X == end.X) {
         line.isVerticalLine = true;
         line.x = line.startPoint.X;
+
         return line;
     }
     else {
@@ -270,12 +271,16 @@ exports.makeLineUsingPoints = function (start, end) {
         //console.log("zIntercept: "+line.zIntercept + ' slope: '+ line.slope + ' - startPoint:' + JSON.stringify(line.startPoint) + ' - endPoint ' + JSON.stringify(line.endPoint) );
         return line;
     }
-
-
 };
 
 // TODO: test!
 exports.makeLineUsingOrientation = function(start, orientation) {
+    var yaw = null;
+    if(typeof(orientation)=="object"&& orientation.yaw != undefined){
+        var yaw = orientation.yaw;
+    }else{
+        var yaw = orientation;
+    }
     var line = {startPoint: {X: start.X, Y: start.Y, Z: start.Z},
         endPoint: {X: null, Y: null, Z: null},
         slope: null,
@@ -284,13 +289,13 @@ exports.makeLineUsingOrientation = function(start, orientation) {
         x: null,
         isLineSegment: false};
 
-    if (orientation === 90 || orientation === 270) {
+    if (yaw === 90 || yaw === 270) {
         line.isVerticalLine = true;
         line.x = line.startPoint.X;
     }
     else {
         line.isVerticalLine = false;
-        line.slope = orientation * Math.PI / 180;
+        line.slope = yaw * Math.PI / 180;
         line.slope = Math.tan(line.slope);
         line.zIntercept = line.startPoint.Z - line.slope * line.startPoint.X;
     }

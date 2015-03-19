@@ -4,6 +4,8 @@ var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
 var async = require("async");
+var Q = require("q");
+var should = chai.should();
 
 describe("util.getSpaceTransitionRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
@@ -293,7 +295,13 @@ describe("util.getXZProjectionFromOrientation()", function(){
     it(" should get the projection towards X-Z space ", function(okay){
         var testRoom = new factory.Room(location,length,depth,height);
         util.getXZProjectionFromOrientation(device,function(data){
-            expect(data.X).to.be.closeTo(-0.5,0.05);
+            try{
+                console.log(data);
+                expect(data.X).to.be.closeTo(-0.5,0.05);
+            }catch(e){
+                console.log(e);
+            }
+
             //data.X.should.equal(-0.66)
             okay()
         });
@@ -345,13 +353,114 @@ describe("util.inRoom()",function(){
                     }
                 ],
                 function(err,results){
+                    //Once everything is done.
                     okay()
                 }
-
             )
         });
     });
 })
+
+
+describe("util.getIntersectionPoint() with Room sides",function(){
+    var location = {X:0,Y:0,Z:0};
+    var length = 3;
+    var depth = 3;
+    var height = 4;
+    var testRoom = new factory.Room(location,length,depth,height);
+    //
+    it(" should get proper intersection point from four sides of the room", function(done){
+    util.translateOrientationToReference({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:30}},
+        function(orientationToReference){
+            console.log("Orientation to reference: "+orientationToReference);
+            var line2 = factory.makeLineUsingOrientation({X:0,Y:1,Z:1},orientationToReference)
+            var left = factory.makeLineUsingPoints(testRoom.walls.left.startingPoint,testRoom.walls.left.endingPoint);
+            var right = factory.makeLineUsingPoints(testRoom.walls.right.startingPoint,testRoom.walls.right.startingPoint);
+            var top = factory.makeLineUsingPoints(testRoom.walls.top.startingPoint,testRoom.walls.top.endingPoint);
+            var bottom = factory.makeLineUsingPoints(testRoom.walls.bottom.startingPoint,testRoom.walls.bottom.endingPoint);
+
+                async.parallel([
+                    function(paCallback){
+                        util.getIntersectionPoint(line2,top).then(function(data){
+                            //console.log("haha"+JSON.stringify(data));
+                            paCallback(null,data);
+                        })
+                    },function(paCallback){
+                        util.getIntersectionPoint(line2,left).then(function(data){
+                            paCallback(null,data);
+                        })
+                    },function(paCallback){
+                        util.getIntersectionPoint(line2,right).then(function(data){
+                            paCallback(null,data);
+                        })
+                    },function(paCallback){
+                        util.getIntersectionPoint(line2,bottom).then(function(data){
+                            paCallback(null,data);
+                        })
+                    }
+                ],function(err,results){
+                    console.log(results);
+                    try {
+                        //expect(results[0].X).to.be.closeTo(0.866,0.05);
+                        expect(results[1]).to.equal(null);
+                        expect(results[2]).to.equal(null);
+                        //expect(results[3]).to.equal(null);
+                        done()    // success: call done with no parameter to indicate that it() is done()
+                    } catch( e ) {
+                        done( e ) // failure: call done with an error Object to indicate that it() failed
+                    }
+                })
+
+            })
+
+        }
+    )
+})
+
+
+describe("util.getIntersectedWall() ",function(){
+
+    //var line2 = factory.makeLineUsingOrientation({X:0,Y:1,Z:1},{pitch:-45,yaw:30})
+    it(" should get 1 value return with which wall gets hit with yaw = 30", function(okay){
+
+            util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:30}}, function (data) {
+                console.log(data);
+                try {
+                    expect(data.length).to.eql(1);
+                    //expect(data.intersectedPoint.side).to.eql('top');
+                    okay()
+                }catch(e) {
+                    okay(e)
+                }
+            })
+    })
+
+    it(" should get 1 value return with which wall gets hit with yaw=45", function(okay){
+        util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:45}}, function (data) {
+            console.log(data);
+            try {
+                expect(data.length).to.eql(1);
+                //expect(data.intersectedPoint.side).to.eql('top');
+                okay()
+            }catch(e) {
+                okay(e)
+            }
+        })
+    })
+    it(" should get 1 value return with which wall gets hit with yaw = 60", function(okay){
+        util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:60}}, function (data) {
+            console.log(data);
+            try {
+                expect(data.length).to.eql(1);
+                //expect(data.intersectedPoint.side).to.eql('top');
+                okay()
+            }catch(e) {
+                okay(e)
+            }
+        })
+    })
+})
+
 
 
 

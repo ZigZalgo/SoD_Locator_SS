@@ -250,37 +250,114 @@ exports.getXZProjectionFromOrientation = function(observer,callback){
     var room = locator.room;
     var observerHeight = observer.location.Y;
     var pitchRad = observer.orientation.pitch * DEGREES_TO_RADIANS;
-    var projectionFromHeight = Math.tan(pitchRad)*observerHeight;
 
     if(observer.orientation.pitch>=0){ // if the observer is looking up
-    }else{  // if the observer is looking down
-    // TODO: Assume orientation.yaw is 0, what the vector looks like
-        var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
+       var projectionFromHeight = Math.tan(pitchRad)*(room.location.Y+room.height-observerHeight);   //get the projection from the Y location of the observer
 
+
+    }else {  // if the observer is looking down
+        // TODO: Assume orientation.yaw is 0, what the vector looks like
+        var projectionFromHeight = Math.tan(pitchRad) * observerHeight;   //get the projection from the Y location of the observer
+    }
+    var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
         // use water fall to chain the tasks.
-        async.waterfall([
-            function(wfcallback) {
-                util.matrixTransformation(initialVector,observer.orientation.yaw,function(data){
-                    wfcallback(null,data)
+    var observerSightIn2D = factory.makeLineUsingOrientation(observer.location,observer.orientation);
+
+    async.parallel([
+        function(wfcallback) {
+            util.matrixTransformation(initialVector,observer.orientation.yaw,function(arg){
+                util.pointMoveToDirection(observer.location,arg,Math.abs(projectionFromHeight),function(movedLocation){
+                    util.inRoom(movedLocation,function(inRoomBool){
+                        wfcallback(null,{
+                            inRoom:inRoomBool,
+                            intersected:movedLocation
+                        });
+                    })
                 })
-            },
-            function(arg1, wfcallback) {
-                // arg1 now equals data
-                util.pointMoveToDirection(observer.location,arg1,Math.abs(projectionFromHeight),function(movedLocation){
-                    wfcallback(null,movedLocation);
-                })
-            }
-        ], function (err, result) {
-            // result now equals 'done'
-            callback(result);
-        });
+            })
+        },
+        function(wfcallback) {
+            // arg1 now equals data
+            /*util.getIntersectedWall(observerSightIn2D,function(result){
+                wfcallback(null,result)
+            })*/
+            wfcallback(null);
+        }
+    ], function (err, result) {
+        // result now equals 'done'
+        callback(result);
+    });
 
         //return rotatedVector;
         //callback(projectionFromHeight)
-    }
+
 
 }
 
+exports.getIntersectedWall = function(observer,callback){
+    util.translateOrientationToReference(observer,
+        function(orientationToReference){
+            console.log("To reference: "+ orientationToReference);
+            var observerSight = factory.makeLineUsingOrientation(observer.location, orientationToReference);
+        var top = factory.makeLineUsingPoints(locator.room.walls.top.startingPoint,locator.room.walls.top.endingPoint);
+        var left = factory.makeLineUsingPoints(locator.room.walls.left.startingPoint,locator.room.walls.left.endingPoint);
+        var right = factory.makeLineUsingPoints(locator.room.walls.right.startingPoint,locator.room.walls.right.startingPoint);
+        var bottom = factory.makeLineUsingPoints(locator.room.walls.bottom.startingPoint,locator.room.walls.bottom.endingPoint);
+
+        async.parallel([
+            function(paCallback){
+                util.getIntersectionPoint(observerSight,top).then(function(data){
+                    //console.log("haha"+JSON.stringify(data));
+                    paCallback(null,{intersectedPoint:data,side:'top'});
+                    /*if(data!=null){
+                        paCallback(null,{intersectedPoint:data,side:'top'});
+                    }else{
+                        paCallback(null);
+                    }*/
+                })
+            },function(paCallback){
+                util.getIntersectionPoint(observerSight,left).then(function(data){
+                    paCallback(null,{intersectedPoint:data,side:'left'});
+                    /*if(data!=null){
+                        paCallback(null,{intersectedPoint:data,side:'left'});
+                    }else{
+                        paCallback(null);
+                    }*/
+                })
+            },function(paCallback){
+                util.getIntersectionPoint(observerSight,right).then(function(data){
+                    paCallback(null,{intersectedPoint:data,side:'right'});
+                    /*if(data!=null){
+                        paCallback(null,{intersectedPoint:data,side:'right'});
+                    }else{
+                        paCallback(null);
+                    }*/
+                })
+            },function(paCallback){
+                util.getIntersectionPoint(observerSight,bottom).then(function(data){
+                    paCallback(null,{intersectedPoint:data,side:'bottom'});
+                    /*if(data!=null){
+                        paCallback(null,{intersectedPoint:data,side:'bottom'});
+                    }else{
+                        paCallback(null);
+                    }*/
+                })
+            }
+        ],function(err,results){
+            console.log("YO! you here?");
+            if(callback!=undefined){
+                var intersectedPoints=[];
+                results.forEach(function(result){
+                    if(result.intersectedPoint!=null){
+                        intersectedPoints.push(result);
+                    }
+                })
+                callback(intersectedPoints)
+            }
+        })
+    })
+
+}
 // in 2D
 exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
     util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
@@ -292,6 +369,22 @@ exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, di
         });
     })
 }
+
+
+// check if objectLocation is in the room
+exports.inRoom = function(objectLocation,callback){
+    var room = locator.room;
+    //since room is a rect we use inRect to check if the object is on the roof or ceiling
+    if(objectLocation.Y>room.height||objectLocation.Y<0){
+        callback(false);
+    }else{
+        util.isInRect(objectLocation,room.location,room.length,room.depth,function(bool){
+            callback(bool);
+        });
+    }
+
+}
+
 
 // Tested!
 exports.getIntersectionPoint = function (line1, line2) {
@@ -322,25 +415,29 @@ exports.getIntersectionPoint = function (line1, line2) {
 
 function calculatePossibleInt(line1,line2){
     var IntersectionPoint = null;
-    if (line1.isVerticalLine && line2.isVerticalLine || line1.slope == line2.slope)
+    //console.log("\n->\t"+JSON.stringify(line1)+"\n"+JSON.stringify(line2)+"\n\n");
+   if (line1.isVerticalLine && line2.isVerticalLine || line1.slope == line2.slope)
         return null;
     else if (line1.isVerticalLine) {
         var yValue = line2.slope * line1.x + line2.zIntercept;
         IntersectionPoint = factory.make2DPoint(line1.x, yValue);
+       return Q(IntersectionPoint);
     }
-    else if (line2.isVerticalLine) {
-        var yValue = line1.slope * line2.x + line1.zIntercept;
-        IntersectionPoint = factory.make2DPoint(line2.x, yValue);
-    }
-    else {
-        var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
-        var yValue = 0;
-        //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
-        //console.log(" Y: " + yValue + "pitch: "+ );
-        var zValue = line1.slope * xValue + line1.zIntercept;
-        IntersectionPoint = {X:xValue,Y: yValue,Z:zValue};
-    }
+   else if (line2.isVerticalLine) {
+       var yValue = line1.slope * line2.x - line1.zIntercept;
+       IntersectionPoint = factory.make2DPoint(line2.x, yValue);
+       return Q(IntersectionPoint);
+   }
+   else {
+       var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
+       var yValue = 0;
+       //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
+       //console.log(" Y: " + yValue + "pitch: "+ );
+       var zValue = line1.slope * xValue + line1.zIntercept;
+       IntersectionPoint = {X:xValue,Y: yValue,Z:zValue};
+   }
     return Q(IntersectionPoint);
+
 }
 // Tested!
 exports.isGreater = function (num1, num2) {
@@ -373,12 +470,10 @@ exports.getLinesOfShape = function (device) {
         var rightSide = factory.makeLineUsingPoints(corners[1], corners[2]);
         var bottomSide = factory.makeLineUsingPoints(corners[2], corners[3]);
         var leftSide = factory.makeLineUsingPoints(corners[3], corners[0]);
-
         returnLines.push(topSide);
         returnLines.push(rightSide);
         returnLines.push(bottomSide);
         returnLines.push(leftSide);
-
         //console.log(returnLines[0].startPoint);
         return returnLines;
     }
@@ -750,17 +845,3 @@ exports.getDistanceOfTwoLocation = function(location1,location2,callback){
     }
 }
 
-
-// check if objectLocation is in the room
-exports.inRoom = function(objectLocation,callback){
-    var room = locator.room;
-    //since room is a rect we use inRect to check if the object is on the roof or ceiling
-    if(objectLocation.Y>room.height||objectLocation.Y<0){
-        callback(false);
-    }else{
-        util.isInRect(objectLocation,room.location,room.length,room.depth,function(bool){
-            callback(bool);
-        });
-    }
-
-}
