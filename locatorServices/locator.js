@@ -935,10 +935,61 @@ exports.registerDevice = function(socket, deviceInfo,fn){
     }
 }
 
-exports.calcIntersectionPointsForRoom = function(observerOrientation,callback){
-    console.log("Observer Orientation: "+ JSON.stringify(observerOrientation));
 
-};
+
+/*
+ *   The observer could be a device.
+ *   location, height, width shall all be defined.
+ * */
+exports.getIntersectionPointInRoom = function(observer,callback){
+    console.log("In Projection observerOrientation: "+ JSON.stringify(observer.orientation));
+    // pitch as z rotation, yaw as Y rotation
+    var room = locator.room;
+    var observerHeight = observer.location.Y;
+    var pitchRad = observer.orientation.pitch * util.DEGREES_TO_RADIANS;
+
+    if(observer.orientation.pitch>=0){ // if the observer is looking up
+        var projectionFromHeight = Math.tan(pitchRad)*(room.location.Y+room.height-observerHeight);   //get the projection from the Y location of the observer
+        var intersectedY = room.location.Y+room.height;
+    }else {  // if the observer is looking down
+        // TODO: Assume orientation.yaw is 0, what the vector looks like
+        var projectionFromHeight = Math.tan(pitchRad) * observerHeight;   //get the projection from the Y location of the observer
+        var intersectedY = room.location.Y;
+    }
+    var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
+    // use water fall to chain the tasks.
+    var observerSightIn2D = factory.makeLineUsingOrientation(observer.location,observer.orientation);
+
+    async.parallel([
+        function(wfcallback) {
+            util.matrixTransformation(initialVector,observer.orientation.yaw,function(arg){
+                util.pointMoveToDirection(observer.location,arg,Math.abs(projectionFromHeight),function(movedLocation){
+                    util.inRoom(movedLocation,function(inRoomBool){
+                        movedLocation.Y = intersectedY;
+                        wfcallback(null,{
+                            inRoom:inRoomBool,
+                            intersected:movedLocation
+                        });
+                    })
+                })
+            })
+        },
+        function(wfcallback) {
+            // arg1 now equals data
+            util.getIntersectedWall(observer,function(result){
+                wfcallback(null,result)
+            })
+        }
+    ], function (err, result) {
+        // result now equals 'done'
+        callback(result);
+    });
+
+    //return rotatedVector;
+    //callback(projectionFromHeight)
+
+
+}
 
 
 // TODO: implement!

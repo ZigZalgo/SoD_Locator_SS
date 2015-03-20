@@ -47,3 +47,33 @@ describe("locator.printPersons()", function(){
         assert.equal(locator.printPersons(), true);
     });
 });*/
+var util = require('../locatorServices/util');
+var locator = require('../locatorServices/locator');
+var factory = require('../locatorServices/factory');
+var chai = require('chai');
+var assert = chai.assert;
+var expect = chai.expect;
+var async = require("async");
+var Q = require("q");
+var should = chai.should();
+
+describe("locator.getIntersectionPointInRoom()", function(){
+    var location = {X:0,Y:0,Z:0};
+    var length = 6;
+    var depth = 8;
+    var height = 4;
+    var device = {ID:1, orientation:{pitch:-45,yaw:30},location:{X:0,Y:1,Z:1}};
+    it(" should get the projection towards X-Z space ", function(okay){
+        console.log();
+        locator.getIntersectionPointInRoom(device,function(data){
+            try{
+                console.log("!:"+JSON.stringify(data));
+                expect(data[0].intersected.X).to.be.closeTo(-0.5,0.05);
+            }catch(e){
+                console.log(e);
+            }
+            //data.X.should.equal(-0.66)
+            okay()
+        });
+    });
+});

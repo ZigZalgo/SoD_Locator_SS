@@ -10,6 +10,8 @@ exports.ROUND_RATIO         = 150;         // the round ratio for dealing with n
 
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
+exports.RADIANS_TO_DEGREES = RADIANS_TO_DEGREES;
+exports.DEGREES_TO_RADIANS = DEGREES_TO_RADIANS;
 var tolerance = 0.05;
 
 
@@ -240,63 +242,12 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
     }
 };
 
-/*
-*   The observer could be a device.
-*   location, height, width shall all be defined.
-* */
-exports.getXZProjectionFromOrientation = function(observer,callback){
-    console.log("In Projection observerOrientation: "+ JSON.stringify(observer.orientation));
-    // pitch as z rotation, yaw as Y rotation
-    var room = locator.room;
-    var observerHeight = observer.location.Y;
-    var pitchRad = observer.orientation.pitch * DEGREES_TO_RADIANS;
-
-    if(observer.orientation.pitch>=0){ // if the observer is looking up
-       var projectionFromHeight = Math.tan(pitchRad)*(room.location.Y+room.height-observerHeight);   //get the projection from the Y location of the observer
-
-
-    }else {  // if the observer is looking down
-        // TODO: Assume orientation.yaw is 0, what the vector looks like
-        var projectionFromHeight = Math.tan(pitchRad) * observerHeight;   //get the projection from the Y location of the observer
-    }
-    var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
-        // use water fall to chain the tasks.
-    var observerSightIn2D = factory.makeLineUsingOrientation(observer.location,observer.orientation);
-
-    async.parallel([
-        function(wfcallback) {
-            util.matrixTransformation(initialVector,observer.orientation.yaw,function(arg){
-                util.pointMoveToDirection(observer.location,arg,Math.abs(projectionFromHeight),function(movedLocation){
-                    util.inRoom(movedLocation,function(inRoomBool){
-                        wfcallback(null,{
-                            inRoom:inRoomBool,
-                            intersected:movedLocation
-                        });
-                    })
-                })
-            })
-        },
-        function(wfcallback) {
-            // arg1 now equals data
-            util.getIntersectedWall(observer,function(result){
-                wfcallback(null,result)
-            })
-        }
-    ], function (err, result) {
-        // result now equals 'done'
-        callback(result);
-    });
-
-        //return rotatedVector;
-        //callback(projectionFromHeight)
-
-
-}
 
 exports.getIntersectedWall = function(observer,callback){
     util.translateOrientationToReference(observer,
         function(orientationToReference){
             console.log("To reference: "+ orientationToReference);
+            var room = locator.room;
             var observerSight = factory.makeLineUsingOrientation(observer.location, orientationToReference);
         var top = factory.makeLineUsingPoints(locator.room.walls.top.startingPoint,locator.room.walls.top.endingPoint);
         var left = factory.makeLineUsingPoints(locator.room.walls.left.startingPoint,locator.room.walls.left.endingPoint);
@@ -356,13 +307,35 @@ exports.getIntersectedWall = function(observer,callback){
                             },function(err){
                                 // All the points are finished processing
                                 //console.log("Done processing all points")
-                                callback([closestPoint])
+                                util.getDistanceOfTwoLocation(observer.location,closestPoint.intersectedPoint,function(XZProjection){
+                                    var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
+                                    console.log("Y: "+intersectionY);
+                                    if(intersectionY>(room.location.Y+room.height)||
+                                        intersectionY<(room.location.Y)){
+                                        callback(null);
+                                    }else{
+                                        closestPoint.intersectedPoint.Y = intersectionY
+                                        callback([closestPoint])
+                                    }
+                                })
+                                //var yValue = (Math.tan(observer.orientation.pitch/180*Math.PI)*intersectionPointWrap.distance)////+devices[observerSocketID].height; // calculate
+                                //intersectionPointWrap.intersectionPoint.Y = yValue+devices[observerSocketID].height;
                             })
                         })
                     })
                     //
                 }else{
-                    callback(intersectedPoints)
+                    util.getDistanceOfTwoLocation(observer.location,intersectedPoints[0].intersectedPoint,function(XZProjection){
+                        var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
+                        console.log("Y1: "+intersectionY);
+                        if(intersectionY>(room.location.Y+room.height)||
+                            intersectionY<(room.location.Y)){
+                            callback(null);
+                        }else{
+                            intersectedPoints[0].intersectedPoint.Y = intersectionY;
+                            callback(intersectedPoints)
+                        }
+                    })
                 }
             }
         })
