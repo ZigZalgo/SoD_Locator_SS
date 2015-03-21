@@ -327,7 +327,7 @@ exports.getIntersectedWall = function(observer,callback){
                 }else{
                     util.getDistanceOfTwoLocation(observer.location,intersectedPoints[0].intersectedPoint,function(XZProjection){
                         var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
-                        console.log("Y1: "+intersectionY);
+                        //console.log("Y1: "+intersectionY);
                         if(intersectionY>(room.location.Y+room.height)||
                             intersectionY<(room.location.Y)){
                             callback(null);
@@ -346,7 +346,7 @@ exports.getIntersectedWall = function(observer,callback){
 exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
     util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
         //console.log("vector distance: "+result+"\t direction: "+JSON.stringify(moveDirectionVector));
-        var ratioToDistance = result/distance;
+        var ratioToDistance = distance/result;
         callback({
             X:locationOfPoint.X+ratioToDistance*moveDirectionVector.X,
             Y:locationOfPoint.Y,
@@ -360,14 +360,13 @@ exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, di
 exports.inRoom = function(objectLocation,callback){
     var room = locator.room;
     //since room is a rect we use inRect to check if the object is on the roof or ceiling
-    if(objectLocation.Y>room.height||objectLocation.Y<0){
+    if(objectLocation.Y > room.height||objectLocation.Y<0){
         callback(false);
     }else{
         util.isInRect(objectLocation,room.location,room.length,room.depth,function(bool){
             callback(bool);
         });
     }
-
 }
 
 

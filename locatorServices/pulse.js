@@ -11,7 +11,12 @@ var async = require('async');
 //var events = require("events");
 var pulse = require('./pulse');
 exports.initPulseInterval = 500;
-exports.eventsSwitch = {inRangeEvents:true,inViewEvents:true,sendIntersectionPoints:true};
+exports.eventsSwitch = {
+    inRangeEvents:true,
+    inViewEvents:true,
+    sendIntersectionPoints:true,
+    roomIntersectionEvents:true
+};
 exports.intervals = {};
 /* Event handler */
 // exposing the heartbeat
@@ -30,6 +35,9 @@ exports.start = function(){
                     inRangeEvent();
                 }
 
+                if(pulse.eventsSwitch.roomIntersectionEvents == true){
+                    roomIntersectionEvent();
+                }
 
                 if(pulse.eventsSwitch.inViewEvents == true){
                     inViewEvent();
@@ -48,6 +56,23 @@ exports.start = function(){
             console.log('unable to start heartbeat due to: '+ e);
         }
 };
+
+function roomIntersectionEvent(){
+    //console.log("")
+    //get all the devices that has locations
+    var deviceList = locator.devices;
+    for(var deviceKey in deviceList){
+        if(deviceList.hasOwnProperty(deviceKey)){
+            var device = deviceList[deviceKey];
+            if(device.location!=undefined && device.location!=null){
+                locator.getIntersectionPointInRoom(device,function(intersectionPoint){
+                    console.log(intersectionPoint);
+                })
+            }// End of if device location is defined
+        }
+    }// End of devices list iteration
+}
+
 
 
 

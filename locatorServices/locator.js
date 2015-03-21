@@ -949,12 +949,14 @@ exports.getIntersectionPointInRoom = function(observer,callback){
     var pitchRad = observer.orientation.pitch * util.DEGREES_TO_RADIANS;
 
     if(observer.orientation.pitch>=0){ // if the observer is looking up
-        var projectionFromHeight = Math.tan(pitchRad)*(room.location.Y+room.height-observerHeight);   //get the projection from the Y location of the observer
+        var hit = "ceiling"
+        var projectionFromHeight = (room.location.Y+room.height-observerHeight)/Math.tan(pitchRad);   //get the projection from the Y location of the observer
         var intersectedY = room.location.Y+room.height;
     }else {  // if the observer is looking down
         // TODO: Assume orientation.yaw is 0, what the vector looks like
-        var projectionFromHeight = Math.tan(pitchRad) * observerHeight;   //get the projection from the Y location of the observer
+        var projectionFromHeight = observerHeight / Math.tan(pitchRad);   //get the projection from the Y location of the observer
         var intersectedY = room.location.Y;
+        var hit = "floor"
     }
     var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
     // use water fall to chain the tasks.
@@ -963,13 +965,19 @@ exports.getIntersectionPointInRoom = function(observer,callback){
     async.parallel([
         function(wfcallback) {
             util.matrixTransformation(initialVector,observer.orientation.yaw,function(arg){
+                console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
                 util.pointMoveToDirection(observer.location,arg,Math.abs(projectionFromHeight),function(movedLocation){
                     util.inRoom(movedLocation,function(inRoomBool){
-                        movedLocation.Y = intersectedY;
-                        wfcallback(null,{
-                            inRoom:inRoomBool,
-                            intersected:movedLocation
-                        });
+
+                        if(inRoomBool==false){
+                            wfcallback(null);
+                        }else{
+                            movedLocation.Y = intersectedY;
+                            wfcallback(null,{
+                                side:hit,
+                                intersected:movedLocation
+                            });
+                        }
                     })
                 })
             })
