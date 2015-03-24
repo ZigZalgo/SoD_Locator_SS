@@ -96,6 +96,11 @@
                         sod.registerDevice(sod);
                         showGreenStatus('connect to server ..')
                     });
+                    //intersectedOnWall
+                    sod.addListener('intersectedOnWall',function(data){
+                        console.log('intersected on wall' + JSON.stringify(data));
+                        //showGreenStatus('connect to server ..')
+                    });
 
                     sod.addListener('intersected',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));

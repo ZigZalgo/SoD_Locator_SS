@@ -65,9 +65,21 @@ function roomIntersectionEvent(){
         if(deviceList.hasOwnProperty(deviceKey)){
             var device = deviceList[deviceKey];
             if(device.location!=undefined && device.location!=null){
-                locator.getIntersectionPointInRoom(device,function(intersectionPoint){
-                    console.log(intersectionPoint);
-                })
+                locator.getIntersectionPointInRoom(device,function(intersectionPoint,observerCB){
+                    //console.log(JSON.stringify(intersectionPoint));
+                    if(intersectionPoint!=null){
+                        // if there is a legit intersection point broadcast events to all devices
+                        Object.keys(deviceList).forEach(function(aDeviceKey){
+                            //console.log(intersectionPoint);
+                            frontend.clients[aDeviceKey].emit("intersectedOnWall",
+                                {
+                                    observer:observerCB,
+                                    intersectionPoint:intersectionPoint[0]
+                                })
+                        })
+                    }
+                    }
+                )
             }// End of if device location is defined
         }
     }// End of devices list iteration
@@ -125,6 +137,7 @@ function inViewEvent(){
             //console.log("key: "+  JSON.stringify(CurrentInViewDeviceList));
             for(var currentInViewDevicesKey in CurrentInViewDeviceList){
                 if(locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] == undefined){
+                    console.log(currentInViewDevicesKey);
                     locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] = {type:'device',ID:locator.devices[CurrentInViewDeviceList[currentInViewDevicesKey]].uniqueDeviceID}
                     console.log('added-> ' +JSON.stringify(locator.devices[deviceKey].inViewList)  + ' to inViewlist');
                     try{
@@ -218,7 +231,6 @@ function inRangeEvent(){
                                             }
                                         }
                                     })
-
                                 }
                                 delete locator.persons[personKey].inRangeOf[deviceKey];
                             }

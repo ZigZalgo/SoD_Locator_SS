@@ -942,57 +942,89 @@ exports.registerDevice = function(socket, deviceInfo,fn){
  *   location, height, width shall all be defined.
  * */
 exports.getIntersectionPointInRoom = function(observer,callback){
-    console.log("In Projection observerOrientation: "+ JSON.stringify(observer.orientation));
+    //console.log("In Projection observerOrientation: "+ JSON.stringify(observer.orientation));
     // pitch as z rotation, yaw as Y rotation
     var room = locator.room;
     var observerHeight = observer.location.Y;
     var pitchRad = observer.orientation.pitch * util.DEGREES_TO_RADIANS;
+    util.isInRect(observer.location,room.location,room.length,room.depth,function(observerInRoom){
+        if(observerInRoom) {
+            //console.log('on device: '+observer.uniqueDeviceID);
+            if (observer.orientation.pitch >= 0) { // if the observer is looking up
+                var hit = "ceiling"
+                var projectionFromHeight = (room.location.Y + room.height - observerHeight) / Math.tan(pitchRad);   //get the projection from the Y location of the observer
+                var intersectedY = room.location.Y + room.height;
+            } else {  // if the observer is looking down
+                // TODO: Assume orientation.yaw is 0, what the vector looks like
+                var projectionFromHeight = observerHeight / Math.tan(pitchRad);   //get the projection from the Y location of the observer
+                var intersectedY = room.location.Y;
+                var hit = "floor"
+            }
+            var initialVector = {X:1,Y:0,Z:0};
+            // use water fall to chain the tasks.
 
-    if(observer.orientation.pitch>=0){ // if the observer is looking up
-        var hit = "ceiling"
-        var projectionFromHeight = (room.location.Y+room.height-observerHeight)/Math.tan(pitchRad);   //get the projection from the Y location of the observer
-        var intersectedY = room.location.Y+room.height;
-    }else {  // if the observer is looking down
-        // TODO: Assume orientation.yaw is 0, what the vector looks like
-        var projectionFromHeight = observerHeight / Math.tan(pitchRad);   //get the projection from the Y location of the observer
-        var intersectedY = room.location.Y;
-        var hit = "floor"
-    }
-    var initialVector = util.getVector(observer.location,{X:0,Y:0,Z:0});
-    // use water fall to chain the tasks.
-    var observerSightIn2D = factory.makeLineUsingOrientation(observer.location,observer.orientation);
 
-    async.parallel([
-        function(wfcallback) {
-            util.matrixTransformation(initialVector,observer.orientation.yaw,function(arg){
-                console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
-                util.pointMoveToDirection(observer.location,arg,Math.abs(projectionFromHeight),function(movedLocation){
-                    util.inRoom(movedLocation,function(inRoomBool){
+            async.parallel([
+                function (wfcallback) {
+                    util.translateOrientationToReference(observer,
+                        function(orientationToReference){
+                            console.log("Ori to Reference: "+orientationToReference);
+                    util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
+                        console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
+                        //console.log("direction: "+JSON.stringify(arg));
+                            //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
 
-                        if(inRoomBool==false){
-                            wfcallback(null);
-                        }else{
-                            movedLocation.Y = intersectedY;
-                            wfcallback(null,{
-                                side:hit,
-                                intersected:movedLocation
-                            });
-                        }
+                            util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
+                            console.log("MovedLocation: "+JSON.stringify(movedLocation));
+                            util.inRoom(movedLocation, function (inRoomBool){
+                                console.log("In room ? "+inRoomBool);
+                                if (inRoomBool == false) {
+                                    wfcallback(null,null);
+                                } else {
+                                    movedLocation.Y = intersectedY;
+                                    wfcallback(null, {
+                                        side: hit,
+                                        intersected: movedLocation
+                                    });
+                                }
+                            })
+                        })
                     })
                 })
-            })
-        },
-        function(wfcallback) {
-            // arg1 now equals data
-            util.getIntersectedWall(observer,function(result){
-                wfcallback(null,result)
-            })
-        }
-    ], function (err, result) {
-        // result now equals 'done'
-        callback(result);
-    });
+                },
+                function (wfcallback) {
+                    // arg1 now equals data
+                    util.getIntersectedWall(observer, function (result) {
+                        wfcallback(null, result)
+                    })
+                }
+            ], function (err, result) {
+                // result now equals 'done'
+                // filter out the null from parallel result.
+                //console.log("ID: "+observer.uniqueDeviceID+" - "+JSON.stringify(result));
 
+                // filter out the undefined result
+                var filteredResult = result.filter(function (element) {
+                    return element != null && element != undefined;
+                })
+                if (filteredResult.length == 1) {
+                    callback(filteredResult,{
+                        type:observer.deviceType,
+                        id:observer.uniqueDeviceID,
+                        name:observer.name
+                    });
+                } else {
+                    console.log("\t*Error trying to get intersection on wall" + "\n" +
+                    "\tError Result: " + JSON.stringify(filteredResult));
+                    callback(null,{
+                        type:observer.deviceType,
+                        id:observer.uniqueDeviceID,
+                        name:observer.name
+                    });
+                }
+            });
+        }//end of if observer is in room
+    })
     //return rotatedVector;
     //callback(projectionFromHeight)
 
