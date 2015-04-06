@@ -67,7 +67,7 @@ function roomIntersectionEvent(){
             if(device.location!=undefined && device.location!=null){
                 locator.getIntersectionPointInRoom(device,function(intersectionPoint,observerCB){
                     //console.log(JSON.stringify(intersectionPoint));
-                    if(intersectionPoint!=null){
+                    if(intersectionPoint!=null && intersectionPoint!=undefined){
                         // if there is a legit intersection point broadcast events to all devices
                         Object.keys(deviceList).forEach(function(aDeviceKey){
                             //console.log(intersectionPoint);
@@ -76,8 +76,27 @@ function roomIntersectionEvent(){
                                     observer:observerCB,
                                     intersectionPoint:intersectionPoint[0]
                                 })
-                        })
+                            // find all visualizer and send a event copy to them
+                            for(var clientKey in frontend.clients){
+                                //filter all webclient and sent event
+                                if(frontend.clients.hasOwnProperty(clientKey)&&
+                                    frontend.clients[clientKey].clientType=="webClient"){
+                                    // sending a copy to visualizers
+                                    var intersectionPointForSend = intersectionPoint[0];
+                                    frontend.clients[clientKey].emit("intersectedOnWall",
+                                        {
+                                            observer:observerCB,
+                                            intersectionPoint:intersectionPointForSend
+                                        })
+
+                                }
+                            }
+                        }
+                        )
+                    }else{
+                        console.log("intersectionPoint undefined.");
                     }
+
                     }
                 )
             }// End of if device location is defined

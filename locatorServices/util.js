@@ -245,9 +245,10 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
 
 // get the intersection point from four walls, value passed into callback
 exports.getIntersectedWall = function(observer,callback){
+    // get translation rule
     util.translateOrientationToReference(observer,
         function(orientationToReference){
-            console.log("To reference: "+ orientationToReference);
+            //console.log("To reference: "+ orientationToReference);
         var room = locator.room;
         var observerSight = factory.makeLineUsingOrientation(observer.location, orientationToReference);
         var top = factory.makeLineUsingPoints(locator.room.walls.top.startingPoint,locator.room.walls.top.endingPoint);
@@ -287,43 +288,44 @@ exports.getIntersectedWall = function(observer,callback){
                 // if there are multiple intersection point, due to there are four walls and in line
                 if(intersectedPoints.length>1){
                     // check if the intersection point is in the view of the device orientation
-                    console.log("2 int with observer:" + JSON.stringify(observer));
+                    //console.log("2 int with observer:" + JSON.stringify(observer));
                     async.waterfall([
-                        function(wtCallback){
+                        function(WFCallback){
                             var returnList = [];
                             //there has to be one that is in the FOV of device orientation
                             intersectedPoints.forEach(function(intPoint){
-                                console.log("intPoint:" + JSON.stringify(intPoint));
+                                //console.log("intPoint:" + JSON.stringify(intPoint));
                                 //console.log("observer:" + JSON.stringify(observer));
                                 util.isPointInView(intPoint.intersectedPoint,observer,function(isInView){
-                                    console.log(isInView);
+                                    //console.log(isInView);
                                     if(isInView){
-                                        wtCallback(null,intPoint)
+                                        WFCallback(null,intPoint)
                                     }
                                     //if the point location is inView
                                 })
                             })
                         },
-                        function(intPoint,wtCallback){
+                        function(intPoint,WFCallback){
                             // once we get the intersectionPoint in FOV, we get the Y intersection value from pitch
                             util.getDistanceOfTwoLocation(observer.location,intPoint.intersectedPoint,function(XZProjection){
                                 var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
-                                console.log("Y: "+intersectionY);
+                                //console.log("Y: "+intersectionY);
                                 if(intersectionY>(room.location.Y+room.height)||
                                     intersectionY<(room.location.Y)){
-                                    wtCallback(null,null);
+                                    WFCallback(null,null);
                                 }else{
                                     intPoint.intersectedPoint.Y = intersectionY;
-                                    wtCallback(null,[intPoint])
+                                    WFCallback(null,intPoint)
                                 }
                             })
                         }
 
                     ],function(err,result){
-                        console.log("result: " , JSON.stringify(result))
+                        //console.log("result: " , JSON.stringify(result))
                         callback(result);
                     })
                 }else{
+                    // if there is only one intersection point , we double check if the point is in view
                     util.isPointInView(intersectedPoints[0].intersectedPoint,observer,function(isInView){
                         if(isInView){
                             // if the point is inView we callback with the Y interesection value of data
@@ -351,7 +353,7 @@ exports.getIntersectedWall = function(observer,callback){
 // in 2D
 exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
     util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
-        console.log("vector distance: "+result+"\t direction: "+JSON.stringify(moveDirectionVector));
+        //console.log("vector distance: "+result+"\t direction: "+JSON.stringify(moveDirectionVector));
 
         var ratioToDistance = distance/result;
         callback({

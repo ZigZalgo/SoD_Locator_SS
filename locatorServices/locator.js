@@ -965,26 +965,26 @@ exports.getIntersectionPointInRoom = function(observer,callback){
 
 
             async.parallel([
+                //check floor and ceiling
                 function (wfcallback) {
                     util.translateOrientationToReference(observer,
                         function(orientationToReference){
-                            console.log("Ori to Reference: "+orientationToReference);
+                            //console.log("Ori to Reference: "+orientationToReference);
                     util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
-                        console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
+                        //console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
                         //console.log("direction: "+JSON.stringify(arg));
                             //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
-
                             util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
-                            console.log("MovedLocation: "+JSON.stringify(movedLocation));
+                            //console.log("MovedLocation: "+JSON.stringify(movedLocation));
                             util.inRoom(movedLocation, function (inRoomBool){
-                                console.log("In room ? "+inRoomBool);
+                                //console.log("In room ? "+inRoomBool);
                                 if (inRoomBool == false) {
                                     wfcallback(null,null);
                                 } else {
                                     movedLocation.Y = intersectedY;
                                     wfcallback(null, {
                                         side: hit,
-                                        intersected: movedLocation
+                                        intersectedPoint: movedLocation
                                     });
                                 }
                             })
@@ -993,7 +993,7 @@ exports.getIntersectionPointInRoom = function(observer,callback){
                 })
                 },
                 function (wfcallback) {
-                    // arg1 now equals data
+                    // check if intersected on four walls
                     util.getIntersectedWall(observer, function (result) {
                         wfcallback(null, result)
                     })

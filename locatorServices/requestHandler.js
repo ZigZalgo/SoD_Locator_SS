@@ -369,6 +369,16 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    socket.on("getRoomFromServer",function(request,callback){
+        //console.log("Get Room request received with "+JSON.stringify(request));
+        if(callback!=null){
+            callback(locator.room);
+        }else{
+            console.log("Callback function is null for return locator room information");
+        }
+    })
+
+
     socket.on('getCalibrationFrames', function (request, fn) {
         // error checking see if the sensor is not defined
         if (frontend.clients[request.referenceSensorID] != undefined && frontend.clients[request.uncalibratedSensorID] != undefined) {
