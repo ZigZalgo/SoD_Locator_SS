@@ -962,8 +962,6 @@ exports.getIntersectionPointInRoom = function(observer,callback){
             }
             var initialVector = {X:1,Y:0,Z:0};
             // use water fall to chain the tasks.
-
-
             async.parallel([
                 //check floor and ceiling
                 function (wfcallback) {
@@ -999,11 +997,8 @@ exports.getIntersectionPointInRoom = function(observer,callback){
                     })
                 }
             ], function (err, result) {
-                // result now equals 'done'
                 // filter out the null from parallel result.
                 //console.log("ID: "+observer.uniqueDeviceID+" - "+JSON.stringify(result));
-
-                // filter out the undefined result
                 var filteredResult = result.filter(function (element) {
                     return element != null && element != undefined;
                 })
