@@ -24,98 +24,16 @@
 <link href="/style" rel="stylesheet"  />
     <script src="/overviewJS"></script>
     <script src="/calibrateJS"></script>
-
+    <script src="/UIJS"></script>
 
 
     <script>
-    $(document).ready(function(){
 
-        $("#calibration_flip").click(function(){
-            $("section#canvas").hide();
-            $("section#overview").hide();
-            $('#dataManage').hide();
-            $("#calibration_section").fadeIn("fast");
-            refreshSensors();
-            showNormalStatus('Navigate to Calibration Page!');
-        });
-        $('#overview_flip').on('click',function(){
-            $("#calibration_section").hide();
-            $('#dataManage').hide();
-            $("section#canvas").fadeIn("fast");
-            $("section#overview").fadeIn("fast");
-            showNormalStatus('Navigate to Overview page')
-        });
-        $('#dataManage_flip').on('click',function(){
-            console.log('data flip!');
-            $("section#canvas").hide();
-            $("section#overview").hide();
-            $("#calibration_section").hide();
-            $('#dataManage').fadeIn("fast");
-            showNormalStatus('Navigate to data mangement page');
-        })
-        $('#refreshSensors').on('click',function(){
-            refreshSensors();
-        })
-
-
-        $('#sampleClients_flip').on('mouseover',function(){
-            $('#sampleClients_list').fadeIn('100');
-        });
-        $('#sampleClients_flip').on('mouseleave',function(){
-            $('#sampleClients_list').fadeOut('100');
-        });
-
-
-        // clear the points for sensor one
-        $('#clear_master_points').click(function(){
-            $('input[name=master_point1X]').val('');
-            $('input[name=master_point1Y]').val('');
-            $('input[name=master_point2X]').val('');
-            $('input[name=master_point2Y]').val('');
-            sensorOnePoints.splice(0,sensorOnePoints.length); // clear all the points for sensor one
-            showGreenStatus('Reference Sensor Points Cleared!');
-        });
-
-        // clear the points for sensor one
-        $('#clear_sensorTwo_points').click(function(){
-            $('input[name=sensor_point1X]').val('');
-            $('input[name=sensor_point1Y]').val('');
-            $('input[name=sensor_point2X]').val('');
-            $('input[name=sensor_point2Y]').val('');
-            sensorTwoPoints.splice(0,sensorTwoPoints.length); // clear all the points for sensor one
-            showGreenStatus("Sensor Two Points Cleared!");
-        });
-
-        $('body').on('click','.get_unpaired_people',function(){
-        var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
-            console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ $(this).text());
-            io.emit("pairDeviceWithPerson",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
-                console.log(JSON.stringify(callback));
-            });
-        })
-
-        $('#dumpData_BTN').on('click',function(){
-            console.log('asking: ' + Number($('#dumpDataPersonID').val()) + ' to dump data in range '+ Number($('#dumpDataRange').val()));
-            io.emit('dropData',{ID:Number($('#dumpDataPersonID').val()), range:Number($('#dumpDataRange').val())},function(data){
-                console.log(data);
-                showGreenStatus(data);
-            });
-        })
-
-        $('#calibrate_instruction_flip').on('click',function(){
-            $('#calibration_instruction').slideToggle('200');
-            $(this).toggleClass('button');
-        });
-
-// reading :
-
-        //END reading
-    })
 </script>
 </head>
 <body onload="drawGrid();fileList();">
 <div id="page-wrap">
-    <section id="top">
+    <div id="top">
         <header>Super Cool SOD Visualizer
             </header>
         <nav id="mode_selection" >
@@ -123,6 +41,7 @@
                 <li id="overview_flip">Overview</li>
                 <li id="calibration_flip">Calibration</li>
                 <li id="dataManage_flip">Data Management</li>
+                <li id="settings_flip">Settings</li>
                 <li id="sampleClients_flip">Sample Clients
                 <ul id="sampleClients_list" style="display:none;">
                     <li><a href="/JSDeviceClient" target="_blank">Device Client</a></li>
@@ -238,41 +157,40 @@
             <!--<input id="calibrate" type="button" value="Calibrate!">-->
 
         </section>
-
-    </section>
     <section id="canvas">
         <div id="cnvStationary"></div>
         <canvas id="cnv" width="800" height="800" ></canvas>
         <canvas id="cnvSensors" width="800" height="800"></canvas>
         <canvas id="cnvBG" width="800" height="800"></canvas>
-    </section>
-    <section id="overview">
+        <div id="overview">
 
-        <div id="kineticDiv"></div>
+            <div id="kineticDiv"></div>
 
-        <form>
-            <!--<input type="text" id="message" /> <!--text form to send data to the server-->
-            <div id="contentHeader" >Overview</div> <!--This is where the data from the server is added-->
+            <form>
+                <!--<input type="text" id="message" /> <!--text form to send data to the server-->
+                <div id="contentHeader" >Overview</div> <!--This is where the data from the server is added-->
 
-            <fieldset id="clients">
-                <legend> Clients </legend>
-            </fieldset>  <!--This is where the data from the server is added-->
-            <fieldset id="sensors" >
-                <legend> Sensors </legend>
-            </fieldset> <!--This is where the data from the server is added-->
-            <fieldset id="people">
-                <legend> People </legend>
-            </fieldset> <!--This is where the data from the server is added-->
-            <fieldset id="devices">
-                <legend> Devices </legend>
-            </fieldset> <!--This is where the data from the server is added-->
+                <fieldset id="clients">
+                    <legend> Clients </legend>
+                </fieldset>  <!--This is where the data from the server is added-->
+                <fieldset id="sensors" >
+                    <legend> Sensors </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+                <fieldset id="people">
+                    <legend> People </legend>
+                </fieldset> <!--This is where the data from the server is added-->
+                <fieldset id="devices">
+                    <legend> Devices </legend>
+                </fieldset> <!--This is where the data from the server is added-->
 
-            <fieldset id="dataPoints">
-                <legend> dataPoints </legend>
-            </fieldset> <!--This is where the data from the server is added-->
+                <fieldset id="dataPoints">
+                    <legend> dataPoints </legend>
+                </fieldset> <!--This is where the data from the server is added-->
 
 
-        </form>
+            </form>
+        </div>
+
     </section>
     <section id="dataManage">
         <div id="dataManage_wrap">
@@ -280,16 +198,21 @@
             <select id="filesList" size="15"></select>
             </br>
             <div>
-                <section id="upload">
+                <div id="upload">
                     <form method="post" enctype="multipart/form-data" action="/upload">
                         <input type="file" name="dataFile" style="color: whitesmoke;">
                         <input type="submit">
                     </form>
-                </section>
+                </div>
             </div>
         </div> <!-- End of dataManage_wrap -->
     </section>
+    <section id="setting">
+        <h2>Settings</h2>
+        <div class="instruction_menu" id="setting_menu">
 
+        </div>
+    </section>
 
     <div class="status_wrap">
         <h1>status:</h1>

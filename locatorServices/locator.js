@@ -25,6 +25,7 @@ exports.iBeaconService = require('./Sensors/iBeacon');
 var room = new factory.Room({X:0,Y:0,Z:0},6, 8, 4);
 exports.room = room;
 
+
 // TODO: test!
 /*exports.start = function(){
     // Do initialization here, if any

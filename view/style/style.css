@@ -144,7 +144,7 @@ nav#mode_selection li{
 
 
 /* Overview section */
-section#overview{
+div#overview{
     position: relative;
     left: 827px;
     top: -74px;
@@ -157,7 +157,7 @@ section#overview{
 #contentHeader{
     height: 30px; z-index: 1;
 }
-section#overview fieldset{
+div#overview fieldset{
     padding: 0.2em 0.5em;
     margin: 0.1em;
     border:1px solid #292929;;
@@ -168,14 +168,14 @@ section#overview fieldset{
     border-radius: 9px;
     width:535px;
 }
-section#overview td{
+div#overview td{
     text-align:center;
 }
-section#overview legend{
+div#overview legend{
     font-size:1.5em;
     font-weight:bold;
 }
-section#overview #contentHeader{
+div#overview #contentHeader{
     text-align:center;
     margin-top: 6px;
     padding-top:5px;
@@ -184,17 +184,17 @@ section#overview #contentHeader{
     font-size:2em;
     color:#292929
 }
-section#overview table{
+div#overview table{
     width:100%;
 }
-section#overview table td{
+div#overview table td{
     max-width: 50%;
     width:50%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-section#overview table th{
+div#overview table th{
     font-family:oblique,DinRound, Sans-Serif;
     max-width: 150px;
     font-size:1.2em;
@@ -362,6 +362,41 @@ section#calibration_section .calibration_wrap{
     width:100%;
     margin:10px 10px;
 }
+
+section#setting{
+    margin-bottom: 50px;
+}
+section#setting h2{
+    color: rgb(237, 237, 237);
+    font-family: "Agency FB","futura-pt",Century Gothic,Futura,sans-serif;
+    font-size: 2.0em;
+    font-weight: bold;
+    /* text-align: center; */
+    margin-bottom: 30px;
+    margin-left: 50px;
+    margin-top: 20px;
+}
+div#setting_menu{
+    margin-bottom:50px;
+    min-height:600px;
+}
+section#setting fieldset{
+    color:white;
+    width:60%;
+    margin:auto;
+    margin-bottom: 20px;
+}
+section#setting legend{
+    color:black;
+    background:rgb(237, 237, 237);
+    font-size:1.2em;
+    line-height:1.5em;
+    margin-bottom: 10px;
+    min-width:200px;
+    border-radius:3px;
+    font-weight:bold;
+}
+
 
 .canvas_wrap{
     color:#292929;
@@ -551,7 +586,7 @@ div#calibration_flip{
     height: auto;
     background: #1e1e1e;
     position: absolute;
-    top: 278px;
+    top: 500px;
     left: -224px;
     width: 191px;
     /* z-index: 0; */
