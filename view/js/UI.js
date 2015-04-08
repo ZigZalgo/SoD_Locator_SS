@@ -3,9 +3,12 @@
  */
 $(document).ready(function(){
     var sections = document.getElementsByTagName("section");
+    var setting_changes = {
+        pulse:{},
+        room:{}
+    };
     //console.log(sections);
     function showSection(id){
-        console.log(id);
         for(var key in sections) {
             //console.log(isNaN(Number(key)))
             if(!isNaN(Number(key))) {
@@ -33,9 +36,20 @@ $(document).ready(function(){
     $('#dataManage_flip').on('click',function(){
         showSection("dataManage");
         showNormalStatus('Navigate to data mangement page');
-    })
+    });
+    $('#setting_menu').on('change', '.onoffswitch-checkbox', function() {
+        //do something
+        console.log($(this).is(":checked"));
+        if($(this).is(":checked")) {
+            setting_changes['pulse'][this.id] = true;
+            console.log(setting_changes)
+        }else{
+            setting_changes['pulse'][this.id] = false;
+            console.log(setting_changes);
+        }
+    });
     $('#settings_flip').on('click',function(){
-        console.log('settings flip!');
+        //console.log('settings flip!');
         $.get("setting",function(settingField){
             //console.log(settingField);
             $("div#setting_menu").empty();
@@ -44,20 +58,54 @@ $(document).ready(function(){
                 var makeFieldset = "<fieldset>" + "<legend>"+key.toUpperCase()+"</legend>";
                 // use append use class = "calibration_step"
                 var propertiesWithValueList = settingField[key];
-                for(var property in propertiesWithValueList){
-                    makeFieldset += property+" -- "+JSON.stringify(propertiesWithValueList[property]) + "<br/>";
+                //console.log(propertiesWithValueList);
+                //var valueList = $.parseJSON(propertiesWithValueList);
+                function renderProperty(settingType,property,value,htmlString,callback){
+                    console.log("type: "+ key);
+                    var html = "";
+                    switch(settingType){
+                        case "room":
+                            if(property=="location"){
+                                html+= '<div class="properties"><h3>Location:</h3> X:' +
+                                '<input type="number" style="max-width: 40px;"name="locationX" max="9" value="'+value.X+'" > ';
+                                html+= 'Y:<input style="max-width: 40px;" type="number" name="locationY" max="9" value="'+value.Y+'" > ';
+                                html+= 'Z:<input style="max-width: 40px;" type="number" name="locationZ" max="9" value="'+value.Z+'" > </div>';
 
+                                return html;
+                            }else if(property== "height"){
+                                return html;
+                            }else{
+                                return html;
+                            }
+                            break;
+                        case "pulse":
+                            html='<div class="properties"><h3>'+property+'</h3><div class="onoffswitch"> ' +
+                            '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="'+property+'" checked="checked"> ' +
+                            '<label class="onoffswitch-label" for="'+property+'"> ' +
+                            '<span class="onoffswitch-inner"></span> ' +
+                            '<span class="onoffswitch-switch"></span> ' +
+                            '</label> ' +
+                            '</div></div><br/>';
+                            return html;
+                            break;
+                        default:
+                            console.log("Unknown Type "+ typeof(value));
+
+                    }
+
+                    //return html
+                }
+                for(var property in propertiesWithValueList){
+                    //makeFieldset += property+" -- "+JSON.stringify(propertiesWithValueList[property]) + "<br/>";
+                    makeFieldset += renderProperty(key,property,propertiesWithValueList[property]);
                 }
 
                 makeFieldset += "</fieldset>";
-                //console.log(makeFieldset);
+                console.log(makeFieldset);
                 $('div#setting_menu').append(makeFieldset);
             }
-
             showSection("setting")
         });
-
-
     })
 
     $('#refreshSensors').on('click',function(){
