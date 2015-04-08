@@ -8,8 +8,11 @@ var locator = require('./locator');
 var util = require('./util');
 var frontend = require('./../frontend');
 var async = require('async');
-//var events = require("events");
 var pulse = require('./pulse');
+
+
+// Location variable
+var heartbeat = null;
 exports.initPulseInterval = 500;
 exports.eventsSwitch = {
     inRangeEvents:true,
@@ -17,6 +20,7 @@ exports.eventsSwitch = {
     sendIntersectionPoints:true,
     roomIntersectionEvents:true
 };
+
 exports.intervals = {};
 /* Event handler */
 // exposing the heartbeat
@@ -26,7 +30,7 @@ exports.start = function(){
     }
     console.log(' * Starting heartbeat on '+pulse.initPulseInterval + ' ms interval With pulse switch: ' + JSON.stringify(pulse.eventsSwitch));
         try{
-            setInterval(function(){
+            heartbeat = setInterval(function(){
                 //console.log('Event Interval HeartBeat.');
 
                 cleaner();
@@ -43,14 +47,18 @@ exports.start = function(){
                     inViewEvent();
                 }
 
+                if(pulse.eventsSwitch.sendIntersectionPoints==true){
+                    sendIntersectionPoints();
+                }
+
             },pulse.initPulseInterval);
-            if(pulse.eventsSwitch.sendIntersectionPoints == true){
+            /*if(pulse.eventsSwitch.sendIntersectionPoints == true){
                 var sendIntersectionPointsInterval = setInterval(function(){
                         sendIntersectionPoints();
                     },pulse.initPulseInterval
                 );
                 pulse.intervals.sendIntersectionPoints = sendIntersectionPointsInterval;
-            }
+            }*/
 
         }catch(e){
             console.log('unable to start heartbeat due to: '+ e);
@@ -58,7 +66,6 @@ exports.start = function(){
 };
 
 function roomIntersectionEvent(){
-    //console.log("")
     //get all the devices that has locations
     var deviceList = locator.devices;
     for(var deviceKey in deviceList){
@@ -111,7 +118,6 @@ function roomIntersectionEvent(){
 function sendIntersectionPoints(){
     for(var deviceKey in locator.devices){
         if(locator.devices.hasOwnProperty(deviceKey)){
-
             var socketID = deviceKey;
                 locator.calcIntersectionPointsForDevices(socketID, locator.getDevicesInFront(deviceKey, locator.devices), function (intersectionList) {
                     //console.log('calling back? '+ JSON.stringify(intersectionPoint));
@@ -324,4 +330,29 @@ function inRangeEvent(){
     }
 }
 
+exports.refreshHeartbeat = function(property,value,callback){
+    clearInterval(heartbeat);
+    console.log(' * Restarting heartbeat on '+pulse.initPulseInterval + ' ms interval With pulse switch: ' + JSON.stringify(pulse.eventsSwitch));
+    heartbeat = setInterval(function(){
+        //console.log('Event Interval HeartBeat.');
 
+        cleaner();
+
+        if(pulse.eventsSwitch.inRangeEvents == true){
+            inRangeEvent();
+        }
+
+        if(pulse.eventsSwitch.roomIntersectionEvents == true){
+            roomIntersectionEvent();
+        }
+
+        if(pulse.eventsSwitch.inViewEvents == true){
+            inViewEvent();
+        }
+
+        if(pulse.eventsSwitch.sendIntersectionPoints==true){
+            sendIntersectionPoints();
+        }
+
+    },pulse.initPulseInterval);
+}

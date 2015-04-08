@@ -5,7 +5,7 @@ var util = require('./util');
 var frontend = require('./../frontend');
 var Q = require('q');
 var async = require("async");
-
+var pulse = require("./pulse");
 //var events = require("events");
 
 
@@ -1399,5 +1399,25 @@ exports.emitEventToPairedDevice = function(person,eventName,payload){
         }
     }else{
         console.log("Person is not paired. Or the ownedDeviceID is undefined: " + JSON.stringify(person));
+    }
+}
+
+//Handle setting changes on server
+exports.changeSetting = function(type,property,value,callback){
+    console.log('\t'+type + " - " +property + ' -> ' + value );
+    switch(type){
+        case "pulse":
+            if(property=="inRangeEvents"||property=="inViewEvents"
+                ||property=="sendIntersectionPoints"|| property=="roomIntersectionEvents"){
+                pulse.eventsSwitch[property]=value;
+                callback();
+            }
+            break;
+        case "room":
+            callback();
+            break;
+        default:
+            console.log(" Unknow settting change request: "+type);
+            callback("invalid setting type: "+type);
     }
 }

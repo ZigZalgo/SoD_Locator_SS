@@ -402,6 +402,13 @@ section#setting legend{
     padding: 2px 5px;
 }
 
+section#setting div#settingChangesMade{
+    margin:10px auto;
+    color:White;
+    min-height:15px;
+    /*max-width:600px;*/
+    /*word-wrap: break-word;*/
+}
 
 .canvas_wrap{
     color:#292929;
@@ -835,6 +842,47 @@ section#setting #submitChanges{
     min-width:200px;
     margin:auto;
 }
+
+section#setting .blinking{
+    color:#3370d4;
+    -webkit-animation-name: blinker;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-timing-function: ease-out;
+    -webkit-animation-iteration-count: 1;
+
+    -moz-animation-name: blinker;
+    -moz-animation-duration: 1s;
+    -moz-animation-timing-function: ease-out;
+    -moz-animation-iteration-count: 1;
+
+    animation-name: blinker;
+    animation-duration: 1s;
+    animation-timing-function: ease-out;
+    animation-iteration-count: 1;
+}
+.blueIt{
+    color:#3370d4;
+}
+
+@-moz-keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+@-webkit-keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+@keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+/*  Code is generated from: https://proto.io/freebies/onoff/ */
 .onoffswitch {
     position: relative; max-width: 90px;margin:auto;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;

@@ -2,7 +2,9 @@ var locator = require('./locator');
 var factory = require('./factory');
 var frontend = require('./../frontend');
 var util = require('./util');
-
+var pulse = require("./pulse");
+var async =
+    require("async");
 // TODO: test!
 /*exports.start = function () {
     locator.start();
@@ -156,6 +158,37 @@ exports.handleRequest = function (socket) {
         }
 
     });
+
+    socket.on('updateServerSettings',function(request,response){
+        console.log("Setting change request" + JSON.stringify(request));
+        if(request.hasOwnProperty("room")||request.hasOwnProperty("pulse")){
+            for(var type in request){
+                if(Object.keys(request[type]).length>0) {
+                    console.log(type);
+                    async.each(Object.keys(request[type]), function (aProperty, itrCallbackSetting) {
+                        console.log(aProperty);
+                        locator.changeSetting(type, aProperty, request[type][aProperty],itrCallbackSetting)
+
+                    }, function (err) {
+                        console.log("all done" + err);
+                        if(type=='pulse'){
+                            pulse.refreshHeartbeat();
+                        }
+                        response("DONE");
+                    })
+                }
+
+            }
+//  pulse.refreshHeartbeat(property,value,callback);
+        }else{
+            console.log("request doesn't have correct property");
+        }
+    });
+
+    // END of update envets
+
+
+    // Client requests
     socket.on('getPeopleFromServer', function (request, fn) {
         if (fn != undefined) {
             fn((locator.persons));

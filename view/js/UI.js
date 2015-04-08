@@ -24,6 +24,9 @@ $(document).ready(function(){
             }
         }
     }
+    function updateChangesOnLayout(){
+        $('div#settingChangesMade').text("Modified: "+JSON.stringify(setting_changes));
+    }
     $("#calibration_flip").click(function(){
         showSection('calibration_section')
         refreshSensors();
@@ -42,12 +45,28 @@ $(document).ready(function(){
         console.log($(this).is(":checked"));
         if($(this).is(":checked")) {
             setting_changes['pulse'][this.id] = true;
-            console.log(setting_changes)
+            //$(this.parentNode.parentNode).addClass('blinking blueIt')
+            updateChangesOnLayout();
         }else{
             setting_changes['pulse'][this.id] = false;
-            console.log(setting_changes);
+            //console.log(setting_changes);
+            /*if($(this.parentNode.parentNode).hasClass('blueIt'))
+            {
+                $(this.parentNode.parentNode).removeClass('blueIt');
+            }*/
+            updateChangesOnLayout();
         }
     });
+    $('#setting_menu').on('change', 'input[type=number]', function() {
+        //do something
+        console.log($(this).attr('name')); // locationX/Y/Z
+            });
+    $('div#submitChanges').on('click',function(e){
+        io.emit('updateServerSettings',setting_changes,function(response){
+            console.log(response);
+        });
+
+    })
     $('#settings_flip').on('click',function(){
         //console.log('settings flip!');
         $.get("setting",function(settingField){
@@ -61,16 +80,16 @@ $(document).ready(function(){
                 //console.log(propertiesWithValueList);
                 //var valueList = $.parseJSON(propertiesWithValueList);
                 function renderProperty(settingType,property,value,htmlString,callback){
-                    console.log("type: "+ key);
+                    //console.log("type: "+ key);
                     var html = "";
                     switch(settingType){
                         case "room":
                             if(property=="location"){
-                                html+= '<div class="properties"><h3>Location:</h3> X:' +
+                            /*    html+= '<div class="properties"><h3>Location:</h3> X:' +
                                 '<input type="number" style="max-width: 40px;"name="locationX" max="9" value="'+value.X+'" > ';
                                 html+= 'Y:<input style="max-width: 40px;" type="number" name="locationY" max="9" value="'+value.Y+'" > ';
                                 html+= 'Z:<input style="max-width: 40px;" type="number" name="locationZ" max="9" value="'+value.Z+'" > </div>';
-
+                            */
                                 return html;
                             }else if(property== "height"){
                                 return html;
@@ -101,7 +120,7 @@ $(document).ready(function(){
                 }
 
                 makeFieldset += "</fieldset>";
-                console.log(makeFieldset);
+                //console.log(makeFieldset);
                 $('div#setting_menu').append(makeFieldset);
             }
             showSection("setting")
