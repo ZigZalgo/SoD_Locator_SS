@@ -831,7 +831,7 @@ function refreshStationaryLayer() {
 
 function getDeviceInfoByID(deviceID,ctx,xInMeters,zInMeters,personLocation){
     var deviceNameString;
-    console.log("device ID:"+deviceID);
+    //console.log("device ID:"+deviceID);
     io.emit('getDevicesWithSelection',{selection:['all']},function(data){
         if(data.hasOwnProperty(deviceID)){
             //console.log('got device: '+data[Object.keys(data)].name.length);
@@ -846,22 +846,23 @@ function getDeviceInfoByID(deviceID,ctx,xInMeters,zInMeters,personLocation){
             ctx.font = "12px Arial";
             ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
 
-            console.log("Paired Device Observer: "+JSON.stringify(data[deviceID].observer));
-            switch(data[deviceID].observer.observerType){
-                case "radial":
-                    /*console.log("radial device person location:"+JSON.stringify(personLocation));
-                    ctx.beginPath();
-                    ctx.arc(shiftXToGridOrigin(personLocation.X*pixelsPerMeter),shiftYToGridOrigin(personLocation.Y*pixelsPerMeter), data[deviceID].observer.observeRange*pixelsPerMeter, 0, 2 * Math.PI, false);
-                    ctx.strokeStyle = '#003300';
-                    ctx.stroke();
-                    ctx.lineWidth = 1;*/
-                    break;
-                case "rectangular":
-                    break;
-                default:
-                    console.log("Unknown Observer type");
+            //console.log("Paired Device Observer: "+JSON.stringify(data[deviceID].observer));
+            if(data[deviceID].observer!=undefined) {
+                switch (data[deviceID].observer.observerType) {
+                    case "radial":
+                        /*console.log("radial device person location:"+JSON.stringify(personLocation));
+                         ctx.beginPath();
+                         ctx.arc(shiftXToGridOrigin(personLocation.X*pixelsPerMeter),shiftYToGridOrigin(personLocation.Y*pixelsPerMeter), data[deviceID].observer.observeRange*pixelsPerMeter, 0, 2 * Math.PI, false);
+                         ctx.strokeStyle = '#003300';
+                         ctx.stroke();
+                         ctx.lineWidth = 1;*/
+                        break;
+                    case "rectangular":
+                        break;
+                    default:
+                        console.log("Unknown Observer type");
+                }
             }
-
         }
     });
 }
@@ -1164,8 +1165,11 @@ function highlightIntersectionPoint(intersectionInfo,callback) {
         stationaryLayer.draw();
 
     }else{
+        //console.log(foundIntPointByID[0].id());
+        console.log(intersectionInfo.observer.id);
         // if point belong to this ID found, update the point
-        if(foundIntPointByID[0].id==intersectionInfo.observer.ID) {
+        if(foundIntPointByID[0].id()==intersectionInfo.observer.id) {
+            //console.log("happiness found?");
             foundIntPointByID[0].setPosition({
                 x: intersectedPoint.X * pixelsPerMeter,
                 y: intersectedPoint.Z * pixelsPerMeter
@@ -1178,19 +1182,19 @@ function highlightIntersectionPoint(intersectionInfo,callback) {
     if(foundRoomGroup!=null&&foundRoomGroup!=undefined) {
         switch (intersectionInfo.intersectionPoint.side) {
             case "top":
-                foundRoomGroup.children[0].stroke("yellow");
+                //foundRoomGroup.children[0].stroke("yellow");
                 stationaryLayer.draw();
                 break;
             case "left":
-                foundRoomGroup.children[3].stroke("yellow");
+                //foundRoomGroup.children[3].stroke("yellow");
                 stationaryLayer.draw();
                 break;
             case "right":
-                foundRoomGroup.children[1].stroke("yellow");
+                //foundRoomGroup.children[1].stroke("yellow");
                 stationaryLayer.draw();
                 break;
             case "bottom":
-                foundRoomGroup.children[2].stroke("yellow");
+                //foundRoomGroup.children[2].stroke("yellow");
                 stationaryLayer.draw();
                 break;
             case "ceiling":

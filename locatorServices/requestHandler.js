@@ -113,7 +113,7 @@ exports.handleRequest = function (socket) {
     //START LOCATOR SERVICES/////////////////////////////////////////////////////////////////////////////////////////
     socket.on('updateOrientation', function (request) {
         //not checking for fn(callback), since adding a callback here would be costly
-        console.log(request);
+        //console.log(request);
         if(typeof(request.orientation)=="number"){
             var orientationForUpdate = {yaw:request.orientation,pitch:0}
             locator.updateDeviceOrientation(orientationForUpdate, socket);
@@ -176,7 +176,7 @@ exports.handleRequest = function (socket) {
                         })
 
                     }, function (err) {
-                        console.log("all done" + err);
+                        //console.log("all done" + err);
                         if(type=='pulse'){
                             pulse.refreshHeartbeat();
                         }

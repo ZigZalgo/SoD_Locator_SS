@@ -12,7 +12,7 @@ var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
 exports.RADIANS_TO_DEGREES = RADIANS_TO_DEGREES;
 exports.DEGREES_TO_RADIANS = DEGREES_TO_RADIANS;
-var tolerance = 0.05;
+var tolerance = 0.005;
 
 
 /*
@@ -296,6 +296,7 @@ exports.getIntersectedWall = function(observer,callback){
                             intersectedPoints.forEach(function(intPoint){
                                 //console.log("intPoint:" + JSON.stringify(intPoint));
                                 //console.log("observer:" + JSON.stringify(observer));
+
                                 util.isPointInView(intPoint.intersectedPoint,observer,function(isInView){
                                     //console.log(isInView);
                                     if(isInView){
@@ -306,22 +307,28 @@ exports.getIntersectedWall = function(observer,callback){
                             })
                         },
                         function(intPoint,WFCallback){
+                            console.log("intpoint: "+JSON.stringify(intPoint));
                             // once we get the intersectionPoint in FOV, we get the Y intersection value from pitch
-                            util.getDistanceOfTwoLocation(observer.location,intPoint.intersectedPoint,function(XZProjection){
-                                var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
-                                //console.log("Y: "+intersectionY);
-                                if(intersectionY>(room.location.Y+room.height)||
-                                    intersectionY<(room.location.Y)){
-                                    WFCallback(null,null);
-                                }else{
-                                    intPoint.intersectedPoint.Y = intersectionY;
-                                    WFCallback(null,intPoint)
-                                }
-                            })
+                            if(intPoint!=null) {
+                                util.getDistanceOfTwoLocation(observer.location, intPoint.intersectedPoint, function (XZProjection) {
+                                    var intersectionY = Math.tan(observer.orientation.pitch * DEGREES_TO_RADIANS) * XZProjection + observer.location.Y;
+                                    //console.log("Y: "+intersectionY);
+                                    if (intersectionY > (room.location.Y + room.height) ||
+                                        intersectionY < (room.location.Y)) {
+                                        WFCallback(null, null);
+                                    } else {
+                                        intPoint.intersectedPoint.Y = intersectionY;
+                                        WFCallback(null, intPoint)
+                                    }
+                                })
+                            }else {
+                                WFCallback(null,null);
+                            }
                         }
 
                     ],function(err,result){
                         //console.log("result: " , JSON.stringify(result))
+                        //console.log("callback1");
                         callback(result);
                     })
                 }else{
@@ -333,13 +340,16 @@ exports.getIntersectedWall = function(observer,callback){
                                 var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
                                 if(intersectionY>(room.location.Y+room.height)||
                                     intersectionY<(room.location.Y)){
+                                    //console.log("callback");
                                     callback(null);
                                 }else{
                                     intersectedPoints[0].intersectedPoint.Y = intersectionY;
+                                    //console.log("callback");
                                     callback(intersectedPoints)
                                 }
                             })
                         }else{
+                            //console.log("callback");
                             callback(null);
                         }
                     })
@@ -848,16 +858,16 @@ exports.getNearest = function(subject,objectList,functionCallback){
     })
 }
 
-exports.getDistanceOfTwoLocation = function(location1,location2,callback){
+exports.getDistanceOfTwoLocation = function(location1,location2,fn){
     if(location1.X!=undefined && location2.Z!= undefined) {
-        callback(Math.sqrt(
+        fn(Math.sqrt(
                 (location1.X - location2.X) * (location1.X - location2.X)
                 +
                 (location1.Z - location2.Z) * (location1.Z - location2.Z))
         );
     }else{
         console.log("   *Distance is not defined");
-        callback(null);
+        fn(null);
     }
 }
 

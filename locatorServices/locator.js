@@ -950,51 +950,56 @@ exports.getIntersectionPointInRoom = function(observer,callback){
     var pitchRad = observer.orientation.pitch * util.DEGREES_TO_RADIANS;
     util.isInRect(observer.location,room.location,room.length,room.depth,function(observerInRoom){
         if(observerInRoom) {
-            //console.log('on device: '+observer.uniqueDeviceID);
-            if (observer.orientation.pitch >= 0) { // if the observer is looking up
+            //console.log('orientation: '+JSON.stringify(observer.orientation));
+            if (observer.orientation.pitch > 0) { // if the observer is looking up
                 var hit = "ceiling"
                 var projectionFromHeight = (room.location.Y + room.height - observerHeight) / Math.tan(pitchRad);   //get the projection from the Y location of the observer
                 var intersectedY = room.location.Y + room.height;
-            } else {  // if the observer is looking down
-                // TODO: Assume orientation.yaw is 0, what the vector looks like
+            } else if(observer.orientation.pitch < 0){  // if the observer is looking down
                 var projectionFromHeight = observerHeight / Math.tan(pitchRad);   //get the projection from the Y location of the observer
                 var intersectedY = room.location.Y;
                 var hit = "floor"
+            }else {
+                var hit = "neither";
             }
             var initialVector = {X:1,Y:0,Z:0};
             // use water fall to chain the tasks.
             async.parallel([
                 //check floor and ceiling
-                function (wfcallback) {
-                    util.translateOrientationToReference(observer,
-                        function(orientationToReference){
-                            //console.log("Ori to Reference: "+orientationToReference);
-                    util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
-                        //console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
-                        //console.log("direction: "+JSON.stringify(arg));
-                            //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
-                            util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
-                            //console.log("MovedLocation: "+JSON.stringify(movedLocation));
-                            util.inRoom(movedLocation, function (inRoomBool){
-                                //console.log("In room ? "+inRoomBool);
-                                if (inRoomBool == false) {
-                                    wfcallback(null,null);
-                                } else {
-                                    movedLocation.Y = intersectedY;
-                                    wfcallback(null, {
-                                        side: hit,
-                                        intersectedPoint: movedLocation
-                                    });
-                                }
+                function (plcallback) {
+                    if(hit != 'neither') {
+                        util.translateOrientationToReference(observer,
+                            function (orientationToReference) {
+                                //console.log("Ori to Reference: "+orientationToReference);
+                                util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
+                                    //console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
+                                    //console.log("direction: "+JSON.stringify(arg));
+                                    //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
+                                    util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
+                                        console.log("MovedLocation: " + JSON.stringify(movedLocation));
+                                        util.inRoom(movedLocation, function (inRoomBool) {
+                                            //console.log("In room ? "+inRoomBool);
+                                            if (inRoomBool == false) {
+                                                plcallback(null, null);
+                                            } else {
+                                                movedLocation.Y = intersectedY;
+                                                plcallback(null, {
+                                                    side: hit,
+                                                    intersectedPoint: movedLocation
+                                                });
+                                            }
+                                        })
+                                    })
+                                })
                             })
-                        })
-                    })
-                })
+                    }else{
+                        plcallback(null,null);
+                    }
                 },
-                function (wfcallback) {
+                function (plcallback) {
                     // check if intersected on four walls
                     util.getIntersectedWall(observer, function (result) {
-                        wfcallback(null, result)
+                        plcallback(null, result)
                     })
                 }
             ], function (err, result) {
