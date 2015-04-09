@@ -167,14 +167,20 @@ exports.handleRequest = function (socket) {
                     console.log(type);
                     async.each(Object.keys(request[type]), function (aProperty, itrCallbackSetting) {
                         console.log(aProperty);
-                        locator.changeSetting(type, aProperty, request[type][aProperty],itrCallbackSetting)
+                        locator.changeSetting(type, aProperty, request[type][aProperty],function(data){
+                            if(data){
+                                itrCallbackSetting()
+                            }else{
+                                response(false);
+                            }
+                        })
 
                     }, function (err) {
                         console.log("all done" + err);
                         if(type=='pulse'){
                             pulse.refreshHeartbeat();
                         }
-                        response("DONE");
+                        response(true);
                     })
                 }
 

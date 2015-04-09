@@ -1410,14 +1410,16 @@ exports.changeSetting = function(type,property,value,callback){
             if(property=="inRangeEvents"||property=="inViewEvents"
                 ||property=="sendIntersectionPoints"|| property=="roomIntersectionEvents"){
                 pulse.eventsSwitch[property]=value;
-                callback();
+                callback(true);
+            }else{
+                callback(false)
             }
             break;
         case "room":
-            callback();
+            callback(false);
             break;
         default:
             console.log(" Unknow settting change request: "+type);
-            callback("invalid setting type: "+type);
+            callback(false);
     }
 }

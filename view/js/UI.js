@@ -64,6 +64,11 @@ $(document).ready(function(){
     $('div#submitChanges').on('click',function(e){
         io.emit('updateServerSettings',setting_changes,function(response){
             console.log(response);
+            if(response==true){
+                showGreenStatus("Setting changes has been applied.");
+            }else{
+                showRedStatus("Failed change settings")
+            }
         });
 
     })
