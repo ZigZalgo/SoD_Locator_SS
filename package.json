@@ -6,16 +6,17 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "jade": "*",
+    "async": "*",
     "chai": "*",
-    "mocha": "*",
-    "underscore": "*",
-    "socket.io": "0.9",
-    "zeparser": "0.0.7",
+    "express": "^4.12.3",
     "express.io": "*",
-    "walk": "*",
+    "jade": "*",
     "mime": "*",
-    "q":"*",
-    "async":"*"
+    "mocha": "*",
+    "q": "*",
+    "socket.io": "^0.9.17",
+    "underscore": "*",
+    "walk": "*",
+    "zeparser": "0.0.7"
   }
 }
