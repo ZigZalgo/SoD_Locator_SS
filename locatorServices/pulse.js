@@ -66,6 +66,7 @@ exports.start = function(){
 };
 
 function roomIntersectionEvent(){
+    console.log('YO');
     //get all the devices that has locations
     var deviceList = locator.devices;
     for(var deviceKey in deviceList){
@@ -333,6 +334,7 @@ function inRangeEvent(){
 exports.refreshHeartbeat = function(property,value,callback){
     clearInterval(heartbeat);
     console.log(' * Restarting heartbeat on '+pulse.initPulseInterval + ' ms interval With pulse switch: ' + JSON.stringify(pulse.eventsSwitch));
+    console.log(pulse.eventsSwitch);
     heartbeat = setInterval(function(){
         //console.log('Event Interval HeartBeat.');
 

@@ -98,15 +98,30 @@ $(document).ready(function(){
                             }
                             break;
                         case "pulse":
-                            html='<div class="properties"><h3>'+property+'</h3><div class="onoffswitch"> ' +
-                            '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="'+property+'" checked="checked"> ' +
-                            '<label class="onoffswitch-label" for="'+property+'"> ' +
-                            '<span class="onoffswitch-inner"></span> ' +
-                            '<span class="onoffswitch-switch"></span> ' +
-                            '</label> ' +
-                            '</div></div><br/>';
-                            return html;
-                            break;
+                            if(value == true) {
+                               // console.log(property +" - " + value);
+                                html = '<div class="properties"><h3>' + property + '</h3><div class="onoffswitch"> ' +
+                                '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + property + '" checked="checked"> ' +
+                                '<label class="onoffswitch-label" for="' + property + '"> ' +
+                                '<span class="onoffswitch-inner"></span> ' +
+                                '<span class="onoffswitch-switch"></span> ' +
+                                '</label> ' +
+                                '</div></div><br/>';
+                                return html;
+                                break;
+                            }else{
+                               // console.log(property +" - " + value);
+                                html = '<div class="properties"><h3>' + property + '</h3><div class="onoffswitch"> ' +
+                                '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + property + '" unchecked> ' +
+                                '<label class="onoffswitch-label" for="' + property + '"> ' +
+                                '<span class="onoffswitch-inner"></span> ' +
+                                '<span class="onoffswitch-switch"></span> ' +
+                                '</label> ' +
+                                '</div></div><br/>';
+                                return html;
+                                break;
+                            }
+
                         default:
                             console.log("Unknown Type "+ typeof(value));
 
