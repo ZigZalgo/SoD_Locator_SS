@@ -180,9 +180,7 @@ SODDevice.prototype = {
     },
     pairPersonWithID : function(personID){
         console.log('pairing with person' + personID);
-        this.socket.emit('pairDeviceWithPerson',{deviceSocketID:this.socket.id,uniquePersonID:personID},function(data){
-            console.log(data);
-        });
+        this.socket.emit('pairDeviceWithPerson',{deviceSocketID:this.socket.id,uniquePersonID:personID});
     },
     sendEventToDevices : function(eventName,payload,deviceList){
         console.log('sending string to devices: ' + eventName+" - "+payload+" - "+deviceList);
