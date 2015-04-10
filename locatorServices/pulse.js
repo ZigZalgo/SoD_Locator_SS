@@ -124,7 +124,7 @@ function inRangeEvent(){
     for(var personKey in locator.persons){
         if(locator.persons.hasOwnProperty(personKey)){
             for(var deviceKey in locator.devices){
-                if(locator.devices.hasOwnProperty(deviceKey) && locator.devices.observer!=undefined){
+                if(locator.devices.hasOwnProperty(deviceKey) && locator.devices[deviceKey].observer!=undefined){
                     // if a person in in range of any device fire out broadcast event
                     //try{
                         // if the person is not in range of this device yet
