@@ -226,7 +226,10 @@ function Device(socket, opts){
         this.observer = null;
         this.inRangeOf = {};
         this.inViewList = {};
-        this.subscribeToEvents ={receiveIntersectionPoints:true,receiveInViewList:true};
+        this.subscribeToEvents ={
+            receiveIntersectionPoints:true,
+            receiveInViewList:true
+        };
     }
     catch(err){
     }

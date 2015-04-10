@@ -277,6 +277,7 @@ exports.getIntersectedWall = function(observer,callback){
                 })
             }
         ],function(err,results){
+            //console.log("*****");
             if(callback!=undefined){
                 var intersectedPoints=[];
                 results.forEach(function(result){
@@ -307,7 +308,7 @@ exports.getIntersectedWall = function(observer,callback){
                             })
                         },
                         function(intPoint,WFCallback){
-                            console.log("intpoint: "+JSON.stringify(intPoint));
+                            //console.log("intPoint:" + JSON.stringify(intPoint));
                             // once we get the intersectionPoint in FOV, we get the Y intersection value from pitch
                             if(intPoint!=null) {
                                 util.getDistanceOfTwoLocation(observer.location, intPoint.intersectedPoint, function (XZProjection) {

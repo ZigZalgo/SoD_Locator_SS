@@ -976,7 +976,7 @@ exports.getIntersectionPointInRoom = function(observer,callback){
                                     //console.log("direction: "+JSON.stringify(arg));
                                     //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
                                     util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
-                                        console.log("MovedLocation: " + JSON.stringify(movedLocation));
+                                        //console.log("MovedLocation: " + JSON.stringify(movedLocation));
                                         util.inRoom(movedLocation, function (inRoomBool) {
                                             //console.log("In room ? "+inRoomBool);
                                             if (inRoomBool == false) {

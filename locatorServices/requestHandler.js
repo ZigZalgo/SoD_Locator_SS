@@ -113,7 +113,7 @@ exports.handleRequest = function (socket) {
     //START LOCATOR SERVICES/////////////////////////////////////////////////////////////////////////////////////////
     socket.on('updateOrientation', function (request) {
         //not checking for fn(callback), since adding a callback here would be costly
-        //console.log(request);
+        console.log("Update orientation..");
         if(typeof(request.orientation)=="number"){
             var orientationForUpdate = {yaw:request.orientation,pitch:0}
             locator.updateDeviceOrientation(orientationForUpdate, socket);

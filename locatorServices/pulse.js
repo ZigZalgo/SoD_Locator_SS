@@ -34,7 +34,6 @@ exports.start = function(){
                 //console.log('Event Interval HeartBeat.');
 
                 cleaner();
-
                 if(pulse.eventsSwitch.inRangeEvents == true){
                     inRangeEvent();
                 }
@@ -81,32 +80,28 @@ function roomIntersectionEvent(){
                             //console.log(intersectionPoint);
                             frontend.clients[aDeviceKey].emit("intersectedOnWall",
                                 {
-                                    observer:observerCB,
-                                    intersectionPoint:intersectionPoint[0]
+                                    observer: observerCB,
+                                    intersectionPoint: intersectionPoint[0]
                                 })
-                            // find all visualizer and send a event copy to them
-                            for(var clientKey in frontend.clients){
-                                //filter all webclient and sent event
-                                if(frontend.clients.hasOwnProperty(clientKey)&&
-                                    frontend.clients[clientKey].clientType=="webClient"){
-                                    // sending a copy to visualizers
-                                    var intersectionPointForSend = intersectionPoint[0];
-                                    frontend.clients[clientKey].emit("intersectedOnWall",
-                                        {
-                                            observer:observerCB,
-                                            intersectionPoint:intersectionPointForSend
-                                        })
-
-                                }
+                        })
+                        // find all visualizer and send a event copy to them
+                        for(var clientKey in frontend.clients){
+                            //filter all webclient and sent event
+                            if(frontend.clients.hasOwnProperty(clientKey)&&
+                                frontend.clients[clientKey].clientType=="webClient"){
+                                // sending a copy to visualizers
+                                var intersectionPointForSend = intersectionPoint[0];
+                                frontend.clients[clientKey].emit("intersectedOnWall",
+                                    {
+                                        observer:observerCB,
+                                        intersectionPoint:intersectionPointForSend
+                                    })
                             }
                         }
-                        )
                     }else{
                         console.log("intersectionPoint undefined.");
                     }
-
-                    }
-                )
+                    })
             }// End of if device location is defined
         }
     }// End of devices list iteration
@@ -197,14 +192,15 @@ function inViewEvent(){
 /* inRangeEvent functions calculate whether a person is in range of a device. */
 function inRangeEvent(){
     //for all the people that are been tracked
+    //console.log("*********");
     for(var personKey in locator.persons){
         if(locator.persons.hasOwnProperty(personKey)){
+            //console.log(personKey);
             for(var deviceKey in locator.devices){
-                if(locator.devices.hasOwnProperty(deviceKey) && locator.devices.observer!=undefined){
+                if(locator.devices.hasOwnProperty(deviceKey) && locator.devices[deviceKey].observer!=undefined){
                     // if a person in in range of any device fire out broadcast event
                     //try{
                         // if the person is not in range of this device yet
-
                         if(locator.persons[personKey].inRangeOf[deviceKey]==undefined) // handles enter event
                         {
                             if(locator.devices[deviceKey].observer.observerType == 'radial' &&
