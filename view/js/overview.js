@@ -217,7 +217,7 @@ function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
     var positionX = shiftXToGridOrigin(X);
     var positionY = shiftXToGridOrigin(Y);
-    console.log(orientation);
+    //console.log(orientation);
     var actualOrientation = 360 - orientation;
     var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
     var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;

@@ -70,6 +70,7 @@ function roomIntersectionEvent(){
     var deviceList = locator.devices;
     for(var deviceKey in deviceList){
         if(deviceList.hasOwnProperty(deviceKey)){
+            //console.log(deviceKey);
             var device = deviceList[deviceKey];
             if(device.location!=undefined && device.location!=null){
                 locator.getIntersectionPointInRoom(device,function(intersectionPoint,observerCB){
@@ -77,7 +78,6 @@ function roomIntersectionEvent(){
                     if(intersectionPoint!=null && intersectionPoint!=undefined){
                         // if there is a legit intersection point broadcast events to all devices
                         Object.keys(deviceList).forEach(function(aDeviceKey){
-                            //console.log(intersectionPoint);
                             frontend.clients[aDeviceKey].emit("intersectedOnWall",
                                 {
                                     observer: observerCB,

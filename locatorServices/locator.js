@@ -906,13 +906,8 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting pitch to default : 0");
             device.orientation = {pitch:0,yaw:deviceInfo.orientation};
         }else{
+            //console.log(deviceInfo.orientation);
             device.orientation = deviceInfo.orientation;
-        }
-        // for stationary layer refreshes
-        if(deviceInfo.stationary == true){
-            device.stationary = deviceInfo.stationary;
-            device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
-            frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
 
         // JSclient may register deivce with location as well.
@@ -922,6 +917,12 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             if(deviceInfo.locationX !=undefined){
                 device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             }
+        }
+        // for stationary layer refreshes
+        if(deviceInfo.stationary == true){
+            device.stationary = deviceInfo.stationary;
+            //device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
+            frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
 
         devices[socket.id] = device; // officially register the device to locator(server)
@@ -968,17 +969,18 @@ exports.getIntersectionPointInRoom = function(observer,callback){
                 //check floor and ceiling
                 function (plcallback) {
                     if(hit != 'neither') {
+                        //console.log();
                         util.translateOrientationToReference(observer,
                             function (orientationToReference) {
-                                //console.log("Ori to Reference: "+orientationToReference);
+                               // console.log("Ori to Reference: "+orientationToReference);
                                 util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
-                                    //console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
+                                  //  console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
                                     //console.log("direction: "+JSON.stringify(arg));
                                     //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
                                     util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
                                         //console.log("MovedLocation: " + JSON.stringify(movedLocation));
                                         util.inRoom(movedLocation, function (inRoomBool) {
-                                            //console.log("In room ? "+inRoomBool);
+                                        // console.log("In room ? "+inRoomBool);
                                             if (inRoomBool == false) {
                                                 plcallback(null, null);
                                             } else {
@@ -999,6 +1001,7 @@ exports.getIntersectionPointInRoom = function(observer,callback){
                 function (plcallback) {
                     // check if intersected on four walls
                     util.getIntersectedWall(observer, function (result) {
+                        //console.log(result);
                         plcallback(null, result)
                     })
                 }
@@ -1165,6 +1168,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
             // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
             // // We will use angles to represent these vectors.
             try {
+
                 //get the angle to sens
                 var angleToSensor = util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
                 var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
