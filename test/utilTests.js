@@ -428,7 +428,7 @@ describe("util.getIntersectedWall() ",function(){
                 try {
                     console.log(data);
                     //expect(data).to.eql(null);
-                    expect(data[0].intersectedPoint.X).to.be.closeTo(-2.886,0.005);
+                    expect(data.intersectedPoint.X).to.be.closeTo(-2.886,0.005);
                     okay()
                 }catch(e) {
                     okay(e)
@@ -483,7 +483,8 @@ describe("util.getIntersectedWall() ",function(){
         util.getIntersectedWall(device1, function (data) {
             console.log(data);
             try {
-                expect(data.length).to.eql(1);
+                //expect(data.length).to.eql(1);
+                expect(data.side).to.eql('left');
                 //expect(data.intersectedPoint.side).to.eql('top');
                 done()
             }catch(e) {

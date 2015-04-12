@@ -110,9 +110,29 @@ app.get('/data', function (req, res) {
 app.get('/dataJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/dataView.js');
 });
+app.get('/UIJS',function(req,res){
+    res.sendfile(__dirname + '/view/js/UI.js');
+})
+
+app.get('/setting',function(req,res){
+    var tempLocatorRoom = locator.room;
+    //console.log(locator.room);
+    var currentSetting = {
+        room:{location:locator.room.location,
+            width:locator.room.width,
+            height:locator.room.height,
+            depth:locator.room.depth
+        },
+        pulse:pulse.eventsSwitch
+    }
+    res.status(200);
+    res.send(currentSetting);
+})
 
 app.post('/sensors/:id/uncalibrate', sensorsREST.uncalibrate)
 app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrientation)
+
+
 
 app.get('/files/:fileName.:ext', data.show);
 app.get('/filesList', data.fileList);

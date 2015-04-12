@@ -217,6 +217,7 @@ function drawView(context, X, Y, rangeInMM, fillStyle,orientation, FOV){
     var radius = rangeInMM/1000*pixelsPerMeter; //how long are the view lines? in pixels...
     var positionX = shiftXToGridOrigin(X);
     var positionY = shiftXToGridOrigin(Y);
+    //console.log(orientation);
     var actualOrientation = 360 - orientation;
     var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
     var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
@@ -246,6 +247,75 @@ function drawSensor(context,X,Y,index,angle,FOV){
     context.font = minorGridLineWidth*2+'px Arial';
     context.fillStyle = '#3370d4';
     context.fillText('K'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
+}
+
+//function takes room information and stage&layer from kineticJS
+function drawRoom(roomInfo,stage,layer,callback){
+    //console.log("Drawing room: "+JSON.stringify(roomInfo));
+    // make a room as a group of lines
+    var roomGroup = new Kinetic.Group({
+        x: shiftXToGridOrigin(roomInfo.location.X*pixelsPerMeter),
+        y: shiftXToGridOrigin(roomInfo.location.Z*pixelsPerMeter),
+        rotation: 0,
+        draggable:false,
+        name: 'roomGroup'
+    });
+    var topLine = new Kinetic.Line({
+        points:[roomInfo.walls.top.startingPoint.X*pixelsPerMeter,
+            roomInfo.walls.top.startingPoint.Z*pixelsPerMeter,
+            roomInfo.walls.top.endingPoint.X*pixelsPerMeter,
+            roomInfo.walls.top.endingPoint.Z*pixelsPerMeter],
+        stroke: 'black',
+        strokeWidth: 3,
+        lineCap: 'round',
+        lineJoin: 'round',
+        dash: [33, 10],
+        opacity:0.4
+    })
+    var leftLine = new Kinetic.Line({
+        points:[roomInfo.walls.left.startingPoint.X*pixelsPerMeter,
+            roomInfo.walls.left.startingPoint.Z*pixelsPerMeter,
+            roomInfo.walls.left.endingPoint.X*pixelsPerMeter,
+            roomInfo.walls.left.endingPoint.Z*pixelsPerMeter],
+        stroke: 'black',
+        strokeWidth: 3,
+        lineCap: 'round',
+        lineJoin: 'round',
+        dash: [33, 10],
+        opacity:0.4
+    })
+    var rightLine = new Kinetic.Line({
+        points:[roomInfo.walls.right.startingPoint.X*pixelsPerMeter,
+            roomInfo.walls.right.startingPoint.Z*pixelsPerMeter,
+            roomInfo.walls.right.endingPoint.X*pixelsPerMeter,
+            roomInfo.walls.right.endingPoint.Z*pixelsPerMeter],
+        stroke: 'black',
+        strokeWidth: 3,
+        lineCap: 'round',
+        lineJoin: 'round',
+        dash: [33, 10],
+        opacity:0.4
+    })
+
+    var bottomLine = new Kinetic.Line({
+        points:[roomInfo.walls.bottom.startingPoint.X*pixelsPerMeter,
+            roomInfo.walls.bottom.startingPoint.Z*pixelsPerMeter,
+            roomInfo.walls.bottom.endingPoint.X*pixelsPerMeter,
+            roomInfo.walls.bottom.endingPoint.Z*pixelsPerMeter],
+        stroke: 'black',
+        strokeWidth: 3,
+        lineCap: 'round',
+        lineJoin: 'round',
+        dash: [33, 10],
+        opacity:0.4
+    })
+
+    roomGroup.add(topLine);
+    roomGroup.add(rightLine);
+    roomGroup.add(bottomLine);
+    roomGroup.add(leftLine);
+    layer.add(roomGroup);
+    stage.add(layer);
 }
 
 function printPersonID(ID)
@@ -297,7 +367,7 @@ function angle (cx, cy, px, py) {var x = cx - px; var y = cy - py; return Math.a
 function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x), 2) + Math.pow ((p2y - p1y), 2))}
 
  function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observer,layer,stage){
-     console.log('width: '+ width + ' && height: ' + height);
+     //console.log('width: '+ width + ' && height: ' + height);
      var width = width*pixelsPerMeter;
      var height = height*pixelsPerMeter;
 
@@ -320,7 +390,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
     //var endAngle = (actualOrientation-(FOV/2))*Math.PI/180;
      var actualOrientation = (360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2));
      if(FOV != undefined){
-         console.log('getDeviceOrientation:'+getDeviceOrientation(X,Z) + '   FOV/2:'+FOV/2 + '\torientation:'+orientation);
+         //console.log('getDeviceOrientation:'+getDeviceOrientation(X,Z) + '   FOV/2:'+FOV/2 + '\torientation:'+orientation);
          var deviceView = new Kinetic.Arc({
              innerRadius: 0,
              outerRadius: 2*pixelsPerMeter,
@@ -354,7 +424,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
     });
     stationaryDevice.add(deviceID);
 
-     console.log('Observer:' + JSON.stringify(observer));
+     //console.log('Observer:' + JSON.stringify(observer));
      if(observer.observerType == 'radial') {
          var observeRangeVisual = new Kinetic.Circle({
              x: 0,
@@ -370,10 +440,9 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
      }else if(observer.observerType == 'rectangular'){
          var width = observer.observeWidth*pixelsPerMeter;
          var height = observer.observeHeight*pixelsPerMeter;
-         console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
+         //console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
          //console.log(width+'-'+height);
          var rotatedDirection = matrixTransformation({X:observer.observerDistance*pixelsPerMeter,Y:0,Z:0},-(deviceView.getRotationDeg()+FOV/2));
-         console.log();
          var observeRangeVisual = new Kinetic.Rect({
              x: rotatedDirection.X-(width/2),
              y: rotatedDirection.Z-(height/2),
@@ -424,7 +493,8 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         directionVector.Z += -(movedVector.Z);
         if(Math.abs(movedVector.X)>=0.1|| Math.abs(movedVector.Z)>=0.1){
             console.log('directionVector : ' + JSON.stringify(directionVector));
-            io.emit('updateObjectLocation',{ID:ID,newLocation:{X:originLocation.X+directionVector.X,Y:0,Z:originLocation.Z+directionVector.Z},objectType:'device'});
+            console.log("original location: "+JSON.stringify(originLocation));
+            io.emit('updateObjectLocation',{ID:ID,newLocation:{X:originLocation.X+directionVector.X,Y:originLocation.Y,Z:originLocation.Z+directionVector.Z},objectType:'device'});
             refreshStationaryLayer();
         }
     });
@@ -507,14 +577,14 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
 
         controlGroup.on ('dragend', function() {
             var dragendArc = stationaryDevice.children[0];
-            console.log("stationaryDevice"+ JSON.stringify(stationaryDevice.getPosition()));
+            //console.log("stationaryDevice"+ JSON.stringify(stationaryDevice.getPosition()));
 
             var rotatedDirection = matrixTransformation({X:stationaryDevice.children[0].outerRadius(),Y:0,Z:0},-(stationaryDevice.children[0].getRotationDeg()+FOV/2));
 
-            console.log("controlgroup: " + JSON.stringify(controlGroup.getPosition()));
+            //console.log("controlgroup: " + JSON.stringify(controlGroup.getPosition()));
 
-            console.log('degreeChange:' + (-(actualOrientation-(360+dragendArc.getRotationDeg()))));//
-            console.log('udpate orientation request')
+            //console.log('degreeChange:' + (-(actualOrientation-(360+dragendArc.getRotationDeg()))));//
+            //console.log('udpate orientation request')
             $.ajaxSetup({
                 type: 'POST',
                 headers: { "cache-control": "no-cache" }
@@ -699,8 +769,11 @@ function drawDataPoint(data,layer){
  * Stationary Only updates position when this is called
  *
  * */
+// expose stationary layer and stage
+var stationaryStage = null;
+var stationaryLayer = null;
 function refreshStationaryLayer() {
-    console.log('Stationary layer refreshed');
+    //console.log('Stationary layer refreshed');
 
     var stage = new Kinetic.Stage({
         container: 'cnvStationary',
@@ -709,6 +782,8 @@ function refreshStationaryLayer() {
     });
     var layer = new Kinetic.Layer();
 
+    stationaryStage = stage;
+    stationaryLayer = layer;
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function (data) {
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
@@ -724,6 +799,11 @@ function refreshStationaryLayer() {
         }
         stage.add(layer);
     });
+    // Paint room on stationary layer
+    io.emit("getRoomFromServer",{},function(room){
+        // Got room from server drawing room with kineticjs
+        drawRoom(room,stage,layer);
+    })
     // drawing data points
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {
         //var c = document.getElementById("cnv");
@@ -752,7 +832,7 @@ function refreshStationaryLayer() {
 
 function getDeviceInfoByID(deviceID,ctx,xInMeters,zInMeters,personLocation){
     var deviceNameString;
-    console.log("device ID:"+deviceID);
+    //console.log("device ID:"+deviceID);
     io.emit('getDevicesWithSelection',{selection:['all']},function(data){
         if(data.hasOwnProperty(deviceID)){
             //console.log('got device: '+data[Object.keys(data)].name.length);
@@ -767,22 +847,23 @@ function getDeviceInfoByID(deviceID,ctx,xInMeters,zInMeters,personLocation){
             ctx.font = "12px Arial";
             ctx.fillText(deviceNameString,shiftXToGridOrigin(xInMeters)+minorGridLineWidth,shiftYToGridOrigin(zInMeters)+1);
 
-            console.log("Paired Device Observer: "+JSON.stringify(data[deviceID].observer));
-            switch(data[deviceID].observer.observerType){
-                case "radial":
-                    /*console.log("radial device person location:"+JSON.stringify(personLocation));
-                    ctx.beginPath();
-                    ctx.arc(shiftXToGridOrigin(personLocation.X*pixelsPerMeter),shiftYToGridOrigin(personLocation.Y*pixelsPerMeter), data[deviceID].observer.observeRange*pixelsPerMeter, 0, 2 * Math.PI, false);
-                    ctx.strokeStyle = '#003300';
-                    ctx.stroke();
-                    ctx.lineWidth = 1;*/
-                    break;
-                case "rectangular":
-                    break;
-                default:
-                    console.log("Unknown Observer type");
+            //console.log("Paired Device Observer: "+JSON.stringify(data[deviceID].observer));
+            if(data[deviceID].observer!=undefined) {
+                switch (data[deviceID].observer.observerType) {
+                    case "radial":
+                        /*console.log("radial device person location:"+JSON.stringify(personLocation));
+                         ctx.beginPath();
+                         ctx.arc(shiftXToGridOrigin(personLocation.X*pixelsPerMeter),shiftYToGridOrigin(personLocation.Y*pixelsPerMeter), data[deviceID].observer.observeRange*pixelsPerMeter, 0, 2 * Math.PI, false);
+                         ctx.strokeStyle = '#003300';
+                         ctx.stroke();
+                         ctx.lineWidth = 1;*/
+                        break;
+                    case "rectangular":
+                        break;
+                    default:
+                        console.log("Unknown Observer type");
+                }
             }
-
         }
     });
 }
@@ -1052,6 +1133,86 @@ io.on("webMessageEvent",function(message){
 io.on("refreshStationaryLayer",function(){
     refreshStationaryLayer();
 });
+
+
+io.on("intersectedOnWall",function(intersectionInfo){
+    //console.log(intersectionInfo);
+    highlightIntersectionPoint(intersectionInfo);
+});
+function highlightIntersectionPoint(intersectionInfo,callback) {
+    //console.log(foundRoomGroup);
+    //console.log(intersectionInfo.intersectionPoint[0]);
+    //console.log(intersectionInfo);
+    var intersectedPoint = intersectionInfo.intersectionPoint.intersectedPoint;
+    var foundRoomGroup = stationaryLayer.find('.roomGroup')[0];
+    var foundIntPointByID = stationaryLayer.find("#"+intersectionInfo.observer.id);
+    if(foundIntPointByID.length==0){
+        // if there is no intersectionPoint displayed on canvas, create a new one
+        var intersectionPointOnCanvas = new Kinetic.Circle({
+            x: intersectedPoint.X * pixelsPerMeter,
+            y: intersectedPoint.Z * pixelsPerMeter,
+            radius: 5,
+            fill: 'red',
+            stroke: 'black',
+            strokeWidth: 1,
+            name:"intersectionPointInRoom",
+            id: ''+intersectionInfo.observer.id
+        });
+        if(intersectionInfo.intersectionPoint.side == "floor"){
+            intersectionPointOnCanvas.opacity(0.2);
+        }
+        foundRoomGroup.add(intersectionPointOnCanvas);
+        //console.log(intersectionPointOnCanvas.id());
+        stationaryLayer.draw();
+
+    }else{
+        //console.log(foundIntPointByID[0].id());
+        //console.log(intersectionInfo.observer.id);
+        // if point belong to this ID found, update the point
+        if(foundIntPointByID[0].id()==intersectionInfo.observer.id) {
+            //console.log("happiness found?");
+            foundIntPointByID[0].setPosition({
+                x: intersectedPoint.X * pixelsPerMeter,
+                y: intersectedPoint.Z * pixelsPerMeter
+            });
+            stationaryLayer.draw();
+        }
+    }
+    //console.log(foundRoomGroup);
+    // Highlight intersection if on wall
+    if(foundRoomGroup!=null&&foundRoomGroup!=undefined) {
+        switch (intersectionInfo.intersectionPoint.side) {
+            case "top":
+                //foundRoomGroup.children[0].stroke("yellow");
+                stationaryLayer.draw();
+                break;
+            case "left":
+                //foundRoomGroup.children[3].stroke("yellow");
+                stationaryLayer.draw();
+                break;
+            case "right":
+                //foundRoomGroup.children[1].stroke("yellow");
+                stationaryLayer.draw();
+                break;
+            case "bottom":
+                //foundRoomGroup.children[2].stroke("yellow");
+                stationaryLayer.draw();
+                break;
+            case "ceiling":
+                //foundRoomGroup.children[2].stroke("yellow");
+
+                //stationaryLayer.draw();
+                break;
+            case "floor":
+                //foundRoomGroup.children[2].stroke("yellow");
+                //stationaryLayer.draw();
+                break;
+            default:
+                console.log("Unknown side in intersectionPoint: " + intersectionInfo.intersectionPoint.side);
+        }
+    }
+}
+
 
 io.on("connect", function(){
     io.emit("registerWebClient", {});

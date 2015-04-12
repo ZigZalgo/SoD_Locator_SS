@@ -100,7 +100,7 @@ exports.purgeUnusedHands = function(){
 
     async.each(Object.keys(locator.persons),function(key,itrCallback){
         var now = new Date().getTime();
-        console.log(locator.persons[key].hands);
+        //console.log(locator.persons[key].hands);
         if(locator.persons[key].hands.left.ID != null){
             console.log();
             if((now-locator.persons[key].hands.left.lastUpdated)/1000>3){

@@ -5,7 +5,7 @@ var util = require('./util');
 var frontend = require('./../frontend');
 var Q = require('q');
 var async = require("async");
-
+var pulse = require("./pulse");
 //var events = require("events");
 
 
@@ -24,6 +24,7 @@ exports.leapMotionService = require('./Sensors/leapMotion');
 exports.iBeaconService = require('./Sensors/iBeacon');
 var room = new factory.Room({X:0,Y:0,Z:0},6, 8, 4);
 exports.room = room;
+
 
 // TODO: test!
 /*exports.start = function(){
@@ -905,13 +906,8 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting pitch to default : 0");
             device.orientation = {pitch:0,yaw:deviceInfo.orientation};
         }else{
+            //console.log(deviceInfo.orientation);
             device.orientation = deviceInfo.orientation;
-        }
-        // for stationary layer refreshes
-        if(deviceInfo.stationary == true){
-            device.stationary = deviceInfo.stationary;
-            device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
-            frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
 
         // JSclient may register deivce with location as well.
@@ -921,6 +917,12 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             if(deviceInfo.locationX !=undefined){
                 device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             }
+        }
+        // for stationary layer refreshes
+        if(deviceInfo.stationary == true){
+            device.stationary = deviceInfo.stationary;
+            //device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
+            frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
 
         devices[socket.id] = device; // officially register the device to locator(server)
@@ -949,61 +951,63 @@ exports.getIntersectionPointInRoom = function(observer,callback){
     var pitchRad = observer.orientation.pitch * util.DEGREES_TO_RADIANS;
     util.isInRect(observer.location,room.location,room.length,room.depth,function(observerInRoom){
         if(observerInRoom) {
-            //console.log('on device: '+observer.uniqueDeviceID);
-            if (observer.orientation.pitch >= 0) { // if the observer is looking up
+            //console.log('orientation: '+JSON.stringify(observer.orientation));
+            if (observer.orientation.pitch > 0) { // if the observer is looking up
                 var hit = "ceiling"
                 var projectionFromHeight = (room.location.Y + room.height - observerHeight) / Math.tan(pitchRad);   //get the projection from the Y location of the observer
                 var intersectedY = room.location.Y + room.height;
-            } else {  // if the observer is looking down
-                // TODO: Assume orientation.yaw is 0, what the vector looks like
+            } else if(observer.orientation.pitch < 0){  // if the observer is looking down
                 var projectionFromHeight = observerHeight / Math.tan(pitchRad);   //get the projection from the Y location of the observer
                 var intersectedY = room.location.Y;
                 var hit = "floor"
+            }else {
+                var hit = "neither";
             }
             var initialVector = {X:1,Y:0,Z:0};
             // use water fall to chain the tasks.
-
-
             async.parallel([
-                function (wfcallback) {
-                    util.translateOrientationToReference(observer,
-                        function(orientationToReference){
-                            console.log("Ori to Reference: "+orientationToReference);
-                    util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
-                        console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
-                        //console.log("direction: "+JSON.stringify(arg));
-                            //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
-
-                            util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
-                            console.log("MovedLocation: "+JSON.stringify(movedLocation));
-                            util.inRoom(movedLocation, function (inRoomBool){
-                                console.log("In room ? "+inRoomBool);
-                                if (inRoomBool == false) {
-                                    wfcallback(null,null);
-                                } else {
-                                    movedLocation.Y = intersectedY;
-                                    wfcallback(null, {
-                                        side: hit,
-                                        intersected: movedLocation
-                                    });
-                                }
+                //check floor and ceiling
+                function (plcallback) {
+                    if(hit != 'neither') {
+                        //console.log();
+                        util.translateOrientationToReference(observer,
+                            function (orientationToReference) {
+                               // console.log("Ori to Reference: "+orientationToReference);
+                                util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
+                                  //  console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
+                                    //console.log("direction: "+JSON.stringify(arg));
+                                    //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
+                                    util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
+                                        //console.log("MovedLocation: " + JSON.stringify(movedLocation));
+                                        util.inRoom(movedLocation, function (inRoomBool) {
+                                        // console.log("In room ? "+inRoomBool);
+                                            if (inRoomBool == false) {
+                                                plcallback(null, null);
+                                            } else {
+                                                movedLocation.Y = intersectedY;
+                                                plcallback(null, {
+                                                    side: hit,
+                                                    intersectedPoint: movedLocation
+                                                });
+                                            }
+                                        })
+                                    })
+                                })
                             })
-                        })
-                    })
-                })
+                    }else{
+                        plcallback(null,null);
+                    }
                 },
-                function (wfcallback) {
-                    // arg1 now equals data
+                function (plcallback) {
+                    // check if intersected on four walls
                     util.getIntersectedWall(observer, function (result) {
-                        wfcallback(null, result)
+                        //console.log(result);
+                        plcallback(null, result)
                     })
                 }
             ], function (err, result) {
-                // result now equals 'done'
                 // filter out the null from parallel result.
                 //console.log("ID: "+observer.uniqueDeviceID+" - "+JSON.stringify(result));
-
-                // filter out the undefined result
                 var filteredResult = result.filter(function (element) {
                     return element != null && element != undefined;
                 })
@@ -1164,6 +1168,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
             // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
             // // We will use angles to represent these vectors.
             try {
+
                 //get the angle to sens
                 var angleToSensor = util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
                 var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
@@ -1403,5 +1408,27 @@ exports.emitEventToPairedDevice = function(person,eventName,payload){
         }
     }else{
         console.log("Person is not paired. Or the ownedDeviceID is undefined: " + JSON.stringify(person));
+    }
+}
+
+//Handle setting changes on server
+exports.changeSetting = function(type,property,value,callback){
+    console.log('\t'+type + " - " +property + ' -> ' + value );
+    switch(type){
+        case "pulse":
+            if(property=="inRangeEvents"||property=="inViewEvents"
+                ||property=="sendIntersectionPoints"|| property=="roomIntersectionEvents"){
+                pulse.eventsSwitch[property]=value;
+                callback(true);
+            }else{
+                callback(false)
+            }
+            break;
+        case "room":
+            callback(false);
+            break;
+        default:
+            console.log(" Unknow settting change request: "+type);
+            callback(false);
     }
 }

@@ -2,7 +2,9 @@ var locator = require('./locator');
 var factory = require('./factory');
 var frontend = require('./../frontend');
 var util = require('./util');
-
+var pulse = require("./pulse");
+var async =
+    require("async");
 // TODO: test!
 /*exports.start = function () {
     locator.start();
@@ -111,7 +113,7 @@ exports.handleRequest = function (socket) {
     //START LOCATOR SERVICES/////////////////////////////////////////////////////////////////////////////////////////
     socket.on('updateOrientation', function (request) {
         //not checking for fn(callback), since adding a callback here would be costly
-        console.log(request);
+        //console.log("Update orientation..");
         if(typeof(request.orientation)=="number"){
             var orientationForUpdate = {yaw:request.orientation,pitch:0}
             locator.updateDeviceOrientation(orientationForUpdate, socket);
@@ -156,6 +158,43 @@ exports.handleRequest = function (socket) {
         }
 
     });
+
+    socket.on('updateServerSettings',function(request,response){
+        console.log("Setting change request" + JSON.stringify(request));
+        if(request.hasOwnProperty("room")||request.hasOwnProperty("pulse")){
+            for(var type in request){
+                if(Object.keys(request[type]).length>0) {
+                    console.log(type);
+                    async.each(Object.keys(request[type]), function (aProperty, itrCallbackSetting) {
+                        console.log(aProperty);
+                        locator.changeSetting(type, aProperty, request[type][aProperty],function(data){
+                            if(data){
+                                itrCallbackSetting()
+                            }else{
+                                response(false);
+                            }
+                        })
+
+                    }, function (err) {
+                        //console.log("all done" + err);
+                        if(type=='pulse'){
+                            pulse.refreshHeartbeat();
+                        }
+                        response(true);
+                    })
+                }
+
+            }
+//  pulse.refreshHeartbeat(property,value,callback);
+        }else{
+            console.log("request doesn't have correct property");
+        }
+    });
+
+    // END of update envets
+
+
+    // Client requests
     socket.on('getPeopleFromServer', function (request, fn) {
         if (fn != undefined) {
             fn((locator.persons));
@@ -368,6 +407,16 @@ exports.handleRequest = function (socket) {
             fn((locator.sensors));
         }
     });
+
+    socket.on("getRoomFromServer",function(request,callback){
+        //console.log("Get Room request received with "+JSON.stringify(request));
+        if(callback!=null){
+            callback(locator.room);
+        }else{
+            console.log("Callback function is null for return locator room information");
+        }
+    })
+
 
     socket.on('getCalibrationFrames', function (request, fn) {
         // error checking see if the sensor is not defined

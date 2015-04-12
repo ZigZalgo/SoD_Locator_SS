@@ -160,9 +160,6 @@ describe("register functions", function () {
 describe("Sensor functions -", function () {
     it('LeapMotion - \"handUpdate\" updateHand data should work: ', function(done){
 
-
-
-
         var client = io.connect(socketURL,options);
         var sampleLeapSensor = {sensorType:'LeapMotion',location:{X:0,Y:0,Z:0}};
         var updateLeftHandData = {whichHand:"left",ID:10,gesture:"Hold"};
