@@ -153,6 +153,14 @@ describe("util.matrixTransformation()", function(){
 });
 
 
+
+describe("util.mathRoundWithDecimal()", function(){
+    it(" should get the 1.2345 to 1.23 with getting 2 decimal value", function(){
+        expect(util.mathRoundWithDecimal(1.2345,2)).to.eql(1.23);;//(util.matrixTransformation(testLocation,30), correctResult);
+    });
+});
+
+
 //Test function util.getVector() with callback
 /*
 describe("util.getVector",function(){

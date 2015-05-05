@@ -227,8 +227,10 @@ function Device(socket, opts){
         this.inRangeOf = {};
         this.inViewList = {};
         this.subscribeToEvents ={
-            receiveIntersectionPoints:true,
-            receiveInViewList:true
+            roomIntersectionEvents:true,
+            inViewEvents:true,
+            observerRangeEvents:false,
+            intersectionPointsEvents:false
         };
     }
     catch(err){

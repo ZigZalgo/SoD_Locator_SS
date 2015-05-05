@@ -362,9 +362,10 @@ exports.handleRequest = function (socket) {
     socket.on('personUpdate', function (persons, fn) {
         //get persons from body, call update function for each person
         if (persons != null) {
-            locator.removeIDsNoLongerTracked(socket, persons);
+            console.log(Object.keys(persons).length);
 			try{
-				locator.removeUntrackedPeople(1000);
+                locator.removeIDsNoLongerTracked(socket, persons);
+				locator.removeUntrackedPeople(0);
 			}
 			catch(err){
 				console.log("error trying to remove untracked people: " + err);
@@ -372,9 +373,9 @@ exports.handleRequest = function (socket) {
             persons.forEach(function (person) {
                 locator.updatePersons(person, socket);
             });
-            if(fn!=undefined) {
+            /*if(fn!=undefined) {
                 fn();
-            }
+            }*/
         }
         else {
             console.log("request was null");

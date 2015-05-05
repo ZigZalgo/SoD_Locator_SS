@@ -78,11 +78,13 @@ function roomIntersectionEvent(){
                     if(intersectionPoint!=null && intersectionPoint!=undefined){
                         // if there is a legit intersection point broadcast events to all devices
                         Object.keys(deviceList).forEach(function(aDeviceKey){
-                            frontend.clients[aDeviceKey].emit("intersectedOnWall",
-                                {
-                                    observer: observerCB,
-                                    intersectionPoint: intersectionPoint[0]
-                                })
+                            if(deviceList[aDeviceKey].roomIntersectionEvents==true) {
+                                frontend.clients[aDeviceKey].emit("intersectedOnWall",
+                                    {
+                                        observer: observerCB,
+                                        intersectionPoint: intersectionPoint[0]
+                                    })
+                            }
                         })
                         // find all visualizer and send a event copy to them
                         for(var clientKey in frontend.clients){
@@ -156,9 +158,9 @@ function inViewEvent(){
         if(locator.devices.hasOwnProperty(deviceKey)){
             var CurrentInViewDeviceList = locator.getDevicesInFront(frontend.clients[deviceKey].id,locator.devices);
             //console.log("key: "+  JSON.stringify(CurrentInViewDeviceList));
+            //console.log(CurrentInViewDeviceList);
             for(var currentInViewDevicesKey in CurrentInViewDeviceList){
                 if(locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] == undefined){
-                    console.log(currentInViewDevicesKey);
                     locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] = {type:'device',ID:locator.devices[CurrentInViewDeviceList[currentInViewDevicesKey]].uniqueDeviceID}
                     console.log('added-> ' +JSON.stringify(locator.devices[deviceKey].inViewList)  + ' to inViewlist');
                     try{

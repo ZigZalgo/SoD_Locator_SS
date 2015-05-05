@@ -874,6 +874,10 @@ exports.getNearest = function(subject,objectList,functionCallback){
     })
 }
 
+// Round up with decimal value
+exports.mathRoundWithDecimal = function(input, decimal){
+    return Math.round(input*Math.pow(10,decimal))/Math.pow(10,decimal);
+}
 exports.getDistanceOfTwoLocation = function(location1,location2,fn){
     if(location1.X!=undefined && location2.Z!= undefined) {
         fn(Math.sqrt(
@@ -983,5 +987,4 @@ exports.isPointInView = function(pointLocation,observer,callback){
     }else{
         console.log("Observer is undefined in get Devices in front");
     }
-
 }

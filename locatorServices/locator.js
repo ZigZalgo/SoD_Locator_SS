@@ -323,11 +323,11 @@ function gestureHandler(key,gesture,socket){
 
 
 exports.updatePersons = function(receivedPerson, socket){
-
     if(Object.keys(persons).length == 0){
         //nobody being tracked, add new person
         //person was not found
         if((receivedPerson.trackingState==1) && receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
+            console.log("received Person: "+JSON.stringify(receivedPerson));
             var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
             person.lastUpdated = new Date();
             person.currentlyTrackedBy = socket.id;
@@ -337,10 +337,111 @@ exports.updatePersons = function(receivedPerson, socket){
     }
     else{
         //there are people being tracked, see if they match
-        var counter = Object.keys(persons).length;
+        //var counter = Object.keys(persons).length;
         var nearestDistance = 1000;
         var nearestPersonID = null;
         var existingID = [];
+        var receivedPersonProcessed = false;        // a lock make sure async doesn't process same received person twice
+
+        async.eachSeries(Object.keys(persons),function(personKey,eachSeriesCallback){
+            // process each person individually
+            if(persons.hasOwnProperty(personKey) && receivedPersonProcessed == false){
+                var personInList = locator.persons[personKey];
+                existingID = existingID.concat(Object.keys(personInList.ID));
+                // add this person to existing IDs
+                if(personInList.ID[receivedPerson.ID]!=undefined){
+                    // receivedPerson is in one of persons' ID list
+                    if(personInList.currentlyTrackedBy == socket.id){
+                        // receivedPerson also come the the main track sensor, update personInList attributes
+                        try{
+                            personInList.location.X = receivedPerson.location.X.toFixed(3);
+                            personInList.location.Y = receivedPerson.location.Y.toFixed(3);
+                            personInList.location.Z = receivedPerson.location.Z.toFixed(3);
+                            personInList.lastUpdated = new Date();
+                            personInList.gesture = receivedPerson.gesture;
+                            // handles the person's gesture.
+                            if(personInList.gesture != null){
+                                gestureHandler(personKey,personInList.gesture,socket);//handles the guesture
+                            }
+
+                            if(personInList.ownedDeviceID != null) {
+                                devices[personInList.ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
+                                devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
+                                devices[personInList.ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
+                            }
+                            console.log("\t->received Peron got updated " +
+                                "with personList.");
+                            receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
+                            eachSeriesCallback();
+                        }catch (e){
+                            console.log("error update person with existing ID: "+e);
+                        }
+                    }// END of currentattractedBy
+                    else{
+                        console.log("receivedPerson is in ID list, but not currenly tracked by this sensor");
+                        eachSeriesCallback();
+                    }
+                }else{
+                    //  The receivedPerson that is not in  this person list
+                    if(util.distanceBetweenPoints(personInList.location, receivedPerson.location) < nearestDistance){
+                        //
+                        nearestDistance= util.distanceBetweenPoints(personInList.location, receivedPerson.location);
+                        nearestPersonID = personKey;
+                        eachSeriesCallback();
+                    }else{
+                        eachSeriesCallback();
+                    }
+
+                }
+            }// if person key actually exitst
+        },function(err){
+            // found the closes person in list for this receivedPerson, see if the distance is within the threshold
+            if(receivedPersonProcessed == false) // if the received person hasn't been processed
+            {
+                if (nearestDistance < 0.4) {
+                    console.log("Done with all persons."+" with closest person: "+nearestPersonID+" ,distance: "+nearestDistance);
+                    // if the sensor hasn't been registered to the person's seen-by-sensor list, and the person isn't used in any other person's list
+                    if ((existingID.indexOf(receivedPerson.ID) == -1) && persons[nearestPersonID].ID[receivedPerson.ID] == undefined) {
+                        //console.log('person '+persons[nearestPersonID].uniquePersonID+' is now tracked by ' + socket.id);
+                        //locator.removeUntrackedPersonID(persons[nearestPersonID].ID, receivedPerson.ID,socket)
+                        console.log('-> Merging person to ' + persons[nearestPersonID].uniquePersonID + ' with nearestDistance : ' + nearestDistance);
+                        persons[nearestPersonID].ID[receivedPerson.ID] = socket.id;
+                        persons[nearestPersonID].gesture = receivedPerson.gesture;
+                        persons[nearestPersonID].lastUpdated = new Date();
+                        // handle the person's guesture
+                        if (persons[nearestPersonID].gesture != null) {
+                            gestureHandler(nearestPersonID, persons[nearestPersonID].gesture, socket);//handles the guesture
+                        }
+                        console.log('->-> Person ' + persons[nearestPersonID].uniquePersonID + ' ID length: (' + Object.keys(persons[nearestPersonID].ID).length + ') with details: ' + JSON.stringify(persons[nearestPersonID].ID));
+                    }
+                } // out side of the threshold
+                else {
+                    //locator.removeUntrackedPersonID(persons[key].ID, receivedPerson.ID,socket);
+                    //end of iterations, person not found and not near a tracked person
+                    //util.findWithAttr(persons,'ID',receivedPerson.ID);
+                    if ((existingID.indexOf(receivedPerson.ID) == -1) && (receivedPerson.ID != undefined) && (receivedPerson.location != undefined)) { //if provided an ID and a location, update
+                        if((receivedPerson.trackingState == 1)){
+                            var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+                            person.lastUpdated = new Date();
+                            person.currentlyTrackedBy = socket.id;
+                            person.gesture = receivedPerson.gesture;
+                            if (person.gesture != null) {
+                                gestureHandler(key, persons[key].gesture, socket);//handles the guesture
+                            }
+                            persons[person.uniquePersonID] = person;
+                            console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
+                        }else{
+                            console.log("\t->A new person detected, though not sure if it is a person yet. TrackingState: "+receivedPerson.trackingState);
+                        }
+
+                    }
+
+                }
+            }
+        })
+
+
+/*
         for(var key in persons){
             counter --;
             if(persons.hasOwnProperty(key)){
@@ -367,7 +468,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                         }
-
+                        break;
 
 
                     }
@@ -378,7 +479,6 @@ exports.updatePersons = function(receivedPerson, socket){
                             delete persons[key];
                         }
                     }
-                    break; // whtat is this break for ??
                 }
                 // this person comes in with a new ID
                 else{
@@ -430,7 +530,7 @@ exports.updatePersons = function(receivedPerson, socket){
                     }
                 }// end of "Come of new ID"
             }
-        }
+        }*/
     }
 }; // end of update people list
 
@@ -449,12 +549,12 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
                             if(persons[key].currentlyTrackedBy == socket.id){
-                                var i = 0;  // counter for person in person id list
-                                do{
-                                    console.log('\t->->-> Do while loop : ' + persons[key].uniquePersonID);
+                                /*var i = 0;  // counter for person in person id list
+                                do{*/
+                                    //console.log('\t->->-> Do while loop : ' + persons[key].uniquePersonID);
                                     persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[i]];//Object.keys(persons[key].ID)[0];
-                                    i++;
-                                }while(persons[key].currentlyTrackedBy == socket.id && i <= 15)
+                                    /*i++;
+                                }while(persons[key].currentlyTrackedBy == socket.id && i <= 15)*/
 
                                 console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
                             }
@@ -517,6 +617,7 @@ exports.removeUntrackedPersonID = function(personIDList,receivedPersonID,sensorS
 exports.pairAndNotify = function(deviceSocketID, uniquePersonID){
     devices[deviceSocketID].ownerID = uniquePersonID;
     devices[deviceSocketID].pairingState = "paired";
+    devices[deviceSocketID].loaction = persons[uniquePersonID].location;
     frontend.clients[deviceSocketID].emit("devicePaired", {
         name: devices[deviceSocketID].name,
         ID: devices[deviceSocketID].uniqueDeviceID,
@@ -1180,6 +1281,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
                 return Object.keys(deviceList).filter(function (key) {
                     //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
                     if (deviceList[key] != observer && deviceList[key].location != undefined) {
+                        //console.log(deviceList[key].location);
                         if (leftFieldOfView > rightFieldOfView &&
                             (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
                             (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {

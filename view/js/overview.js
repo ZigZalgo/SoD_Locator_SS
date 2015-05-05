@@ -610,7 +610,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
             };
             var newOrientation = (orientation+(actualOrientation-(360+dragendArc.getRotationDeg())));
             $.post('/devices/updateOrientation'+'/' + deviceID.getText()+'/'+ newOrientation, function(data,status){
-                console.log("success? " + status);
+                //console.log("success? " + status);
                 if(status == 'success') {
                     window.clearTimeout(timer);
                     updateOrientationAndRefresh();
@@ -1145,6 +1145,7 @@ function highlightIntersectionPoint(intersectionInfo,callback) {
     //console.log(intersectionInfo);
     var intersectedPoint = intersectionInfo.intersectionPoint.intersectedPoint;
     var foundRoomGroup = stationaryLayer.find('.roomGroup')[0];
+    //console.log(foundRoomGroup);
     var foundIntPointByID = stationaryLayer.find("#"+intersectionInfo.observer.id);
     if(foundIntPointByID.length==0){
         // if there is no intersectionPoint displayed on canvas, create a new one
