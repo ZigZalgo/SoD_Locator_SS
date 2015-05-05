@@ -362,7 +362,8 @@ exports.handleRequest = function (socket) {
     socket.on('personUpdate', function (persons, fn) {
         //get persons from body, call update function for each person
         if (persons != null) {
-            console.log(Object.keys(persons).length);
+            //console.log(Object.keys(persons).length);
+
 			try{
                 locator.removeIDsNoLongerTracked(socket, persons);
 				locator.removeUntrackedPeople(0);

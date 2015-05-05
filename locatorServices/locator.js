@@ -77,6 +77,7 @@ function isEmpty(str) {
 function grabDataInRange(requestObject,targetObject){
     var distance,dataRange;
     distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
+    console.log(requestObject);
     if(targetObject.observer.observerType=='radial'&&distance<targetObject.observer.observeRange){
         try{
             console.log('-> Grab event emit: person : ' + targetObject.ID + ' grab dataPoint: ' + requestObject.uniquePersonID);
@@ -296,6 +297,7 @@ function grabEventHandler(object){
             //}
         }
     }
+
 }
 
 
@@ -311,10 +313,12 @@ function gestureHandler(key,gesture,socket){
         case "Grab":
             console.log("-> GRAB gesture detected from person: " + key + "!");
             grabEventHandler(persons[key]); // try to grab data if any data is within range
+            frontend.io.sockets.emit("gesture",{person:persons[key].uniquePersonID,gesture:"Grab"});
             break;
         case "Release":
             console.log("-> RELEASE gesture detected from person: " + key + "!");
             locator.dropData(socket,persons[key],0.5); // set the default drop range to 1 meter for now
+            frontend.io.sockets.emit("gesture",{person:persons[key].uniquePersonID,gesture:"Release"});
             break;
         default:
             console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
@@ -361,6 +365,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             personInList.gesture = receivedPerson.gesture;
                             // handles the person's gesture.
                             if(personInList.gesture != null){
+                                console.log(personInList.gesture);
                                 gestureHandler(personKey,personInList.gesture,socket);//handles the guesture
                             }
 
@@ -369,8 +374,7 @@ exports.updatePersons = function(receivedPerson, socket){
                                 devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                                 devices[personInList.ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                             }
-                            console.log("\t->received Peron got updated " +
-                                "with personList.");
+                            //console.log("\t->received Peron got updated " + "with personList.");
                             receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
                             eachSeriesCallback();
                         }catch (e){
@@ -409,9 +413,9 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[nearestPersonID].gesture = receivedPerson.gesture;
                         persons[nearestPersonID].lastUpdated = new Date();
                         // handle the person's guesture
-                        if (persons[nearestPersonID].gesture != null) {
+                        /*if (persons[nearestPersonID].gesture != null) {
                             gestureHandler(nearestPersonID, persons[nearestPersonID].gesture, socket);//handles the guesture
-                        }
+                        }*/
                         console.log('->-> Person ' + persons[nearestPersonID].uniquePersonID + ' ID length: (' + Object.keys(persons[nearestPersonID].ID).length + ') with details: ' + JSON.stringify(persons[nearestPersonID].ID));
                     }
                 } // out side of the threshold
@@ -426,12 +430,12 @@ exports.updatePersons = function(receivedPerson, socket){
                             person.currentlyTrackedBy = socket.id;
                             person.gesture = receivedPerson.gesture;
                             if (person.gesture != null) {
-                                gestureHandler(key, persons[key].gesture, socket);//handles the guesture
+                                gestureHandler(person.uniquePersonID, person.gesture, socket);//handles the guesture
                             }
                             persons[person.uniquePersonID] = person;
                             console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
                         }else{
-                            console.log("\t->A new person detected, though not sure if it is a person yet. TrackingState: "+receivedPerson.trackingState);
+                            //console.log("\t->A new person detected, though not sure if it is a person yet. TrackingState: "+receivedPerson.trackingState);
                         }
 
                     }
@@ -1036,6 +1040,8 @@ exports.registerDevice = function(socket, deviceInfo,fn){
 
         frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});
     }
+
+    var a = {"ID":109,"status":"registered","entity":{"uniqueDeviceID":109,"orientation":{"pitch":0,"yaw":0},"name":"ICT524J","socketID":"GKcaCiswXNpMx8JAKOPn","deviceType":"walldisplay","location":{"X":1,"Y":2,"Z":3},"FOV":30,"depth":0.5,"height":1,"width":0.5,"ownerID":null,"pairingState":"unpaired","intersectionPoint":{"X":0,"Y":0},"lastUpdated":"2015-05-05T22:37:14.086Z","stationary":true,"deviceIP":"127.0.0.1","observer":{"observerType":"radial","observeRange":1,"observeWidth":null,"observeHeight":null,"observerDistance":null},"inRangeOf":{},"inViewList":{},"subscribeToEvents":{"roomIntersectionEvents":true,"inViewEvents":true,"observerRangeEvents":false,"intersectionPointsEvents":false}},"deviceID":109,"socketID":"GKcaCiswXNpMx8JAKOPn","currentDeviceNumber":1,"orientation":{"pitch":0,"yaw":0}}
 }
 
 
