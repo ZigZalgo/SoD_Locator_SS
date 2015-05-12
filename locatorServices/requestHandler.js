@@ -338,6 +338,7 @@ exports.handleRequest = function (socket) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(request.arguments==undefined) request.arguments = null;
                 frontend.clients[key].emit("request", {dataRequested: request.data, arguments: request.arguments}, function (data) {
+                    console.log(data);
                     socket.emit(request.data, data);
                 })
             }
@@ -372,6 +373,9 @@ exports.handleRequest = function (socket) {
 				console.log("error trying to remove untracked people: " + err);
 			}
             persons.forEach(function (person) {
+                if(person.gesture!=null){
+                    console.log(person.gesture);
+                }
                 locator.updatePersons(person, socket);
             });
             /*if(fn!=undefined) {

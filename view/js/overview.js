@@ -1136,7 +1136,7 @@ io.on("refreshStationaryLayer",function(){
 
 
 io.on("intersectedOnWall",function(intersectionInfo){
-    //console.log(intersectionInfo);
+    console.log(intersectionInfo);
     highlightIntersectionPoint(intersectionInfo);
 });
 function highlightIntersectionPoint(intersectionInfo,callback) {

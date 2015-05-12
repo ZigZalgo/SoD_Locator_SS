@@ -731,6 +731,24 @@ exports.findWithAttrWeak = function (array, attr, query) {
     }
 };
 
+exports.findKeyByValue = function(JSONObject, value){
+    var found = false;
+    if(typeof(JSONObject) == "object"){
+        async.each(Object.keys(JSONObject),function(objKey,itrCallback){
+            if(JSONObject[objKey] == value){
+                found = objKey;
+                itrCallback();
+            }else{
+                itrCallback();
+            }
+        },function(err){
+            return found;
+        })
+    }else{
+        console.log("can not search through non JSON");
+        return found;
+    }
+}
 
 exports.findKeyWithAttr = function(obj,value){
 	if(typeof(obj) == "object"){

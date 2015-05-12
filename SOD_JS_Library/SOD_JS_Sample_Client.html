@@ -96,6 +96,14 @@
                         sod.registerDevice(sod);
                         showGreenStatus('connect to server ..')
                     });
+
+
+                    sod.addListener('gesture',function(data){
+                        //sod.registerDevice(sod);
+                        console.log("happyness?");
+                        showGreenStatus(JSON.stringify(data))
+                    });
+
                     //intersectedOnWall
                     sod.addListener('intersectedOnWall',function(data){
                         console.log('intersected on wall' + JSON.stringify(data));
