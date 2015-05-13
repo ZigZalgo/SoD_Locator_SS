@@ -225,6 +225,26 @@ exports.handleRequest = function (socket) {
         fn(util.filterDevices(socket, request));
     })
 
+    socket.on("getDeviceInViewWithDistance",function(request,fn){
+        console.log("Request: "+JSON.stringify(request));
+        var devicesInView = util.filterDevices(socket,{selection:['inView']});
+        var listWithDistance = {};
+        async.each(Object.keys(devicesInView),function(deviceKey,eachCallback){
+            util.getDistanceOfTwoLocation(locator.devices[socket.id].location,locator.devices[deviceKey].location,function(callback){
+                console.log(callback);
+                listWithDistance[deviceKey] = locator.devices[deviceKey];
+                listWithDistance[deviceKey]["distance"] = callback
+                eachCallback();
+            })
+        },function(err){
+            console.log("ALL done."+JSON.stringify(listWithDistance));
+            if(fn!=undefined){
+                console.log(fn);
+                fn(listWithDistance);
+            }
+        })
+    });
+
     socket.on('getDataPointsWithSelection', function (request, fn) {
         var selection = request.selection;
         if(fn!=undefined){
