@@ -1030,6 +1030,9 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             device.orientation = deviceInfo.orientation;
         }
 
+        if(device.orientation.yaw>=360){
+            device.orientation.yaw = device.orientation.yaw % 360;
+        }
         // JSclient may register deivce with location as well.
         if(deviceInfo.location!=undefined){
             device.location = {X: deviceInfo.location.X, Y: deviceInfo.location.Y, Z: deviceInfo.location.Z}

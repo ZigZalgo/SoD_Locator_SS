@@ -413,7 +413,7 @@ exports.handleRequest = function (socket) {
     socket.on('handsUpdate',function(data,fn){
         console.log("Hand update with data: "+JSON.stringify(data));
         data.socketID = socket.id;
-        data.sensorID = locator.sensors.leapMotions[socket.id].ID
+        data.sensorID = locator.sensors.leapMotions[socket.id].ID;
         locator.leapMotionService.updatePersonWithHandData(data,function(callback){
             console.log(callback);
             fn(callback);

@@ -408,12 +408,13 @@ describe("util.getIntersectionPoint() with Room sides",function(){
                         })
                     }
                 ],function(err,results){
-                    console.log(results);
+                    console.log("YO!:::"+JSON.stringify(results));
                     try {
                         //expect(results[0].X).to.be.closeTo(0.866,0.05);
-                        expect(results[1]).to.equal(null);
+                        console.log(results);
+                        //expect(results[1]).to.equal(null);
+                        //expect(results[2]).to.equal(null);
                         expect(results[2]).to.equal(null);
-                        //expect(results[3]).to.equal(null);
                         done()    // success: call done with no parameter to indicate that it() is done()
                     } catch( e ) {
                         done( e ) // failure: call done with an error Object to indicate that it() failed

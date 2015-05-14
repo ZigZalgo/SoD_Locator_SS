@@ -802,7 +802,7 @@ function refreshStationaryLayer() {
     // Paint room on stationary layer
     io.emit("getRoomFromServer",{},function(room){
         // Got room from server drawing room with kineticjs
-        drawRoom(room,stage,layer);
+        //drawRoom(room,stage,layer);
     })
     // drawing data points
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {

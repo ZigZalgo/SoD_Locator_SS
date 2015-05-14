@@ -30,7 +30,7 @@ var device = {  ID : null,
     socketID : null,
     deviceType : "JSClientDevice",
     location : {X: 1, Y: 2, Z:3},
-    orientation : 12,
+    orientation : 2470,
     FOV : 12,
     height : 1,
     width :  1,
@@ -133,15 +133,16 @@ describe("register functions", function () {
     })
 
     it('should be able to register device', function(done){
-        var client1 = io.connect(socketURL,options);;
+        var client1 = io.connect(socketURL,options);
         client1.on('connect',function(data){
             console.log('haha');
             // register sensor
             try{
                 client1.emit('registerDevice', device, function(data){
                     data.should.have.property('status','registered');
+                    //console.log(data);
                     expect(data.entity.socketID).to.equal(client1.socket.transport.sessid);
-                    expect(data.entity.orientation.yaw).to.equal(device.orientation);
+                    expect(data.entity.orientation.yaw).to.equal(device.orientation%360);
                     expect(data.entity.depth).to.equal(device.depth);
                     expect(data.entity.height).to.equal(device.height);
                     expect(data.entity.width).to.equal(device.width);
@@ -156,6 +157,7 @@ describe("register functions", function () {
         })
     })
 });
+
 
 describe("Sensor functions -", function () {
     it('LeapMotion - \"handUpdate\" updateHand data should work: ', function(done){
