@@ -12,7 +12,13 @@ var async = require("async");
 var dataPoints = {};
 var persons = {};
 var devices = {};
-var sensors = {kinects:{},leapMotions:{},iBeacons:{}};
+
+//Modifications For Beacon
+var sensors = {kinects:{},leapMotions:{},iBeacons:{}, iBeaconRcvrs:{}};
+var visibleBeacons = {};
+exports.visibleBeacons = visibleBeacons;
+//
+
 var data = {};
 exports.kinectSensorsReference = null;
 exports.persons = persons;
@@ -53,6 +59,25 @@ exports.registerSensor = function(socket,type,sensorInfo,callback){
             console.log("Unkonwn Sensor Type: "+ sensorInfo.sensorType);
     }
 }
+
+//Modifications by Nabil Muthanna
+//------------------------------------------------------------------------------------------------------------//
+//Handles recieving beacons list
+
+exports.handleDeregisteringBeaconTransmitter = function(socket){
+    
+    console.log("deRegister iBeacon Inc in Locator");
+    locator.iBeaconService.deRegisterIBeaconTrHandler(socket);
+}
+
+exports.handleUpdatedBeaconsList = function(socket, beaconsList, callback){
+    
+    console.log('Isnide locator.js');
+    //console.log('Handling updating the following beacons list: \n\n'+JSON.stringify(beaconsList) + '\n\n');
+    locator.iBeaconService.handleUpdatedBeaconsList(socket, beaconsList, callback);
+}
+//------------------------------------------------------------------------------------------------------------//
+//Modifications
 
 // calibration to sensors
 exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
@@ -683,7 +708,7 @@ exports.updateDeviceOrientation = function(orientation, socket){
             device.lastUpdated = new Date();
             devices[socket.id] = device;
         }*/
-        console.log("update orientaion of a device hasn't registered");
+        //console.log("update orientaion of a device hasn't registered");
     }
 }
 
@@ -900,7 +925,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         device.lastUpdated = new Date();
         device.deviceIP = socketIP;
         if(typeof(deviceInfo.orientation)=="number"){
-            console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting pitch to default : 0");
+            //console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting pitch to default : 0");
             device.orientation = {pitch:0,yaw:deviceInfo.orientation};
         }else{
             device.orientation = deviceInfo.orientation;
@@ -928,6 +953,18 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             //console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
             fn({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
+
+        
+
+        //Modifications by Nabil Muthanna
+        //------------------------------------------------------------------------------------------------------------//
+        if(deviceInfo.deviceType == "iBeaconRcvr"){
+            console.log("Device Type is iBeaconRcvr");
+            locator.iBeaconService.registerIBeaconRcvrHandler(socket,deviceInfo,fn); 
+        }
+
+        //------------------------------------------------------------------------------------------------------------//
+        //Modifications
 
         frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});
     }
