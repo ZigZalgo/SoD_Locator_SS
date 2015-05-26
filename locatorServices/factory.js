@@ -6,6 +6,7 @@ var uniqueDeviceCounter = reservedDeviceIDRange + 1;
 var uniqueSensorCounter = 0;
 var uniqueDataPointCounter = 0;
 var uniqueDataCounter = 0;
+var uniqueProjectorCounter = 0;
 
 // data object (first class)
 function data(){
@@ -59,6 +60,26 @@ function dataPoint(location,socketID,dropRange,data,observer,subscriber){
 dataPoint.prototype = {
 };
 exports.dataPoint = dataPoint;
+
+function projector(socketID,data,subscriber){
+    try{
+        
+        this.ID = uniqueProjectorCounter++;
+        this.socketID = socketID;
+        if(data!=undefined){
+            this.data = data;
+        }
+        this.subscriber = subscriber;
+        this.subscriber.subscriberType = subscriber.subscriberType;
+        
+    }catch(err){
+        return false;
+    }
+}
+projector.prototype = {
+};
+exports.projector = projector;
+
 
 function Person(id, location, socket){
     try{
@@ -234,7 +255,6 @@ Device.prototype = {
 };
 
 exports.Device = Device;
-
 
 
 // tested

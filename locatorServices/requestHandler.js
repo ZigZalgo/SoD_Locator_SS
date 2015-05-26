@@ -44,6 +44,10 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    socket.on('registerProjector',function (projectorInfo,fn){
+        locator.registerProjector(socket,projectorInfo,fn);
+    });
+
 
     socket.on('registerWebClient', function (clientInfo, fn) {
         frontend.clients[socket.id].clientType = "webClient";
@@ -59,6 +63,56 @@ exports.handleRequest = function (socket) {
         }
     });
     //END REGISTRATION EVENTS////////////////////////////////////////////////////////////////////////////////////////
+
+    //START PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
+
+    socket.on('connectToProjector',function (deviceInfo,fn){
+        locator.connectToProjector(socket,deviceInfo,fn);
+    });
+
+    socket.on('getRoom',function (deviceInfo,fn){
+        locator.getRoom(socket,deviceInfo,fn);
+    });
+
+    socket.on('addWindow',function (apidata,fn){
+        locator.newWindow(socket,apidata,fn);
+    });
+
+    socket.on('newCircle',function (apidata,fn){
+        locator.newCircle(socket,apidata,fn);
+    });
+
+    socket.on('moveCircle',function (apidata,fn){
+        locator.moveCircle(socket,apidata,fn);
+    });
+
+    socket.on('newRectangle',function (apidata,fn){
+        locator.newRectangle(socket,apidata,fn);
+    });
+
+    socket.on('moveRectangle',function (apidata,fn){
+        locator.moveRectangle(socket,apidata,fn);
+    });
+
+    socket.on('newTexRectangle',function (apidata,fn){
+        locator.newTexRectangle(socket,apidata,fn);
+    });
+
+    socket.on('moveTexRectangle',function (apidata,fn){
+        locator.moveTexRectangle(socket,apidata,fn);
+    });
+
+    socket.on('newLine',function (apidata,fn){
+        locator.newLine(socket,apidata,fn);
+    });
+
+    socket.on('newText',function (apidata,fn){
+        locator.newText(socket,apidata,fn);
+    });
+
+    //END PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
+
+
 
     //START PAIRING EVENTS///////////////////////////////////////////////////////////////////////////////////////////
     socket.on('setPairingState', function (data, fn) {
