@@ -157,17 +157,20 @@ function leapMotion(socket){
 exports.leapMotion = leapMotion;
 
 
-// Leap motion constructor
-function iBeacon(socket){
-    try{
+//Modifications by Nabil Muthanna  and added (sensorInfo) argument
+//------------------------------------------------------------------------------------------------------------//   
+// Beacon constructor
+function iBeacon(socket, sensorInfo){
+    try{  
+        this.uuid = sensorInfo.uuid;
+        this.major = sensorInfo.major;
+        this.minor = sensorInfo.minor;
+        this.identifier = sensorInfo.identifier;
+       
         this.ID = uniqueSensorCounter ++;
         this.socketID = socket.id;
         this.sensorType = "iBeacon";
-        //this.FOV = 0;
         this.lastUpdated = new Date();
-        //this.calibration = {Rotation: null, TransformX: null, TransformY: null,xSpaceTransition:null,ySpaceTransition:null, StartingLocation: {X: 0, Y: 0, Z: 0}};
-        //this.isCalibrated = false;
-        //console.log("constructing sensor: "+ JSON.stringify(this.calibration));
     }
     catch(err){
         return false;
@@ -175,6 +178,27 @@ function iBeacon(socket){
 }
 
 exports.iBeacon = iBeacon;
+
+//BeaconRcvr Constructor
+function iBeaconRcvr(socket, sensorInfo){
+    console.log('\nInside iBeaconRcvr\n');
+    try{
+
+        this.ID = uniqueSensorCounter ++;
+        this.name = sensorInfo.name;
+        this.socketID = socket.id;
+        this.sensorType = "iBeaconRcvr";
+        this.lastUpdated = new Date();
+    }
+    catch(err){
+        return false;
+    }
+}
+
+exports.iBeaconRcvr = iBeaconRcvr;
+//------------------------------------------------------------------------------------------------------------//
+//Modifications
+
 
 // TODO: TEST
 function Device(socket, opts){

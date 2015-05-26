@@ -48,6 +48,28 @@ exports.handleRequest = function (socket) {
         locator.registerProjector(socket,projectorInfo,fn);
     });
 
+    //Handle deregistering beaconTransmitter
+    socket.on('deRegisterBeaconTransmitter', function(sensorInfo, fn){
+        locator.handleDeregisteringBeaconTransmitter(socket);
+    });
+
+
+    //Handles recieving beacons list
+    socket.on('updatedBeaconsList', function (beaconsList, fn) {
+        console.log('New Updated Beacons List: '+JSON.stringify(beaconsList));
+        
+        try{
+            if(beaconsList != null){
+                locator.handleUpdatedBeaconsList(socket, beaconsList, fn);
+            }
+            else{
+                console.log('Isnide requestHandler.js: The beaconsList is empty');
+            }
+        }catch(e) {
+            console.log('Isnide requestHandler.js');
+            console.log("Error handling updated Beacons List: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
+        }
+    });
 
     socket.on('registerWebClient', function (clientInfo, fn) {
         frontend.clients[socket.id].clientType = "webClient";
