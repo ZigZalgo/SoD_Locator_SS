@@ -322,6 +322,7 @@ $(function(){
 
         // get calibration rule for reference sensor
         io.emit('getSensorsFromServer',{},function(sensors){
+            console.log(sensors);
             sensors = sensors.kinects;
             for(var key in sensors){
                 if(sensors.hasOwnProperty(key) && sensors[key].ID == referenceSensorID){

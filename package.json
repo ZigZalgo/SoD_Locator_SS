@@ -10,7 +10,7 @@
     "chai": "*",
     "mocha": "*",
     "underscore": "*",
-    "socket.io": "0.9",
+    "socket.io": "0.9.17",
     "zeparser": "0.0.7",
     "express.io": "*",
     "walk": "*",

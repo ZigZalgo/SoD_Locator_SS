@@ -203,6 +203,9 @@ io.sockets.on('connection', function (socket) {
                     console.log("IMPLEMENT CLEAN UP CODE FOR JSCLIENT!");
                     locator.cleanUpDevice(socket.id);
                     break;
+                case 'unityVisualizer':
+                    console.log("-> Unity Visualizer Disconnected.");
+                    break;
                 default:
                     if(locator.devices[socket.id] != null) locator.cleanUpDevice(socket.id);
                     if(locator.sensors[socket.id] != null) locator.cleanUpSensor(socket.id);

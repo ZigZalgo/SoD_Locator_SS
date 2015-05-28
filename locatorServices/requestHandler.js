@@ -60,6 +60,13 @@ exports.handleRequest = function (socket) {
             fn({"status": 'server: you registered as a "mobileWebClient"'})
         }
     });
+    socket.on('registerUnityVisualizer',function(clientInfo,fn){
+        frontend.clients[socket.id].clientType = "unityVisualizer";
+        console.log("-> A Unity Visualizer Connected");
+        if(fn!=undefined){
+            fn({"status":"success"})
+        }
+    })
     //END REGISTRATION EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
     //START PAIRING EVENTS///////////////////////////////////////////////////////////////////////////////////////////
@@ -153,10 +160,11 @@ exports.handleRequest = function (socket) {
         if(sensorInfo.translateRule!=undefined){
             var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
                 StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
-            locator.sensors.kinects[socket.id].calibration = receivedCalibration;
-            console.log(JSON.stringify(locator.sensors.kinects[socket.id].calibration));
+            if(locator.sensors.kinects[socket.id]!=undefined){
+                locator.sensors.kinects[socket.id].calibration = receivedCalibration;
+                console.log(JSON.stringify(locator.sensors.kinects[socket.id].calibration));
+            }
         }
-
     });
 
     socket.on('updateServerSettings',function(request,response){
@@ -220,7 +228,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
-        //console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
+       // console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
         //console.log(util.filterDevices(socket, request.selection));
         fn(util.filterDevices(socket, request));
     })
@@ -357,10 +365,16 @@ exports.handleRequest = function (socket) {
         for (var key in util.filterDevices(socket, request)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(request.arguments==undefined) request.arguments = null;
-                frontend.clients[key].emit("request", {dataRequested: request.data, arguments: request.arguments}, function (data) {
-                    console.log(data);
-                    socket.emit(request.data, data);
-                })
+                frontend.clients[key].emit("request",
+                    {
+                        dataRequested: request.data,
+                        arguments: request.arguments
+                    },
+                    function (data)
+                    {
+                        console.log(data);
+                        socket.emit(request.data, data);
+                    })
             }
         }
         if (fn != undefined) {
@@ -372,7 +386,8 @@ exports.handleRequest = function (socket) {
 
     socket.on('broadcast', function (request, fn) {
         try {
-            console.log(JSON.stringify(request));
+            //console.log(JSON.stringify(request));
+            console.log("Received Broadcast emit from "+ frontend.clients[socket.id].clientType);
             socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});
         }
         catch (err) {

@@ -1250,7 +1250,7 @@ var matrixTransformation = function(personLocation,angle){
 
 io.emit("registerWebClient", {});
 $(document).ready(function(){
-    setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for people list and display on canvas
+    setInterval(function() {updateContentWithObjects(); }, 500); //poll server for people list and display on canvas
 })
 
 var sendResetRequest = function(socketID){
