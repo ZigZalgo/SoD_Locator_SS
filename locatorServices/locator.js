@@ -1058,7 +1058,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             fn({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
 
-        frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});
+        //frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});
     }
 
     var a = {"ID":109,"status":"registered","entity":{"uniqueDeviceID":109,"orientation":{"pitch":0,"yaw":0},"name":"ICT524J","socketID":"GKcaCiswXNpMx8JAKOPn","deviceType":"walldisplay","location":{"X":1,"Y":2,"Z":3},"FOV":30,"depth":0.5,"height":1,"width":0.5,"ownerID":null,"pairingState":"unpaired","intersectionPoint":{"X":0,"Y":0},"lastUpdated":"2015-05-05T22:37:14.086Z","stationary":true,"deviceIP":"127.0.0.1","observer":{"observerType":"radial","observeRange":1,"observeWidth":null,"observeHeight":null,"observerDistance":null},"inRangeOf":{},"inViewList":{},"subscribeToEvents":{"roomIntersectionEvents":true,"inViewEvents":true,"observerRangeEvents":false,"intersectionPointsEvents":false}},"deviceID":109,"socketID":"GKcaCiswXNpMx8JAKOPn","currentDeviceNumber":1,"orientation":{"pitch":0,"yaw":0}}
