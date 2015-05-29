@@ -215,10 +215,10 @@ function inRangeEvent(){
                                          {
                                             observer: {
                                                 ID: locator.devices[deviceKey].uniqueDeviceID,
-                                                type: 'device'
+                                                type: locator.devices[deviceKey].deviceType
                                             },
                                             visitor: {
-                                                type: "device",
+                                                type: locator.devices[locator.persons[personKey].ownedDeviceID].deviceType,
                                                 ID: locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID
                                             }
                                         }
@@ -232,7 +232,7 @@ function inRangeEvent(){
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:{type:"person",ID:locator.persons[personKey].uniquePersonID}});
                                 console.log('-> enter rect '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 if(locator.persons[personKey].pairingState=="paired"){
-                                    locator.emitEventToPairedDevice(locator.persons[personKey],"enterObserveRange",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:{type:"device",ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}})
+                                    locator.emitEventToPairedDevice(locator.persons[personKey],"enterObserveRange",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:locator.devices[deviceKey].deviceType},visitor:{type:locator.devices[locator.persons[personKey].ownedDeviceID].deviceType,ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}})
                                 }
 
                             }
@@ -247,10 +247,10 @@ function inRangeEvent(){
                                         {
                                             observer: {
                                                 ID: locator.devices[deviceKey].uniqueDeviceID,
-                                                type: 'device'
+                                                type: locator.devices[deviceKey].deviceType
                                             },
                                             visitor: {
-                                                type: "device",
+                                                type: locator.devices[locator.persons[personKey].ownedDeviceID].deviceType,
                                                 ID: locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID
                                             }
                                         }
@@ -268,10 +268,10 @@ function inRangeEvent(){
                                         {
                                             observer: {
                                                 ID: locator.devices[deviceKey].uniqueDeviceID,
-                                                type: 'device'
+                                                type: locator.devices[deviceKey].deviceType
                                             },
                                             visitor: {
-                                                type: "device",
+                                                type: locator.devices[locator.persons[personKey].ownedDeviceID].deviceType,
                                                 ID: locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID
                                             }
                                         }
