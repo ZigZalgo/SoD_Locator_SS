@@ -132,6 +132,22 @@ exports.handleRequest = function (socket) {
         locator.newText(socket,apidata,fn);
     });
 
+    socket.on('newPath',function (apidata,fn){
+        locator.newPath(socket,apidata,fn);
+    });
+
+    socket.on('addLineToPath',function (apidata,fn){
+        locator.addLineToPath(socket,apidata,fn);
+    });
+
+    socket.on('removeElement',function (apidata,fn){
+        locator.removeElement(socket,apidata,fn);
+    });
+
+    socket.on('getElementsOnWindow',function (apidata,fn){
+        locator.getElementsOnWindow(socket,apidata,fn);
+    });
+
     //END PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
 

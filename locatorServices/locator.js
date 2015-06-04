@@ -864,11 +864,25 @@ exports.registerDataPoint = function(socket,dataPointInfo,fn){
         dataPointInfo.data.forEach(function(dataName){
             registerData[dataName]=data[dataName];
         })
-        console.log('register data: ' + JSON.stringify(registerData));
-        var dataPoint = new factory.dataPoint(dataPointInfo.location,socket.id,dataPointInfo.dropRange,registerData,dataPointInfo.observer,dataPointInfo.subscriber);
+        
+
+        var location = dataPointInfo.location;
+        if (location == undefined)
+            location = {X: dataPointInfo.locationX, Y: dataPointInfo.locationY, Z: dataPointInfo.locationZ};
+
+        var observer = dataPointInfo.observer;
+        if (observer == undefined)
+            observer  = { observerType: dataPointInfo.observerType, observeWidth: dataPointInfo.observeWidth, observeHeight: dataPointInfo.observeHeight, observerDistance: dataPointInfo.observerDistance };
+
+        var subscriber = dataPointInfo.subscriber;
+        if (subscriber == undefined)
+            subscriber = {subscriberType: dataPointInfo.subscriberType, ID: dataPointInfo.ID };
+
+        var dataPoint = new factory.dataPoint(location,socket.id,dataPointInfo.dropRange,registerData,observer,subscriber);
         frontend.clients[socket.id].clientType = "dataPointClient";
         dataPoints[dataPoint.ID] = dataPoint; // reigster dataPoint to the list with its ID as its key
         //console.log('all data points: ' +JSON.stringify(dataPoints));
+        console.log('new datapoint: ' + JSON.stringify(dataPoint));
         if(fn!=undefined){
             fn(dataPoints[socket.id]);
         }
@@ -1418,8 +1432,6 @@ exports.newWindow = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1439,8 +1451,6 @@ exports.newCircle = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1461,8 +1471,6 @@ exports.moveCircle = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1482,8 +1490,6 @@ exports.newRectangle = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1504,8 +1510,6 @@ exports.moveRectangle = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1525,8 +1529,6 @@ exports.newTexRectangle = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1546,8 +1548,6 @@ exports.moveTexRectangle = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1567,8 +1567,6 @@ exports.newLine = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1589,8 +1587,6 @@ exports.newText = function(socket,apidata,fn) {
 
     try {
 
-        console.log("API call data:");
-        console.log(apidata);
         if (projector != undefined) {
 
             // send the request to the subscriber 
@@ -1607,9 +1603,82 @@ exports.newText = function(socket,apidata,fn) {
 }
 
 
+exports.newPath = function(socket,apidata,fn) {
+
+    try {
+
+        if (projector != undefined) {
+
+            // send the request to the subscriber 
+            var controller = projector[0];
+            frontend.clients[controller.socketID].emit("newPathController", apidata, function (data) {
+                console.log("new path name: " + apidata["name"]);
+                fn(data);
+            });
+        }
+     }
+     catch(err) {
+        console.log('new path failed due to: ' +err)
+     }
+}
+
+exports.addLineToPath = function(socket,apidata,fn) {
+
+    try {
+
+        if (projector != undefined) {
+
+            // send the request to the subscriber 
+            var controller = projector[0];
+            frontend.clients[controller.socketID].emit("addLineToPathController", apidata, function (data) {
+                console.log("add to path named: " + apidata["name"]);
+                fn(data);
+            });
+        }
+     }
+     catch(err) {
+        console.log('add to path failed due to: ' +err)
+     }
+}
+
+exports.removeElement = function(socket,apidata,fn) {
+
+    try {
+
+        if (projector != undefined) {
+
+            // send the request to the subscriber 
+            var controller = projector[0];
+            frontend.clients[controller.socketID].emit("removeElementController", apidata, function (data) {
+                console.log("removed element named: " + apidata["name"]);
+                fn(data);
+            });
+        }
+     }
+     catch(err) {
+        console.log('remove failed due to: ' +err)
+     }
+}
 
 
+exports.getElementsOnWindow = function(socket,apidata,fn) {
 
+    try {
+
+        if (projector != undefined) {
+
+            // send the request to the subscriber 
+            var controller = projector[0];
+            frontend.clients[controller.socketID].emit("getElementsOnWindowController", apidata, function (data) {
+                
+                fn(data);
+            });
+        }
+     }
+     catch(err) {
+        console.log('get elements failed due to: ' +err)
+     }
+}
 
 
 
