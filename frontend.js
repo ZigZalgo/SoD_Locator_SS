@@ -86,6 +86,11 @@ app.get('/images/ajax-loader.gif', function (req, res) {
 app.get('/overviewJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/overview.js');
 });
+app.get('/happiness', function (req, res) {
+    console.log("requested for happiness");
+    res.sendfile(__dirname + '/data/happiness.json');
+});
+
 app.get('/calibrateJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/calibrate.js');
 });

@@ -91,7 +91,8 @@ function grabDataInRange(requestObject,targetObject){
     if(targetObject.data != undefined && Object.keys(targetObject.data).length != 0) {
         // if there exists data in side of an object, grab all the data
         for (var dataKey in targetObject.data) {
-            if(targetObject.data.hasOwnProperty(dataKey)) {
+           /* if(targetObject.data.hasOwnProperty(dataKey)) {
+                console.log(targetObject.data[dataKey]);
                 dataRange = targetObject.data[dataKey].range;
                 // get range of this point
                 if (requestObject.data[dataKey] == undefined && distance <= dataRange) {
@@ -99,7 +100,7 @@ function grabDataInRange(requestObject,targetObject){
                     requestObject.data[dataKey] = targetObject.data[dataKey];
                     console.log('\t->-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey].name) + ' From targetobject');
                 }
-            }
+            }*/
         }
     }else{
         console.log('\t->-> Ojbect grabbed '+'0 data from target.' );
@@ -339,6 +340,12 @@ exports.updatePersons = function(receivedPerson, socket){
             person.lastUpdated = new Date();
             person.currentlyTrackedBy = socket.id;
             person.gesture = receivedPerson.gesture;
+            if(receivedPerson.leftHandLocation!=null){
+                person.hands.left.location = receivedPerson.lefthandLocation;
+            }
+            if(receivedPerson.rightHandLocation!=null){
+                person.hands.right.location = receivedPerson.rightHandLocation;
+            }
             persons[person.uniquePersonID] = person;
         }
     }
@@ -379,7 +386,12 @@ exports.updatePersons = function(receivedPerson, socket){
                             /*if(receivedPerson.gesture!=null){
                                 gestureHandler(personKey,personInList.gesture,socket);//handles the guesture
                             }*/
-
+                            if(receivedPerson.leftHandLocation!=null){
+                                personInList.hands.left.location = receivedPerson.leftHandLocation;
+                            }
+                            if(receivedPerson.rightHandLocation!=null){
+                                personInList.hands.right.location = receivedPerson.rightHandLocation;
+                            }
                             if(personInList.ownedDeviceID != null) {
                                 devices[personInList.ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
                                 devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
@@ -387,6 +399,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             }
                             //console.log("\t->received Peron got updated " + "with personList.");
                             receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
+                            //console.log("udpate Person hand "+JSON.stringify(personInList.hands));
                             eachSeriesCallback();
                         }catch (e){
                             console.log("error update person with existing ID: "+e);
