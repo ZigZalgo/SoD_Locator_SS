@@ -98,63 +98,63 @@ exports.handleRequest = function (socket) {
     //START PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
     socket.on('connectToProjector',function (deviceInfo,fn){
-        locator.connectToProjector(socket,deviceInfo,fn);
+        locator.projectorService.connectToProjector(socket,deviceInfo,fn);
     });
 
     socket.on('getRoom',function (deviceInfo,fn){
-        locator.getRoom(socket,deviceInfo,fn);
+        locator.projectorService.getRoom(socket,deviceInfo,fn);
     });
 
     socket.on('addWindow',function (apidata,fn){
-        locator.newWindow(socket,apidata,fn);
+        locator.projectorService.newWindow(socket,apidata,fn);
     });
 
     socket.on('newCircle',function (apidata,fn){
-        locator.newCircle(socket,apidata,fn);
+        locator.projectorService.newCircle(socket,apidata,fn);
     });
 
     socket.on('moveCircle',function (apidata,fn){
-        locator.moveCircle(socket,apidata,fn);
+        locator.projectorService.moveCircle(socket,apidata,fn);
     });
 
     socket.on('newRectangle',function (apidata,fn){
-        locator.newRectangle(socket,apidata,fn);
+        locator.projectorService.newRectangle(socket,apidata,fn);
     });
 
     socket.on('moveRectangle',function (apidata,fn){
-        locator.moveRectangle(socket,apidata,fn);
+        locator.projectorService.moveRectangle(socket,apidata,fn);
     });
 
     socket.on('newTexRectangle',function (apidata,fn){
-        locator.newTexRectangle(socket,apidata,fn);
+        locator.projectorService.newTexRectangle(socket,apidata,fn);
     });
 
     socket.on('moveTexRectangle',function (apidata,fn){
-        locator.moveTexRectangle(socket,apidata,fn);
+        locator.projectorService.moveTexRectangle(socket,apidata,fn);
     });
 
     socket.on('newLine',function (apidata,fn){
-        locator.newLine(socket,apidata,fn);
+        locator.projectorService.newLine(socket,apidata,fn);
     });
 
     socket.on('newText',function (apidata,fn){
-        locator.newText(socket,apidata,fn);
+        locator.projectorService.newText(socket,apidata,fn);
     });
 
     socket.on('newPath',function (apidata,fn){
-        locator.newPath(socket,apidata,fn);
+        locator.projectorService.newPath(socket,apidata,fn);
     });
 
     socket.on('addLineToPath',function (apidata,fn){
-        locator.addLineToPath(socket,apidata,fn);
+        locator.projectorService.addLineToPath(socket,apidata,fn);
     });
 
     socket.on('removeElement',function (apidata,fn){
-        locator.removeElement(socket,apidata,fn);
+        locator.projectorService.removeElement(socket,apidata,fn);
     });
 
     socket.on('getElementsOnWindow',function (apidata,fn){
-        locator.getElementsOnWindow(socket,apidata,fn);
+        locator.projectorService.getElementsOnWindow(socket,apidata,fn);
     });
 
     //END PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
