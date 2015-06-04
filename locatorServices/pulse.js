@@ -298,12 +298,12 @@ function inRangeEvent(){
                                 console.log('person inside of dataPoint: '+dataPointKey );
                                 locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                                 //TODO: add sendMessageToSubscriber function call
-                                locator.emitEventToSubscriber('enterObserveRange',{observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID},locator.dataPoints[dataPointKey].subscriber)
+                                locator.emitEventToSubscriber('enterObserveRange',{observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: {type:"person",ID:locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                                 console.log('-> enter rec!! '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             }
                         }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)<=locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
-                            locator.emitEventToSubscriber('enterObserveRange', {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID},locator.dataPoints[dataPointKey].subscriber)
+                            locator.emitEventToSubscriber('enterObserveRange', {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: {type:"person",ID:locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                             console.log('-> enter radial '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                         }
                     }else if(locator.persons[personKey].inRangeOf[dataPointKey]!=undefined){ // handles leave event
@@ -312,13 +312,13 @@ function inRangeEvent(){
                             if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer.observeHeight)==false){
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                                 //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}});
-                                locator.emitEventToSubscriber('leaveObserveRange', {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID},locator.dataPoints[dataPointKey].subscriber);
+                                locator.emitEventToSubscriber('leaveObserveRange', {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: {type:"person",ID:locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                                 delete locator.persons[personKey].inRangeOf[dataPointKey];
                             }
                         }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)>locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}});
-                            locator.emitEventToSubscriber('leaveObserveRange', {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID},locator.dataPoints[dataPointKey].subscriber);
+                            locator.emitEventToSubscriber('leaveObserveRange', {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: {type:"person",ID:locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                             delete locator.persons[personKey].inRangeOf[dataPointKey];
                         }
                     }// in range of somebdoy ends
