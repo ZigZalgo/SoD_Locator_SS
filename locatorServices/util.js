@@ -2,6 +2,7 @@ var factory = require('./factory');
 var locator = require('./locator');
 var util = require('./util');
 var Q = require('q');
+var async = require('async');
 
 exports.DEFAULT_FIELD_OF_VIEW = 25.0;
 exports.KINECT_VIEW_RANGE = 28.5;               // not being used yet
@@ -9,7 +10,9 @@ exports.ROUND_RATIO         = 150;         // the round ratio for dealing with n
 
 var RADIANS_TO_DEGREES = 180 / Math.PI;
 var DEGREES_TO_RADIANS = Math.PI / 180;
-var tolerance = 0.05;
+exports.RADIANS_TO_DEGREES = RADIANS_TO_DEGREES;
+exports.DEGREES_TO_RADIANS = DEGREES_TO_RADIANS;
+var tolerance = 0.1;
 
 
 /*
@@ -168,7 +171,7 @@ exports.matrixTransformation = function (personLocation, angle, callback) {
     returnLocation.Z = Math.round(returnZ * this.ROUND_RATIO) / this.ROUND_RATIO;
     if(callback != undefined){
         try{
-            callback();
+            callback(returnLocation);
         }catch(e){
             console.log(' error in callback: '+ e);
         }
@@ -225,14 +228,181 @@ exports.angleBetweenPoints = function (start, end) {
 exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
     if(objectLocation.X<=(observerLocation.X - width/2)||(objectLocation.X >=observerLocation.X+width/2)||
         (objectLocation.Z<=(observerLocation.Z - height/2)) || objectLocation.Z >= (observerLocation.Z + height/2)){
+        if(fn!=undefined){
+            fn(false)
+        }
         return false;
+
     }else{
         //console.log("object:"+JSON.stringify(objectLocation)+" observer: "+JSON.stringify(observerLocation) + " width: "+width+" height: "+JSON.stringify(height));
+        if(fn!=undefined){
+            fn(true)
+        }
         return true;
     }
 };
 
 
+// get the intersection point from four walls, value passed into callback
+exports.getIntersectedWall = function(observer,callback){
+    // get translation rule
+    util.translateOrientationToReference(observer,
+        function(orientationToReference){
+            //console.log("To reference: "+ orientationToReference);
+        var room = locator.room;
+        var observerSight = factory.makeLineUsingOrientation(observer.location, orientationToReference);
+        var top = factory.makeLineUsingPoints(locator.room.walls.top.startingPoint,locator.room.walls.top.endingPoint);
+        var left = factory.makeLineUsingPoints(locator.room.walls.left.startingPoint,locator.room.walls.left.endingPoint);
+        var right = factory.makeLineUsingPoints(locator.room.walls.right.startingPoint,locator.room.walls.right.endingPoint);
+        var bottom = factory.makeLineUsingPoints(locator.room.walls.bottom.startingPoint,locator.room.walls.bottom.endingPoint);
+        // process all fource walls, try to get intersection in XZ space
+        async.parallel([
+            function(paCallback){
+                util.getIntersectionPoint(observerSight,top).then(function(data){
+                    //console.log("haha"+JSON.stringify(data));
+                    //console.log("TOP: "+ JSON.stringify(top));
+                    paCallback(null,{intersectedPoint:data,side:'top'});
+                })
+            },function(paCallback){
+                util.getIntersectionPoint(observerSight,left).then(function(data){
+                    paCallback(null,{intersectedPoint:data,side:'left'});
+                })
+            },function(paCallback){
+                util.getIntersectionPoint(observerSight,right).then(function(data){
+                    paCallback(null,{intersectedPoint:data,side:'right'});
+                })
+            },function(paCallback){
+                util.getIntersectionPoint(observerSight,bottom).then(function(data){
+                    paCallback(null,{intersectedPoint:data,side:'bottom'});
+                })
+            }
+        ],function(err,results){
+            //console.log("*****");
+            if(callback!=undefined){
+                var intersectedPoints=[];
+                results.forEach(function(result){
+                    if(result.intersectedPoint!=null){
+                        intersectedPoints.push(result);
+                    }
+                })
+                //console.log("intersectedPoints YO: "+JSON.stringify(intersectedPoints));
+                // if there are multiple intersection point, due to there are four walls and in line
+                if(intersectedPoints.length>1){
+                    // check if the intersection point is in the view of the device orientation
+                    //console.log("2 int with observer:" + JSON.stringify(observer));
+
+                    // start water fall to get the proper intersection points
+                    async.waterfall([
+                        function(WFCallback){
+
+                            /*   There has to be one that is in the FOV of device orientation
+                             *
+                             *   callbackLock - This variable lock the waterfall callback. Since we may get two intersection point from the
+                             *          From the corner of the room. And both of the intersection points will be in the view the device.
+                             *          So we use this variable to lock the callback for current process.
+                             * */
+                            var callbackLock = false;
+
+                            intersectedPoints.forEach(function(intPoint){
+                                //console.log("intPoint:" + JSON.stringify(intPoint));
+                                //console.log("observer:" + JSON.stringify(observer));
+
+                                util.isPointInView(intPoint.intersectedPoint,observer,function(isInView){
+                                    //console.log(isInView);
+                                    if(isInView&&callbackLock==false){
+                                        callbackLock=true;  // lock the callback to prevent multiple callback being invoked
+                                        WFCallback(null,intPoint)
+                                    }
+                                    //if the point location is inView
+                                })
+                            })
+                        },
+                        function(intPoint,WFCallback){
+                            //console.log("intPoint:" + JSON.stringify(intPoint));
+                            // once we get the intersectionPoint in FOV, we get the Y intersection value from pitch
+                            if(intPoint!=null) {
+                                util.getDistanceOfTwoLocation(observer.location, intPoint.intersectedPoint, function (XZProjection) {
+                                    var intersectionY = Math.tan(observer.orientation.pitch * DEGREES_TO_RADIANS) * XZProjection + parseFloat(observer.location.Y);
+                                    //console.log("Y: "+intersectionY + "room.location.Y"+room.location.Y+"room.height"+room.height);
+                                    if (intersectionY > (room.location.Y + room.height) ||
+                                        intersectionY < (room.location.Y)) {
+                                        WFCallback(null, null);
+                                    } else {
+                                        intPoint.intersectedPoint.Y = intersectionY;
+                                        WFCallback(null, intPoint)
+                                    }
+                                })
+                            }else {
+                                WFCallback(null,null);
+                            }
+                        }
+
+                    ],function(err,result){
+                        //console.log("result: " , JSON.stringify(result))
+                        //console.log("callback1");
+                        callback(result);
+                    })
+                }else{
+                    // if there is only one intersection point , we double check if the point is in view
+                    util.isPointInView(intersectedPoints[0].intersectedPoint,observer,function(isInView){
+                        if(isInView){
+                            // if the point is inView we callback with the Y interesection value of data
+                            util.getDistanceOfTwoLocation(observer.location,intersectedPoints[0].intersectedPoint,function(XZProjection){
+                                var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
+                                if(intersectionY>(room.location.Y+room.height)||
+                                    intersectionY<(room.location.Y)){
+                                    //console.log("callback2");
+                                    callback(null);
+                                }else{
+                                    intersectedPoints[0].intersectedPoint.Y = intersectionY;
+                                    //console.log("callback3");
+                                    callback(intersectedPoints)
+                                }
+                            })
+                        }else{
+                            //console.log("callback");
+                            callback(null);
+                        }
+                    })
+                    // if we get one intersection points from the walls, check if it's in front
+                }
+            }
+        })
+    })
+
+}
+// in 2D
+exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
+    util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
+        //console.log("vector distance: "+result+"\t direction: "+JSON.stringify(moveDirectionVector));
+
+        var ratioToDistance = distance/result;
+
+        // handles the case when the location is not a number
+        var xMovedTo = parseFloat(locationOfPoint.X)+parseFloat(ratioToDistance*moveDirectionVector.X);
+        var zMovedTo = parseFloat(locationOfPoint.Z)+parseFloat(ratioToDistance*moveDirectionVector.Z);
+        //console.log(xMovedTo+" type: "+typeof(xMovedTo));
+        callback({
+            X:xMovedTo,
+            Y:Number(locationOfPoint.Y),
+            Z:zMovedTo
+        });
+    })
+}
+
+
+// check if objectLocation is in the room
+exports.inRoom = function(objectLocation,callback){
+    var room = locator.room;
+    //since room is a rect we use inRect to check if the object is on the roof or ceiling
+    if(objectLocation.Y > room.height||objectLocation.Y<0){
+        callback(false);
+    }else{
+        util.isInRect(objectLocation,room.location,room.length,room.depth,function(bool){
+            callback(bool);
+        });
+    }
+}
 
 
 // Tested!
@@ -264,25 +434,52 @@ exports.getIntersectionPoint = function (line1, line2) {
 
 function calculatePossibleInt(line1,line2){
     var IntersectionPoint = null;
-    if (line1.isVerticalLine && line2.isVerticalLine || line1.slope == line2.slope)
+    //console.log("\n->\t"+JSON.stringify(line1)+"\n"+JSON.stringify(line2)+"\n\n");
+   if (line1.isVerticalLine && line2.isVerticalLine || line1.slope == line2.slope)
         return null;
     else if (line1.isVerticalLine) {
         var yValue = line2.slope * line1.x + line2.zIntercept;
         IntersectionPoint = factory.make2DPoint(line1.x, yValue);
+       return Q(IntersectionPoint);
     }
-    else if (line2.isVerticalLine) {
-        var yValue = line1.slope * line2.x + line1.zIntercept;
-        IntersectionPoint = factory.make2DPoint(line2.x, yValue);
-    }
-    else {
-        var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
-        var yValue = 0;
-        //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
-        //console.log(" Y: " + yValue + "pitch: "+ );
-        var zValue = line1.slope * xValue + line1.zIntercept;
-        IntersectionPoint = {X:xValue,Y: yValue,Z:zValue};
-    }
+   else if (line2.isVerticalLine) {
+       var yValue = line1.slope * line2.x + line1.zIntercept;
+       IntersectionPoint = factory.make2DPoint(line2.x, yValue);
+       return Q(IntersectionPoint);
+   }
+   else {
+       var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
+       var yValue = 0;
+       //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
+       var zValue = line1.slope * xValue + line1.zIntercept;
+       //console.log(" Y: " + zValue + " X:" +xValue);
+       IntersectionPoint = {X:xValue,Y: yValue,Z:zValue};
+   }
     return Q(IntersectionPoint);
+
+
+    /*
+    * var IntersectionPoint = null;
+     if (line1.isVerticalLine && line2.isVerticalLine || line1.slope == line2.slope)
+     return null;
+     else if (line1.isVerticalLine) {
+     var yValue = line2.slope * line1.x + line2.zIntercept;
+     IntersectionPoint = factory.make2DPoint(line1.x, yValue);
+     }
+     else if (line2.isVerticalLine) {
+     var yValue = line1.slope * line2.x + line1.zIntercept;
+     IntersectionPoint = factory.make2DPoint(line2.x, yValue);
+     }
+     else {
+     var xValue = (line2.zIntercept - line1.zIntercept) / (line1.slope - line2.slope);
+     var yValue = 0;
+     //console.log(line2.zIntercept + " - " + line1.zIntercept + ' / ' + line1.slope + ' - ' + line2.slope );
+     //console.log(" Y: " + yValue + "pitch: "+ );
+     var zValue = line1.slope * xValue + line1.zIntercept;
+     IntersectionPoint = {X:xValue,Y: yValue,Z:zValue};
+     }
+     return Q(IntersectionPoint);
+     */
 }
 // Tested!
 exports.isGreater = function (num1, num2) {
@@ -315,12 +512,10 @@ exports.getLinesOfShape = function (device) {
         var rightSide = factory.makeLineUsingPoints(corners[1], corners[2]);
         var bottomSide = factory.makeLineUsingPoints(corners[2], corners[3]);
         var leftSide = factory.makeLineUsingPoints(corners[3], corners[0]);
-
         returnLines.push(topSide);
         returnLines.push(rightSide);
         returnLines.push(bottomSide);
         returnLines.push(leftSide);
-
         //console.log(returnLines[0].startPoint);
         return returnLines;
     }
@@ -536,6 +731,24 @@ exports.findWithAttrWeak = function (array, attr, query) {
     }
 };
 
+exports.findKeyByValue = function(JSONObject, value){
+    var found = false;
+    if(typeof(JSONObject) == "object"){
+        async.each(Object.keys(JSONObject),function(objKey,itrCallback){
+            if(JSONObject[objKey] == value){
+                found = objKey;
+                itrCallback();
+            }else{
+                itrCallback();
+            }
+        },function(err){
+            return found;
+        })
+    }else{
+        console.log("can not search through non JSON");
+        return found;
+    }
+}
 
 exports.findKeyWithAttr = function(obj,value){
 	if(typeof(obj) == "object"){
@@ -592,7 +805,7 @@ exports.filterDevices = function(socket, request){
                         return filterSelection(i + 1, (locator.getAllDevicesExceptSelf(socket, listDevices)));
                         break;
                     case "inView":
-                        return filterSelection(i + 1, locator.getDevicesInView(socket.id, listDevices));// locator.calcIntersectionPoints(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
+                        return filterSelection(i + 1, locator.getDevicesInView(socket.id, listDevices));// locator.calcIntersectionPointsForDevices(socket.id, locator.getDevicesInFront(socket.id, listDevices)));
                         break;
                     case "paired":
                         return filterSelection(i + 1, locator.getPairedDevice(listDevices));
@@ -647,5 +860,149 @@ exports.callbackHandler= function(callback){
         }
     }else{
         //callback is empty
+    }
+}
+
+exports.getNearest = function(subject,objectList,functionCallback){
+    var nearestDistance = 1000,nearestObject = null;
+    // use async.each handle callback after everything is done.
+    async.eachSeries(Object.keys(objectList),function(index,itrCallback){
+        //console.log(index);
+        //console.log("\t"+JSON.stringify(subject)+"\n\t"+ JSON.stringify(objectList[index]));
+        util.getDistanceOfTwoLocation(subject.location,objectList[index].location,function(distance){
+            if(distance<nearestDistance){
+                nearestDistance = distance;
+                nearestObject = objectList[index];
+                itrCallback();
+            }else{
+                itrCallback();
+            }
+
+        })
+    },function(err){
+        // if any of the file processing produced an error, err would equal that error
+        if( err ) {
+            // One of the iterations produced an error.
+            // All processing will now stop.
+            console.log('A person failed to process');
+        } else {
+            console.log('All persons were processed successfully');
+            functionCallback({nearestObject: nearestObject,distance:nearestDistance});
+        }
+    })
+}
+
+// Round up with decimal value
+exports.mathRoundWithDecimal = function(input, decimal){
+    return Math.round(input*Math.pow(10,decimal))/Math.pow(10,decimal);
+}
+exports.getDistanceOfTwoLocation = function(location1,location2,fn){
+    if(location1.X!=undefined && location2.Z!= undefined) {
+        fn(Math.sqrt(
+                (location1.X - location2.X) * (location1.X - location2.X)
+                +
+                (location1.Z - location2.Z) * (location1.Z - location2.Z))
+        );
+    }else{
+        console.log("   *Distance is not defined");
+        fn(null);
+    }
+}
+
+
+exports.isPointInView = function(pointLocation,observer,callback){
+    // List<Device> returnDevices = new List<Device>();
+    var returnDevices = {};
+    //console.log("Observer: "+ JSON.stringify(observer));
+    //console.log(observerSocketID + ' - ' + JSON.stringify(deviceList));
+    //(CB - Should we throw an exception here? Rather then just returning an empty list?)
+    if(observer!=undefined) {
+        if (observer.orientation != undefined) { // check if observer orientation is null
+            function filterFOV(observer, deviceList) {
+                try {
+                    if (observer.location == null || observer.orientation.yaw == null)
+                        return returnDevices;
+                    if (observer.FOV == 0.0)
+                        return returnDevices;
+                    if (observer.FOV == 360.0) {
+                        return Object.keys(deviceList).filter(function (key) {
+                            if (deviceList[key] != observer && deviceList[key].location != undefined) {
+                                return true;
+                            }
+                        })
+                    }
+                }
+                catch (err) {
+                    console.log("Error getting devices in front of device FOV/Location" + ": " + err);
+                }
+
+            }
+            // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
+            // // We will use angles to represent these vectors.
+            try {
+                //console.log("FOV: "+observer.FOV);
+                if(observer.FOV==undefined){
+                    console.log("Observer FOV undefined");
+                    callback(false);
+                }
+                //get the angle to sens
+                var angleToSensor = util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
+                var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
+                var rightFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor - (observer.FOV / 2));
+
+                //console.log("Left FOV = " + leftFieldOfView)
+                //console.log("Right FOV = " + rightFieldOfView)
+                //console.log("Point of interest: "+JSON.stringify(pointLocation));
+
+                if (pointLocation!=undefined) {
+                    if (leftFieldOfView > rightFieldOfView){
+                        if(((util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView) &&
+                            ((util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView))
+                        {
+                            //console.log("YES1");
+                            callback(true)
+                            return true;
+                        }else{
+                            //console.log("NO1");
+                            callback(false);
+                        }
+                    }
+                    else if (leftFieldOfView < rightFieldOfView) {
+                        if ((util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                            (util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                            //console.log("YES2");
+                            callback(true)
+                            return true;
+                        }else{
+                            //console.log("NO2");
+                            callback(false);
+                        }
+                    }
+                }
+                /*return function(){
+                    //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
+                    if (pointLocation!=undefined) {
+                        if (leftFieldOfView > rightFieldOfView &&
+                            (util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
+                            (util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                            return true;
+                        }
+                        else if (leftFieldOfView < rightFieldOfView) {
+                            if ((util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                                (util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                                return true;
+                            }
+                        }
+                    }
+                }();*/
+            }
+            catch (err) {
+                console.log("Error getting devices in front of device " + ": " + err);
+            }
+        } else { // end of checking observer orientation
+            console.log("observer " + JSON.stringify(observer)+ " orientation is null.");
+        }
+    }else{
+        console.log("Observer is undefined in get Devices in front");
     }
 }

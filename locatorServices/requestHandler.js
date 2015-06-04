@@ -2,11 +2,13 @@ var locator = require('./locator');
 var factory = require('./factory');
 var frontend = require('./../frontend');
 var util = require('./util');
-
+var pulse = require("./pulse");
+var async =
+    require("async");
 // TODO: test!
-exports.start = function () {
+/*exports.start = function () {
     locator.start();
-};
+};*/
 
 exports.locator = locator;
 
@@ -84,6 +86,13 @@ exports.handleRequest = function (socket) {
             fn({"status": 'server: you registered as a "mobileWebClient"'})
         }
     });
+    socket.on('registerUnityVisualizer',function(clientInfo,fn){
+        frontend.clients[socket.id].clientType = "unityVisualizer";
+        console.log("-> A Unity Visualizer Connected");
+        if(fn!=undefined){
+            fn({"status":"success"})
+        }
+    })
     //END REGISTRATION EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
     //START PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +213,7 @@ exports.handleRequest = function (socket) {
     //START LOCATOR SERVICES/////////////////////////////////////////////////////////////////////////////////////////
     socket.on('updateOrientation', function (request) {
         //not checking for fn(callback), since adding a callback here would be costly
-        console.log(request);
+        //console.log("Update orientation..");
         if(typeof(request.orientation)=="number"){
             var orientationForUpdate = {yaw:request.orientation,pitch:0}
             locator.updateDeviceOrientation(orientationForUpdate, socket);
@@ -244,11 +253,49 @@ exports.handleRequest = function (socket) {
         if(sensorInfo.translateRule!=undefined){
             var receivedCalibration =  {Rotation: sensorInfo.translateRule.changeInOrientation, TransformX: sensorInfo.translateRule.dX, TransformY: sensorInfo.translateRule.dZ,xSpaceTransition:sensorInfo.translateRule.xSpace,ySpaceTransition:sensorInfo.translateRule.zSpace,
                 StartingLocation: {X: sensorInfo.translateRule.startingLocation.X, Y: sensorInfo.translateRule.startingLocation.Y, Z: sensorInfo.translateRule.startingLocation.Z}};
-            locator.sensors.kinects[socket.id].calibration = receivedCalibration;
-            console.log(JSON.stringify(locator.sensors.kinects[socket.id].calibration));
+            if(locator.sensors.kinects[socket.id]!=undefined){
+                locator.sensors.kinects[socket.id].calibration = receivedCalibration;
+                console.log(JSON.stringify(locator.sensors.kinects[socket.id].calibration));
+            }
         }
-
     });
+
+    socket.on('updateServerSettings',function(request,response){
+        console.log("Setting change request" + JSON.stringify(request));
+        if(request.hasOwnProperty("room")||request.hasOwnProperty("pulse")){
+            for(var type in request){
+                if(Object.keys(request[type]).length>0) {
+                    console.log(type);
+                    async.each(Object.keys(request[type]), function (aProperty, itrCallbackSetting) {
+                        console.log(aProperty);
+                        locator.changeSetting(type, aProperty, request[type][aProperty],function(data){
+                            if(data){
+                                itrCallbackSetting()
+                            }else{
+                                response(false);
+                            }
+                        })
+
+                    }, function (err) {
+                        //console.log("all done" + err);
+                        if(type=='pulse'){
+                            pulse.refreshHeartbeat();
+                        }
+                        response(true);
+                    })
+                }
+
+            }
+//  pulse.refreshHeartbeat(property,value,callback);
+        }else{
+            console.log("request doesn't have correct property");
+        }
+    });
+
+    // END of update envets
+
+
+    // Client requests
     socket.on('getPeopleFromServer', function (request, fn) {
         if (fn != undefined) {
             fn((locator.persons));
@@ -274,10 +321,30 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('getDevicesWithSelection', function (request, fn) {
-        //console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
+       // console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
         //console.log(util.filterDevices(socket, request.selection));
         fn(util.filterDevices(socket, request));
     })
+
+    socket.on("getDeviceInViewWithDistance",function(request,fn){
+        console.log("Request: "+JSON.stringify(request));
+        var devicesInView = util.filterDevices(socket,{selection:['inView']});
+        var listWithDistance = {};
+        async.each(Object.keys(devicesInView),function(deviceKey,eachCallback){
+            util.getDistanceOfTwoLocation(locator.devices[socket.id].location,locator.devices[deviceKey].location,function(callback){
+                console.log(callback);
+                listWithDistance[deviceKey] = locator.devices[deviceKey];
+                listWithDistance[deviceKey]["distance"] = callback
+                eachCallback();
+            })
+        },function(err){
+            console.log("ALL done."+JSON.stringify(listWithDistance));
+            if(fn!=undefined){
+                console.log(fn);
+                fn(listWithDistance);
+            }
+        })
+    });
 
     socket.on('getDataPointsWithSelection', function (request, fn) {
         var selection = request.selection;
@@ -391,9 +458,16 @@ exports.handleRequest = function (socket) {
         for (var key in util.filterDevices(socket, request)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(request.arguments==undefined) request.arguments = null;
-                frontend.clients[key].emit("request", {dataRequested: request.data, arguments: request.arguments}, function (data) {
-                    socket.emit(request.data, data);
-                })
+                frontend.clients[key].emit("request",
+                    {
+                        dataRequested: request.data,
+                        arguments: request.arguments
+                    },
+                    function (data)
+                    {
+                        console.log(data);
+                        socket.emit(request.data, data);
+                    })
             }
         }
         if (fn != undefined) {
@@ -405,7 +479,8 @@ exports.handleRequest = function (socket) {
 
     socket.on('broadcast', function (request, fn) {
         try {
-            console.log(JSON.stringify(request));
+            //console.log(JSON.stringify(request));
+            console.log("Received Broadcast emit from "+ frontend.clients[socket.id].clientType);
             socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});
         }
         catch (err) {
@@ -416,22 +491,41 @@ exports.handleRequest = function (socket) {
     socket.on('personUpdate', function (persons, fn) {
         //get persons from body, call update function for each person
         if (persons != null) {
-            locator.removeIDsNoLongerTracked(socket, persons);
+            //console.log(Object.keys(persons).length);
+            //console.log(persons);
 			try{
-				locator.removeUntrackedPeople(1000);
+                locator.removeIDsNoLongerTracked(socket, persons);
+				locator.removeUntrackedPeople(0);
 			}
 			catch(err){
 				console.log("error trying to remove untracked people: " + err);
 			}
             persons.forEach(function (person) {
+                if(person.gesture!=null){
+                    console.log(person.gesture);
+                }
                 locator.updatePersons(person, socket);
             });
+            /*if(fn!=undefined) {
+                fn();
+            }*/
         }
         else {
             console.log("request was null");
         }
-
         //locator.printPersons();
+    });
+
+
+
+    socket.on('handsUpdate',function(data,fn){
+        console.log("Hand update with data: "+JSON.stringify(data));
+        data.socketID = socket.id;
+        data.sensorID = locator.sensors.leapMotions[socket.id].ID;
+        locator.leapMotionService.updatePersonWithHandData(data,function(callback){
+            console.log(callback);
+            fn(callback);
+        })
     });
 
     socket.on('error', function (err) {
@@ -447,6 +541,16 @@ exports.handleRequest = function (socket) {
             fn((locator.sensors));
         }
     });
+
+    socket.on("getRoomFromServer",function(request,callback){
+        //console.log("Get Room request received with "+JSON.stringify(request));
+        if(callback!=null){
+            callback(locator.room);
+        }else{
+            console.log("Callback function is null for return locator room information");
+        }
+    })
+
 
     socket.on('getCalibrationFrames', function (request, fn) {
         // error checking see if the sensor is not defined
@@ -469,4 +573,8 @@ exports.handleRequest = function (socket) {
         //take two sensorIDs from request, call locator.calibrateSensors(sid1, sid2)
         //return calibration for client? nah....... maybe....
     });
+
+
+
+
 };

@@ -102,6 +102,7 @@ function Person(id, location, socket){
         this.data = {};
         this.gesture = "untracked";
         this.inRangeOf = {};
+        this.hands = {left:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null},right:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null}}
     }
     catch(err){
         return false;
@@ -145,6 +146,7 @@ function leapMotion(socket){
         this.sensorType = "leapMotion";
         //this.FOV = 0;
         this.lastUpdated = new Date();
+        this.location = {X:null,Y:null,Z:null};
         //this.calibration = {Rotation: null, TransformX: null, TransformY: null,xSpaceTransition:null,ySpaceTransition:null, StartingLocation: {X: 0, Y: 0, Z: 0}};
         //this.isCalibrated = false;
         //console.log("constructing sensor: "+ JSON.stringify(this.calibration));
@@ -269,7 +271,12 @@ function Device(socket, opts){
         this.observer = null;
         this.inRangeOf = {};
         this.inViewList = {};
-        this.subscribeToEvents ={receiveIntersectionPoints:true,receiveInViewList:true};
+        this.subscribeToEvents ={
+            roomIntersectionEvents:true,
+            inViewEvents:true,
+            observerRangeEvents:false,
+            intersectionPointsEvents:false
+        };
     }
     catch(err){
     }
@@ -303,6 +310,7 @@ exports.makeLineUsingPoints = function (start, end) {
     if (start.X == end.X) {
         line.isVerticalLine = true;
         line.x = line.startPoint.X;
+
         return line;
     }
     else {
@@ -312,12 +320,16 @@ exports.makeLineUsingPoints = function (start, end) {
         //console.log("zIntercept: "+line.zIntercept + ' slope: '+ line.slope + ' - startPoint:' + JSON.stringify(line.startPoint) + ' - endPoint ' + JSON.stringify(line.endPoint) );
         return line;
     }
-
-
 };
 
 // TODO: test!
 exports.makeLineUsingOrientation = function(start, orientation) {
+    var yaw = null;
+    if(typeof(orientation)=="object"&& orientation.yaw != undefined){
+        var yaw = orientation.yaw;
+    }else{
+        var yaw = orientation;
+    }
     var line = {startPoint: {X: start.X, Y: start.Y, Z: start.Z},
         endPoint: {X: null, Y: null, Z: null},
         slope: null,
@@ -326,16 +338,57 @@ exports.makeLineUsingOrientation = function(start, orientation) {
         x: null,
         isLineSegment: false};
 
-    if (orientation === 90 || orientation === 270) {
+    if (yaw === 90 || yaw === 270) {
         line.isVerticalLine = true;
         line.x = line.startPoint.X;
     }
     else {
         line.isVerticalLine = false;
-        line.slope = orientation * Math.PI / 180;
+        line.slope = yaw * Math.PI / 180;
         line.slope = Math.tan(line.slope);
         line.zIntercept = line.startPoint.Z - line.slope * line.startPoint.X;
     }
-
     return line;
 };
+
+
+/*
+*   Location is a JSON object ie, {X:0,Y:0,Z:0} indicates the location of the device
+*   walls property:
+*       top,left,right,bottom - as in two D space
+*       relative computation are basically using projection
+* */
+function Room(location,Length,Depth,Height){
+    this.location = location;
+    this.length = Length;
+    this.depth = Depth;
+    this.height = Height;
+    this.walls = {
+        top:{
+            startingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2},
+            endingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2}
+        },
+        left:{
+            startingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2},
+            endingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2}
+        },
+        right:{
+            startingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z+this.depth/2},
+            endingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2}
+        },
+        bottom:{
+            startingPoint:{X:location.X-this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2},
+            endingPoint:{X:location.X+this.length/2,Y:location.Y+this.height,Z:location.Z-this.depth/2}
+        }
+    }
+    this.ceiling = {        //ceiling in 2D
+        length:this.length,
+        depth: this.depth,
+        height:this.height
+    }
+
+}
+Room.prototype = {
+
+};
+exports.Room = Room;

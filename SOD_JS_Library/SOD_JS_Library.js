@@ -310,7 +310,7 @@ SODSensor.prototype = {
                 this.movementInterval = setInterval(function () {
                     sod.people.forEach(function(person) {
                         // move right 0.2
-                       person.location.X +=0.2;
+                       person.location.Z +=1;
                     })
                     sod.socket.emit('personUpdate', sod.people);
 

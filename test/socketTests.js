@@ -30,7 +30,7 @@ var device = {  ID : null,
     socketID : null,
     deviceType : "JSClientDevice",
     location : {X: 1, Y: 2, Z:3},
-    orientation : 12,
+    orientation : 2470,
     FOV : 12,
     height : 1,
     width :  1,
@@ -99,7 +99,7 @@ describe("register functions", function () {
 
     it('SoD should be able to allow register LeapMotion', function(done){
         var client = io.connect(socketURL,options);
-        var sampleLeapSensor = {sensorType:'LeapMotion'};
+        var sampleLeapSensor = {sensorType:'LeapMotion',location:{X:0,Y:0,Z:0}};
         client.on('connect',function(data){
             // register sensor
             client.emit('registerSensor',sampleLeapSensor,function(data){
@@ -107,6 +107,7 @@ describe("register functions", function () {
                 data.should.have.property('status','registered');
                 //data['status'].should.equal('registered');
                 data['entity'].sensorType.should.equal('LeapMotion');
+                data['entity'].location.X.should.equal(0);
                 client.disconnect();
                 done();
             });
@@ -132,15 +133,16 @@ describe("register functions", function () {
     })
 
     it('should be able to register device', function(done){
-        var client1 = io.connect(socketURL,options);;
+        var client1 = io.connect(socketURL,options);
         client1.on('connect',function(data){
             console.log('haha');
             // register sensor
             try{
                 client1.emit('registerDevice', device, function(data){
                     data.should.have.property('status','registered');
+                    //console.log(data);
                     expect(data.entity.socketID).to.equal(client1.socket.transport.sessid);
-                    expect(data.entity.orientation.yaw).to.equal(device.orientation);
+                    expect(data.entity.orientation.yaw).to.equal(device.orientation%360);
                     expect(data.entity.depth).to.equal(device.depth);
                     expect(data.entity.height).to.equal(device.height);
                     expect(data.entity.width).to.equal(device.width);
@@ -154,10 +156,65 @@ describe("register functions", function () {
             }
         })
     })
-
-
 });
 
+
+describe("Sensor functions -", function () {
+    it('LeapMotion - \"handUpdate\" updateHand data should work: ', function(done){
+
+        var client = io.connect(socketURL,options);
+        var sampleLeapSensor = {sensorType:'LeapMotion',location:{X:0,Y:0,Z:0}};
+        var updateLeftHandData = {whichHand:"left",ID:10,gesture:"Hold"};
+        var updateRightHandData = {whichHand:"right",ID:11,gesture:"Swipe"};
+        var person = {ID:'Test_'+ '0',location:{X:-0.3,Y:1,Z:1}, trackingState: 1};
+        var people = [person];
+        client.on('connect',function(data){
+            /*
+             * Testing registering functions
+             * */
+            client.emit('registerSensor',sampleLeapSensor,function(data){
+                /*
+                 * Tesing hand update for left hand data.
+                 * */
+
+                var client1 = io.connect(socketURL,options);
+                var sampleKinectSensor = {sensorType:'kinect2',FOV:10,rangeInMM:1,frameHeight:10,frameWidth:10,translateRule:{
+                    changeInOrientation:10,dX:10,dZ:10,xSpace:10,zSpace:10,startingLocation:{X:0,Y:0,Z:0}}};
+                client1.on('connect',function(data){
+                    // register sensor
+                    client1.emit('registerSensor',sampleKinectSensor,function(data){
+                        //console.log("register Kinect callback" + JSON.stringify(data));
+                        data.should.have.property('status','registered');
+                        //data['status'].should.equal('registered');
+                        data['entity'].sensorType.should.equal('kinect');
+
+                        // add a person to server.
+                        client1.emit('personUpdate',people,function(){
+                            // person gets updated
+                            client.emit('handsUpdate',updateLeftHandData,function(data){
+                                expect(data.entity.left.ID).to.equal(updateLeftHandData.ID);
+                                expect(data.entity.left.gesture).to.equal(updateLeftHandData.gesture);
+                                /*
+                                 * Tesing hand update for right hand data.
+                                 * */
+                                client.emit('handsUpdate',updateRightHandData,function(data){
+                                    expect(data.entity.right.ID).to.equal(updateRightHandData.ID);
+                                    expect(data.entity.right.gesture).to.equal(updateRightHandData.gesture);
+                                    client.disconnect();
+                                    client1.disconnect();
+                                    done();
+                                })
+                            })
+                        });
+                    });
+                })
+
+
+            });
+
+        })
+    });
+})
 
 //testing send data
 /*describe("send data", function () {

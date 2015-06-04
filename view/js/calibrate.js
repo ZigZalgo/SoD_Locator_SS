@@ -18,8 +18,8 @@ var referenceSensorCalibration;
  */
 function translateToCoordinateSpace(location, translateRules) {
     function getVector(locationA, locationB) {
-        //console.log('locationA: '+ JSON.stringify(locationA.X));
-        //console.log('locationB: '+ JSON.stringify(locationB.X));
+        console.log('locationA: '+ JSON.stringify(locationA));
+        console.log('locationB: '+ JSON.stringify(locationB));
         return {X: locationB.X - locationA.X, Y: 0, Z: locationB.Z - locationA.Z};
         //typeof callback === 'function' && callback();
     };
@@ -30,15 +30,17 @@ function translateToCoordinateSpace(location, translateRules) {
         var returnZ = personLocation.Z * Math.cos(angle * DEGREES_TO_RADIANS) - (personLocation.X * Math.sin(angle * DEGREES_TO_RADIANS));
         returnLocation.X = Math.round(returnX * this.ROUND_RATIO) / this.ROUND_RATIO;
         returnLocation.Z = Math.round(returnZ * this.ROUND_RATIO) / this.ROUND_RATIO;
+        console.log(JSON.stringify(returnLocation)+" - "+this.ROUND_RATIO+" - "+JSON.stringify(personLocation));
         return returnLocation; // for testing
     };
     console.log('location: '+ JSON.stringify(location));
     console.log('translateRules: '+ JSON.stringify(translateRules));
     var vectorToStartingPoint = getVector(translateRules.StartingLocation, location);
+    console.log(vectorToStartingPoint);
     var rotatedPoint = matrixTransformation(vectorToStartingPoint, translateRules.Rotation);
     rotatedPoint.X += translateRules.TransformX + translateRules.StartingLocation.X;
     rotatedPoint.Z += translateRules.TransformY + translateRules.StartingLocation.Z;
-    console.log('traslated point : ' + JSON.stringify(rotatedPoint));
+    console.log('translated point : ' + JSON.stringify(rotatedPoint));
     return rotatedPoint;
 };
 
@@ -48,15 +50,15 @@ function getPosition(canvasID, sid, event)
 
     var rect = document.getElementById(canvasID).getBoundingClientRect();
     var xInPixels = event.x - rect.left;
-    console.log('rect.left : ' + rect.left+ '\trect.top: '+rect.top);
+    //console.log('rect.left : ' + rect.left+ '\trect.top: '+rect.top);
     var y = event.y - rect.top;
     // this Z value is actully very close to reality value O_O
     var z = depthArrays[sid][Math.round(xInPixels+(y*sensors[sid].frameWidth))];//depthArrays[sid][xInPixels+(y*sensors[sid].frameWidth)];
-    console.log('z: '+ z);
+    //console.log('z: '+ z);
 
-    console.log('event.x: '+ event.x + '\tevent.y: ' + event.y);
+   //console.log('event.x: '+ event.x + '\tevent.y: ' + event.y);
     var xInMM;
-    if(sensors[sid].sensorType == "Kinect2"){
+    if(sensors[sid].sensorType == "kinect"){
         var zForCalc = z*10;
         xInMM = 2*(event.x - rect.left-(sensors[sid].frameWidth/2))/(sensors[sid].frameWidth)*(zForCalc>>>3)*(Math.tan(sensors[sid].FOV/2))
     }
@@ -70,6 +72,7 @@ function getPosition(canvasID, sid, event)
     if(canvasID == "cnvSensorOne"){
         if(sensorOnePoints.length < 2 && z > 0){
             pointFromDepthFrame = {X: xInMM, Y: y, Z: z};
+            console.log("pointFromDepthFrame: "+JSON.stringify(pointFromDepthFrame)+"  xInMM: "+xInMM+" - sensor type: "+sensors[sid].sensorType);
             translatedPoint = translateToCoordinateSpace(pointFromDepthFrame,referenceSensorCalibration)
             sensorOnePoints.push(translatedPoint);
             showGreenStatus('Points saved.');
@@ -180,6 +183,7 @@ function refreshSensors(){
     var uncalibratedSensorList = document.getElementById("uncalibratedSensorList");
     io.emit('getSensorsFromServer', {}, function(data){
         sensors = {};
+        data = data.kinects;
         //var referenceSensorList = document.getElementById("referenceSensorList")
         //var uncalibratedSensorList = document.getElementById("uncalibratedSensorList")
         //console.log("there are "+Object.keys(data).length + " sensors in the server.");
@@ -318,6 +322,8 @@ $(function(){
 
         // get calibration rule for reference sensor
         io.emit('getSensorsFromServer',{},function(sensors){
+            console.log(sensors);
+            sensors = sensors.kinects;
             for(var key in sensors){
                 if(sensors.hasOwnProperty(key) && sensors[key].ID == referenceSensorID){
                     //console.log('reference sensor key:'+sensors[key].ID);

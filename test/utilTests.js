@@ -1,8 +1,13 @@
 var util = require('../locatorServices/util');
+var locator = require('../locatorServices/locator');
 var factory = require('../locatorServices/factory');
 var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
+var async = require("async");
+var Q = require("q");
+var should = chai.should();
+var locator
 
 describe("util.getSpaceTransitionRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
@@ -148,6 +153,14 @@ describe("util.matrixTransformation()", function(){
 });
 
 
+
+describe("util.mathRoundWithDecimal()", function(){
+    it(" should get the 1.2345 to 1.23 with getting 2 decimal value", function(){
+        expect(util.mathRoundWithDecimal(1.2345,2)).to.eql(1.23);;//(util.matrixTransformation(testLocation,30), correctResult);
+    });
+});
+
+
 //Test function util.getVector() with callback
 /*
 describe("util.getVector",function(){
@@ -279,6 +292,253 @@ describe("util.distanceBetweenPoints()", function(){
         assert.equal(util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: -1, Y: 1, Z: -3}), 5);
     });
 });
+
+
+
+
+describe("util.pointMoveToDirection()",function(){
+    var originalLocation = {X:0,Y:1,Z:1};
+    var directionVector = {X:-0.5,Y:0,Z:Math.sqrt(3)/2};
+    var distance = 1;
+    it(" should move a point to a dedicated direction by a certain distance ", function(done) {
+        util.pointMoveToDirection(originalLocation,directionVector,distance,function(data){
+            expect(data.X).to.be.closeTo(-0.5,0.01);
+            expect(data.Z).to.be.closeTo(1.86,0.01);
+            done()
+        })
+    })
+})
+
+describe("util.pointMoveToDirection()",function(){
+    var originalLocation = {X:0,Y:1,Z:1};
+    var directionVector = {X:1,Y:0,Z:0};
+    var distance = 1;
+    it(" should move a point to a dedicated direction by a certain distance with actual data", function(done) {
+        util.matrixTransformation(directionVector,-120,function(rotatedMatrix){
+            console.log("rotated: "+JSON.stringify(rotatedMatrix));
+            util.pointMoveToDirection(originalLocation,rotatedMatrix,distance,function(data){
+
+                console.log(data);
+                //expect(data.X).to.be.closeTo(-0.5,0.01);
+                //expect(data.Z).to.be.closeTo(1.86,0.01);
+                done()
+            })
+        })
+    })
+})
+
+
+
+
+describe("util.inRoom()",function(){
+    var location = {X:0,Y:0,Z:0};
+    var length = 6;
+    var depth = 8;
+    var height = 4;
+    var device = {ID:1, orientation:{pitch:-45,yaw:30},location:{X:0,Y:1,Z:1},FOV:30};
+    it(" should  check wether the location is in the room ", function(okay){
+        var testRoom = new factory.Room(location,length,depth,height);
+        locator.getIntersectionPointInRoom(device,function(data){
+            console.log(data);
+            //data.X.should.equal(-0.66)
+            async.parallel([
+                    function(paCallback){
+                        util.inRoom(data,function(bool){
+                            expect(bool).to.eql(true);
+                            paCallback(null);
+                        });
+                    },
+                    function(paCallback){
+                        util.inRoom({X:2.9,Y:3.9,Z:3.9},function(bool){
+                            expect(bool).to.eql(true);
+                            paCallback(null);
+                        });
+                    },
+                    function(paCallback){
+                        util.inRoom({X:2.9,Y:4.1,Z:4.1},function(bool){
+                            expect(bool).to.eql(false);
+                            paCallback(null);
+                        });
+                    }
+                ],
+                function(err,results){
+                    //Once everything is done.
+                    okay()
+                }
+            )
+        });
+    });
+})
+
+
+describe("util.getIntersectionPoint() with Room sides",function(){
+    var location = {X:0,Y:0,Z:0};
+    var length = 3;
+    var depth = 3;
+    var height = 4;
+    var testRoom = new factory.Room(location,length,depth,height);
+    //
+    it(" should get proper intersection point from four sides of the room", function(done){
+    util.translateOrientationToReference({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:30},FOV:30},
+        function(orientationToReference){
+            console.log("Orientation to reference: "+orientationToReference);
+            var line2 = factory.makeLineUsingOrientation({X:0,Y:1,Z:1},orientationToReference)
+            var left = factory.makeLineUsingPoints(testRoom.walls.left.startingPoint,testRoom.walls.left.endingPoint);
+            var right = factory.makeLineUsingPoints(testRoom.walls.right.startingPoint,testRoom.walls.right.endingPoint);
+            var top = factory.makeLineUsingPoints(testRoom.walls.top.startingPoint,testRoom.walls.top.endingPoint);
+            var bottom = factory.makeLineUsingPoints(testRoom.walls.bottom.startingPoint,testRoom.walls.bottom.endingPoint);
+
+                async.parallel([
+                    function(paCallback){
+                        util.getIntersectionPoint(line2,top).then(function(data){
+                            //console.log("haha"+JSON.stringify(data));
+                            paCallback(null,data);
+                        })
+                    },function(paCallback){
+                        util.getIntersectionPoint(line2,left).then(function(data){
+                            paCallback(null,data);
+                        })
+                    },function(paCallback){
+                        util.getIntersectionPoint(line2,right).then(function(data){
+                            paCallback(null,data);
+                        })
+                    },function(paCallback){
+                        util.getIntersectionPoint(line2,bottom).then(function(data){
+                            paCallback(null,data);
+                        })
+                    }
+                ],function(err,results){
+                    console.log("YO!:::"+JSON.stringify(results));
+                    try {
+                        //expect(results[0].X).to.be.closeTo(0.866,0.05);
+                        console.log(results);
+                        //expect(results[1]).to.equal(null);
+                        //expect(results[2]).to.equal(null);
+                        expect(results[2]).to.equal(null);
+                        done()    // success: call done with no parameter to indicate that it() is done()
+                    } catch( e ) {
+                        done( e ) // failure: call done with an error Object to indicate that it() failed
+                    }
+                })
+
+            })
+
+        }
+    )
+})
+
+
+describe("util.getIntersectedWall() ",function(){
+
+    //var line2 = factory.makeLineUsingOrientation({X:0,Y:1,Z:1},{pitch:-45,yaw:30})
+    it(" should get 1 value return with which wall gets hit with yaw = 30", function(okay){
+        var origin = {X:0,Y:1,Z:1};
+            util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:20,yaw:30},FOV:30}, function (data) {
+                try {
+                    console.log(data);
+                    //expect(data).to.eql(null);
+                    expect(data.intersectedPoint.X).to.be.closeTo(-2.886,0.005);
+                    okay()
+                }catch(e) {
+                    okay(e)
+                }
+            })
+    })
+
+    it(" should get 1 value return with which wall gets hit with yaw=45", function(okay){
+        util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:45},FOV:70}, function (data) {
+            //console.log(data);
+            try {
+                expect(data).to.eql(null);
+                //expect(data.length).to.eql(1);
+                //expect(data[0].intersectedPoint.X).to.be.closeTo(-3,0.005);
+                //expect(data.intersectedPoint.side).to.eql('top');
+                okay()
+            }catch(e) {
+                okay(e)
+            }
+        })
+    })
+    it(" should get 1 value return with which wall gets hit with yaw = 60", function(okay){
+        util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:60},FOV:70}, function (data) {
+            console.log(data);
+            try {
+                expect(data).to.eql(null);
+                //expect(data.intersectedPoint.side).to.eql('top');
+                okay()
+            }catch(e) {
+                okay(e)
+            }
+        })
+    })
+    it(" should with real data 1", function(done) {
+        //var pointOfInterest1 = {X:0,Y:0,Z:0};
+        var device1 = {"uniqueDeviceID":101,"orientation":{"yaw":-83.43,"pitch":45},"name":"JSClient","socketID":"b2Z6p3i8OZDg_TyNoU6h","deviceType":"JSClientDevice","location":{"X":1,"Y":1,"Z":1},"FOV":70,"depth":1,"height":1,"width":1,"ownerID":null,"pairingState":"unpaired","intersectionPoint":{"X":0,"Y":0},"lastUpdated":"2015-03-24T02:34:11.488Z","stationary":true,"deviceIP":"127.0.0.1","observer":{"observerType":"rectangular","observeWidth":2,"observeHeight":1,"observerDistance":1},"inRangeOf":{},"inViewList":{},"subscribeToEvents":{"receiveIntersectionPoints":true,"receiveInViewList":true}};
+        util.getIntersectedWall(device1, function (data) {
+            console.log(data);
+            try {
+                expect(data).to.eql(null);
+                //expect(data.intersectedPoint.side).to.eql('top');
+                done()
+            }catch(e) {
+                done(e)
+            }
+        })
+        //{"uniqueDeviceID":101,"orientation":{"yaw":60.32,"pitch":45},"name":"JSClient","socketID":"3ZOUPwubnoH-SR1UvAMD","deviceType":"JSClientDevice","location":{"X":-0.040000000000000924,"Y":0,"Z":1},"FOV":70,"depth":1,"height":1,"width":1,"ownerID":null,"pairingState":"unpaired","intersectionPoint":{"X":0,"Y":0},"lastUpdated":"2015-03-24T03:03:21.485Z","stationary":true,"deviceIP":"127.0.0.1","observer":{"observerType":"rectangular","observeWidth":2,"observeHeight":1,"observerDistance":1},"inRangeOf":{},"inViewList":{},"subscribeToEvents":{"receiveIntersectionPoints":true,"receiveInViewList":true}}
+    })
+    it(" should with real data 2", function(done) {
+        //var pointOfInterest1 = {X:0,Y:0,Z:0};
+        var device1 = {"uniqueDeviceID":101,"orientation":{"yaw":60.32,"pitch":45},"name":"JSClient","socketID":"3ZOUPwubnoH-SR1UvAMD","deviceType":"JSClientDevice","location":{"X":-0.040000000000000924,"Y":0,"Z":1},"FOV":70,"depth":1,"height":1,"width":1,"ownerID":null,"pairingState":"unpaired","intersectionPoint":{"X":0,"Y":0},"lastUpdated":"2015-03-24T03:03:21.485Z","stationary":true,"deviceIP":"127.0.0.1","observer":{"observerType":"rectangular","observeWidth":2,"observeHeight":1,"observerDistance":1},"inRangeOf":{},"inViewList":{},"subscribeToEvents":{"receiveIntersectionPoints":true,"receiveInViewList":true}}
+        util.getIntersectedWall(device1, function (data) {
+            console.log(data);
+            try {
+                //expect(data.length).to.eql(1);
+                expect(data.side).to.eql('left');
+                //expect(data.intersectedPoint.side).to.eql('top');
+                done()
+            }catch(e) {
+                done(e)
+            }
+        })
+        //
+    })
+})
+
+
+describe("util.isPointInView()",function(){
+    it(" should check if a point is a view", function(done) {
+        var pointOfInterest1 = {X:0,Y:0,Z:0};
+        var device1 = {location:{X:0,Y:1,Z:1},orientation:{pitch:20,yaw:0},FOV:45};
+        util.isPointInView(pointOfInterest1,device1,function(bool){
+
+            try {
+                expect(bool).to.eql(true);
+                //expect(data.length).to.eql(1);
+                //expect(data.intersectedPoint.side).to.eql('top');
+                done()
+            }catch(e) {
+                done(e)
+            }
+        });
+    })
+    it(" should check if a point is a view with yaw 16 FOV 30", function(done) {
+        var pointOfInterest1 = {X:0,Y:0,Z:0};
+        var device1 = {location:{X:0,Y:1,Z:1},orientation:{pitch:20,yaw:16},FOV:30};
+        util.isPointInView(pointOfInterest1,device1,function(bool){
+
+            try {
+                expect(bool).to.eql(false);
+                //expect(data.length).to.eql(1);
+                //expect(data.intersectedPoint.side).to.eql('top');
+                done()
+            }catch(e) {
+                done(e)
+            }
+        });
+    })
+})
+
+
 
 // old test starts
 // isGreater

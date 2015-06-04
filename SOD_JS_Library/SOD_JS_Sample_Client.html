@@ -97,6 +97,19 @@
                         showGreenStatus('connect to server ..')
                     });
 
+
+                    sod.addListener('gesture',function(data){
+                        //sod.registerDevice(sod);
+                        console.log("happyness?");
+                        showGreenStatus(JSON.stringify(data))
+                    });
+
+                    //intersectedOnWall
+                    sod.addListener('intersectedOnWall',function(data){
+                        console.log('intersected on wall' + JSON.stringify(data));
+                        //showGreenStatus('connect to server ..')
+                    });
+
                     sod.addListener('intersected',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
                         console.log('->intersected!'+JSON.stringify(data));
@@ -108,7 +121,7 @@
 
                     sod.addListener('enterObserveRange',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
-                        console.log('->enter!'+JSON.stringify(data.payload));
+                        console.log('->enter!'+JSON.stringify(data));
                     });
                     sod.addListener('enterView',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
@@ -234,7 +247,6 @@
             // sendEvent
             $('#sendStringToAll').on('click',function(){
                 sod.sendToDevices.all('string','hello this is world!');
-
             });
 
             /*function convertImgToBase64(url, callback, outputFormat){

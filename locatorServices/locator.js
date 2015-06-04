@@ -5,7 +5,7 @@ var util = require('./util');
 var frontend = require('./../frontend');
 var Q = require('q');
 var async = require("async");
-
+var pulse = require("./pulse");
 //var events = require("events");
 
 
@@ -29,11 +29,14 @@ exports.dataPoints = dataPoints;
 exports.kinectService = require('./Sensors/kinect');
 exports.leapMotionService = require('./Sensors/leapMotion');
 exports.iBeaconService = require('./Sensors/iBeacon');
+var room = new factory.Room({X:0,Y:0,Z:0},6, 8, 4);
+exports.room = room;
+
 
 // TODO: test!
-exports.start = function(){
+/*exports.start = function(){
     // Do initialization here, if any
-};
+};*/
 
 
 exports.registerSensor = function(socket,type,sensorInfo,callback){
@@ -50,6 +53,7 @@ exports.registerSensor = function(socket,type,sensorInfo,callback){
             break;
         case "leapmotion":
             console.log("Register Leap Inc");
+
             locator.leapMotionService.registerLeapMotionHandler(socket,sensorInfo,callback);
             break;
         case "ibeacon":
@@ -100,6 +104,7 @@ function isEmpty(str) {
 function grabDataInRange(requestObject,targetObject){
     var distance,dataRange;
     distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
+    console.log(requestObject);
     if(targetObject.observer.observerType=='radial'&&distance<targetObject.observer.observeRange){
         try{
             console.log('-> Grab event emit: person : ' + targetObject.ID + ' grab dataPoint: ' + requestObject.uniquePersonID);
@@ -112,7 +117,8 @@ function grabDataInRange(requestObject,targetObject){
     if(targetObject.data != undefined && Object.keys(targetObject.data).length != 0) {
         // if there exists data in side of an object, grab all the data
         for (var dataKey in targetObject.data) {
-            if(targetObject.data.hasOwnProperty(dataKey)) {
+           /* if(targetObject.data.hasOwnProperty(dataKey)) {
+                console.log(targetObject.data[dataKey]);
                 dataRange = targetObject.data[dataKey].range;
                 // get range of this point
                 if (requestObject.data[dataKey] == undefined && distance <= dataRange) {
@@ -120,7 +126,7 @@ function grabDataInRange(requestObject,targetObject){
                     requestObject.data[dataKey] = targetObject.data[dataKey];
                     console.log('\t->-> Object grabbed:' + JSON.stringify(requestObject.data[dataKey].name) + ' From targetobject');
                 }
-            }
+            }*/
         }
     }else{
         console.log('\t->-> Ojbect grabbed '+'0 data from target.' );
@@ -151,44 +157,46 @@ function grabAllData(requestObject,targetObject){
 exports.dropData = function(socket,requestObject,dropRange,fn){
     var dataPointCounter = 0;
     var dataPointsLength = Object.keys(dataPoints).length;
-    if(requestObject.data!=undefined){
-        if(requestObject.location!=undefined && dropRange != undefined && Object.keys(requestObject.data).length != 0){
-            console.log('drop data request from: '+ JSON.stringify(requestObject) + ' dropRange: '+ dropRange);
-            //var dropLocation = requestObject.location;
-            for(var key in dataPoints) {
-                if(dataPoints.hasOwnProperty(key)){
-                    // if reach the end of the dataPoints list
-                    dataPointCounter ++;
-                    //console.log('Current DP: ' + JSON.stringify(dataPoints[key]));
-                    //console.log(dataPointCounter+ ' / '+ dataPointsLength);
-                    var distance, dataPointDropRange;
-                    dataPointDropRange = dataPoints[key].dropRange;              // get range of this point
-                    //console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
-                    distance = util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
-                    if (distance <= dataPointDropRange) {
-                        grabAllData(dataPoints[key], requestObject);    //dump the data once and return.
-                        console.log('-> Dumping data to data point: ' + dataPoints[key].ID + ' since the distance: ' + distance + ' within dropRange: ' + dropRange);
-                        if (fn != undefined) {
-                            fn('\t->-> dumping data to dataPoint ' + dataPoints[key].ID);
+    if(requestObject!=undefined) {
+        if (requestObject.data != undefined) {
+            if (requestObject.location != undefined && dropRange != undefined && Object.keys(requestObject.data).length != 0) {
+                console.log('drop data request from: ' + JSON.stringify(requestObject) + ' dropRange: ' + dropRange);
+                //var dropLocation = requestObject.location;
+                for (var key in dataPoints) {
+                    if (dataPoints.hasOwnProperty(key)) {
+                        // if reach the end of the dataPoints list
+                        dataPointCounter++;
+                        //console.log('Current DP: ' + JSON.stringify(dataPoints[key]));
+                        //console.log(dataPointCounter+ ' / '+ dataPointsLength);
+                        var distance, dataPointDropRange;
+                        dataPointDropRange = dataPoints[key].dropRange;              // get range of this point
+                        //console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
+                        distance = util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
+                        if (distance <= dataPointDropRange) {
+                            grabAllData(dataPoints[key], requestObject);    //dump the data once and return.
+                            console.log('-> Dumping data to data point: ' + dataPoints[key].ID + ' since the distance: ' + distance + ' within dropRange: ' + dropRange);
+                            if (fn != undefined) {
+                                fn('\t->-> dumping data to dataPoint ' + dataPoints[key].ID);
+                            }
+                            frontend.io.sockets.emit("refreshStationaryLayer", {}); // refresh the fronted layer
+                            return;
+                        } else if (dataPointCounter == dataPointsLength) {
+                            var currentLocation = {X: requestObject.location.X, Y: requestObject.location.Y, Z: requestObject.location.Z};
+                            locator.registerDataPoint(socket, {location: currentLocation, data: Object.keys(requestObject.data), dropRange: dropRange}, fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
                         }
-                        frontend.io.sockets.emit("refreshStationaryLayer", {}); // refresh the fronted layer
-                        return;
-                    }else if(dataPointCounter==dataPointsLength) {
-                        var currentLocation = {X:requestObject.location.X,Y:requestObject.location.Y,Z:requestObject.location.Z};
-                        locator.registerDataPoint(socket,{location:currentLocation,data:Object.keys(requestObject.data),dropRange:dropRange},fn); //dataPointInfo.location,socket.id,dataPointInfo.range,registerData
-                    }
-                }// end of hasOwnproperty
-            }
-            // if it is not in any dataPoints range
+                    }// end of hasOwnproperty
+                }
+                // if it is not in any dataPoints range
 
-        }else{
-            console.log('\t->-> 0 ' + ' data has been dropped by object '+ requestObject );
-            if(fn!=undefined){
-                fn('Dump data requestObject is not well defined.');
+            } else {
+                console.log('\t->-> 0 ' + ' data has been dropped by object ' + requestObject);
+                if (fn != undefined) {
+                    fn('Dump data requestObject is not well defined.');
+                }
             }
+        } else {
+            console.log('Request object does not have any data');
         }
-    }else{
-        console.log('Request object does not have any data');
     }
 }
 // send message to subscriber if defined, otherwise send message to All
@@ -228,13 +236,13 @@ function inRangeEvent(){
                                 util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observer.observeRange)
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
-                                frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                                frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:locator.persons[personKey].uniquePersonID}});
                                 console.log('-> enter radial'+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                             }else if(locator.devices[deviceKey].observer.observerType == 'rectangular'
                                 && util.isInRect(locator.persons[personKey].location,util.getObserverLocation(locator.devices[deviceKey]),locator.devices[deviceKey].observer.observeWidth,locator.devices[deviceKey].observer.observeHeight) == true) // handles rectangular
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
-                                frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},invader:locator.persons[personKey].uniquePersonID}});
+                                frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:locator.persons[personKey].uniquePersonID}});
                                 console.log('-> enter rect! '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                             }
                         }
@@ -242,14 +250,14 @@ function inRangeEvent(){
                         {
                             if (locator.devices[deviceKey].observer.observerType == 'radial' && util.distanceBetweenPoints(locator.persons[personKey].location, locator.devices[deviceKey].location) > locator.devices[deviceKey].observer.observeRange) {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
-                                frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, invader: locator.persons[personKey].uniquePersonID}});
+                                frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, visitor: locator.persons[personKey].uniquePersonID}});
                                 delete locator.persons[personKey].inRangeOf[deviceKey];
                             }
                             if (locator.devices[deviceKey].observer.observerType == 'rectangular'
                                 && util.isInRect(locator.persons[personKey].location, util.getObserverLocation(locator.devices[deviceKey]), locator.devices[deviceKey].observer.observeWidth, locator.devices[deviceKey].observer.observeHeight) == false) // handles rectangular
                             {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
-                                frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, invader: locator.persons[personKey].uniquePersonID}});
+                                frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, visitor: locator.persons[personKey].uniquePersonID}});
                                 delete locator.persons[personKey].inRangeOf[deviceKey];
                             }
                         }
@@ -268,12 +276,12 @@ function inRangeEvent(){
                                 console.log('person inside of dataPoint: '+dataPointKey );
                                 locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                                 //TODO: add sendMessageToSubscriber function call
-                                locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
+                                locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                                 console.log('-> enter rec '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             }
                         }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)<=locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
-                            locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
+                            locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                             console.log('-> enter radial '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                         }
                     }else if(locator.persons[personKey].inRangeOf[dataPointKey]!=undefined){ // handles leave event
@@ -281,14 +289,14 @@ function inRangeEvent(){
                             //console.log('inRange '+ (locator.dataPoints[dataPointKey].location.Z-locator.dataPoints[dataPointKey].observer.observeHeight/2));
                             if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer.observeHeight)==false){
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
-                                //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}});
-                                locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
+                                //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}});
+                                locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                                 delete locator.persons[personKey].inRangeOf[dataPointKey];
                             }
                         }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)>locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
-                            //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}});
-                            locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, invader: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
+                            //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}});
+                            locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                             delete locator.persons[personKey].inRangeOf[dataPointKey];
                         }
                     }// in range of somebdoy ends
@@ -319,6 +327,7 @@ function grabEventHandler(object){
             //}
         }
     }
+
 }
 
 
@@ -334,10 +343,12 @@ function gestureHandler(key,gesture,socket){
         case "Grab":
             console.log("-> GRAB gesture detected from person: " + key + "!");
             grabEventHandler(persons[key]); // try to grab data if any data is within range
+            frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"Grab"});
             break;
         case "Release":
             console.log("-> RELEASE gesture detected from person: " + key + "!");
             locator.dropData(socket,persons[key],0.5); // set the default drop range to 1 meter for now
+            frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"Release"});
             break;
         default:
             console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
@@ -346,24 +357,151 @@ function gestureHandler(key,gesture,socket){
 
 
 exports.updatePersons = function(receivedPerson, socket){
-
     if(Object.keys(persons).length == 0){
         //nobody being tracked, add new person
         //person was not found
         if((receivedPerson.trackingState==1) && receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
+            console.log("received Person: "+JSON.stringify(receivedPerson));
             var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
             person.lastUpdated = new Date();
             person.currentlyTrackedBy = socket.id;
             person.gesture = receivedPerson.gesture;
+            if(receivedPerson.leftHandLocation!=null){
+                person.hands.left.location = receivedPerson.lefthandLocation;
+            }
+            if(receivedPerson.rightHandLocation!=null){
+                person.hands.right.location = receivedPerson.rightHandLocation;
+            }
             persons[person.uniquePersonID] = person;
         }
     }
     else{
         //there are people being tracked, see if they match
-        var counter = Object.keys(persons).length;
+        //var counter = Object.keys(persons).length;
         var nearestDistance = 1000;
         var nearestPersonID = null;
         var existingID = [];
+        var receivedPersonProcessed = false;        // a lock make sure async doesn't process same received person twice
+
+        async.eachSeries(Object.keys(persons),function(personKey,eachSeriesCallback){
+            // process each person individually
+            if(persons.hasOwnProperty(personKey) && receivedPersonProcessed == false){
+                var personInList = locator.persons[personKey];
+                existingID = existingID.concat(Object.keys(personInList.ID));
+
+
+                // add this person to existing IDs
+                if(personInList.ID[receivedPerson.ID]!=undefined){
+                    // receivedPerson is in one of persons' ID list
+                    // Handles gesture of this person
+                    personInList.gesture = receivedPerson.gesture;
+                    if(receivedPerson.gesture!=null){
+                        gestureHandler(personKey,personInList.gesture,socket);//handles the guesture
+                    }
+
+
+                    if(personInList.currentlyTrackedBy == socket.id){
+                        // receivedPerson also come the the main track sensor, update personInList attributes
+                        try{
+                            personInList.location.X = receivedPerson.location.X.toFixed(3);
+                            personInList.location.Y = receivedPerson.location.Y.toFixed(3);
+                            personInList.location.Z = receivedPerson.location.Z.toFixed(3);
+                            personInList.lastUpdated = new Date();
+                            //personInList.gesture = receivedPerson.gesture;
+                            // handles the person's gesture.
+                            /*if(receivedPerson.gesture!=null){
+                                gestureHandler(personKey,personInList.gesture,socket);//handles the guesture
+                            }*/
+                            if(receivedPerson.leftHandLocation!=null){
+                                personInList.hands.left.location = receivedPerson.leftHandLocation;
+                            }
+                            if(receivedPerson.rightHandLocation!=null){
+                                personInList.hands.right.location = receivedPerson.rightHandLocation;
+                            }
+                            if(personInList.ownedDeviceID != null) {
+                                devices[personInList.ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
+                                devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
+                                devices[personInList.ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
+                            }
+                            //console.log("\t->received Peron got updated " + "with personList.");
+                            receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
+                            //console.log("udpate Person hand "+JSON.stringify(personInList.hands));
+                            eachSeriesCallback();
+                        }catch (e){
+                            console.log("error update person with existing ID: "+e);
+                        }
+                    }// END of currentattractedBy
+                    else{
+                        //console.log("receivedPerson is in ID list, but not currenly tracked by this sensor");
+                        if(receivedPerson.gesture != null){
+                            console.log("person detected "+receivedPerson.gesture+" but not tracked by this sensor");
+                            //gestureHandler(personKey,personInList.gesture,socket);//handles the guesture
+                        }
+                        eachSeriesCallback();
+                    }
+                }else{
+                    //  The receivedPerson that is not in  this person list
+                    if(util.distanceBetweenPoints(personInList.location, receivedPerson.location) < nearestDistance){
+                        //
+                        nearestDistance= util.distanceBetweenPoints(personInList.location, receivedPerson.location);
+                        nearestPersonID = personKey;
+                        eachSeriesCallback();
+                    }else{
+                        eachSeriesCallback();
+                    }
+
+                }
+            }// if person key actually exitst
+        },function(err){
+            // found the closes person in list for this receivedPerson, see if the distance is within the threshold
+            if(receivedPersonProcessed == false) // if the received person hasn't been processed
+            {
+                if (nearestDistance < 0.4) {
+                    //console.log("Done with all persons."+" with closest person: "+nearestPersonID+" ,distance: "+nearestDistance);
+                    // if the sensor hasn't been registered to the person's seen-by-sensor list, and the person isn't used in any other person's list
+
+                    if ((existingID.indexOf(receivedPerson.ID) == -1) && persons[nearestPersonID].ID[receivedPerson.ID] == undefined) {
+                        //console.log('person '+persons[nearestPersonID].uniquePersonID+' is now tracked by ' + socket.id);
+                        //locator.removeUntrackedPersonID(persons[nearestPersonID].ID, receivedPerson.ID,socket)
+                        console.log('-> Merging person to ' + persons[nearestPersonID].uniquePersonID + ' with nearestDistance : ' + nearestDistance);
+                        var foundSensorSocketInPersonID = util.findKeyByValue(persons[nearestPersonID].ID,socket.id);
+                        if(foundSensorSocketInPersonID!=false){
+                            console.log("Person already contains sensor ID. Deleting.");
+                            delete persons[nearestPersonID].ID[foundSensorSocketInPersonID];
+                        }
+                        persons[nearestPersonID].ID[receivedPerson.ID] = socket.id;
+                        persons[nearestPersonID].gesture = receivedPerson.gesture;
+                        persons[nearestPersonID].lastUpdated = new Date();
+                        console.log('->-> Person ' + persons[nearestPersonID].uniquePersonID + ' ID length: (' + Object.keys(persons[nearestPersonID].ID).length + ') with details: ' + JSON.stringify(persons[nearestPersonID].ID));
+                    }
+                } // out side of the threshold
+                else {
+                    //locator.removeUntrackedPersonID(persons[key].ID, receivedPerson.ID,socket);
+                    //end of iterations, person not found and not near a tracked person
+                    //util.findWithAttr(persons,'ID',receivedPerson.ID);
+                    if ((existingID.indexOf(receivedPerson.ID) == -1) && (receivedPerson.ID != undefined) && (receivedPerson.location != undefined)) { //if provided an ID and a location, update
+                        if((receivedPerson.trackingState == 1)){
+                            var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+                            person.lastUpdated = new Date();
+                            person.currentlyTrackedBy = socket.id;
+                            person.gesture = receivedPerson.gesture;
+                            if (person.gesture != null) {
+                                gestureHandler(person.uniquePersonID, person.gesture, socket);//handles the guesture
+                            }
+                            persons[person.uniquePersonID] = person;
+                            console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
+                        }else{
+                            //console.log("\t->A new person detected, though not sure if it is a person yet. TrackingState: "+receivedPerson.trackingState);
+                        }
+
+                    }
+
+                }
+            }
+        })
+
+
+/*
         for(var key in persons){
             counter --;
             if(persons.hasOwnProperty(key)){
@@ -390,7 +528,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             devices[persons[key].ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
                             devices[persons[key].ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
                         }
-
+                        break;
 
 
                     }
@@ -401,7 +539,6 @@ exports.updatePersons = function(receivedPerson, socket){
                             delete persons[key];
                         }
                     }
-                    break; // whtat is this break for ??
                 }
                 // this person comes in with a new ID
                 else{
@@ -453,7 +590,7 @@ exports.updatePersons = function(receivedPerson, socket){
                     }
                 }// end of "Come of new ID"
             }
-        }
+        }*/
     }
 }; // end of update people list
 
@@ -472,12 +609,12 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
                             delete persons[key].ID[IDkey];
                             if(persons[key].currentlyTrackedBy == socket.id){
-                                var i = 0;  // counter for person in person id list
-                                do{
-                                    console.log('\t->->-> Do while loop : ' + persons[key].uniquePersonID);
-                                    persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[i]];//Object.keys(persons[key].ID)[0];
-                                    i++;
-                                }while(persons[key].currentlyTrackedBy == socket.id && i <= 15)
+                                /*var i = 0;  // counter for person in person id list
+                                do{*/
+                                    //console.log('\t->->-> Do while loop : ' + persons[key].uniquePersonID);
+                                    persons[key].currentlyTrackedBy = persons[key].ID[Object.keys(persons[key].ID)[0]];//Object.keys(persons[key].ID)[0];
+                                    /*i++;
+                                }while(persons[key].currentlyTrackedBy == socket.id && i <= 15)*/
 
                                 console.log('person ' + key + ' is changed to seen by: ' + persons[key].currentlyTrackedBy);
                             }
@@ -540,6 +677,7 @@ exports.removeUntrackedPersonID = function(personIDList,receivedPersonID,sensorS
 exports.pairAndNotify = function(deviceSocketID, uniquePersonID){
     devices[deviceSocketID].ownerID = uniquePersonID;
     devices[deviceSocketID].pairingState = "paired";
+    devices[deviceSocketID].loaction = persons[uniquePersonID].location;
     frontend.clients[deviceSocketID].emit("devicePaired", {
         name: devices[deviceSocketID].name,
         ID: devices[deviceSocketID].uniqueDeviceID,
@@ -943,15 +1081,13 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             //console.log("orientation in deviceInfo is not defined as pitch and yaw. Setting pitch to default : 0");
             device.orientation = {pitch:0,yaw:deviceInfo.orientation};
         }else{
+            //console.log(deviceInfo.orientation);
             device.orientation = deviceInfo.orientation;
         }
-        // for stationary layer refreshes
-        if(deviceInfo.stationary == true){
-            device.stationary = deviceInfo.stationary;
-            device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
-            frontend.io.sockets.emit("refreshStationaryLayer", {});
-        }
 
+        if(device.orientation.yaw>=360){
+            device.orientation.yaw = device.orientation.yaw % 360;
+        }
         // JSclient may register deivce with location as well.
         if(deviceInfo.location!=undefined){
             device.location = {X: deviceInfo.location.X, Y: deviceInfo.location.Y, Z: deviceInfo.location.Z}
@@ -959,6 +1095,12 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             if(deviceInfo.locationX !=undefined){
                 device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
             }
+        }
+        // for stationary layer refreshes
+        if(deviceInfo.stationary == true){
+            device.stationary = deviceInfo.stationary;
+            //device.location = {X: deviceInfo.locationX, Y: deviceInfo.locationY, Z: deviceInfo.locationZ}
+            frontend.io.sockets.emit("refreshStationaryLayer", {});
         }
 
         devices[socket.id] = device; // officially register the device to locator(server)
@@ -969,25 +1111,116 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             fn({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
 
-        
-
-        //Modifications by Nabil Muthanna
-        //------------------------------------------------------------------------------------------------------------//
         if(deviceInfo.deviceType == "iBeaconRcvr"){
             console.log("Device Type is iBeaconRcvr");
             locator.iBeaconService.registerIBeaconRcvrHandler(socket,deviceInfo,fn); 
         }
 
-        //------------------------------------------------------------------------------------------------------------//
-        //Modifications
-
-        frontend.clients[socket.id].emit('registered',{deviceID:locator.devices[socket.id].uniqueDeviceID});
     }
 }
 
+
+
+/*
+ *   The observer could be a device.
+ *   location, height, width shall all be defined.
+ * */
+exports.getIntersectionPointInRoom = function(observer,callback){
+    //console.log("In Projection observerOrientation: "+ JSON.stringify(observer.orientation));
+    // pitch as z rotation, yaw as Y rotation
+    var room = locator.room;
+    var observerHeight = observer.location.Y;
+    var pitchRad = observer.orientation.pitch * util.DEGREES_TO_RADIANS;
+    util.isInRect(observer.location,room.location,room.length,room.depth,function(observerInRoom){
+        if(observerInRoom) {
+            //console.log('orientation: '+JSON.stringify(observer.orientation));
+            if (observer.orientation.pitch > 0) { // if the observer is looking up
+                var hit = "ceiling"
+                var projectionFromHeight = (room.location.Y + room.height - observerHeight) / Math.tan(pitchRad);   //get the projection from the Y location of the observer
+                var intersectedY = room.location.Y + room.height;
+            } else if(observer.orientation.pitch < 0){  // if the observer is looking down
+                var projectionFromHeight = observerHeight / Math.tan(pitchRad);   //get the projection from the Y location of the observer
+                var intersectedY = room.location.Y;
+                var hit = "floor"
+            }else {
+                var hit = "neither";
+            }
+            var initialVector = {X:1,Y:0,Z:0};
+            // use water fall to chain the tasks.
+            async.parallel([
+                //check floor and ceiling
+                function (plcallback) {
+                    if(hit != 'neither') {
+                        //console.log();
+                        util.translateOrientationToReference(observer,
+                            function (orientationToReference) {
+                               // console.log("Ori to Reference: "+orientationToReference);
+                                util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
+                                  //  console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
+                                    //console.log("direction: "+JSON.stringify(arg));
+                                    //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
+                                    util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
+                                        //console.log("MovedLocation: " + JSON.stringify(movedLocation));
+                                        util.inRoom(movedLocation, function (inRoomBool) {
+                                        // console.log("In room ? "+inRoomBool);
+                                            if (inRoomBool == false) {
+                                                plcallback(null, null);
+                                            } else {
+                                                movedLocation.Y = intersectedY;
+                                                plcallback(null, {
+                                                    side: hit,
+                                                    intersectedPoint: movedLocation
+                                                });
+                                            }
+                                        })
+                                    })
+                                })
+                            })
+                    }else{
+                        plcallback(null,null);
+                    }
+                },
+                function (plcallback) {
+                    // check if intersected on four walls
+                    util.getIntersectedWall(observer, function (result) {
+                        //console.log(result);
+                        plcallback(null, result)
+                    })
+                }
+            ], function (err, result) {
+                // filter out the null from parallel result.
+                //console.log("ID: "+observer.uniqueDeviceID+" - "+JSON.stringify(result));
+                var filteredResult = result.filter(function (element) {
+                    return element != null && element != undefined;
+                })
+                if (filteredResult.length == 1) {
+                    callback(filteredResult,{
+                        type:observer.deviceType,
+                        id:observer.uniqueDeviceID,
+                        name:observer.name
+                    });
+                } else {
+                    console.log("\t*Error trying to get intersection on wall" + "\n" +
+                    "\tError Result: " + JSON.stringify(filteredResult));
+                    callback(null,{
+                        type:observer.deviceType,
+                        id:observer.uniqueDeviceID,
+                        name:observer.name
+                    });
+                }
+            });
+        }//end of if observer is in room
+    })
+    //return rotatedVector;
+    //callback(projectionFromHeight)
+
+
+}
+
+
 // TODO: implement!
 // TODO: test!
-exports.calcIntersectionPoints = function(observerSocketID, devicesInFront,done){
+exports.calcIntersectionPointsForDevices = function(observerSocketID, devicesInFront,done){
     var returnDevices = {};
     util.translateOrientationToReference(locator.devices[observerSocketID],
     function(orientationToReference){
@@ -1117,6 +1350,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
             // // We imagine the field of view as two vectors, pointing away from the observing device. Targets between the vectors are in view.
             // // We will use angles to represent these vectors.
             try {
+
                 //get the angle to sens
                 var angleToSensor = util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
                 var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
@@ -1128,6 +1362,7 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
                 return Object.keys(deviceList).filter(function (key) {
                     //var angle = util.normalizeAngle(Math.atan2(devices[key].location.Y - observer.location.Y, devices[key].location.X - observer.location.X) * 180 / Math.PI);
                     if (deviceList[key] != observer && deviceList[key].location != undefined) {
+                        //console.log(deviceList[key].location);
                         if (leftFieldOfView > rightFieldOfView &&
                             (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
                             (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
@@ -1358,6 +1593,7 @@ exports.emitEventToPairedDevice = function(person,eventName,payload){
         console.log("Person is not paired. Or the ownedDeviceID is undefined: " + JSON.stringify(person));
     }
 }
+
 
 
 // ===================== Projected Pixels =====================
@@ -1684,4 +1920,27 @@ exports.getElementsOnWindow = function(socket,apidata,fn) {
 
 
 
+
+
+//Handle setting changes on server
+exports.changeSetting = function(type,property,value,callback){
+    console.log('\t'+type + " - " +property + ' -> ' + value );
+    switch(type){
+        case "pulse":
+            if(property=="inRangeEvents"||property=="inViewEvents"
+                ||property=="sendIntersectionPoints"|| property=="roomIntersectionEvents"){
+                pulse.eventsSwitch[property]=value;
+                callback(true);
+            }else{
+                callback(false)
+            }
+            break;
+        case "room":
+            callback(false);
+            break;
+        default:
+            console.log(" Unknow settting change request: "+type);
+            callback(false);
+    }
+}
 
