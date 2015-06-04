@@ -47,7 +47,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('registerProjector',function (projectorInfo,fn){
-        locator.registerProjector(socket,projectorInfo,fn);
+        locator.projectorService.registerProjector(socket,projectorInfo,fn);
     });
 
     //Handle deregistering beaconTransmitter
