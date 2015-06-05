@@ -4,6 +4,7 @@ var app = express().http().io();
 var data = require('./locatorServices/data');
 var sensorsREST = require('./locatorServices/REST/sensors');
 var devicesREST = require('./locatorServices/REST/devices');
+var locator = require('./locatorServices/locator');
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
@@ -31,16 +32,18 @@ app.configure(function(){
     app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data' }));
     //app.use(express.bodyParser({uploadDir:'./data'}));
     app.use(app.router);
+    //locator.loadConfig();
 })
 
 if(isNaN(process.argv[2])){
     server.listen(3000);
+
 }
 else{
     server.listen(process.argv[2]);
 }
 
-requestHandler.start();
+//requestHandler.start();
 
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/setup.html');
@@ -225,6 +228,7 @@ io.sockets.on('connection', function (socket) {
 function init(){
     var os = require('os');
     var interfaces = os.networkInterfaces();
+
     //exports.serverAddress;
     setTimeout(function(){pulse.start();}, 3000); // three second after heartbeat
 
@@ -249,8 +253,8 @@ function init(){
 //var thumbnailSize = 400;
     var util = require('./locatorServices/util');
     var mime = require('mime');
-    var locator = require('./locatorServices/locator');
 
+    //
     var walk    = require('walk');
     var files   = [];
     var walker  = walk.walk(dataDirectory, { followLinks: false });
@@ -261,6 +265,7 @@ function init(){
     });
     walker.on('end', function() {
         //console.log(files);
+        locator.loadConfig();
         console.log('End of initializing data');
     });
 }

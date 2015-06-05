@@ -40,11 +40,11 @@ exports.room = room;
 
 
 // TODO: test!
-exports.start = function(){
+/*exports.start = function(){
     // Do initialization here, if any
     // load flashback from stateFile
     locator.loadConfig();
-};
+};*/
 
 
 exports.registerSensor = function(socket,type,sensorInfo,callback){

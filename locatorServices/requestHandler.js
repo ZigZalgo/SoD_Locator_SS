@@ -6,9 +6,9 @@ var pulse = require("./pulse");
 var async =
     require("async");
 // TODO: test!
-exports.start = function () {
+/*exports.start = function () {
     locator.start();
-};
+};*/
 
 exports.locator = locator;
 
