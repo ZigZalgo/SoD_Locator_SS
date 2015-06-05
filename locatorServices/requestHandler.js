@@ -6,9 +6,9 @@ var pulse = require("./pulse");
 var async =
     require("async");
 // TODO: test!
-/*exports.start = function () {
+exports.start = function () {
     locator.start();
-};*/
+};
 
 exports.locator = locator;
 
@@ -93,6 +93,14 @@ exports.handleRequest = function (socket) {
             fn({"status":"success"})
         }
     })
+    socket.on("saveCurrentState",function(request,fn){
+        //console.log("SaveCurrentState request received");
+        locator.saveCurrentState();
+    });
+    socket.on("loadFromConfig",function(request,fn){
+        //console.log("SaveCurrentState request received");
+        locator.loadConfig();
+    });
     //END REGISTRATION EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
     //START PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////

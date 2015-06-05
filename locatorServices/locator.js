@@ -6,6 +6,7 @@ var frontend = require('./../frontend');
 var Q = require('q');
 var async = require("async");
 var pulse = require("./pulse");
+var dataService = require("./data");
 //var events = require("events");
 
 
@@ -21,6 +22,7 @@ exports.visibleBeacons = visibleBeacons;
 
 var data = {};
 var projector = {};
+var configuration = {};
 exports.kinectSensorsReference = null;
 exports.persons = persons;
 exports.devices = devices;
@@ -38,9 +40,11 @@ exports.room = room;
 
 
 // TODO: test!
-/*exports.start = function(){
+exports.start = function(){
     // Do initialization here, if any
-};*/
+    // load flashback from stateFile
+    locator.loadConfig();
+};
 
 
 exports.registerSensor = function(socket,type,sensorInfo,callback){
@@ -1622,3 +1626,48 @@ exports.changeSetting = function(type,property,value,callback){
     }
 }
 
+//save current state of SOD into a file
+var stateCounter = 0;
+exports.saveCurrentState = function(){
+    var currentState = {stateID:stateCounter++, devices:locator.devices, sensors:locator.sensors,
+        room:{
+            location:locator.room.location,
+            length:locator.room.length,
+            depth:locator.room.depth,
+            height:locator.room.height
+        },
+        timestamp:null};
+    dataService.saveDataToFile(JSON.stringify(currentState,null,4),"data/reserved/config.json",function(err){
+        if(err==1){
+            //file successfully saved. 1 - success
+            try{
+                configuration = currentState;
+                Object.keys(devices).forEach(function(deviceKey){
+                    frontend.clients[deviceKey].emit("rememberWhoYouAre",
+                        {
+                            stateID:currentState.stateID,
+                            type:locator.devices[deviceKey].deviceType,
+                            ID: locator.devices[deviceKey].uniqueDeviceID
+                        });
+                })
+            }catch(e){
+                console.log("error emitting rememberWhoYouAre");
+            }
+        }else{
+            console.log("Err while save to file: "+err );
+        }
+    })
+}
+
+exports.loadConfig = function(){
+    //console.log();
+    dataService.loadJSONWithCallback("data/reserved/config.json",function(callback){
+        if(callback!=null){
+            //console.log(callback);
+            console.log("Config file loaded..");
+            configuration = callback;
+            locator.room = new factory.Room(configuration.room.location,configuration.room.length,configuration.room.depth,configuration.room.height);
+            //console.log(JSON.stringify(locator.room,null,4));
+        }
+    })
+}

@@ -72,6 +72,16 @@ $(document).ready(function(){
         });
 
     })
+    $('div#saveCurrentState').on('click',function(e){
+        io.emit('saveCurrentState',{},function(callback){
+
+        });
+    })
+    $('div#loadFromFlashBack').on('click',function(e){
+        io.emit('loadFromConfig',{},function(callback){
+
+        });
+    })
     $('#settings_flip').on('click',function(){
         //console.log('settings flip!');
         $.get("setting",function(settingField){

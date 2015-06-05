@@ -1,0 +1,21 @@
+{
+    "stateID": 1,
+    "devices": {},
+    "sensors": {
+        "kinects": {},
+        "leapMotions": {},
+        "iBeacons": {},
+        "iBeaconRcvrs": {}
+    },
+    "room": {
+        "location": {
+            "X": 0,
+            "Y": 0,
+            "Z": 3
+        },
+        "length": 6,
+        "depth": 8,
+        "height": 4
+    },
+    "timestamp": null
+}

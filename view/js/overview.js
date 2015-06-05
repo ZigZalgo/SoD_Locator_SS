@@ -254,8 +254,8 @@ function drawRoom(roomInfo,stage,layer,callback){
     //console.log("Drawing room: "+JSON.stringify(roomInfo));
     // make a room as a group of lines
     var roomGroup = new Kinetic.Group({
-        x: shiftXToGridOrigin(roomInfo.location.X*pixelsPerMeter),
-        y: shiftXToGridOrigin(roomInfo.location.Z*pixelsPerMeter),
+        x: shiftXToGridOrigin(0*pixelsPerMeter),
+        y: shiftXToGridOrigin(0*pixelsPerMeter),
         rotation: 0,
         draggable:false,
         name: 'roomGroup'
@@ -802,7 +802,7 @@ function refreshStationaryLayer() {
     // Paint room on stationary layer
     io.emit("getRoomFromServer",{},function(room){
         // Got room from server drawing room with kineticjs
-        //drawRoom(room,stage,layer);
+        drawRoom(room,stage,layer);
     })
     // drawing data points
     io.emit('getDataPointsWithSelection', {selection: 'all'}, function (data) {

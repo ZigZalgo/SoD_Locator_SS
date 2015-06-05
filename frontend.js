@@ -40,7 +40,7 @@ else{
     server.listen(process.argv[2]);
 }
 
-//requestHandler.start();
+requestHandler.start();
 
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/setup.html');
@@ -86,10 +86,7 @@ app.get('/images/ajax-loader.gif', function (req, res) {
 app.get('/overviewJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/overview.js');
 });
-app.get('/happiness', function (req, res) {
-    console.log("requested for happiness");
-    res.sendfile(__dirname + '/data/happiness.json');
-});
+
 
 app.get('/calibrateJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/calibrate.js');
@@ -248,7 +245,7 @@ function init(){
     // Initialize all the existing data in the data and convert them into object store them in the locator
     console.log('Loading existing data ...');
     var fs = require('fs');
-    var dataDirectory = 'data/';
+    var dataDirectory = 'data/temp/';
 //var thumbnailSize = 400;
     var util = require('./locatorServices/util');
     var mime = require('mime');
@@ -256,7 +253,7 @@ function init(){
 
     var walk    = require('walk');
     var files   = [];
-    var walker  = walk.walk('./data', { followLinks: false });
+    var walker  = walk.walk(dataDirectory, { followLinks: false });
     walker.on('file', function(root, stat, next) {
         //files.push(stat.name);
         locator.registerData({name:stat.name,type:mime.lookup('data\\'+stat.name),dataPath:'\\files\\'+stat.name,range:0.2});

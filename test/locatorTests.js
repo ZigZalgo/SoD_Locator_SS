@@ -90,3 +90,7 @@ describe("locator.getIntersectionPointInRoom()", function(){
         });
     });
 });
+
+/*describe("locator.saveCurrentState()", function(){
+    locator.saveCurrentState();
+});*/
