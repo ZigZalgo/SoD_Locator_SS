@@ -696,19 +696,20 @@ exports.pairAndNotify = function(deviceSocketID, uniquePersonID){
 
 exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
-        "\nPerson ID: " + uniquePersonID;
+        " - Person ID: " + uniquePersonID;
+    console.log(statusMsg);
 
-    if(devices[deviceSocketID] != undefined && persons[uniquePersonID] != undefined){
-        if(devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
+    if(locator.devices[deviceSocketID] != undefined && locator.persons[uniquePersonID] != undefined){
+        if(locator.devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
             locator.pairAndNotify(deviceSocketID, uniquePersonID);
             persons[uniquePersonID].ownedDeviceID = deviceSocketID;
             persons[uniquePersonID].pairingState = "paired";
             statusMsg += "\n Pairing successful.";
-            frontend.clients[deviceSocketID].emit("gotPaired",{device:devices[deviceSocketID].uniqueDeviceID,person:persons[uniquePersonID].uniquePersonID,status:"success"});
+            frontend.clients[deviceSocketID].emit("gotPaired",{device:locator.devices[deviceSocketID].uniqueDeviceID,person:persons[uniquePersonID].uniquePersonID,status:"success"});
         }
         else{
             statusMsg += "\nPairing attempt unsuccessful";
-            if(devices[deviceSocketID].pairingState != "unpaired"){
+            if(locator.devices[deviceSocketID].pairingState != "unpaired"){
                 statusMsg += "Device unavailable for pairing.";
             }
             if(persons[uniquePersonID].pairingState != "unpaired"){
@@ -719,7 +720,8 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
     }
     else{
         statusMsg += "Pairing attempt unsuccessful. One or both objects were not found.";
-        frontend.clients[deviceSocketID].emit("gotPaired",{deviceID:devices[deviceSocketID].uniqueDeviceID,personID:persons[uniquePersonID],status:statusMsg});
+        //frontend.clients[deviceSocketID].emit("gotPaired",{deviceID:locator.devices[deviceSocketID].uniqueDeviceID,personID:persons[uniquePersonID],status:statusMsg});
+        console.log(JSON.stringify(locator.devices[deviceSocketID]) + " -\n " + JSON.stringify(persons[uniquePersonID]) );
     }
     socket.send(JSON.stringify({"status": statusMsg, "ownerID": uniquePersonID}));
     if(callback!=undefined){
