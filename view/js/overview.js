@@ -1006,7 +1006,7 @@ function updateContentWithObjects(){
                 ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),minorGridLineWidth,0,2*Math.PI);
                 ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
                 ctx.fill();
-                if(data[key].pairingState == 'paired'){
+                if(data[key].pairingState != 'unpaired'){
                     ctx.strokeStyle = "#2cd72A";
                     //ctx.rect(shiftXToGridOrigin(xInMeters)-minorGridLineWidth,shiftYToGridOrigin(zInMeters)-minorGridLineWidth,minorGridLineWidth*2,minorGridLineWidth*2);
                     ctx.stroke();

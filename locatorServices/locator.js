@@ -427,9 +427,42 @@ exports.updatePersons = function(receivedPerson, socket){
                                 personInList.hands.right.location = receivedPerson.rightHandLocation;
                             }
                             if(personInList.ownedDeviceID != null) {
-                                devices[personInList.ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
-                                devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
-                                devices[personInList.ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
+                                /**
+                                 *  Check which hand/base the ownedDevice is paired to. Update the location based on
+                                 *      the hands location if it's detected. Otherwise use base loaction.
+                                 * */
+                                switch(personInList.pairingState){
+                                    case "leftHand":
+                                        if(receivedPerson.leftHandLocation!=null){
+                                            devices[personInList.ownedDeviceID].location.X = receivedPerson.leftHandLocation.X.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Y = receivedPerson.leftHandLocation.Y.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Z = receivedPerson.leftHandLocation.Z.toFixed(3);
+                                        }else{
+                                            devices[personInList.ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
+                                        }
+                                        break;
+                                    case "rightHand":
+                                        if(receivedPerson.rightHandLocation!=null){
+                                            devices[personInList.ownedDeviceID].location.X = receivedPerson.rightHandLocation.X.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Y = receivedPerson.rightHandLocation.Y.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Z = receivedPerson.rightHandLocation.Z.toFixed(3);
+                                        }else{
+                                            devices[personInList.ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
+                                            devices[personInList.ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
+                                        }
+                                        break;
+                                    case "base":
+                                        devices[personInList.ownedDeviceID].location.X = receivedPerson.location.X.toFixed(3);
+                                        devices[personInList.ownedDeviceID].location.Y = receivedPerson.location.Y.toFixed(3);
+                                        devices[personInList.ownedDeviceID].location.Z = receivedPerson.location.Z.toFixed(3);
+                                        break;
+                                    default:
+                                        console.log("unknown pairing state: "+personInList.pairingState);
+                                }
+
                             }
                             //console.log("\t->received Peron got updated " + "with personList.");
                             receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
@@ -682,10 +715,10 @@ exports.removeUntrackedPersonID = function(personIDList,receivedPersonID,sensorS
     }
 }
 
-exports.pairAndNotify = function(deviceSocketID, uniquePersonID){
+exports.pairAndNotify = function(deviceSocketID, uniquePersonID,pairType){
     devices[deviceSocketID].ownerID = uniquePersonID;
-    devices[deviceSocketID].pairingState = "paired";
-    devices[deviceSocketID].loaction = persons[uniquePersonID].location;
+    devices[deviceSocketID].pairingState = pairType;
+    //devices[deviceSocketID].loaction = persons[uniquePersonID].location;
     frontend.clients[deviceSocketID].emit("devicePaired", {
         name: devices[deviceSocketID].name,
         ID: devices[deviceSocketID].uniqueDeviceID,
@@ -693,18 +726,26 @@ exports.pairAndNotify = function(deviceSocketID, uniquePersonID){
         ownerID: uniquePersonID
     });
 }
-
-exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
+/**
+ * pairType:
+ *      base        - baseJoint, belly area of skeleton
+ *      leftHand    - leftHandJoint of skeleton
+ *      rightHand   - right hand joint of skeleton
+ *      unpaired    - no paired
+ * */
+exports.pairDevice = function(deviceSocketID, uniquePersonID,pairType,socket,callback){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         " - Person ID: " + uniquePersonID;
-    console.log(statusMsg);
+    console.log(pairType);
 
     if(locator.devices[deviceSocketID] != undefined && locator.persons[uniquePersonID] != undefined){
         if(locator.devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
+            // pair
             locator.pairAndNotify(deviceSocketID, uniquePersonID);
             persons[uniquePersonID].ownedDeviceID = deviceSocketID;
-            persons[uniquePersonID].pairingState = "paired";
+            persons[uniquePersonID].pairingState = pairType;
             statusMsg += "\n Pairing successful.";
+            console.log(statusMsg);
             frontend.clients[deviceSocketID].emit("gotPaired",{device:locator.devices[deviceSocketID].uniqueDeviceID,person:persons[uniquePersonID].uniquePersonID,status:"success"});
         }
         else{
@@ -715,6 +756,7 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
             if(persons[uniquePersonID].pairingState != "unpaired"){
                 statusMsg += "Person unavailable for pairing.";
             }
+            console.log(statusMsg);
             frontend.clients[deviceSocketID].emit("gotPaired",{device:devices[deviceSocketID].uniqueDeviceID,person:persons[uniquePersonID],status:statusMsg});
         }
     }
@@ -724,7 +766,7 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
         console.log(JSON.stringify(locator.devices[deviceSocketID]) + " -\n " + JSON.stringify(persons[uniquePersonID]) );
     }
     socket.send(JSON.stringify({"status": statusMsg, "ownerID": uniquePersonID}));
-    if(callback!=undefined){
+    /*if(callback!=undefined){
         try{
             callback();
         }catch(e){
@@ -732,7 +774,7 @@ exports.pairDevice = function(deviceSocketID, uniquePersonID,socket,callback){
         }
     }else{
         console.log("no callback has been defined.");
-    }
+    }*/
 }
 
 //tested
@@ -880,7 +922,7 @@ exports.cleanUpDataPoint = function(socketID){
 
 exports.cleanUpDevice = function(socketID){
     var personID = devices[socketID].ownerID;
-    if(devices[socketID].pairingState == "paired" && personID != null){
+    if(devices[socketID].pairingState != "unpaired" && personID != null){
         if(persons[personID] != undefined){
             persons[personID].ownedDeviceID = null;
             persons[personID].pairingState = "unpaired";
@@ -1480,7 +1522,7 @@ exports.getPairedDevice = function(listDevices){
     var pairedDevices = {};
     if(Object.keys(listDevices).length!=0){
         for(var key in devices){
-            if(devices.hasOwnProperty(key) && listDevices[key].pairingState == 'paired'){
+            if(devices.hasOwnProperty(key) && listDevices[key].pairingState != 'unpaired'){
                 pairedDevices[key] = devices[key];
             }
         }
@@ -1589,9 +1631,9 @@ exports.refreshStationarylayer = function(){
 
 // Emit event to paired device of a person
 exports.emitEventToPairedDevice = function(person,eventName,payload){
-    if(person.pairingState=="paired" && person.ownedDeviceID!=undefined){
+    if(person.pairingState!="unpaired" && person.ownedDeviceID!=undefined){
         try{
-            if(person.pairingState == "paired"){
+            if(person.pairingState != "unpaired"){
                 console.log("Emiting: "+eventName+" with palyload "+JSON.stringify(payload)+
                     " to "+locator.devices[person.ownedDeviceID].uniqueDeviceID+" with person:"+JSON.stringify(person));
                 frontend.clients[person.ownedDeviceID].emit(eventName,payload);

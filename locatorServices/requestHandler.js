@@ -179,19 +179,20 @@ exports.handleRequest = function (socket) {
 
     socket.on('pairDeviceWithPerson', function (request, fn){
         //console.log("Paring request: "+JSON.stringify(request));
-        if (request.uniqueDeviceID != undefined) {
-            console.log('receive paring request: pair device '+ request.uniqueDeviceID +' with person ' + request.uniquePersonID );
-            locator.pairDevice(util.getDeviceSocketIDByID(request.uniqueDeviceID),request.uniquePersonID,socket,fn);
-        }else
-        if (request.deviceSocketID != undefined) {
-            locator.pairDevice(request.deviceSocketID, request.uniquePersonID,socket,fn);
-        }
-        else {
-            locator.pairDevice(socket.id, request.uniquePersonID,socket,fn);
-        }
-        if(fn!=undefined){
-            fn(({"status": 'pairing'+locator.devices[request.deviceSocketID].uniqueDeviceID+' with person: '+request.uniquePersonID+' success'}));
-            locator.pairDevice(socket.id, request.uniquePersonID, socket, fn);
+        if(request.pairType==undefined){
+            console.log("PairType is null, please specify a pairType when request.");
+            fn({status:"fail",msg:"need pairType in request(base,leftHand,or rightHand)."});
+        }else{
+            if (request.uniqueDeviceID != undefined) {
+                console.log('receive paring request: pair device '+ request.uniqueDeviceID +' with person ' + request.uniquePersonID );
+                locator.pairDevice(util.getDeviceSocketIDByID(request.uniqueDeviceID),request.uniquePersonID,request.pairType,socket,fn);
+            }else
+            if (request.deviceSocketID != undefined) {
+                locator.pairDevice(request.deviceSocketID, request.uniquePersonID,request.pairType,socket,fn);
+            }
+            else {
+                locator.pairDevice(socket.id, request.uniquePersonID,request.pairType,socket,fn);
+            }
         }
     });
 
