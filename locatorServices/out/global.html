@@ -1,0 +1,3173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Global</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Global</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        
+        </h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="handleRequest"><span class="type-signature"></span>handleRequest<span class="signature">(socket)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    socket comes in here to handle all the request.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>socket</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">hands all the request from socketIO</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line20">line 20</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+        <h3 class="subsection-title">Events</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:dropData">dropData</h4>
+
+    
+
+
+
+<div class="description">
+    "dropData" listener handles when a person performs release handgesture and drop the data associate with the person to the location     this function will check whether there is a dataPoint within the dropRange         if there is a dataPoint within the range the data associate with the person will be dump into the dataPoint         otherWise a new dataPoint will spawn on the current location where the person is standing and link the data to it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">contains the dropRange of the person and the ID of the person</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line588">line 588</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:dropData">event:dropData</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:dropData">event:dropData</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = {ID:0, dropRange:0.5}; socket.emit("dropData",function(callback){     console.log(callback);  // callback object is the list of people from server })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getPeopleFromServer">getPeopleFromServer</h4>
+
+    
+
+
+
+<div class="description">
+    "getPeopleFromServer" listener handles get all the people from server
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">not being used</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback contains list of people on the server in dictionary</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line567">line 567</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getPeopleFromServer">event:getPeopleFromServer</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getPeopleFromServer">event:getPeopleFromServer</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>socket.emit("getPeopleFromServer",function(callback){     console.log(callback);  // callback object is the list of people from server })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:pairDeviceWithPerson">pairDeviceWithPerson</h4>
+
+    
+
+
+
+<div class="description">
+    "pairDeviceWithPerson" listener handles pairs a device with a person such that the device will be using the person loaction, the person can use the orientation from device
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains request inof of uniqueDeviceID, uniquePersonID and pairType</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line308">line 308</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:pairDeviceWithPerson">event:pairDeviceWithPerson</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:pairDeviceWithPerson">event:pairDeviceWithPerson</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// pair device ID-101 with person ID-1. Device will be using person(ID:1)'s base location var request = {     uniqueDeviceID:101,     uniquePersonID:1,     pairType:"base" // pairType can be "base","leftHand","rightHand" . "base" indicates person's mid-belly position }; socket.emit("pairDeviceWithPerson",request,function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:registerDataPoint">registerDataPoint</h4>
+
+    
+
+
+
+<div class="description">
+    "registerDataPoint" listener handles register Device request
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dataPointInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains all info about the dataPoint who wants to register</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line73">line 73</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:registerDataPoint">event:registerDataPoint</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:registerDataPoint">event:registerDataPoint</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var dataPointInfo = {                         location: { X: 1, Y: 0, Z: 1 },     // customizable
+                                data: [ '123.jpg', '' ],            // customizable
+                                dropRange: 0,                       // customizable
+                                observeRange: 0,                    // customizable
+                                observer:                           // customizable
+                                {
+                                    observerType: 'rectangular',
+                                    observeWidth: 2,
+                                    observeHeight: 1
+                                },
+                                subscriber: [ { subscriberType: 'device', ID: 101 } ]   // customizable  } socket.emit("registerDataPoint",dataPointInfo,function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:registerMobileWebClient">registerMobileWebClient</h4>
+
+    
+
+
+
+<div class="description">
+    "registerMobileWebClient" listener handles register mobileWebClient any client call emit this event will yield to register as a webclient
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>clientInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">currently not being used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line186">line 186</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:registerMobileWebClient">event:registerMobileWebClient</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:registerMobileWebClient">event:registerMobileWebClient</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>socket.emit("registerMobileWebClient",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:registerSensor">registerSensor</h4>
+
+    
+
+
+
+<div class="description">
+    "registerSensor" listener handles register sensor request
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sensorInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains all info about the dataPoint who wants to register</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line102">line 102</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:registerSensor">event:registerSensor</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:registerSensor">event:registerSensor</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var sensorInfo = {     sensorType: 'kinect',
+            FOV: 70,
+            rangeInMM: 4000,
+            frameHeight: 0,
+            frameWidth: 0,
+            translateRule:
+            {
+                startingLocation: { X: 0, Y: 0, Z: 0 },
+                changeInOrientation: 0,
+                xSpace: 0,
+                zSpace: 0,
+                dX: 0,
+                dZ: 0
+            } } socket.emit("registerSensor",sensorInfo,function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:registerUnityVisualizer">registerUnityVisualizer</h4>
+
+    
+
+
+
+<div class="description">
+    "registerUnityVisualizer" listener handles register registerUnityVisualizer any client call emit this event will yield to register as a webclient
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>clientInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">currently not being used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line205">line 205</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:registerUnityVisualizer">event:registerUnityVisualizer</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:registerUnityVisualizer">event:registerUnityVisualizer</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>socket.emit("registerMobileWebClient",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:registerWebClient">registerWebClient</h4>
+
+    
+
+
+
+<div class="description">
+    "registerWebClient" listener handles register webclient any client call emit this event will yield to register as a webclient
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>clientInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">currently not being used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line168">line 168</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:registerWebClient">event:registerWebClient</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:registerWebClient">event:registerWebClient</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>socket.emit("registerWebClient",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:reigsterDevice">reigsterDevice</h4>
+
+    
+
+
+
+<div class="description">
+    "registerDevice" listener handles register Device request
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>deviceInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains all info about the devcie who wants to register</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback for registerDevice</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line23">line 23</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:reigsterDevice">event:reigsterDevice</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:reigsterDevice">event:reigsterDevice</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var deviceInfo = { ID: null,                        // customizable
+                  name: 'JSClient',                     // customizable
+                  socketID: null,                       // defined by server
+                  deviceType: 'JSClientDevice',         // customizable
+                  location: { X: 1, Y: 1, Z: 1 },       // customizable
+                  orientation: { yaw: 30, pitch: 45 },  // customizable
+                  FOV: 70,                              // customizable
+                  depth: 1,                             // customizable
+                  width: 1,                             // customizable
+                  ownerID: null,                        // defined by server
+                  pairingState: 'unpaired',             // defined by server
+                  intersectionPoint: { X: 0, Y: 0 },    // defined by server
+                  lastUpdated: '2015-06-10T21:58:34.024Z', // defined by server
+                  stationary: true,                     // customizable
+                  deviceIP: '',                         // defined by server
+                  observer:                             // customizable
+                   { observerType: 'rectangular',
+                     observeWidth: 2,
+                     observeHeight: 1,
+                     observerDistance: 1 },
+                  height: 1                             // customizable } socket.emit("registerDevice",deviceInfo,function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:unpairAllDevices">unpairAllDevices</h4>
+
+    
+
+
+
+<div class="description">
+    "unpairAllDevices" listener handles unpair all the device with paired person.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">can be null</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line363">line 363</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:unpairAllDevices">event:unpairAllDevices</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:unpairAllDevices">event:unpairAllDevices</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// socket.emit("unpairAllDevices",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:unpairAllPeople">unpairAllPeople</h4>
+
+    
+
+
+
+<div class="description">
+    "unpairAllPeople" listener handles unpair all the people with paired device.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">can be null</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line382">line 382</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:unpairAllPeople">event:unpairAllPeople</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:unpairAllPeople">event:unpairAllPeople</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// socket.emit("unpairAllPeople",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:unpairDevice">unpairDevice</h4>
+
+    
+
+
+
+<div class="description">
+    "unpairDevice" listener handles unpair the device, whoever is firing this event, with paired person.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">can be null</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line344">line 344</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:unpairDevice">event:unpairDevice</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:unpairDevice">event:unpairDevice</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// socket.emit("unpairDevice",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:updateDeviceInfo">updateDeviceInfo</h4>
+
+    
+
+
+
+<div class="description">
+    "updateDeviceInfo" listener handles update device information on the server.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>deviceInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">contains the deviceInfo that we want to update</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback for updateDeviceInfo</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line476">line 476</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:updateDeviceInfo">event:updateDeviceInfo</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:updateDeviceInfo">event:updateDeviceInfo</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value var deviceInfo = {     objectType:"happiness",     location:{X:1,Y:1,Z:1} };  // device property will be updated according to deviceInfo socket.emit("updateDeviceInfo",deviceInfo,function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:updateObjectLocation">updateObjectLocation</h4>
+
+    
+
+
+
+<div class="description">
+    "updateObjectLocation" listener handles device/dataPoint update its location to the server
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">contains the deviceType, ID, and newLocation</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback for updateObjectLocation</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line434">line 434</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:updateObjectLocation">event:updateObjectLocation</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:updateObjectLocation">event:updateObjectLocation</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value var request = {     objectType:"device",    // can be "device" or "dataPoint"     ID:0,     location:{X:1,Y:1,Z:1} }; socket.emit("updateObjectLocation",request,function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:updateOrientation">updateOrientation</h4>
+
+    
+
+
+
+<div class="description">
+    "updateOrientation" listener handles device update it's orientation to the server
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains the orientation data of the device</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback for updateOrientation</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line405">line 405</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:updateOrientation">event:updateOrientation</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:updateOrientation">event:updateOrientation</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value var request = {     orientation:{         pitch:30,         yaw:45     } }; socket.emit("updateOrientation",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:updateSensorInfo">updateSensorInfo</h4>
+
+    
+
+
+
+<div class="description">
+    "updateSensorInfo" listener handles update sensor infomation on the server
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sensorInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">contains the sensorInfo that we want to update</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback for updateSensorInfo</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line496">line 496</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:updateSensorInfo">event:updateSensorInfo</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:updateSensorInfo">event:updateSensorInfo</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// we mainly use this to update calibration rule of the sensor var sensorInfo = {     translateRule:{         changeInOrientation: 22,    // Rotation         dX:0,                       // transformX         dZ:0,                       // transformY         xSpace: 0,                  // xSpaceTransition         zSpace: 0,                  // ySpaceTransition         startingLocation.X:0,       // startingLocation.X         startingLocation.Y:0,       // startingLocation.Y         startingLocation.Z:0        // startingLocation.Z     } };  // device property will be updated according to deviceInfo socket.emit("updateSensorInfo",sensorInfo,function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Events</h3><ul><li><a href="global.html#event:dropData">dropData</a></li><li><a href="global.html#event:getPeopleFromServer">getPeopleFromServer</a></li><li><a href="global.html#event:pairDeviceWithPerson">pairDeviceWithPerson</a></li><li><a href="global.html#event:registerDataPoint">registerDataPoint</a></li><li><a href="global.html#event:registerMobileWebClient">registerMobileWebClient</a></li><li><a href="global.html#event:registerSensor">registerSensor</a></li><li><a href="global.html#event:registerUnityVisualizer">registerUnityVisualizer</a></li><li><a href="global.html#event:registerWebClient">registerWebClient</a></li><li><a href="global.html#event:reigsterDevice">reigsterDevice</a></li><li><a href="global.html#event:unpairAllDevices">unpairAllDevices</a></li><li><a href="global.html#event:unpairAllPeople">unpairAllPeople</a></li><li><a href="global.html#event:unpairDevice">unpairDevice</a></li><li><a href="global.html#event:updateDeviceInfo">updateDeviceInfo</a></li><li><a href="global.html#event:updateObjectLocation">updateObjectLocation</a></li><li><a href="global.html#event:updateOrientation">updateOrientation</a></li><li><a href="global.html#event:updateSensorInfo">updateSensorInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#handleRequest">handleRequest</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.1</a> on Wed Jun 10 2015 17:23:34 GMT-0600 (Mountain Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

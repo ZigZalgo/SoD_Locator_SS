@@ -1,4 +1,32 @@
-var locator = require('./locator');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: requestHandler.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: requestHandler.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var locator = require('./locator');
 var factory = require('./factory');
 var frontend = require('./../frontend');
 var util = require('./util');
@@ -674,7 +702,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('getDistanceBetweenDevices', function (request, fn) {
-        if (util.getDeviceSocketIDByID(request.ID1) != undefined && util.getDeviceSocketIDByID(request.ID2) != undefined) {
+        if (util.getDeviceSocketIDByID(request.ID1) != undefined &amp;&amp; util.getDeviceSocketIDByID(request.ID2) != undefined) {
             //target devices found, return distance
             try {
                 fn(util.distanceBetweenPoints(locator.devices[util.getDeviceSocketIDByID(request.ID1)].location, locator.devices[util.getDeviceSocketIDByID(request.ID2)].location));
@@ -691,7 +719,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('getDistanceBetweenPersonAndDevice', function (request, fn) {
-        if (locator.persons[request.ID1] != undefined && util.getDeviceSocketIDByID(request.ID2)!=undefined){
+        if (locator.persons[request.ID1] != undefined &amp;&amp; util.getDeviceSocketIDByID(request.ID2)!=undefined){
             try{
                 fn(util.distanceBetweenPoints(locator.persons[request.ID1].location, locator.devices[util.getDeviceSocketIDByID(request.ID2)].location));
             }
@@ -706,7 +734,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('getDistanceBetweenPeople', function(request, fn){
-        if(locator.persons[request.ID1] != undefined && locator.persons[request.ID2]){
+        if(locator.persons[request.ID1] != undefined &amp;&amp; locator.persons[request.ID2]){
             try{
                 fn(util.distanceBetweenPoints(locator.persons[request.ID1].location, locator.persons[request.ID2].location));
             }
@@ -738,7 +766,7 @@ exports.handleRequest = function (socket) {
     socket.on('sendEventToDevicesWithSelection', function(payload, fn){
         console.log(payload);
         for (var key in util.filterDevices(socket, payload)) {
-            if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
+            if (locator.devices.hasOwnProperty(key) &amp;&amp; socket != frontend.clients[key]) {
                 if(payload.eventName==undefined){
                     frontend.clients[key].send(payload.data)
                 }
@@ -755,7 +783,7 @@ exports.handleRequest = function (socket) {
     socket.on('requestDataFromSelection', function (request, fn) {
         console.log("Got request: " + JSON.stringify(request));
         for (var key in util.filterDevices(socket, request)) {
-            if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
+            if (locator.devices.hasOwnProperty(key) &amp;&amp; socket != frontend.clients[key]) {
                 if(request.arguments==undefined) request.arguments = null;
                 frontend.clients[key].emit("request",
                     {
@@ -853,7 +881,7 @@ exports.handleRequest = function (socket) {
 
     socket.on('getCalibrationFrames', function (request, fn) {
         // error checking see if the sensor is not defined
-        if (frontend.clients[request.referenceSensorID] != undefined && frontend.clients[request.uncalibratedSensorID] != undefined) {
+        if (frontend.clients[request.referenceSensorID] != undefined &amp;&amp; frontend.clients[request.uncalibratedSensorID] != undefined) {
             frontend.clients[request.referenceSensorID].emit('getFrameFromSensor', socket.id);
             frontend.clients[request.uncalibratedSensorID].emit('getFrameFromSensor', socket.id);
         } else {
@@ -876,4 +904,26 @@ exports.handleRequest = function (socket) {
 
 
 
-};
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Events</h3><ul><li><a href="global.html#event:dropData">dropData</a></li><li><a href="global.html#event:getPeopleFromServer">getPeopleFromServer</a></li><li><a href="global.html#event:pairDeviceWithPerson">pairDeviceWithPerson</a></li><li><a href="global.html#event:registerDataPoint">registerDataPoint</a></li><li><a href="global.html#event:registerMobileWebClient">registerMobileWebClient</a></li><li><a href="global.html#event:registerSensor">registerSensor</a></li><li><a href="global.html#event:registerUnityVisualizer">registerUnityVisualizer</a></li><li><a href="global.html#event:registerWebClient">registerWebClient</a></li><li><a href="global.html#event:reigsterDevice">reigsterDevice</a></li><li><a href="global.html#event:unpairAllDevices">unpairAllDevices</a></li><li><a href="global.html#event:unpairAllPeople">unpairAllPeople</a></li><li><a href="global.html#event:unpairDevice">unpairDevice</a></li><li><a href="global.html#event:updateDeviceInfo">updateDeviceInfo</a></li><li><a href="global.html#event:updateObjectLocation">updateObjectLocation</a></li><li><a href="global.html#event:updateOrientation">updateOrientation</a></li><li><a href="global.html#event:updateSensorInfo">updateSensorInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#handleRequest">handleRequest</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.1</a> on Wed Jun 10 2015 17:23:34 GMT-0600 (Mountain Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
