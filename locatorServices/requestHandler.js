@@ -597,7 +597,7 @@ exports.handleRequest = function (socket) {
      *  @example
      *  var request = {ID:0, dropRange:0.5};
      *  socket.emit("dropData",function(callback){
-     *      console.log(callback);  // callback object is the list of people from server
+     *      console.log(callback);
      *  })
      * */
     socket.on('dropData',function(request,fn){
@@ -608,25 +608,64 @@ exports.handleRequest = function (socket) {
         }
         //locator.dropData(socket,request.ID,request.range);
     });
+
+    /**
+     *  "getClientsFromServer" listener handles get all the clients from server
+     *  @event getClientsFromServer
+     *  @param {?object} request not being used
+     *  @param {!requestCallback} fn return callback contains device socketID, clientType
+     *  @listens getClientsFromServer
+     *  @example
+     *
+     *
+     *  socket.emit("getClientsFromServer",function(callback){
+     *      console.log(callback);  // callback object is the list of client from server
+     *  })
+     * */
     socket.on('getClientsFromServer', function (request, fn) {
         var selectedValues = {};
         for (var key in frontend.clients) {
             selectedValues[key] = {socketID: frontend.clients[key].id, clientType: frontend.clients[key].clientType}
         };
-
         if (fn != undefined) {
             fn(selectedValues);
         }
     });
 
+    /**
+     *  "getDevicesWithSelection" listener handles get device with selection
+     *  @event getDevicesWithSelection
+     *  @param {!object} request contains the arrays of selection such as ["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]
+     *  @param {!requestCallback} fn return callback contains the selected device based on selection
+     *  @listens getDevicesWithSelection
+     *  @example
+     *  // supported selection type are "all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"
+     *  var list = ["inView","nearest"];
+     *  socket.emit("getDevicesWithSelection",{selection:list},function(callback){
+     *      console.log(callback);  // callback contains the device that are inView but also nearest to the device who fire the event
+     *  })
+     * */
     socket.on('getDevicesWithSelection', function (request, fn) {
        // console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
         //console.log(util.filterDevices(socket, request.selection));
         fn(util.filterDevices(socket, request));
     })
 
+
+    /**
+     *  "getDeviceInViewWithDistance" listener handles get device inView but also include the distance towards the device
+     *  @event getDeviceInViewWithDistance
+     *  @param {?object} request nullable
+     *  @param {!requestCallback} fn return callback contains the device inView with additional field of the distance towards the device
+     *  @listens getDeviceInViewWithDistance
+     *  @example
+     *  var request = null;
+     *  socket.emit("getDeviceInViewWithDistance",request,function(callback){
+     *      // callback contains the list of devices inView, in each device object there is a additional field indicates the distance from the device towards whoever fire the event
+     *      console.log(callback);
+     *  })
+     * */
     socket.on("getDeviceInViewWithDistance",function(request,fn){
-        console.log("Request: "+JSON.stringify(request));
         var devicesInView = util.filterDevices(socket,{selection:['inView']});
         var listWithDistance = {};
         async.each(Object.keys(devicesInView),function(deviceKey,eachCallback){
@@ -645,6 +684,19 @@ exports.handleRequest = function (socket) {
         })
     });
 
+    /**
+     *  "getDataPointsWithSelection" listener handles get all the dataPoints from server
+     *  @event getDataPointsWithSelection
+     *  @param {!object} request array of selections ["all"]
+     *  @param {!requestCallback} fn return callback contains list of dataPoints
+     *  @listens getDataPointsWithSelection
+     *  @example
+     *  // currently selection only supports ["all"]
+     *  var selectionList = ["all"];
+     *  socket.emit("getDataPointsWithSelection",{selection:selectionList},function(callback){
+     *      console.log(callback);  // callback object contains list of dataPoints
+     *  })
+     * */
     socket.on('getDataPointsWithSelection', function (request, fn) {
         var selection = request.selection;
         if(fn!=undefined){
@@ -657,6 +709,18 @@ exports.handleRequest = function (socket) {
         }
     })
 
+    /**
+     *  "getDistanceToDevice" listener handles get Distance to a specific device
+     *  @event getDistanceToDevice
+     *  @param {!object} request contains a dictioanry with key of "ID" point to a value of ID number
+     *  @param {!requestCallback} fn return callback contains the distance towards device ID=0
+     *  @listens getDistanceToDevice
+     *  @example
+     *  var request = {ID:0};
+     *  socket.emit("getDistanceToDevice",request,function(callback){
+     *      console.log(callback);  // callback object contains the distance towards device ID=0
+     *  })
+     * */
     socket.on('getDistanceToDevice', function (request, fn) {
         if (util.getDeviceSocketIDByID(request.ID) != undefined) {
             //target device found, return distance
@@ -673,6 +737,18 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    /**
+     *  "getDistanceBetweenDevices" listener handles get Distance between two devices
+     *  @event getDistanceBetweenDevices
+     *  @param {!object} request contains a dictionary with key of "ID1"&"ID2" points value of ID number
+     *  @param {!requestCallback} fn return callback contains the distance towards device ID=0
+     *  @listens getDistanceBetweenDevices
+     *  @example
+     *  var request = {ID1:0,ID2:1};
+     *  socket.emit("getDistanceBetweenDevices",request,function(callback){
+     *      console.log(callback);  // callback object contains the distance between device ID1=0 and device ID2=1
+     *  })
+     * */
     socket.on('getDistanceBetweenDevices', function (request, fn) {
         if (util.getDeviceSocketIDByID(request.ID1) != undefined && util.getDeviceSocketIDByID(request.ID2) != undefined) {
             //target devices found, return distance
@@ -690,6 +766,18 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    /**
+     *  "getDistanceBetweenPersonAndDevice" listener handles get Distance between a device and a person
+     *  @event getDistanceBetweenDevices
+     *  @param {!object} request contains a dictionary with key of "ID1" is the person ID &"ID2" is the device ID
+     *  @param {!requestCallback} fn return callback contains the distance between the device and the person
+     *  @listens getDistanceBetweenDevices
+     *  @example
+     *  var request = {ID1:0,ID2:1};
+     *  socket.emit("getDistanceBetweenPersonAndDevice",request,function(callback){
+     *      console.log(callback);  // callback object contains the distance between person ID1=0 and device ID2=1
+     *  })
+     * */
     socket.on('getDistanceBetweenPersonAndDevice', function (request, fn) {
         if (locator.persons[request.ID1] != undefined && util.getDeviceSocketIDByID(request.ID2)!=undefined){
             try{
@@ -705,6 +793,18 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    /**
+     *  "getDistanceBetweenPeople" listener handles get Distance between two people
+     *  @event getDistanceBetweenPeople
+     *  @param {!object} request contains a dictionary with key of "ID1" is the person ID &"ID2" is another person ID
+     *  @param {!requestCallback} fn return callback contains the distance between the device and the person
+     *  @listens getDistanceBetweenPeople
+     *  @example
+     *  var request = {ID1:0,ID2:1};
+     *  socket.emit("getDistanceBetweenPeople",request,function(callback){
+     *      console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
+     *  })
+     * */
     socket.on('getDistanceBetweenPeople', function(request, fn){
         if(locator.persons[request.ID1] != undefined && locator.persons[request.ID2]){
             try{
@@ -719,6 +819,24 @@ exports.handleRequest = function (socket) {
     //END LOCATOR SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
     //START SENDING SERVICES/////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+    /**
+     *  "sendEventToDevicesWithSelectionIncludingSelf" listener send playload to devices with selection including self.
+     *  @event sendEventToDevicesWithSelectionIncludingSelf
+     *  @param {!object} request contains a nullable eventName, a array of selections such as the arrays of selection such as ["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]
+     *  @param {?requestCallback} fn return callback contains status
+     *  @listens sendEventToDevicesWithSelectionIncludingSelf
+     *  @example
+     *  var request = {
+     *      selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]
+     *      eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname
+     *      };
+     *  socket.emit("sendEventToDevicesWithSelectionIncludingSelf",request,function(callback){
+     *      console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
+     *  })
+     * */
     socket.on('sendEventToDevicesWithSelectionIncludingSelf', function(payload, fn){
         for (var key in util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key)) {
@@ -735,8 +853,23 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    /**
+     *  "sendEventToDevicesWithSelection" listener send playload to devices with selection including self.
+     *  @event sendEventToDevicesWithSelection
+     *  @param {!object} request contains a nullable eventName, a array of selections such as the arrays of selection such as ["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]
+     *  @param {?requestCallback} fn return callback contains status
+     *  @listens sendEventToDevicesWithSelection
+     *  @example
+     *  var request = {
+     *      selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]
+     *      eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname
+     *      };
+     *  socket.emit("sendEventToDevicesWithSelection",request,function(callback){
+     *      console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
+     *  })
+     * */
     socket.on('sendEventToDevicesWithSelection', function(payload, fn){
-        console.log(payload);
+        //console.log(payload);
         for (var key in util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(payload.eventName==undefined){

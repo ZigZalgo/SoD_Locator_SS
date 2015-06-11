@@ -422,7 +422,1396 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {ID:0, dropRange:0.5}; socket.emit("dropData",function(callback){     console.log(callback);  // callback object is the list of people from server })</code></pre>
+    <pre class="prettyprint"><code>var request = {ID:0, dropRange:0.5}; socket.emit("dropData",function(callback){     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getClientsFromServer">getClientsFromServer</h4>
+
+    
+
+
+
+<div class="description">
+    "getClientsFromServer" listener handles get all the clients from server
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">not being used</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback contains device socketID, clientType</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line612">line 612</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getClientsFromServer">event:getClientsFromServer</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getClientsFromServer">event:getClientsFromServer</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>socket.emit("getClientsFromServer",function(callback){     console.log(callback);  // callback object is the list of client from server })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getDataPointsWithSelection">getDataPointsWithSelection</h4>
+
+    
+
+
+
+<div class="description">
+    "getDataPointsWithSelection" listener handles get all the dataPoints from server
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">array of selections ["all"]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback contains list of dataPoints</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line687">line 687</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getDataPointsWithSelection">event:getDataPointsWithSelection</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getDataPointsWithSelection">event:getDataPointsWithSelection</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// currently selection only supports ["all"] var selectionList = ["all"]; socket.emit("getDataPointsWithSelection",{selection:selectionList},function(callback){     console.log(callback);  // callback object contains list of dataPoints })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getDeviceInViewWithDistance">getDeviceInViewWithDistance</h4>
+
+    
+
+
+
+<div class="description">
+    "getDeviceInViewWithDistance" listener handles get device inView but also include the distance towards the device
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">nullable</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback contains the device inView with additional field of the distance towards the device</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line655">line 655</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getDeviceInViewWithDistance">event:getDeviceInViewWithDistance</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getDeviceInViewWithDistance">event:getDeviceInViewWithDistance</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = null; socket.emit("getDeviceInViewWithDistance",request,function(callback){     // callback contains the list of devices inView, in each device object there is a additional field indicates the distance from the device towards whoever fire the event     console.log(callback); })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getDevicesWithSelection">getDevicesWithSelection</h4>
+
+    
+
+
+
+<div class="description">
+    "getDevicesWithSelection" listener handles get device with selection
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains the arrays of selection such as ["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback contains the selected device based on selection</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line635">line 635</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getDevicesWithSelection">event:getDevicesWithSelection</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getDevicesWithSelection">event:getDevicesWithSelection</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// supported selection type are "all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>" var list = ["inView","nearest"]; socket.emit("getDevicesWithSelection",{selection:list},function(callback){     console.log(callback);  // callback contains the device that are inView but also nearest to the device who fire the event })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getDistanceBetweenDevices">getDistanceBetweenDevices</h4>
+
+    
+
+
+
+<div class="description">
+    "getDistanceBetweenDevices" listener handles get Distance between two devices
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains a dictionary with key of "ID1"&"ID2" points value of ID number</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback contains the distance towards device ID=0</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line740">line 740</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getDistanceBetweenDevices">event:getDistanceBetweenDevices</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getDistanceBetweenDevices">event:getDistanceBetweenDevices</a></li>
+
+    <li><a href="global.html#event:getDistanceBetweenDevices">event:getDistanceBetweenDevices</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1}; socket.emit("getDistanceBetweenDevices",request,function(callback){     console.log(callback);  // callback object contains the distance between device ID1=0 and device ID2=1 })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getDistanceBetweenDevices">getDistanceBetweenDevices</h4>
+
+    
+
+
+
+<div class="description">
+    "getDistanceBetweenPersonAndDevice" listener handles get Distance between a device and a person
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains a dictionary with key of "ID1" is the person ID &"ID2" is the device ID</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback contains the distance between the device and the person</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line769">line 769</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getDistanceBetweenDevices">event:getDistanceBetweenDevices</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1}; socket.emit("getDistanceBetweenPersonAndDevice",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and device ID2=1 })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getDistanceBetweenPeople">getDistanceBetweenPeople</h4>
+
+    
+
+
+
+<div class="description">
+    "getDistanceBetweenPeople" listener handles get Distance between two people
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains a dictionary with key of "ID1" is the person ID &"ID2" is another person ID</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback contains the distance between the device and the person</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line796">line 796</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getDistanceBetweenPeople">event:getDistanceBetweenPeople</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getDistanceBetweenPeople">event:getDistanceBetweenPeople</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1}; socket.emit("getDistanceBetweenPeople",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1 })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:getDistanceToDevice">getDistanceToDevice</h4>
+
+    
+
+
+
+<div class="description">
+    "getDistanceToDevice" listener handles get Distance to a specific device
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">contains a dictioanry with key of "ID" point to a value of ID number</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return callback contains the distance towards device ID=0</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line712">line 712</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:getDistanceToDevice">event:getDistanceToDevice</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:getDistanceToDevice">event:getDistanceToDevice</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = {ID:0}; socket.emit("getDistanceToDevice",request,function(callback){     console.log(callback);  // callback object contains the distance towards device ID=0 })</code></pre>
 
 
 
@@ -1846,6 +3235,384 @@
 
     
 
+    <h4 class="name" id="event:sendEventToDevicesWithSelection">sendEventToDevicesWithSelection</h4>
+
+    
+
+
+
+<div class="description">
+    "sendEventToDevicesWithSelection" listener send playload to devices with selection including self.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">contains a nullable eventName, a array of selections such as the arrays of selection such as ["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback contains status</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line856">line 856</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:sendEventToDevicesWithSelection">event:sendEventToDevicesWithSelection</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:sendEventToDevicesWithSelection">event:sendEventToDevicesWithSelection</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = {     selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>"]     eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname     }; socket.emit("sendEventToDevicesWithSelection",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1 })</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:sendEventToDevicesWithSelectionIncludingSelf">sendEventToDevicesWithSelectionIncludingSelf</h4>
+
+    
+
+
+
+<div class="description">
+    "sendEventToDevicesWithSelectionIncludingSelf" listener send playload to devices with selection including self.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">contains a nullable eventName, a array of selections such as the arrays of selection such as ["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">requestCallback</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">return callback contains status</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line825">line 825</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+<h5>Listens to Events:</h5>
+<ul>
+    <li><a href="global.html#event:sendEventToDevicesWithSelectionIncludingSelf">event:sendEventToDevicesWithSelectionIncludingSelf</a></li>
+</ul>
+
+
+
+<h5>Listeners of This Event:</h5>
+<ul>
+    <li><a href="global.html#event:sendEventToDevicesWithSelectionIncludingSelf">event:sendEventToDevicesWithSelectionIncludingSelf</a></li>
+</ul>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var request = {     selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>"]     eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname     }; socket.emit("sendEventToDevicesWithSelectionIncludingSelf",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1 })</code></pre>
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="event:unpairAllDevices">unpairAllDevices</h4>
 
     
@@ -3158,13 +4925,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Events</h3><ul><li><a href="global.html#event:dropData">dropData</a></li><li><a href="global.html#event:getPeopleFromServer">getPeopleFromServer</a></li><li><a href="global.html#event:pairDeviceWithPerson">pairDeviceWithPerson</a></li><li><a href="global.html#event:registerDataPoint">registerDataPoint</a></li><li><a href="global.html#event:registerMobileWebClient">registerMobileWebClient</a></li><li><a href="global.html#event:registerSensor">registerSensor</a></li><li><a href="global.html#event:registerUnityVisualizer">registerUnityVisualizer</a></li><li><a href="global.html#event:registerWebClient">registerWebClient</a></li><li><a href="global.html#event:reigsterDevice">reigsterDevice</a></li><li><a href="global.html#event:unpairAllDevices">unpairAllDevices</a></li><li><a href="global.html#event:unpairAllPeople">unpairAllPeople</a></li><li><a href="global.html#event:unpairDevice">unpairDevice</a></li><li><a href="global.html#event:updateDeviceInfo">updateDeviceInfo</a></li><li><a href="global.html#event:updateObjectLocation">updateObjectLocation</a></li><li><a href="global.html#event:updateOrientation">updateOrientation</a></li><li><a href="global.html#event:updateSensorInfo">updateSensorInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#handleRequest">handleRequest</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Events</h3><ul><li><a href="global.html#event:dropData">dropData</a></li><li><a href="global.html#event:getClientsFromServer">getClientsFromServer</a></li><li><a href="global.html#event:getDataPointsWithSelection">getDataPointsWithSelection</a></li><li><a href="global.html#event:getDeviceInViewWithDistance">getDeviceInViewWithDistance</a></li><li><a href="global.html#event:getDevicesWithSelection">getDevicesWithSelection</a></li><li><a href="global.html#event:getDistanceBetweenDevices">getDistanceBetweenDevices</a></li><li><a href="global.html#event:getDistanceBetweenPeople">getDistanceBetweenPeople</a></li><li><a href="global.html#event:getDistanceToDevice">getDistanceToDevice</a></li><li><a href="global.html#event:getPeopleFromServer">getPeopleFromServer</a></li><li><a href="global.html#event:pairDeviceWithPerson">pairDeviceWithPerson</a></li><li><a href="global.html#event:registerDataPoint">registerDataPoint</a></li><li><a href="global.html#event:registerMobileWebClient">registerMobileWebClient</a></li><li><a href="global.html#event:registerSensor">registerSensor</a></li><li><a href="global.html#event:registerUnityVisualizer">registerUnityVisualizer</a></li><li><a href="global.html#event:registerWebClient">registerWebClient</a></li><li><a href="global.html#event:reigsterDevice">reigsterDevice</a></li><li><a href="global.html#event:sendEventToDevicesWithSelection">sendEventToDevicesWithSelection</a></li><li><a href="global.html#event:sendEventToDevicesWithSelectionIncludingSelf">sendEventToDevicesWithSelectionIncludingSelf</a></li><li><a href="global.html#event:unpairAllDevices">unpairAllDevices</a></li><li><a href="global.html#event:unpairAllPeople">unpairAllPeople</a></li><li><a href="global.html#event:unpairDevice">unpairDevice</a></li><li><a href="global.html#event:updateDeviceInfo">updateDeviceInfo</a></li><li><a href="global.html#event:updateObjectLocation">updateObjectLocation</a></li><li><a href="global.html#event:updateOrientation">updateOrientation</a></li><li><a href="global.html#event:updateSensorInfo">updateSensorInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#handleRequest">handleRequest</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.1</a> on Wed Jun 10 2015 17:23:34 GMT-0600 (Mountain Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.1</a> on Thu Jun 11 2015 13:45:40 GMT-0600 (Mountain Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
