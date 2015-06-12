@@ -72,6 +72,16 @@ $(document).ready(function(){
         });
 
     })
+    $('div#saveCurrentState').on('click',function(e){
+        io.emit('saveCurrentState',{},function(callback){
+
+        });
+    })
+    $('div#loadFromFlashBack').on('click',function(e){
+        io.emit('loadFromConfig',{},function(callback){
+
+        });
+    })
     $('#settings_flip').on('click',function(){
         //console.log('settings flip!');
         $.get("setting",function(settingField){
@@ -183,7 +193,7 @@ $(document).ready(function(){
     $('body').on('click','.get_unpaired_people',function(){
         var deviceID = uniqueDeviceIDToSocketID[$("td:first",$(this).parents('tr')).text()];
         console.log("Selected Device: " + deviceID + "\tuniquePersonID: "+ $(this).text());
-        io.emit("pairDeviceWithPerson",{deviceSocketID:deviceID, uniquePersonID: $(this).text()},function(callback){
+        io.emit("pairDeviceWithPerson",{deviceSocketID:deviceID, uniquePersonID: $(this).text(),pairType:"leftHand"},function(callback){
             console.log(JSON.stringify(callback));
         });
     })

@@ -254,8 +254,8 @@ function drawRoom(roomInfo,stage,layer,callback){
     //console.log("Drawing room: "+JSON.stringify(roomInfo));
     // make a room as a group of lines
     var roomGroup = new Kinetic.Group({
-        x: shiftXToGridOrigin(roomInfo.location.X*pixelsPerMeter),
-        y: shiftXToGridOrigin(roomInfo.location.Z*pixelsPerMeter),
+        x: shiftXToGridOrigin(0*pixelsPerMeter),
+        y: shiftXToGridOrigin(0*pixelsPerMeter),
         rotation: 0,
         draggable:false,
         name: 'roomGroup'
@@ -610,7 +610,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
             };
             var newOrientation = (orientation+(actualOrientation-(360+dragendArc.getRotationDeg())));
             $.post('/devices/updateOrientation'+'/' + deviceID.getText()+'/'+ newOrientation, function(data,status){
-                console.log("success? " + status);
+                //console.log("success? " + status);
                 if(status == 'success') {
                     window.clearTimeout(timer);
                     updateOrientationAndRefresh();
@@ -1006,7 +1006,7 @@ function updateContentWithObjects(){
                 ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),minorGridLineWidth,0,2*Math.PI);
                 ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
                 ctx.fill();
-                if(data[key].pairingState == 'paired'){
+                if(data[key].pairingState != 'unpaired'){
                     ctx.strokeStyle = "#2cd72A";
                     //ctx.rect(shiftXToGridOrigin(xInMeters)-minorGridLineWidth,shiftYToGridOrigin(zInMeters)-minorGridLineWidth,minorGridLineWidth*2,minorGridLineWidth*2);
                     ctx.stroke();
@@ -1145,6 +1145,7 @@ function highlightIntersectionPoint(intersectionInfo,callback) {
     //console.log(intersectionInfo);
     var intersectedPoint = intersectionInfo.intersectionPoint.intersectedPoint;
     var foundRoomGroup = stationaryLayer.find('.roomGroup')[0];
+    //console.log(foundRoomGroup);
     var foundIntPointByID = stationaryLayer.find("#"+intersectionInfo.observer.id);
     if(foundIntPointByID.length==0){
         // if there is no intersectionPoint displayed on canvas, create a new one
@@ -1249,7 +1250,7 @@ var matrixTransformation = function(personLocation,angle){
 
 io.emit("registerWebClient", {});
 $(document).ready(function(){
-    setInterval(function() {updateContentWithObjects(); }, 1000); //poll server for people list and display on canvas
+    setInterval(function() {updateContentWithObjects(); }, 500); //poll server for people list and display on canvas
 })
 
 var sendResetRequest = function(socketID){

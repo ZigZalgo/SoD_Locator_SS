@@ -1,22 +1,21 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "start": "node app.js"
-  },
-  "dependencies": {
-    "async": "*",
-    "chai": "*",
-    "express": "^4.12.3",
-    "express.io": "*",
-    "jade": "*",
-    "mime": "*",
-    "mocha": "*",
-    "q": "*",
-    "socket.io": "^0.9.17",
-    "underscore": "*",
-    "walk": "*",
-    "zeparser": "0.0.7"
-  }
+    "name": "application-name",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "jade": "*",
+        "chai": "*",
+        "mocha": "*",
+        "underscore": "*",
+        "socket.io": "0.9.17",
+        "zeparser": "0.0.7",
+        "express.io": "*",
+        "walk": "*",
+        "mime": "*",
+        "q":"*",
+        "async":"*"
+    }
 }

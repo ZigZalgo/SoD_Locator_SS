@@ -4,6 +4,7 @@ var app = express().http().io();
 var data = require('./locatorServices/data');
 var sensorsREST = require('./locatorServices/REST/sensors');
 var devicesREST = require('./locatorServices/REST/devices');
+var locator = require('./locatorServices/locator');
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
@@ -31,10 +32,12 @@ app.configure(function(){
     app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data' }));
     //app.use(express.bodyParser({uploadDir:'./data'}));
     app.use(app.router);
+    //locator.loadConfig();
 })
 
 if(isNaN(process.argv[2])){
     server.listen(3000);
+
 }
 else{
     server.listen(process.argv[2]);
@@ -86,6 +89,8 @@ app.get('/images/ajax-loader.gif', function (req, res) {
 app.get('/overviewJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/overview.js');
 });
+
+
 app.get('/calibrateJS', function (req, res) {
     res.sendfile(__dirname + '/view/js/calibrate.js');
 });
@@ -203,6 +208,9 @@ io.sockets.on('connection', function (socket) {
                     console.log("IMPLEMENT CLEAN UP CODE FOR JSCLIENT!");
                     locator.cleanUpDevice(socket.id);
                     break;
+                case 'unityVisualizer':
+                    console.log("-> Unity Visualizer Disconnected.");
+                    break;
                 default:
                     if(locator.devices[socket.id] != null) locator.cleanUpDevice(socket.id);
                     if(locator.sensors[socket.id] != null) locator.cleanUpSensor(socket.id);
@@ -220,6 +228,7 @@ io.sockets.on('connection', function (socket) {
 function init(){
     var os = require('os');
     var interfaces = os.networkInterfaces();
+
     //exports.serverAddress;
     setTimeout(function(){pulse.start();}, 3000); // three second after heartbeat
 
@@ -240,15 +249,15 @@ function init(){
     // Initialize all the existing data in the data and convert them into object store them in the locator
     console.log('Loading existing data ...');
     var fs = require('fs');
-    var dataDirectory = 'data/';
+    var dataDirectory = 'data/temp/';
 //var thumbnailSize = 400;
     var util = require('./locatorServices/util');
     var mime = require('mime');
-    var locator = require('./locatorServices/locator');
 
+    //
     var walk    = require('walk');
     var files   = [];
-    var walker  = walk.walk('./data', { followLinks: false });
+    var walker  = walk.walk(dataDirectory, { followLinks: false });
     walker.on('file', function(root, stat, next) {
         //files.push(stat.name);
         locator.registerData({name:stat.name,type:mime.lookup('data\\'+stat.name),dataPath:'\\files\\'+stat.name,range:0.2});
@@ -256,6 +265,7 @@ function init(){
     });
     walker.on('end', function() {
         //console.log(files);
+        locator.loadConfig();
         console.log('End of initializing data');
     });
 }

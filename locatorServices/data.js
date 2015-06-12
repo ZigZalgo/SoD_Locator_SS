@@ -3,7 +3,7 @@
  */
 //var gm = require('gm');
 var fs = require('fs');
-var dataDirectory = 'data/';
+var dataDirectory = 'data/temp/';
 //var thumbnailSize = 400;
 var util = require('./util');
 var mime = require('mime');
@@ -104,4 +104,29 @@ function sendNotFoundError(req,res){
     // default to plain-text. send()
     res.type('txt').send('Not found');
     return;
+}
+exports.saveDataToFile = function(data,path,callback){
+    fs.writeFile(path, data, function(err) {
+        if(err) {
+            callback(err);
+            return console.log(err);
+        }else {
+            callback(1);
+            console.log(path+" was saved!");
+        }
+    });
+}
+
+exports.loadJSONWithCallback = function(path,callback){
+    var obj;
+    fs.readFile(path, 'utf8', function (err, data) {
+        if (err) {
+            throw err;
+            callback(null);
+        }
+        else{
+            obj = JSON.parse(data);
+            callback(obj)
+        }
+    });
 }

@@ -731,6 +731,24 @@ exports.findWithAttrWeak = function (array, attr, query) {
     }
 };
 
+exports.findKeyByValue = function(JSONObject, value){
+    var found = false;
+    if(typeof(JSONObject) == "object"){
+        async.each(Object.keys(JSONObject),function(objKey,itrCallback){
+            if(JSONObject[objKey] == value){
+                found = objKey;
+                itrCallback();
+            }else{
+                itrCallback();
+            }
+        },function(err){
+            return found;
+        })
+    }else{
+        console.log("can not search through non JSON");
+        return found;
+    }
+}
 
 exports.findKeyWithAttr = function(obj,value){
 	if(typeof(obj) == "object"){
@@ -874,6 +892,10 @@ exports.getNearest = function(subject,objectList,functionCallback){
     })
 }
 
+// Round up with decimal value
+exports.mathRoundWithDecimal = function(input, decimal){
+    return Math.round(input*Math.pow(10,decimal))/Math.pow(10,decimal);
+}
 exports.getDistanceOfTwoLocation = function(location1,location2,fn){
     if(location1.X!=undefined && location2.Z!= undefined) {
         fn(Math.sqrt(
@@ -983,5 +1005,4 @@ exports.isPointInView = function(pointLocation,observer,callback){
     }else{
         console.log("Observer is undefined in get Devices in front");
     }
-
 }
