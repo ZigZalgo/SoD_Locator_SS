@@ -37,6 +37,7 @@ exports.handleRequest = function (socket) {
     // registerSensor event listener
     socket.on('registerSensor', function (sensorInfo, fn) {
         console.log('registering with sensorInfo: '+JSON.stringify(sensorInfo));
+        console.log(sensorInfo);
         try{
             if(sensorInfo.sensorType!=null){
                 locator.registerSensor(socket,sensorInfo.sensorType,sensorInfo,fn);
@@ -384,15 +385,24 @@ exports.handleRequest = function (socket) {
 
 
 
-    socket.on('handsUpdate',function(data,fn){
-        console.log("Hand update with data: "+JSON.stringify(data));
-        data.socketID = socket.id;
-        data.sensorID = locator.sensors.leapMotions[socket.id].ID
-        locator.leapMotionService.updatePersonWithHandData(data,function(callback){
-            console.log(callback);
-            fn(callback);
-        })
+    socket.on('handsUpdate',function(handdata,fn){
+        console.log("Hand update with data: "+JSON.stringify(handdata));
+        handdata.socketID = socket.id;
+        handdata.sensorID = locator.sensors.leapMotions[socket.id].ID;
+        for (var key in util.filterDevices(socket, handdata)) {
+            if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
+
+
+                if(handdata.gestureType=="TYPE_CIRCLE") {
+                    frontend.clients[key].emit("check", handdata);
+                    console.log("check");
+                }
+
+
+            }
+        }
     });
+
 
     socket.on('error', function (err) {
         console.log("error: " + err);
