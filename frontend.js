@@ -61,6 +61,44 @@ app.get('/testing', function (req, res) {
     res.sendfile(__dirname + '/view/testing.html');
 });
 
+// Start: documentation
+app.get('/scripts/prettify/prettify.js', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/scripts/prettify/prettify.js');
+});
+
+app.get('/global.html', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/global.html');
+});
+
+app.get('/scripts/prettify/lang-css.js', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/scripts/prettify/lang-css.js');
+});
+
+app.get('/styles/prettify-tomorrow.css', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/styles/prettify-tomorrow.css');
+});
+
+app.get('/scripts/linenumber.js', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/scripts/linenumber.js');
+});
+
+app.get('/requestHandler.js.html', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/requestHandler.js.html');
+});
+
+app.get('/styles/jsdoc-default.css', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/styles/jsdoc-default.css');
+});
+
+app.get('/doc', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/doc/out/index.html');
+});
+
+app.get("/architecture",function(request,respond){
+    respond.sendfile(__dirname+"/data/reserved/SoD-Architecture.png");
+});
+// End of documentation
+
 app.get('/jquery', function (req, res) {
     res.sendfile(__dirname + '/view/js/jquery-1.11.1.min.js');
 });
@@ -268,4 +306,5 @@ function init(){
         locator.loadConfig();
         console.log('End of initializing data');
     });
+
 }

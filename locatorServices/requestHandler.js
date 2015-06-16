@@ -710,6 +710,66 @@ exports.handleRequest = function (socket) {
     })
 
     /**
+     *  "getSensorsFromServer" listener handles get all the sensors from server
+     *  @event getSensorsFromServer
+     *  @param {?object} request not being used
+     *  @param {!requestCallback} fn return callback contains sensors
+     *  @listens getSensorsFromServer
+     *  @example
+     *
+     *
+     *  socket.emit("getSensorsFromServer",function(callback){
+     *      console.log(callback);  // callback object is the list of sensors from server
+     *  })
+     * */
+    socket.on('getSensorsFromServer', function (request, fn) {
+        if (fn != undefined) {
+            fn((locator.sensors));
+        }
+    });
+
+    /**
+     *  "getRoomFromServer" listener handles get the room info from server
+     *  @event getRoomFromServer
+     *  @param {?object} request is nuable
+     *  @param {!requestCallback} fn return callback contains room setup
+     *  @listens getRoomFromServer
+     *  @example
+     *
+     *
+     *  socket.emit("getRoomFromServer",function(callback){
+     *      console.log(callback);  // callback object is the room info
+     *      callback = {
+     *                  location = {X:0,Y:0,Z:0},
+     *                  length = 6,
+     *                  depth = 8,
+     *                  height = 4
+     *              }//callback looks like this.
+     *
+     *
+     *  })
+     * */
+    socket.on("getRoomFromServer",function(request,callback){
+        //console.log("Get Room request received with "+JSON.stringify(request));
+        if(callback!=null){
+            callback(locator.room);
+        }else{
+            console.log("Callback function is null for return locator room information");
+        }
+    })
+
+
+    socket.on('getCalibrationFrames', function (request, fn) {
+        // error checking see if the sensor is not defined
+        if (frontend.clients[request.referenceSensorID] != undefined && frontend.clients[request.uncalibratedSensorID] != undefined) {
+            frontend.clients[request.referenceSensorID].emit('getFrameFromSensor', socket.id);
+            frontend.clients[request.uncalibratedSensorID].emit('getFrameFromSensor', socket.id);
+        } else {
+            console.log('reference sensor or calibrate sensor could be undefined.');
+        }
+    });
+
+    /**
      *  "getDistanceToDevice" listener handles get Distance to a specific device
      *  @event getDistanceToDevice
      *  @param {!object} request contains a dictioanry with key of "ID" point to a value of ID number
@@ -885,6 +945,7 @@ exports.handleRequest = function (socket) {
         }
     });
 
+
     socket.on('requestDataFromSelection', function (request, fn) {
         console.log("Got request: " + JSON.stringify(request));
         for (var key in util.filterDevices(socket, request)) {
@@ -907,8 +968,18 @@ exports.handleRequest = function (socket) {
         }
     });
 
-    //END SENDING SERVICES///////////////////////////////////////////////////////////////////////////////////////////
-
+    /**
+     *  "broadcast" listener send playload all the clients through socket.broadcast
+     *  @event broadcast
+     *  @param {!object} request contains payload of the data wanted to be send to all the devices
+     *  @param {?requestCallback} fn nullable
+     *  @listens broadcast
+     *  @example
+     *  var request = {
+     *          payload:"anypayload" // if this is null, then the payload will be send to device directly without an eventname
+     *      };
+     *  socket.emit("broadcast",request)
+     * */
     socket.on('broadcast', function (request, fn) {
         try {
             //console.log(JSON.stringify(request));
@@ -919,6 +990,8 @@ exports.handleRequest = function (socket) {
             console.log(err + 'broadcasting failed.');
         }
     });
+
+    //END SENDING SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
     socket.on('personUpdate', function (persons, fn) {
         //get persons from body, call update function for each person
@@ -968,31 +1041,6 @@ exports.handleRequest = function (socket) {
         console.log("uncaughtException: " + err);
     });
 
-    socket.on('getSensorsFromServer', function (request, fn) {
-        if (fn != undefined) {
-            fn((locator.sensors));
-        }
-    });
-
-    socket.on("getRoomFromServer",function(request,callback){
-        //console.log("Get Room request received with "+JSON.stringify(request));
-        if(callback!=null){
-            callback(locator.room);
-        }else{
-            console.log("Callback function is null for return locator room information");
-        }
-    })
-
-
-    socket.on('getCalibrationFrames', function (request, fn) {
-        // error checking see if the sensor is not defined
-        if (frontend.clients[request.referenceSensorID] != undefined && frontend.clients[request.uncalibratedSensorID] != undefined) {
-            frontend.clients[request.referenceSensorID].emit('getFrameFromSensor', socket.id);
-            frontend.clients[request.uncalibratedSensorID].emit('getFrameFromSensor', socket.id);
-        } else {
-            console.log('reference sensor or calibrate sensor could be undefined.');
-        }
-    });
 
     socket.on('calibrateSensors', function (request, fn) {
         var translateRule = locator.calibrateSensors(request.sensorOnePoints, request.sensorTwoPoints);
