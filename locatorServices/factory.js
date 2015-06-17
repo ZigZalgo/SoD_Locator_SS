@@ -162,7 +162,7 @@ exports.leapMotion = leapMotion;
 //-----------------------------------------------  iBeacon  --------------------------------------------------//   
 //------------------------------------------------------------------------------------------------------------//   
 //------------------------------------------------------------------------------------------------------------//   
-function iBeacon(socket, sensorInfo, deviceSocketID){
+function iBeacon(socket, sensorInfo, deviceSocketID, personID){
     try{  
         this.uuid = sensorInfo.uuid;
         this.major = sensorInfo.major;
@@ -170,14 +170,13 @@ function iBeacon(socket, sensorInfo, deviceSocketID){
         this.identifier = sensorInfo.identifier;
         this.name = sensorInfo.name;
        
+        this.immediateRange = '1';
+        this.nearRange = '5';
+        this.farRange = '10';
+
         this.location = {X: null, Y: null, Z:null};
         this.deviceSocketID = deviceSocketID;
-
-        if(sensorInfo.personId != undefined){
-            this.personID = sensorInfo.personId;
-        }else{
-            this.personId = -1;
-        }
+        this.personID = personID;
 
         this.ID = uniqueSensorCounter ++;
         this.beaconType = 'Tr';
@@ -221,9 +220,17 @@ exports.iBeaconRcvr = iBeaconRcvr;
 
 function beaconLocation (iBeacon){
     try{
-        this.X = iBeacon.location.X;
-        this.Y = iBeacon.location.Y;
-        this.Z = iBeacon.location.Z;
+        this.location = {};
+        this.location.X = iBeacon.location.X;
+        this.location.Y = iBeacon.location.Y;
+        this.location.Z = iBeacon.location.Z;
+
+        this.immediateRange = iBeacon.immediateRange;
+        this.nearRange = iBeacon.nearRange;
+        this.farRange = iBeacon.farRange;
+    
+        this.ID = iBeacon.ID;
+
     } catch (err){
         return false;
     }

@@ -20,12 +20,12 @@ exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
         
         if(sensorInfo.beaconType == "Tr"){
             //Transmitter beacon
-            console.log('Beacon typ is Transmitter.\n');
+            console.log('Beacon typ is Transmitter.');
             registerIBeacon(socket, sensorInfo, callback);
         } 
         else if (sensorInfo.beaconType == "Rcvr"){
             //Reciever Beacon
-            console.log('Beacon typ is Reciever.\n');
+            console.log('Beacon typ is Reciever.');
             registerIBeaconRcvrHandler(socket,sensorInfo,callback);
         } 
         else{
@@ -43,7 +43,7 @@ exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
 
 //register Ibeacon to sensor list
 function registerIBeacon(socket, sensorInfo, callback){
-    console.log('Registering Tr Beacon ...\n');
+    console.log('Registering Tr Beacon ...');
     if(locator.sensors.iBeacons[socket.id] == undefined){
         var deviceSocketID = checkIfExisted(sensorInfo.name);
         var iBeacon = new factory.iBeacon(socket, sensorInfo, deviceSocketID);
@@ -51,15 +51,24 @@ function registerIBeacon(socket, sensorInfo, callback){
         //handles reference Beacon
         frontend.io.sockets.emit("refreshWebClientSensors", {});
         
+        var personID = '-1';
+        var personFound = false;
+        var tmpPerson = null; 
         //Update beacon location if applicable
         if(sensorInfo.personId != undefined){
             for(var person in locator.persons){
-                console.log(person);
                 if(sensorInfo.personId == person){
+                    personFound = true;
+                    tmpPerson = person;
                     iBeacon.location.X = locator.persons[person].location.X;
                     iBeacon.location.Y = locator.persons[person].location.Y;
                     iBeacon.location.Z = locator.persons[person].location.Z;
                 }
+            }
+            if(personFound == false){
+                console.log('Could not find a person with personId provided');
+            } else{
+                console.log('found a person with personId provided with the following info:\n' + JSON.stringify(locator.persons[tmpPerson]));
             }
         }
 
@@ -67,8 +76,8 @@ function registerIBeacon(socket, sensorInfo, callback){
         locator.sensors.iBeacons[iBeacon.socketID] = iBeacon;
         socket.emit('registered',{data:iBeacon.beaconType}); 
 
-        console.log('Beacon Tr registration is confirmed with the following info:\n' + beacon);
-        console.log('Printing the new Tr Beacons list\n');
+        console.log('Beacon Tr registration is confirmed with the following info:\n' + JSON.stringify(locator.sensors.iBeacons[socket.id]));
+        console.log('Printing the new Tr Beacons list');
         console.log(locator.sensors.iBeacons);  
     } else{
         console.log('Beacon Tr is already registered.');
@@ -92,7 +101,7 @@ function registerIBeaconRcvrHandler (socket,sensorInfo,callback){
             socket.emit('registered',{data:iBeaconRcvr.beaconType});
            
 
-            console.log('Beacon Rcvr registration is confirmed with the following info:\n' + iBeaconRcvr);
+            console.log('Beacon Rcvr registration is confirmed with the following info:\n' + JSON.stringify(iBeaconRcvr));
             console.log('Printing the new Tr Beacons list\n');
             console.log(locator.sensors.iBeaconRcvrs);
 
@@ -107,14 +116,12 @@ function registerIBeaconRcvrHandler (socket,sensorInfo,callback){
 
 
 function checkIfExisted (deviceName){
-   
-    console.log('Inside checkIfExisted Function \n');
     var bool = false;
 
     for(var socketID in locator.devices){        
         if(locator.devices[socketID].name == deviceName){
             bool = true;
-            console.log('Device is already registered\n');
+            console.log('\tDevice with given name is found');
             return socketID;
         }
     }
@@ -134,6 +141,8 @@ exports.deRegisterIBeaconTrHandler = function (socket){
 
     if(locator.sensors.iBeacons[socket.id] != undefined){
         delete locator.sensors.iBeacons[socket.id];
+        console.log('de-registering beacon tranmitter is confirmed.')
+        console.log('updated transmitters list is \n' + locator.sensors.iBeacons);
     }
 }
 
@@ -141,6 +150,8 @@ exports.deRegisterIBeaconRcvrHandler = function (socket){
 
     if(locator.sensors.iBeaconRcvrs[socket.id] != undefined){
         delete locator.sensors.iBeaconRcvrs[socket.id];
+        console.log('de-registering beacon reciever is confirmed.')
+        console.log('updated recievers list is \n' + locator.sensors.iBeaconRcvrs);
         if(locator.visibleBeacons[socket.id] != undefined){
             delete locator.visibleBeacons[socket.id];
         }
@@ -187,13 +198,13 @@ exports.handleUpdatedBeaconsList = function(socket, beaconslist, callback){
 
 exports.sendTransmittersList = function(socket){
     var trBeaconsList = locator.sensors.iBeacons;
-    console.log('\nSending list of beacons transmitters...\n' + JSON.stringify(trBeaconsList) + '\n');
+    console.log('Sending list of beacons transmitters...\n' + JSON.stringify(trBeaconsList));
     socket.emit("getBeaconsTransmittersList", {data: trBeaconsList});
 }
 
 exports.sendRecieversList = function (socket){
     var rcvrBeaconsList = locator.sensors.iBeaconRcvrs;
-    console.log('\nSending list of beacons recievers...\n' + JSON.stringify(rcvrBeaconsList) + '\n');
+    console.log('Sending list of beacons recievers...\n' + JSON.stringify(rcvrBeaconsList));
     socket.emit('getBeaconsRecieverList', {data: rcvrBeaconsList});
 }
 
@@ -201,15 +212,12 @@ exports.getBeaconsTransmittersListLocation = function(socket, fn){
     var locations = {};
 
     for(var beacon in locator.sensors.iBeacons){
-        console.log('\nBeacon_socketID :' + beacon + '\n');
-        console.log('\nBeacon_info :' + JSON.stringify(locator.sensors.iBeacons[beacon])
-            + '\n');
         var location = new factory.beaconLocation(locator.sensors.iBeacons[beacon]);
-        console.log('Beacon Location :' + JSON.stringify(location));
+        console.log('Beacon Location :' + JSON.stringify(locator.sensors.iBeacons[beacon]));
         locations[beacon] = location;
     }
 
-    console.log('\nSending locations of beacons transmitters...\n' + locations);
+    console.log('\nSending locations of beacons transmitters...\n' + JSON.stringify(locations));
     socket.emit('getBeaconsTransmittersListLocation', {data: locations});    
 }
 

@@ -65,7 +65,7 @@ exports.registerSensor = function(socket,type,sensorInfo,callback){
             locator.leapMotionService.registerLeapMotionHandler(socket,sensorInfo,callback);
             break;
         case "ibeacon":
-            console.log("Register iBeacon Inc\n");
+            console.log("Register iBeacon Inc");
             locator.iBeaconService.registerIBeaconHandler(socket,sensorInfo,callback);
             break;
         default:
