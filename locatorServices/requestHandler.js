@@ -61,12 +61,7 @@ exports.handleRequest = function (socket) {
         }else{
             locator.registerDevice(socket,deviceInfo)
         }
-        try{
-            socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID,deviceType: deviceInfo.deviceType});
-        }
-        catch(err){
-            console.log("Error emitting name or ID, device may still be registering: " + err);
-        }
+
     });
 
 

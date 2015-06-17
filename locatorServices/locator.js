@@ -1156,6 +1156,12 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         }
 
         devices[socket.id] = device; // officially register the device to locator(server)
+        try{
+            socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID,deviceType: deviceInfo.deviceType});
+        }
+        catch(err){
+            console.log("Error emitting name or ID, device may still be registering: " + err);
+        }
         console.log("Registering device: " + JSON.stringify(device)+"\n");
         //console.log('emitting registered device ID : '+ locator.devices[socket.id].uniqueDeviceID);
         if (fn != undefined) {
