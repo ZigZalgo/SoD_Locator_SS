@@ -173,6 +173,12 @@ function iBeacon(socket, sensorInfo, deviceSocketID){
         this.location = {X: null, Y: null, Z:null};
         this.deviceSocketID = deviceSocketID;
 
+        if(sensorInfo.personId != undefined){
+            this.personID = sensorInfo.personId;
+        }else{
+            this.personId = -1;
+        }
+
         this.ID = uniqueSensorCounter ++;
         this.beaconType = 'Tr';
         this.socketID = socket.id;
@@ -194,8 +200,12 @@ function iBeaconRcvr(socket, sensorInfo, deviceSocketID){
 
         this.name = sensorInfo.name;
         this.location = {X: null, Y: null, Z:null};
-        this.deviceSocketID = null;
         this.deviceSocketID = deviceSocketID;
+        if(sensorInfo.personId != undefined){
+            this.personID = sensorInfo.personId;
+        }else{
+            this.personId = -1;
+        }
 
         this.ID = uniqueSensorCounter ++;
         this.beaconType = 'Rcvr';

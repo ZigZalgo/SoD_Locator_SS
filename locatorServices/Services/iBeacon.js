@@ -20,11 +20,12 @@ exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
         
         if(sensorInfo.beaconType == "Tr"){
             //Transmitter beacon
-         
+            console.log('Beacon typ is Transmitter.\n');
             registerIBeacon(socket, sensorInfo, callback);
         } 
         else if (sensorInfo.beaconType == "Rcvr"){
             //Reciever Beacon
+            console.log('Beacon typ is Reciever.\n');
             registerIBeaconRcvrHandler(socket,sensorInfo,callback);
         } 
         else{
@@ -42,14 +43,13 @@ exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
 
 //register Ibeacon to sensor list
 function registerIBeacon(socket, sensorInfo, callback){
-    
+    console.log('Registering Tr Beacon ...\n');
     if(locator.sensors.iBeacons[socket.id] == undefined){
         var deviceSocketID = checkIfExisted(sensorInfo.name);
         var iBeacon = new factory.iBeacon(socket, sensorInfo, deviceSocketID);
 
         //handles reference Beacon
         frontend.io.sockets.emit("refreshWebClientSensors", {});
-        console.log('received sensor in registerIBeacon: ' +JSON.stringify(iBeacon));
         
         //Update beacon location if applicable
         if(sensorInfo.personId != undefined){
@@ -65,12 +65,13 @@ function registerIBeacon(socket, sensorInfo, callback){
 
         //Update beaconslist with the new beacon
         locator.sensors.iBeacons[iBeacon.socketID] = iBeacon;
+        socket.emit('registered',{data:iBeacon.beaconType}); 
 
-        //console.log('Printing the new Beacons list for testing\n');
-        console.log(JSON.stringify(locator.sensors.iBeacons));
-        socket.emit('registered',{data:iBeacon.beaconType});   
+        console.log('Beacon Tr registration is confirmed with the following info:\n' + beacon);
+        console.log('Printing the new Tr Beacons list\n');
+        console.log(locator.sensors.iBeacons);  
     } else{
-        console.log('Beacon is already registered.');
+        console.log('Beacon Tr is already registered.');
     } 
 }
 
@@ -89,7 +90,12 @@ function registerIBeaconRcvrHandler (socket,sensorInfo,callback){
             var iBeaconRcvr = new factory.iBeaconRcvr(socket, sensorInfo, deviceSocketID);
             locator.sensors.iBeaconRcvrs[iBeaconRcvr.socketID] = iBeaconRcvr;
             socket.emit('registered',{data:iBeaconRcvr.beaconType});
-            console.log(JSON.stringify(locator.sensors.iBeaconRcvrs));
+           
+
+            console.log('Beacon Rcvr registration is confirmed with the following info:\n' + iBeaconRcvr);
+            console.log('Printing the new Tr Beacons list\n');
+            console.log(locator.sensors.iBeaconRcvrs);
+
         } else {
             console.log('received null sensor info. Can not register to the server');
         }

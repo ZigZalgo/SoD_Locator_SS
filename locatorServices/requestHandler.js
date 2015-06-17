@@ -122,8 +122,7 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('registerSensor', function (sensorInfo, fn) {
-        console.log('registering with sensorInfo: '+JSON.stringify(sensorInfo));
-        console.log(sensorInfo);
+        console.log('registering with sensorInfo: \n'+sensorInfo);
         try{
             if(sensorInfo.sensorType!=null){
                 locator.registerSensor(socket,sensorInfo.sensorType,sensorInfo,fn);
