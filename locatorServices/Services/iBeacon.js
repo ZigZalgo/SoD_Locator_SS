@@ -142,7 +142,7 @@ exports.deRegisterIBeaconTrHandler = function (socket){
     if(locator.sensors.iBeacons[socket.id] != undefined){
         delete locator.sensors.iBeacons[socket.id];
         console.log('de-registering beacon tranmitter is confirmed.')
-        console.log('updated transmitters list is \n' + locator.sensors.iBeacons);
+        console.log('updated transmitters list is \n' + JSON.stringify(locator.sensors.iBeacons));
     }
 }
 
@@ -151,7 +151,7 @@ exports.deRegisterIBeaconRcvrHandler = function (socket){
     if(locator.sensors.iBeaconRcvrs[socket.id] != undefined){
         delete locator.sensors.iBeaconRcvrs[socket.id];
         console.log('de-registering beacon reciever is confirmed.')
-        console.log('updated recievers list is \n' + locator.sensors.iBeaconRcvrs);
+        console.log('updated recievers list is \n' + JSON.stringify(locator.sensors.iBeaconRcvrs));
         if(locator.visibleBeacons[socket.id] != undefined){
             delete locator.visibleBeacons[socket.id];
         }
@@ -224,13 +224,11 @@ exports.getBeaconsTransmittersListLocation = function(socket, fn){
 //JGRzY7PL9NNSWMtZ8Ion
 exports.cleanUp = function (socketID){
 
-    console.log('cleanUp is called for beacons\n');
+    console.log('\ncleanUp is called for beacons');
     
-    for(var beacon in locator.sensors.iBeacons){  
-        if(beacon.socketID == socketID){
-            delete locator.sensors.iBeacons[socketID];
-            console.log('Deleted beacon transmitter\n');
-        }
+    if(locator.sensors.iBeacons[socketID] != undefined){
+        delete locator.sensors.iBeacons[socketID];
+        console.log('Deleted beacon transmitter\n');
     }
 
     if(locator.sensors.iBeaconRcvrs[socketID] != undefined){
@@ -244,9 +242,9 @@ exports.cleanUp = function (socketID){
     }
 
     
-    console.log('\n Beacons Transmitters \n' + locator.sensors.iBeacons + '\n');
-    console.log('\n Beacons Recievers \n' + locator.sensors.iBeaconRcvrs + '\n');
-    console.log('\n Beacons Visible Beacons \n' + locator.visibleBeacons + '\n');
+    console.log('Beacons Transmitters \n' + JSON.stringify(locator.sensors.iBeacons));
+    console.log('Beacons Recievers \n' + JSON.stringify(locator.sensors.iBeaconRcvrs));
+    console.log('Beacons Visible Beacons \n' + JSON.stringify(locator.visibleBeacons));
 }
 
 //Send list of transmitters to either all reciever beacons 

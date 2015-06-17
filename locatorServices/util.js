@@ -837,14 +837,17 @@ exports.recursiveDeleteKey = function(list,keyForDelete){
     //console.log("Looking for "+keyForDelete + "");
     for(var key in list){
         //console.log(key);
-        for(var subListKey in list[key]){
-            if(subListKey == keyForDelete){
-                console.log("deleted -> "+subListKey+" from "+key +" list");
-                delete list[key][subListKey];
-                return Q(key);
+        if(!(key == 'iBeacons' || key == 'iBeaconRcvrs')){
+            for(var subListKey in list[key]){
+                if(subListKey == keyForDelete){
+                    console.log("deleted -> "+subListKey+" from "+key +" list");
+                    delete list[key][subListKey];
+                    return Q(key);
+                }
             }
         }
     }
+    return Q('iBeacons');
 }
 
 
