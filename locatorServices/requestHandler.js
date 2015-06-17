@@ -138,29 +138,6 @@ exports.handleRequest = function (socket) {
         locator.projectorService.registerProjector(socket,projectorInfo,fn);
     });
 
-    //Handle deregistering beaconTransmitter
-    socket.on('deRegisterBeaconTransmitter', function(sensorInfo, fn){
-        locator.handleDeregisteringBeaconTransmitter(socket);
-    });
-
-
-    //Handles recieving beacons list
-    socket.on('updatedBeaconsList', function (beaconsList, fn) {
-        console.log('New Updated Beacons List: '+JSON.stringify(beaconsList));
-        
-        try{
-            if(beaconsList != null){
-                locator.handleUpdatedBeaconsList(socket, beaconsList, fn);
-            }
-            else{
-                console.log('Isnide requestHandler.js: The beaconsList is empty');
-            }
-        }catch(e) {
-            console.log('Isnide requestHandler.js');
-            console.log("Error handling updated Beacons List: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
-        }
-    });
-
     /**
      *  "registerWebClient" listener handles register webclient any client call emit this event will yield to register as a webclient
      *  @event registerWebClient
@@ -290,6 +267,48 @@ exports.handleRequest = function (socket) {
     });
 
     //END PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
+
+    //START BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
+    
+    socket.on('updatedBeaconsList', function (beaconsList, fn) {
+        console.log('New Updated Beacons List: '+JSON.stringify(beaconsList));
+        
+        try{
+            if(beaconsList != null){
+                locator.handleUpdatedBeaconsList(socket, beaconsList, fn);
+            }
+            else{
+                console.log('Isnide requestHandler.js: The beaconsList is empty');
+            }
+        }catch(e) {
+            console.log('Isnide requestHandler.js');
+            console.log("Error handling updated Beacons List: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
+        }
+    });
+
+    socket.on('getBeaconsTransmittersList', function () {
+        locator.getBeaconsTransmitterList(socket);
+    });
+
+    socket.on('getBeaconsRecieverList', function () {
+        locator.getBeaconsRecieverList(socket);
+    });
+
+    //Handle deregistering beaconTransmitter
+    socket.on('deRegisterBeaconTransmitter', function(){
+        locator.handleDeregisteringBeaconTransmitter(socket);
+    });
+
+    socket.on('deRegisterBeaconReciever', function(){
+        locator.handleDeregisteringBeaconReciever(socket);
+    });
+
+    socket.on ('getBeaconsTransmittersListLocation', function(fn){
+        locator.getBeaconsTransmittersListLocation(socket, fn);
+    });
+
+    //END BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 

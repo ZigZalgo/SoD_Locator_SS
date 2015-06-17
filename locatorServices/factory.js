@@ -159,17 +159,22 @@ function leapMotion(socket){
 exports.leapMotion = leapMotion;
 
 
-//Modifications by Nabil Muthanna  and added (sensorInfo) argument
+//-----------------------------------------------  iBeacon  --------------------------------------------------//   
 //------------------------------------------------------------------------------------------------------------//   
-// Beacon constructor
-function iBeacon(socket, sensorInfo){
+//------------------------------------------------------------------------------------------------------------//   
+function iBeacon(socket, sensorInfo, deviceSocketID){
     try{  
         this.uuid = sensorInfo.uuid;
         this.major = sensorInfo.major;
         this.minor = sensorInfo.minor;
         this.identifier = sensorInfo.identifier;
+        this.name = sensorInfo.name;
        
+        this.location = {X: null, Y: null, Z:null};
+        this.deviceSocketID = deviceSocketID;
+
         this.ID = uniqueSensorCounter ++;
+        this.beaconType = 'Tr';
         this.socketID = socket.id;
         this.sensorType = "iBeacon";
         this.lastUpdated = new Date();
@@ -182,12 +187,18 @@ function iBeacon(socket, sensorInfo){
 exports.iBeacon = iBeacon;
 
 //BeaconRcvr Constructor
-function iBeaconRcvr(socket, sensorInfo){
+function iBeaconRcvr(socket, sensorInfo, deviceSocketID){
     console.log('\nInside iBeaconRcvr\n');
     try{
 
-        this.ID = uniqueSensorCounter ++;
+
         this.name = sensorInfo.name;
+        this.location = {X: null, Y: null, Z:null};
+        this.deviceSocketID = null;
+        this.deviceSocketID = deviceSocketID;
+
+        this.ID = uniqueSensorCounter ++;
+        this.beaconType = 'Rcvr';
         this.socketID = socket.id;
         this.sensorType = "iBeaconRcvr";
         this.lastUpdated = new Date();
@@ -196,10 +207,21 @@ function iBeaconRcvr(socket, sensorInfo){
         return false;
     }
 }
-
 exports.iBeaconRcvr = iBeaconRcvr;
-//------------------------------------------------------------------------------------------------------------//
-//Modifications
+
+function beaconLocation (iBeacon){
+    try{
+        this.X = iBeacon.location.X;
+        this.Y = iBeacon.location.Y;
+        this.Z = iBeacon.location.Z;
+    } catch (err){
+        return false;
+    }
+}
+
+exports.beaconLocation = beaconLocation;
+
+//-------------------------------------------END of iBEacon--------------------------------------------------//
 
 
 // TODO: TEST

@@ -73,24 +73,34 @@ exports.registerSensor = function(socket,type,sensorInfo,callback){
     }
 }
 
-//Modifications by Nabil Muthanna
-//------------------------------------------------------------------------------------------------------------//
+//----------------------------START OF BEACON---------------------------------------------------------------------------//
 //Handles recieving beacons list
 
 exports.handleDeregisteringBeaconTransmitter = function(socket){
-    
-    console.log("deRegister iBeacon Inc in Locator");
     locator.iBeaconService.deRegisterIBeaconTrHandler(socket);
 }
 
+exports.handleDeregisteringBeaconReciever = function (socket){
+    locator.iBeaconService.deRegisterIBeaconRcvrHandler(socket);
+}
+
 exports.handleUpdatedBeaconsList = function(socket, beaconsList, callback){
-    
-    console.log('Isnide locator.js');
-    //console.log('Handling updating the following beacons list: \n\n'+JSON.stringify(beaconsList) + '\n\n');
     locator.iBeaconService.handleUpdatedBeaconsList(socket, beaconsList, callback);
 }
-//------------------------------------------------------------------------------------------------------------//
-//Modifications
+
+exports.getBeaconsTransmitterList = function (socket){
+    locator.iBeaconService.sendTransmittersList(socket);
+}
+
+exports.getBeaconsRecieverList = function (socket){
+    locator.iBeaconService.sendRecieversList(socket);
+}
+
+exports.getBeaconsTransmittersListLocation = function (socket, fn){
+    locator.iBeaconService.getBeaconsTransmittersListLocation(socket, fn);
+}
+//------------------------------END OF BEACON---------------------------------------------------------------//
+
 
 // calibration to sensors
 exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
@@ -999,6 +1009,7 @@ exports.cleanUpSensor = function(socketID){
                 break;
             case "ibeacons":
                 console.log("iBeacon disconnnected");
+                locator.iBeaconService.cleanUp(socketID);
                 break;
             default:
                 console.log("unknown type sensor dc'ed: " + callback);
