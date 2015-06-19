@@ -456,7 +456,7 @@ exports.handleRequest = function (socket) {
      *  var request = {
      *      objectType:"device",    // can be "device" or "dataPoint"
      *      ID:0,
-     *      location:{X:1,Y:1,Z:1}
+     *      newLocation:{X:1,Y:1,Z:1}
      *  };
      *  socket.emit("updateObjectLocation",request,function(callback){
      *      console.log(callback);

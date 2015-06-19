@@ -385,7 +385,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line971">line 971</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line985">line 985</a>
     </li></ul></dd>
     
 
@@ -422,10 +422,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {
-         payload:"anypayload" // if this is null, then the payload will be send to device directly without an eventname
-     };
- socket.emit("broadcast",request)</code></pre>
+    <pre class="prettyprint"><code>var request = {         payload:"anypayload" // if this is null, then the payload will be send to device directly without an eventname     }; socket.emit("broadcast",request)</code></pre>
 
 
 
@@ -441,10 +438,7 @@
 
 
 <div class="description">
-    "dropData" listener handles when a person performs release handgesture and drop the data associate with the person to the location
-     this function will check whether there is a dataPoint within the dropRange
-         if there is a dataPoint within the range the data associate with the person will be dump into the dataPoint
-         otherWise a new dataPoint will spawn on the current location where the person is standing and link the data to it.
+    "dropData" listener handles when a person performs release handgesture and drop the data associate with the person to the location     this function will check whether there is a dataPoint within the dropRange         if there is a dataPoint within the range the data associate with the person will be dump into the dataPoint         otherWise a new dataPoint will spawn on the current location where the person is standing and link the data to it.
 </div>
 
 
@@ -580,7 +574,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line588">line 588</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line602">line 602</a>
     </li></ul></dd>
     
 
@@ -617,10 +611,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {ID:0, dropRange:0.5};
- socket.emit("dropData",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>var request = {ID:0, dropRange:0.5}; socket.emit("dropData",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -772,7 +763,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line612">line 612</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line626">line 626</a>
     </li></ul></dd>
     
 
@@ -809,9 +800,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>socket.emit("getClientsFromServer",function(callback){
-     console.log(callback);  // callback object is the list of client from server
- })</code></pre>
+    <pre class="prettyprint"><code>socket.emit("getClientsFromServer",function(callback){     console.log(callback);  // callback object is the list of client from server })</code></pre>
 
 
 
@@ -943,7 +932,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line687">line 687</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line701">line 701</a>
     </li></ul></dd>
     
 
@@ -980,11 +969,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// currently selection only supports ["all"]
- var selectionList = ["all"];
- socket.emit("getDataPointsWithSelection",{selection:selectionList},function(callback){
-     console.log(callback);  // callback object contains list of dataPoints
- })</code></pre>
+    <pre class="prettyprint"><code>// currently selection only supports ["all"] var selectionList = ["all"]; socket.emit("getDataPointsWithSelection",{selection:selectionList},function(callback){     console.log(callback);  // callback object contains list of dataPoints })</code></pre>
 
 
 
@@ -1136,7 +1121,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line655">line 655</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line669">line 669</a>
     </li></ul></dd>
     
 
@@ -1173,11 +1158,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = null;
- socket.emit("getDeviceInViewWithDistance",request,function(callback){
-     // callback contains the list of devices inView, in each device object there is a additional field indicates the distance from the device towards whoever fire the event
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>var request = null; socket.emit("getDeviceInViewWithDistance",request,function(callback){     // callback contains the list of devices inView, in each device object there is a additional field indicates the distance from the device towards whoever fire the event     console.log(callback); })</code></pre>
 
 
 
@@ -1309,7 +1290,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line635">line 635</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line649">line 649</a>
     </li></ul></dd>
     
 
@@ -1346,11 +1327,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// supported selection type are "all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>"
- var list = ["inView","nearest"];
- socket.emit("getDevicesWithSelection",{selection:list},function(callback){
-     console.log(callback);  // callback contains the device that are inView but also nearest to the device who fire the event
- })</code></pre>
+    <pre class="prettyprint"><code>// supported selection type are "all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>" var list = ["inView","nearest"]; socket.emit("getDevicesWithSelection",{selection:list},function(callback){     console.log(callback);  // callback contains the device that are inView but also nearest to the device who fire the event })</code></pre>
 
 
 
@@ -1482,7 +1459,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line829">line 829</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line843">line 843</a>
     </li></ul></dd>
     
 
@@ -1521,10 +1498,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1};
- socket.emit("getDistanceBetweenPersonAndDevice",request,function(callback){
-     console.log(callback);  // callback object contains the distance between person ID1=0 and device ID2=1
- })</code></pre>
+    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1}; socket.emit("getDistanceBetweenPersonAndDevice",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and device ID2=1 })</code></pre>
 
 
 
@@ -1656,7 +1630,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line800">line 800</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line814">line 814</a>
     </li></ul></dd>
     
 
@@ -1688,10 +1662,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1};
- socket.emit("getDistanceBetweenDevices",request,function(callback){
-     console.log(callback);  // callback object contains the distance between device ID1=0 and device ID2=1
- })</code></pre>
+    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1}; socket.emit("getDistanceBetweenDevices",request,function(callback){     console.log(callback);  // callback object contains the distance between device ID1=0 and device ID2=1 })</code></pre>
 
 
 
@@ -1823,7 +1794,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line856">line 856</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line870">line 870</a>
     </li></ul></dd>
     
 
@@ -1860,10 +1831,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1};
- socket.emit("getDistanceBetweenPeople",request,function(callback){
-     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
- })</code></pre>
+    <pre class="prettyprint"><code>var request = {ID1:0,ID2:1}; socket.emit("getDistanceBetweenPeople",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1 })</code></pre>
 
 
 
@@ -1995,7 +1963,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line772">line 772</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line786">line 786</a>
     </li></ul></dd>
     
 
@@ -2032,10 +2000,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {ID:0};
- socket.emit("getDistanceToDevice",request,function(callback){
-     console.log(callback);  // callback object contains the distance towards device ID=0
- })</code></pre>
+    <pre class="prettyprint"><code>var request = {ID:0}; socket.emit("getDistanceToDevice",request,function(callback){     console.log(callback);  // callback object contains the distance towards device ID=0 })</code></pre>
 
 
 
@@ -2187,7 +2152,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line567">line 567</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line581">line 581</a>
     </li></ul></dd>
     
 
@@ -2224,9 +2189,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>socket.emit("getPeopleFromServer",function(callback){
-     console.log(callback);  // callback object is the list of people from server
- })</code></pre>
+    <pre class="prettyprint"><code>socket.emit("getPeopleFromServer",function(callback){     console.log(callback);  // callback object is the list of people from server })</code></pre>
 
 
 
@@ -2378,7 +2341,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line731">line 731</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line745">line 745</a>
     </li></ul></dd>
     
 
@@ -2415,17 +2378,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>socket.emit("getRoomFromServer",function(callback){
-     console.log(callback);  // callback object is the room info
-     callback = {
-                 location = {X:0,Y:0,Z:0},
-                 length = 6,
-                 depth = 8,
-                 height = 4
-             }//callback looks like this.
-
-
- })</code></pre>
+    <pre class="prettyprint"><code>socket.emit("getRoomFromServer",function(callback){     console.log(callback);  // callback object is the room info     callback = {                 location = {X:0,Y:0,Z:0},                 length = 6,                 depth = 8,                 height = 4             }//callback looks like this. })</code></pre>
 
 
 
@@ -2577,7 +2530,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line712">line 712</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line726">line 726</a>
     </li></ul></dd>
     
 
@@ -2614,9 +2567,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>socket.emit("getSensorsFromServer",function(callback){
-     console.log(callback);  // callback object is the list of sensors from server
- })</code></pre>
+    <pre class="prettyprint"><code>socket.emit("getSensorsFromServer",function(callback){     console.log(callback);  // callback object is the list of sensors from server })</code></pre>
 
 
 
@@ -2748,7 +2699,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line308">line 308</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line322">line 322</a>
     </li></ul></dd>
     
 
@@ -2785,15 +2736,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// pair device ID-101 with person ID-1. Device will be using person(ID:1)'s base location
- var request = {
-     uniqueDeviceID:101,
-     uniquePersonID:1,
-     pairType:"base" // pairType can be "base","leftHand","rightHand" . "base" indicates person's mid-belly position
- };
- socket.emit("pairDeviceWithPerson",request,function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// pair device ID-101 with person ID-1. Device will be using person(ID:1)'s base location var request = {     uniqueDeviceID:101,     uniquePersonID:1,     pairType:"base" // pairType can be "base","leftHand","rightHand" . "base" indicates person's mid-belly position }; socket.emit("pairDeviceWithPerson",request,function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -2925,7 +2868,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line73">line 73</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line68">line 68</a>
     </li></ul></dd>
     
 
@@ -2962,8 +2905,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var dataPointInfo = {
-                         location: { X: 1, Y: 0, Z: 1 },     // customizable
+    <pre class="prettyprint"><code>var dataPointInfo = {                         location: { X: 1, Y: 0, Z: 1 },     // customizable
                                 data: [ '123.jpg', '' ],            // customizable
                                 dropRange: 0,                       // customizable
                                 observeRange: 0,                    // customizable
@@ -2973,11 +2915,7 @@
                                     observeWidth: 2,
                                     observeHeight: 1
                                 },
-                                subscriber: [ { subscriberType: 'device', ID: 101 } ]   // customizable
-  }
- socket.emit("registerDataPoint",dataPointInfo,function(callback){
-     console.log(callback);
- })</code></pre>
+                                subscriber: [ { subscriberType: 'device', ID: 101 } ]   // customizable  } socket.emit("registerDataPoint",dataPointInfo,function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -3109,7 +3047,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line186">line 186</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line158">line 158</a>
     </li></ul></dd>
     
 
@@ -3146,9 +3084,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>socket.emit("registerMobileWebClient",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>socket.emit("registerMobileWebClient",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -3280,7 +3216,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line102">line 102</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line97">line 97</a>
     </li></ul></dd>
     
 
@@ -3317,8 +3253,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var sensorInfo = {
-     sensorType: 'kinect',
+    <pre class="prettyprint"><code>var sensorInfo = {     sensorType: 'kinect',
             FOV: 70,
             rangeInMM: 4000,
             frameHeight: 0,
@@ -3331,11 +3266,7 @@
                 zSpace: 0,
                 dX: 0,
                 dZ: 0
-            }
- }
- socket.emit("registerSensor",sensorInfo,function(callback){
-     console.log(callback);
- })</code></pre>
+            } } socket.emit("registerSensor",sensorInfo,function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -3467,7 +3398,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line205">line 205</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -3504,9 +3435,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>socket.emit("registerMobileWebClient",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>socket.emit("registerMobileWebClient",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -3638,7 +3567,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line168">line 168</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line140">line 140</a>
     </li></ul></dd>
     
 
@@ -3675,9 +3604,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>socket.emit("registerWebClient",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>socket.emit("registerWebClient",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -3866,11 +3793,7 @@
                      observeWidth: 2,
                      observeHeight: 1,
                      observerDistance: 1 },
-                  height: 1                             // customizable
- }
- socket.emit("registerDevice",deviceInfo,function(callback){
-     console.log(callback);
- })</code></pre>
+                  height: 1                             // customizable } socket.emit("registerDevice",deviceInfo,function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -4022,7 +3945,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line916">line 916</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line930">line 930</a>
     </li></ul></dd>
     
 
@@ -4059,13 +3982,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {
-     selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>"]
-     eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname
-     };
- socket.emit("sendEventToDevicesWithSelection",request,function(callback){
-     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
- })</code></pre>
+    <pre class="prettyprint"><code>var request = {     selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>"]     eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname     }; socket.emit("sendEventToDevicesWithSelection",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1 })</code></pre>
 
 
 
@@ -4217,7 +4134,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line885">line 885</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line899">line 899</a>
     </li></ul></dd>
     
 
@@ -4254,13 +4171,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var request = {
-     selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>"]
-     eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname
-     };
- socket.emit("sendEventToDevicesWithSelectionIncludingSelf",request,function(callback){
-     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
- })</code></pre>
+    <pre class="prettyprint"><code>var request = {     selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single&lt;ID number>"]     eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname     }; socket.emit("sendEventToDevicesWithSelectionIncludingSelf",request,function(callback){     console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1 })</code></pre>
 
 
 
@@ -4414,7 +4325,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line363">line 363</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line377">line 377</a>
     </li></ul></dd>
     
 
@@ -4451,10 +4362,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>//
- socket.emit("unpairAllDevices",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// socket.emit("unpairAllDevices",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -4606,7 +4514,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line382">line 382</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line396">line 396</a>
     </li></ul></dd>
     
 
@@ -4643,10 +4551,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>//
- socket.emit("unpairAllPeople",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// socket.emit("unpairAllPeople",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -4798,7 +4703,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line344">line 344</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line358">line 358</a>
     </li></ul></dd>
     
 
@@ -4835,10 +4740,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>//
- socket.emit("unpairDevice",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// socket.emit("unpairDevice",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -4990,7 +4892,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line476">line 476</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line490">line 490</a>
     </li></ul></dd>
     
 
@@ -5027,14 +4929,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value
- var deviceInfo = {
-     objectType:"happiness",
-     location:{X:1,Y:1,Z:1}
- };  // device property will be updated according to deviceInfo
- socket.emit("updateDeviceInfo",deviceInfo,function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value var deviceInfo = {     objectType:"happiness",     location:{X:1,Y:1,Z:1} };  // device property will be updated according to deviceInfo socket.emit("updateDeviceInfo",deviceInfo,function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -5186,7 +5081,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line434">line 434</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line448">line 448</a>
     </li></ul></dd>
     
 
@@ -5223,15 +5118,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value
- var request = {
-     objectType:"device",    // can be "device" or "dataPoint"
-     ID:0,
-     location:{X:1,Y:1,Z:1}
- };
- socket.emit("updateObjectLocation",request,function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value var request = {     objectType:"device",    // can be "device" or "dataPoint"     ID:0,     newLocation:{X:1,Y:1,Z:1} }; socket.emit("updateObjectLocation",request,function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -5363,7 +5250,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line405">line 405</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line419">line 419</a>
     </li></ul></dd>
     
 
@@ -5400,16 +5287,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value
- var request = {
-     orientation:{
-         pitch:30,
-         yaw:45
-     }
- };
- socket.emit("updateOrientation",function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// orientation can contain pitch value and yaw value var request = {     orientation:{         pitch:30,         yaw:45     } }; socket.emit("updateOrientation",function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -5561,7 +5439,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line496">line 496</a>
+        <a href="requestHandler.js.html">requestHandler.js</a>, <a href="requestHandler.js.html#line510">line 510</a>
     </li></ul></dd>
     
 
@@ -5598,22 +5476,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// we mainly use this to update calibration rule of the sensor
- var sensorInfo = {
-     translateRule:{
-         changeInOrientation: 22,    // Rotation
-         dX:0,                       // transformX
-         dZ:0,                       // transformY
-         xSpace: 0,                  // xSpaceTransition
-         zSpace: 0,                  // ySpaceTransition
-         startingLocation.X:0,       // startingLocation.X
-         startingLocation.Y:0,       // startingLocation.Y
-         startingLocation.Z:0        // startingLocation.Z
-     }
- };  // device property will be updated according to deviceInfo
- socket.emit("updateSensorInfo",sensorInfo,function(callback){
-     console.log(callback);
- })</code></pre>
+    <pre class="prettyprint"><code>// we mainly use this to update calibration rule of the sensor var sensorInfo = {     translateRule:{         changeInOrientation: 22,    // Rotation         dX:0,                       // transformX         dZ:0,                       // transformY         xSpace: 0,                  // xSpaceTransition         zSpace: 0,                  // ySpaceTransition         startingLocation.X:0,       // startingLocation.X         startingLocation.Y:0,       // startingLocation.Y         startingLocation.Z:0        // startingLocation.Z     } };  // device property will be updated according to deviceInfo socket.emit("updateSensorInfo",sensorInfo,function(callback){     console.log(callback); })</code></pre>
 
 
 
@@ -5635,7 +5498,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.1</a> on Tue Jun 16 2015 15:48:16 GMT-0600 (MDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Jun 19 2015 00:04:50 GMT-0600 (Mountain Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

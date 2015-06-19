@@ -89,12 +89,7 @@ exports.handleRequest = function (socket) {
         }else{
             locator.registerDevice(socket,deviceInfo)
         }
-        try{
-            socket.broadcast.emit("someDeviceConnected", { name: deviceInfo.name, ID: locator.devices[socket.id].uniqueDeviceID,deviceType: deviceInfo.deviceType});
-        }
-        catch(err){
-            console.log("Error emitting name or ID, device may still be registering: " + err);
-        }
+
     });
 
 
@@ -155,7 +150,7 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('registerSensor', function (sensorInfo, fn) {
-        console.log('registering with sensorInfo: '+JSON.stringify(sensorInfo));
+        console.log('registering with sensorInfo: \n'+JSON.stringify(sensorInfo));
         try{
             if(sensorInfo.sensorType!=null){
                 locator.registerSensor(socket,sensorInfo.sensorType,sensorInfo,fn);
@@ -168,29 +163,6 @@ exports.handleRequest = function (socket) {
 
     socket.on('registerProjector',function (projectorInfo,fn){
         locator.projectorService.registerProjector(socket,projectorInfo,fn);
-    });
-
-    //Handle deregistering beaconTransmitter
-    socket.on('deRegisterBeaconTransmitter', function(sensorInfo, fn){
-        locator.handleDeregisteringBeaconTransmitter(socket);
-    });
-
-
-    //Handles recieving beacons list
-    socket.on('updatedBeaconsList', function (beaconsList, fn) {
-        console.log('New Updated Beacons List: '+JSON.stringify(beaconsList));
-        
-        try{
-            if(beaconsList != null){
-                locator.handleUpdatedBeaconsList(socket, beaconsList, fn);
-            }
-            else{
-                console.log('Isnide requestHandler.js: The beaconsList is empty');
-            }
-        }catch(e) {
-            console.log('Isnide requestHandler.js');
-            console.log("Error handling updated Beacons List: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
-        }
     });
 
     /**
@@ -322,6 +294,48 @@ exports.handleRequest = function (socket) {
     });
 
     //END PROJECTOR EVENTS////////////////////////////////////////////////////////////////////////////////////////
+
+    //START BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
+    
+    socket.on('updatedBeaconsList', function (beaconsList, fn) {
+        console.log('New Updated Beacons List: '+JSON.stringify(beaconsList));
+        
+        try{
+            if(beaconsList != null){
+                locator.handleUpdatedBeaconsList(socket, beaconsList, fn);
+            }
+            else{
+                console.log('Isnide requestHandler.js: The beaconsList is empty');
+            }
+        }catch(e) {
+            console.log('Isnide requestHandler.js');
+            console.log("Error handling updated Beacons List: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
+        }
+    });
+
+    socket.on('getBeaconsTransmittersList', function () {
+        locator.getBeaconsTransmitterList(socket);
+    });
+
+    socket.on('getBeaconsRecieverList', function () {
+        locator.getBeaconsRecieverList(socket);
+    });
+
+    //Handle deregistering beaconTransmitter
+    socket.on('deRegisterBeaconTransmitter', function(){
+        locator.handleDeregisteringBeaconTransmitter(socket);
+    });
+
+    socket.on('deRegisterBeaconReciever', function(){
+        locator.handleDeregisteringBeaconReciever(socket);
+    });
+
+    socket.on ('getBeaconsTransmittersListLocation', function(fn){
+        locator.getBeaconsTransmittersListLocation(socket, fn);
+    });
+
+    //END BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -470,7 +484,7 @@ exports.handleRequest = function (socket) {
      *  var request = {
      *      objectType:"device",    // can be "device" or "dataPoint"
      *      ID:0,
-     *      location:{X:1,Y:1,Z:1}
+     *      newLocation:{X:1,Y:1,Z:1}
      *  };
      *  socket.emit("updateObjectLocation",request,function(callback){
      *      console.log(callback);
@@ -1051,15 +1065,26 @@ exports.handleRequest = function (socket) {
 
 
 
-    socket.on('handsUpdate',function(data,fn){
-        console.log("Hand update with data: "+JSON.stringify(data));
-        data.socketID = socket.id;
-        data.sensorID = locator.sensors.leapMotions[socket.id].ID;
-        locator.leapMotionService.updatePersonWithHandData(data,function(callback){
-            console.log(callback);
-            fn(callback);
-        })
+
+    socket.on('handsUpdate',function(handdata,fn){
+        console.log("Hand update with data: "+JSON.stringify(handdata));
+        handdata.socketID = socket.id;
+        handdata.sensorID = locator.sensors.leapMotions[socket.id].ID;
+        for (var key in util.filterDevices(socket, handdata)) {
+            if (locator.devices.hasOwnProperty(key) &amp;&amp; socket != frontend.clients[key]) {
+
+
+                if(handdata.gestureType=="TYPE_CIRCLE") {
+                    frontend.clients[key].emit("check", handdata);
+                    console.log("check");
+                }
+
+
+            }
+        }
+
     });
+
 
     socket.on('error', function (err) {
         console.log("error: " + err);
@@ -1101,7 +1126,7 @@ exports.handleRequest = function (socket) {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.1</a> on Tue Jun 16 2015 15:48:16 GMT-0600 (MDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Jun 19 2015 00:04:50 GMT-0600 (Mountain Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
