@@ -299,6 +299,51 @@ function isNotIncluded(uuids, uuid){
 }
 */
 
+function refreshBeaconsLocation(){
+    //console.log("refreshBeaconsLocation is called");
+    
+    for(var beacon in locator.sensors.iBeacons){
+        if(locator.sensors.iBeacons[beacon].deviceSocketID != undefined){
+            updateTrBeaconLocation(beacon, locator.sensors.iBeacons[beacon].deviceSocketID, locator.sensors.iBeacons[beacon].isDevice);
+        }
+    }
+
+    for (var iBeaconRcvr in locator.sensors.iBeaconRcvrs){
+        if(locator.sensors.iBeaconRcvrs[iBeaconRcvr].deviceSocketID){
+            updateRcvrBeaconLocation(iBeaconRcvr, locator.sensors.iBeacons[beacon].deviceSocketID);
+        }
+    }
+}
+
+
+function updateTrBeaconLocation(beaconTrID, deviceSocketID, isDevice){
+    console.log("updateTrBeaconLocation is called");
+    if(locator.devices[deviceSocketID] != undefined && isDevice){
+        locator.sensors.iBeacons[beaconTrID].location.X = locator.devices[deviceSocketID].location.X;
+        locator.sensors.iBeacons[beaconTrID].location.Y = locator.devices[deviceSocketID].location.Y;
+        locator.sensors.iBeacons[beaconTrID].location.Z = locator.devices[deviceSocketID].location.Z;
+    } else{
+        console.log('No device associated with this beacon tr');
+    }
+}
+
+
+function updateRcvrBeaconLocation(beaconRcvrID, deviceSocketID){
+    console.log("updateRcvrBeaconLocation is called");
+    if(locator.devices[deviceSocketID] != undefined){
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.X = locator.devices[deviceSocketID].location.X;
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Y = locator.devices[deviceSocketID].location.Y;
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Z = locator.devices[deviceSocketID].location.Z;
+    } else{
+        console.log('No device associated with this beacon rcvr');
+    }
+}
+
+
+setInterval(function() {  
+    //refreshBeaconsLocation();
+
+}, 500);
 ;
 
 
