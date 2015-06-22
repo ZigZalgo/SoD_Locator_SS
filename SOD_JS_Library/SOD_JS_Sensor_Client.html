@@ -50,7 +50,10 @@
                 var serverURL = "http://"+serverIP+":"+port;
                 var socketURL = serverURL+"/socket.io/socket.io.js";
                 var libraryURL= serverURL+"/SOD_JS_Library"
-                sod = new SODSensor({sensorType:"kinect",FOV:Number($('#FOV').val()),rangeInMM:Number($('#rangeInMM').val()),translateRule:{startingLocation:{X:Number($('#calibrationStartingLocationX').val()),Y:Number($('#calibrationStartingLocationY').val()),Z:Number($('#calibrationStartingLocationZ').val())},
+
+
+
+                sod = new SODSensor({sensorType:$("#sensorTypeSelection").val(),FOV:Number($('#FOV').val()),rangeInMM:Number($('#rangeInMM').val()),translateRule:{startingLocation:{X:Number($('#calibrationStartingLocationX').val()),Y:Number($('#calibrationStartingLocationY').val()),Z:Number($('#calibrationStartingLocationZ').val())},
                     changeInOrientation: Number($('#calibrationRotation').val()),xSpace:Number($('#calibrationXSpace').val()),zSpace:Number($('#calibrationYSpace').val()),dX:Number($('#calibrationDX').val()),dZ:Number($('#calibrationDY').val())}});
 
                 sod.init(serverURL,socketURL, sod);
@@ -95,7 +98,13 @@
     <nav id="mode_selection" >
         <div class="block"></div>
         <table>
-            <tr><td><li id="connect">Connect&Register</li> </td><td>IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
+            <tr><td><li id="connect">Connect&Register</li> </td><td>
+
+                <select id="sensorTypeSelection">
+                    <option value="iBeacon">iBeacon</option>
+                    <option value="kinect">kinect</option>
+                </select>
+                IP: <input id='serverIP'  type="text" value='localhost'> Port:<input id='serverPort'  type="text" value='3000'><br />
                 SensorType: <input id='sensorType'  type="text" value='Kinect2[debug]'> FOV<input id='FOV'  type="text" value='70'> rangeInMM<input id='rangeInMM'  type="text" value='4000'> <br/>
                 Calibration Rotation :<input id='calibrationRotation'  type="text" value='0'> TransformX :<input id='calibrationDX'  type="text" value='0'> TransformY :<input id='calibrationDY'  type="text" value='0'> <br/>
                 xSpaceTransformation :<input id='calibrationXSpace'  type="text" value='0'> ySpaceTransformation :<input id='calibrationYSpace'  type="text" value='0'> <br/>
