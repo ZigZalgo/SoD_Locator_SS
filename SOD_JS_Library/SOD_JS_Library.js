@@ -215,19 +215,34 @@ sendToDevices.prototype = {
 function SODSensor(sensorInfo){
     //this.serverURL = serverURL;
     //this.socketURL = socketURL;
-    this.sensor = {
-        sensorType : 'JSSensor',
-        FOV : 0,
-        rangeInMM : 0,
-        frameHeight : 0,
-        frameWidth : 0
+
+    if(sensorInfo.sensorType=="kinect"){
+        this.sensor = {
+            sensorType : 'JSSensor',
+            FOV : 0,
+            rangeInMM : 0,
+            frameHeight : 0,
+            frameWidth : 0
+        }
+        //setters
+        for(var key in sensorInfo){
+            //console.log('key '+ key +' :'+ deviceInfo[key]);
+            this.sensor[key] = sensorInfo[key];
+            //console.log('device.key: '+ this.device.key);
+        }
+    }else if(sensorInfo.sensorType == "iBeacon"){
+        this.sensor = {
+            sensorType:"iBeacon",
+            beaconType:"Tr",
+            uuid: 0,
+            major:1,
+            minor:2,
+            identifier:3,
+            name:"HappyJSBeaconTransmitter",
+            location:{X:1,Y:0,Z:1}
+        }
     }
-    //setters
-    for(var key in sensorInfo){
-        //console.log('key '+ key +' :'+ deviceInfo[key]);
-        this.sensor[key] = sensorInfo[key];
-        //console.log('device.key: '+ this.device.key);
-    }
+
     this.socket= null;
     this.userListeners = {};
     this.people = [];
