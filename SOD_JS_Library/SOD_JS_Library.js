@@ -239,7 +239,8 @@ function SODSensor(sensorInfo){
             minor:2,
             identifier:3,
             name:"HappyJSBeaconTransmitter",
-            location:{X:1,Y:0,Z:1}
+            personId:0
+
         }
     }
 
