@@ -43,7 +43,7 @@ exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
 
 //register Ibeacon to sensor list
 function registerIBeacon(socket, sensorInfo, callback){
-    console.log('Registering Tr Beacon ...');
+    console.log('Registering Transmitter Beacon ...');
     if(locator.sensors.iBeacons[socket.id] == undefined){
         var deviceSocketID = checkIfExisted(sensorInfo.name);
         var iBeacon = new factory.iBeacon(socket, sensorInfo, deviceSocketID);
@@ -54,6 +54,7 @@ function registerIBeacon(socket, sensorInfo, callback){
         var personID = '-1';
         var personFound = false;
         var tmpPerson = null; 
+        
         //Update beacon location if applicable
         if(sensorInfo.personId != undefined){
             for(var person in locator.persons){

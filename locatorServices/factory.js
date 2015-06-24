@@ -169,8 +169,21 @@ function iBeacon(socket, sensorInfo, deviceSocketID, personID){
         this.minor = sensorInfo.minor;
         this.identifier = sensorInfo.identifier;
         this.name = sensorInfo.name;
-        this.isDevice = false;
+        
+        //Is this sensor a device as well
+        if(sensorInfo.isDevice != undefined){
+            if(sensorInfo.isDevice == 'YES'){
+                this.isDevice = true;
+            } else{
+                this.isDevice = false;
+            }
+        }
+            
+        else{
+            this.isDevice = false;
+        }
        
+        //Default Ranges
         this.immediateRange = '1';
         this.nearRange = '5';
         this.farRange = '10';
