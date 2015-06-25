@@ -84,6 +84,17 @@
             $("#stopMovement").on('click',function(){
                 sod.stopMovement();
             }) // end of click
+            $("#saveiBeaconState").on('click',function(){
+                sod.socket.emit("saveCurrentiBeaconState",{},function(callback){
+                    console.log(callback);
+                });
+            }) // end of click
+
+            $("#cleariBeaconState").on('click',function(){
+                sod.socket.emit("clearCurrentiBeaconState",{},function(callback){
+                    console.log(callback);
+                });
+            }) // end of click
 
         })// end of document ready
     </script>
@@ -114,6 +125,8 @@
             <tr><td><li id="addPeople">Add People In!</li></td><td> Number of People :<input id='numPeople'  type="text" value='1'> </td></tr>
             <tr><td><li id="startMovement">Start Movement</li></td><td> </td></tr>
             <tr><td><li id="stopMovement">Stop Movement</li></td><td> </td></tr>
+            <tr><td><li id="saveiBeaconState">Save Current State(iBeacon)</li></td><td> </td></tr>
+            <tr><td><li id="cleariBeaconState">Clear Current State(iBeacon)</li></td><td> </td></tr>
         </table>
     </nav>
     <div class="status_wrap">
