@@ -7,7 +7,7 @@ var uniqueSensorCounter = 0;
 var uniqueDataPointCounter = 0;
 var uniqueDataCounter = 0;
 var uniqueProjectorCounter = 0;
-
+exports.uniqueSensorCounter = uniqueSensorCounter;
 // data object (first class)
 function data(){
     this.ID = null;
@@ -169,7 +169,7 @@ function iBeacon(socket, sensorInfo, deviceSocketID, personID){
         this.minor = sensorInfo.minor;
         this.identifier = sensorInfo.identifier;
         this.name = sensorInfo.name;
-        
+        this.isFromConfig = false;
         //Is this sensor a device as well
         if(sensorInfo.isDevice != undefined){
             if(sensorInfo.isDevice == 'YES'){

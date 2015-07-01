@@ -125,8 +125,13 @@ exports.loadJSONWithCallback = function(path,callback){
             callback(null);
         }
         else{
-            obj = JSON.parse(data);
-            callback(obj)
+            try {
+                console.log(data);
+                obj = JSON.parse(data);
+                callback(obj)
+            }catch(e){
+                console.log("config maybe empty "+e);
+            }
         }
     });
 }

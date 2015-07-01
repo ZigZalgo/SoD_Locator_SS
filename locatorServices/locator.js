@@ -426,6 +426,7 @@ exports.updatePersons = function(receivedPerson, socket){
                     if(personInList.currentlyTrackedBy == socket.id){
                         // receivedPerson also come the the main track sensor, update personInList attributes
                         try{
+
                             personInList.location.X = receivedPerson.location.X.toFixed(3);
                             personInList.location.Y = receivedPerson.location.Y.toFixed(3);
                             personInList.location.Z = receivedPerson.location.Z.toFixed(3);
@@ -1733,7 +1734,104 @@ exports.loadConfig = function(){
             console.log("Config file loaded..");
             configuration = callback;
             locator.room = new factory.Room(configuration.room.location,configuration.room.length,configuration.room.depth,configuration.room.height);
+            /*Object.keys(configuration.sensors.iBeacons).forEach(function(configBeaconKey){
+                locator.sensors.iBeacons[configBeaconKey] = configuration.sensors.iBeacons[configBeaconKey];
+            })*/
+            locator.sensors.iBeacons = configuration.sensors.iBeacons;
+
             //console.log(JSON.stringify(locator.room,null,4));
         }
     })
+}
+//
+//  Load and modify the config file based on
+//      entity:
+//                  -   iBeacon , save the current state of the iBeacon transmitters
+//      action:
+/*                    -   1      save the current sate of the
+                      -   0      clear all the entity in config file
+// */
+exports.loadModifySaveCurrentState_single = function(entity,action,finalCallback){
+    var configSensorCounter = 500;
+    dataService.loadJSONWithCallback("data/reserved/config.json",function(callback){
+        if(callback!=null){
+            //console.log(callback);
+            var current_config= callback;
+            current_config.stateID ++;
+            //console.log("Config file loaded.."+JSON.stringify(configuration,null,4));
+            switch(entity){
+                case "iBeacon":
+                    // performs the action for storing current iBeacon state
+                    if(action==1) {
+                        async.each(Object.keys(sensors.iBeacons), function (iBeaconKey, eachCallback) {
+                            if (sensors.iBeacons[iBeaconKey].isDevice == false && sensors.iBeacons[iBeaconKey].isFromConfig==false) {
+                                console.log("found one beacon");
+                                (function(iBeacon){
+                                    configSensorCounter++;
+                                    //console.log(iBeacon);
+                                    current_config.sensors.iBeacons["saved-"+iBeaconKey] = iBeacon;
+                                    current_config.sensors.iBeacons["saved-"+iBeaconKey].ID = current_config.stateID*10+iBeacon.ID;
+                                    current_config.sensors.iBeacons["saved-"+iBeaconKey].isFromConfig = true;
+                                })(sensors.iBeacons[iBeaconKey]);
+
+                                eachCallback()
+                            }else{
+                                eachCallback();
+                            }
+                        }, function (err) {
+                            // after the whole list is processed
+                            console.log(current_config);
+                            dataService.saveDataToFile(JSON.stringify(current_config, null, 4), "data/reserved/config.json", function (err) {
+                                if (err == 1) {
+                                    //file successfully saved. 1 - success
+                                    console.log("current state of iBeacons has been successfully stored.");
+                                    if(finalCallback!=undefined){
+                                        finalCallback(1);
+                                    }
+                                } else {
+                                    console.log("Err while save to file: " + err);
+                                }
+                            })
+                        });
+                    }else if(action==0){
+                        // handles clear event for iBeacons
+                        var tempDeletediBeaconsFromConfig = {};
+                        async.each(Object.keys(current_config.sensors.iBeacons), function (iBeaconKey, eachCallback) {
+                            if (current_config.sensors.iBeacons[iBeaconKey].isDevice == false) {
+                                console.log("found one beacon to delete");
+                                tempDeletediBeaconsFromConfig[iBeaconKey] = current_config.sensors.iBeacons[iBeaconKey];
+                                delete current_config.sensors.iBeacons[iBeaconKey];
+                                eachCallback();
+                            }else{
+                                eachCallback();
+                            }
+                        }, function (err) {
+                            //console.log(current_config);
+                            dataService.saveDataToFile(JSON.stringify(current_config, null, 4), "data/reserved/config.json", function (err) {
+                                if (err == 1) {
+                                    //file successfully saved. 1 - success
+                                    locator.loadConfig();
+                                    if(finalCallback!=undefined){
+                                        finalCallback({status:1,clearedConfigBeacons:tempDeletediBeaconsFromConfig});
+                                    }
+                                    console.log("current state of iBeacons has been successfully stored.");
+                                } else {
+                                    console.log("Err while save to file: " + err);
+                                }
+                            })
+                        });
+                    }
+                    break;
+                case "room":
+                    locator.room = new factory.Room(configuration.room.location,configuration.room.length,configuration.room.depth,configuration.room.height);
+                    break;
+                default :
+                    console.log("Unknown modify option:"+entity);
+            }
+
+
+            //console.log(JSON.stringify(locator.room,null,4));
+        }
+    })
+
 }

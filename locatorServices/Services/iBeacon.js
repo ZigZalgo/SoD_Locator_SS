@@ -232,6 +232,7 @@ exports.cleanUp = function (socketID){
     if(locator.sensors.iBeacons[socketID] != undefined){
         delete locator.sensors.iBeacons[socketID];
         console.log('Deleted beacon transmitter\n');
+        locator.loadConfig();
     }
 
     if(locator.sensors.iBeaconRcvrs[socketID] != undefined){

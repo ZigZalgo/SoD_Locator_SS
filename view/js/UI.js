@@ -27,6 +27,7 @@ $(document).ready(function(){
     function updateChangesOnLayout(){
         $('div#settingChangesMade').text("Modified: "+JSON.stringify(setting_changes));
     }
+
     $("#calibration_flip").click(function(){
         showSection('calibration_section')
         refreshSensors();
@@ -61,7 +62,26 @@ $(document).ready(function(){
         //do something
         console.log($(this).attr('name')); // locationX/Y/Z
             });
-    $('div#submitChanges').on('click',function(e){
+    /*
+    *
+    *   Setting sections
+    *
+    * */
+    $('#saveiBeaconsState').on("click",function(){
+        io.emit("saveCurrentiBeaconState",{},function(callback){
+            console.log(callback);
+        });
+    })
+
+    $('#cleariBeaconsState').on("click",function(){
+        io.emit("clearCurrentiBeaconState",{},function(callback){
+            console.log(callback);
+        });
+    })
+
+
+    // End setting section
+     $('div#submitChanges').on('click',function(e){
         io.emit('updateServerSettings',setting_changes,function(response){
             console.log(response);
             if(response==true){

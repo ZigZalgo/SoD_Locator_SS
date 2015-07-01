@@ -197,6 +197,15 @@ exports.handleRequest = function (socket) {
         //console.log("SaveCurrentState request received");
         locator.saveCurrentState();
     });
+
+    socket.on("saveCurrentiBeaconState",function(request,fn){
+        console.log(fn);
+        locator.loadModifySaveCurrentState_single("iBeacon",1,fn);
+    });
+
+    socket.on("clearCurrentiBeaconState",function(request,fn){
+        locator.loadModifySaveCurrentState_single("iBeacon",0,fn);
+    });
     socket.on("loadFromConfig",function(request,fn){
         //console.log("SaveCurrentState request received");
         locator.loadConfig();
