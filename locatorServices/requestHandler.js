@@ -305,6 +305,16 @@ exports.handleRequest = function (socket) {
     socket.on ('getBeaconsTransmittersListLocation', function(fn){
         locator.getBeaconsTransmittersListLocation(socket, fn);
     });
+  
+    socket.on('updateSpeedAndOrientation', function (data, fn) {
+        console.log('New Speed and Orientation: '+JSON.stringify(data));
+        
+        try{
+            locator.updateSpeedAndOrientation(socket, data, fn);
+        }catch(e) {
+            console.log("Error handling New Speed and Orientation: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
+        }
+    });
 
     //END BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
 

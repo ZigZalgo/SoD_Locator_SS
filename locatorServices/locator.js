@@ -99,6 +99,11 @@ exports.getBeaconsRecieverList = function (socket){
 exports.getBeaconsTransmittersListLocation = function (socket, fn){
     locator.iBeaconService.getBeaconsTransmittersListLocation(socket, fn);
 }
+
+exports.updateSpeedAndOrientation = function (socket, date, fn){
+    locator.iBeaconService.updateSpeedAndOrientation(socket, date, fn);
+}
+
 //------------------------------END OF BEACON---------------------------------------------------------------//
 
 

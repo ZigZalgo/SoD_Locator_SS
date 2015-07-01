@@ -5,6 +5,8 @@
  *   iBeacon Service Module
  *
  * */
+
+fs = require('fs');
 var locator     =   require('./../locator');
 var frontend    =   require('../../frontend');
 var factory     =   require('./../factory');
@@ -345,6 +347,20 @@ setInterval(function() {
     //refreshBeaconsLocation();
 
 }, 500);
+
+
+
+exports.updateSpeedAndOrientation = function(socket, date, fn){
+    
+    //Get the current device location from kinnect
+    // var location {}; 
+
+
+    // // var speed = "Device " + data.speed + " | " + " Kinect "
+    // // fs.appendFile('log.txt', 'Hello', encoding='utf8', function (err) {
+
+    // // });
+}
 ;
 
 
