@@ -421,7 +421,7 @@ exports.updatePersons = function(receivedPerson, socket){
                     if(personInList.currentlyTrackedBy == socket.id){
                         // receivedPerson also come the the main track sensor, update personInList attributes
                         try{
-                            
+
                             personInList.location.X = receivedPerson.location.X.toFixed(3);
                             personInList.location.Y = receivedPerson.location.Y.toFixed(3);
                             personInList.location.Z = receivedPerson.location.Z.toFixed(3);

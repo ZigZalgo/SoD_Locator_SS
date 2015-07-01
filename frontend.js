@@ -1,5 +1,6 @@
 // Starting SoD Locator Services
 var express = require('express.io');
+var net = require("net");
 var app = express().http().io();
 var data = require('./locatorServices/data');
 var sensorsREST = require('./locatorServices/REST/sensors');
@@ -10,6 +11,39 @@ var locator = require('./locatorServices/locator');
 
 // Server Initilize
 init();
+
+net.createServer(
+    function(socket)
+    {
+        socket.setEncoding('utf8');
+        socket.on('data', function(data){
+            //console.log(data);
+            if(data.indexOf('policy-file-request') > -1){
+                var toReturn = '';
+                //console.log("REQUESTED POLICY FILE");
+
+                //console.log("<?xml version=\"1.0\"?>");
+                toReturn+="<?xml version=\"1.0\"?>\n";
+                //console.log("<cross-domain-policy>");
+                toReturn+=("<cross-domain-policy>\n");
+                toReturn+=("<allow-access-from domain=\"*\" to-ports=\"*\"/>\n");
+                /*domains.forEach(
+                    function(domain)
+                    {
+                        var parts = domain.split(':');
+                        toReturn+=("<allow-access-from domain=\""*"\" to-ports=\""*"\"/>\n");
+                    }
+                );*/
+                //console.log("</cross-domain-policy>");
+                toReturn+=("</cross-domain-policy>\n");
+                //console.log(toReturn);
+                socket.write(toReturn);
+                socket.end();
+            }
+        })}
+).listen(843);
+
+
 
 var http = require('http')
     , server = http.createServer(app)
@@ -69,6 +103,12 @@ app.get('/scripts/prettify/prettify.js', function (req, res) {
 app.get('/global.html', function (req, res) {
     res.sendfile(__dirname + '/data/reserved/doc/out/global.html');
 });
+
+app.get('/crossdomain.xml', function (req, res) {
+    res.sendfile(__dirname + '/data/reserved/crossdomain.xml');
+});
+
+
 
 app.get('/scripts/prettify/lang-css.js', function (req, res) {
     res.sendfile(__dirname + '/data/reserved/doc/out/scripts/prettify/lang-css.js');
