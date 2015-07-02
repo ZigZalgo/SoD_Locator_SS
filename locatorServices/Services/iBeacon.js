@@ -358,27 +358,21 @@ setInterval(function() {
 
 
 exports.updateSpeedAndOrientation = function(socket, date, fn){
-    
+
+
     try{
         //Get the current device location from kinnect
         if(locator.devices[socket.id] != undefined){
             console.log('\tDevice with given socket ID is found');
 
-            console.log('Previous device location is ' + JSON.stringify(previousKinnectDeviceLocation));
-            console.log('Current device location is ' + JSON.stringify(locator.devices[socket.id].location));
-
             //Get speed and rotations rate of device from kinnect
             var speedAndRotations = getSpeedAndRotationsRate(previousKinnectDeviceLocation, 
-                locator.devices[socket.id].location);
+                locator.devices[socket.id].location, date);
             if(speedAndRotations != null){
-                //TODO
-                //Write data recieved from client to sa file
-                //Write the speedAndRotations of the client from kinnect to a file
-                //fs.appendFileSync('Kinnectlog.txt', 'Hello', encoding='utf8');
-                //fs.appendFileSync('Devicelog.txt', 'Hello', encoding='utf8');
+                
+              
             } else{
                 console.log('*Failed to update Speed And Orientation due to: '+err);
-
             }
 
 
@@ -391,7 +385,7 @@ exports.updateSpeedAndOrientation = function(socket, date, fn){
             var finalLocation = {X:2, Y:2, Z:2};
 
             var speedAndRotations = getSpeedAndRotationsRate(initialLocation, 
-                finalLocation);
+                finalLocation, date);
         }
     } catch(err){
             console.log('*Failed to update Speed And Orientation due to: '+err);
@@ -399,7 +393,7 @@ exports.updateSpeedAndOrientation = function(socket, date, fn){
     
 }
 
-function getSpeedAndRotationsRate(locationOne, locationTwo){
+function getSpeedAndRotationsRate(locationOne, locationTwo, data){
 
     console.log('\nTrying to update the speed and Orientation of the device');
 
@@ -457,7 +451,8 @@ function getSpeedAndRotationsRate(locationOne, locationTwo){
         //console.log('Updated previous location' + JSON.stringify(previousKinnectDeviceLocation));
         //console.log('Updated previous Rotations' + JSON.stringify(previousKinnectDeviceRotations));
 
-
+        //Log the updatez
+        LogUpdatesToAFile(data, speedAndRotationsInformation);
         return speedAndRotationsInformation;
     }catch(err){
             console.log('Failed to get the speed and orientation of device due to: '+err);
@@ -465,6 +460,29 @@ function getSpeedAndRotationsRate(locationOne, locationTwo){
     }
 }
 
+function LogUpdatesToAFile(data, speedAndRotations)
+{
+    console.log("Logging the updates .....")
+    var kinnectData = {speed:{}, rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, timeStamp:new Date()};
+    var deviceData = {speed:{}, rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, timeStamp:new Date()}
+    
+
+    deviceData.speed = data.speed;
+    deviceData.rotationsRate.rotationXRate = data.rotationsRate.rotationXRate;
+    deviceData.rotationsRate.rotationYRate = data.rotationsRate.rotationYRate;
+    deviceData.rotationsRate.rotationZRate = data.rotationsRate.rotationZRate;
+    
+    console.log("Logging the updates .....")
+    kinnectData.speed = speedAndRotations.speed;
+    kinnectData.rotationsRate.rotationXRate = speedAndRotations.rotationsInformation.rotationsRate.rotationXRate;
+    kinnectData.rotationsRate.rotationYRate = speedAndRotations.rotationsInformation.rotationsRate.rotationYRate;
+    kinnectData.rotationsRate.rotationZRate = speedAndRotations.rotationsInformation.rotationsRate.rotationZRate;
+                
+    fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/Kinnectlog.txt', '\n'+ JSON.stringify(kinnectData) + '\n', encoding='utf8');
+    fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/Devicelog.txt', '\n' + JSON.stringify(deviceData) + '\n', encoding='utf8');
+
+    console.log("Done logging.")
+}
 ;
 //var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
 
