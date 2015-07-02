@@ -6,11 +6,17 @@
  *
  * */
 
-fs = require('fs');
 var locator     =   require('./../locator');
 var frontend    =   require('../../frontend');
 var factory     =   require('./../factory');
 var util        =   require('./../util');
+
+var fs = require('fs');
+var math = require('mathjs');
+
+var previousKinnectDeviceLocation = {X: 0, Y: 0, Z:0};
+var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
+var timeInterval = (1/5);
 
 //-------------------------    Registration   ---------------------------------------------------------------------------//
 
@@ -353,16 +359,115 @@ setInterval(function() {
 
 exports.updateSpeedAndOrientation = function(socket, date, fn){
     
-    //Get the current device location from kinnect
-    // var location {}; 
+    try{
+        //Get the current device location from kinnect
+        if(locator.devices[socket.id] != undefined){
+            console.log('\tDevice with given socket ID is found');
+
+            console.log('Previous device location is ' + JSON.stringify(previousKinnectDeviceLocation));
+            console.log('Current device location is ' + JSON.stringify(locator.devices[socket.id].location));
+
+            //Get speed and rotations rate of device from kinnect
+            var speedAndRotations = getSpeedAndRotationsRate(previousKinnectDeviceLocation, 
+                locator.devices[socket.id].location);
+            if(speedAndRotations != null){
+                //TODO
+                //Write data recieved from client to sa file
+                //Write the speedAndRotations of the client from kinnect to a file
+                //fs.appendFileSync('Kinnectlog.txt', 'Hello', encoding='utf8');
+                //fs.appendFileSync('Devicelog.txt', 'Hello', encoding='utf8');
+            } else{
+                console.log('*Failed to update Speed And Orientation due to: '+err);
+
+            }
 
 
-    // // var speed = "Device " + data.speed + " | " + " Kinect "
-    // // fs.appendFile('log.txt', 'Hello', encoding='utf8', function (err) {
+        }
+        else{
+            console.log('\tDevice with given socket ID  is not found');
+            
+        
+            var initialLocation = {X:0, Y:0, Z:0};
+            var finalLocation = {X:2, Y:2, Z:2};
 
-    // // });
+            var speedAndRotations = getSpeedAndRotationsRate(initialLocation, 
+                finalLocation);
+        }
+    } catch(err){
+            console.log('*Failed to update Speed And Orientation due to: '+err);
+    }
+    
 }
+
+function getSpeedAndRotationsRate(locationOne, locationTwo){
+
+    console.log('\nTrying to update the speed and Orientation of the device');
+
+    //console.log('previous location' + JSON.stringify(previousKinnectDeviceLocation));
+    //console.log('previous Rotations' + JSON.stringify(previousKinnectDeviceRotations));
+
+    try{
+        var speedAndRotationsInformation = {speed:{}, 
+                rotationsInformation:
+                {
+                    rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, 
+                    rotationsAngles:{rotationX:0, rotationY:0, rotationZ:0}
+                }
+            };
+
+        //Get Speed
+        var distanceInX = locationTwo.X - locationOne.X;
+        var distanceInY = locationTwo.Y - locationOne.Y;
+        var distanceInZ = locationTwo.Z - locationOne.Z;
+        
+        //console.log('distance in X ' + distanceInX + ' distance in Y ' + distanceInY + ' distance in Z  ' + distanceInZ);
+
+        var distance = Math.sqrt(Math.pow(distanceInX, 2) + Math.pow(distanceInY, 2) + Math.pow(distanceInZ, 2));
+
+        speedAndRotationsInformation.speed = (distance/timeInterval);
+
+        //Get rotations in degrees
+        var rotationInx = 90 - (math.atan(distanceInZ/distanceInY) * (180/Math.PI))
+        var rotationInY = 90 - (math.atan(distanceInZ/distanceInX) * (180/Math.PI))
+        var rotationInZ = 90 - (math.atan(distanceInX/distanceInY) * (180/Math.PI))
+        
+        //console.log('rotationInx ' + rotationInx + ' rotationInY ' + rotationInY + ' rotationInZ ' + rotationInZ);
+        
+        //Get rotations in radians
+        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationX = rotationInx * (Math.PI/180);
+        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationY = rotationInY * (Math.PI/180);
+        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationZ = rotationInZ * (Math.PI/180);
+
+        //Get rate of rotations in radians per second
+        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationXRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationX)/ timeInterval;
+        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationYRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationY)/ timeInterval;
+        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationZRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationZ)/ timeInterval;
+
+        //Update the previous location to be the new location
+        previousKinnectDeviceLocation.X = locationTwo.X;
+        previousKinnectDeviceLocation.Y = locationTwo.Y;
+        previousKinnectDeviceLocation.Z = locationTwo.Z;
+
+        //update the old rotation to be the next rotation
+        previousKinnectDeviceRotations.rotationX = speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationX;
+        previousKinnectDeviceRotations.rotationY = speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationY;
+        previousKinnectDeviceRotations.rotationZ = speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationZ;
+
+        //console.log('Updated speed and RotationRates' + JSON.stringify(speedAndRotationsInformation));
+        //console.log('Updated previous location' + JSON.stringify(previousKinnectDeviceLocation));
+        //console.log('Updated previous Rotations' + JSON.stringify(previousKinnectDeviceRotations));
+
+
+        return speedAndRotationsInformation;
+    }catch(err){
+            console.log('Failed to get the speed and orientation of device due to: '+err);
+            return null;
+    }
+}
+
 ;
+//var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
+
 
 
 
