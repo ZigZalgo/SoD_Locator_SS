@@ -257,6 +257,190 @@ exports.cleanUp = function (socketID){
     console.log('Beacons Visible Beacons \n' + JSON.stringify(locator.visibleBeacons));
 }
 
+
+
+function refreshBeaconsLocation(){
+    //console.log("refreshBeaconsLocation is called");
+    
+    for(var beacon in locator.sensors.iBeacons){
+        if(locator.sensors.iBeacons[beacon].deviceSocketID != undefined){
+            updateTrBeaconLocation(beacon, locator.sensors.iBeacons[beacon].deviceSocketID, locator.sensors.iBeacons[beacon].isDevice);
+        }
+    }
+
+    for (var iBeaconRcvr in locator.sensors.iBeaconRcvrs){
+        if(locator.sensors.iBeaconRcvrs[iBeaconRcvr].deviceSocketID){
+            updateRcvrBeaconLocation(iBeaconRcvr, locator.sensors.iBeacons[beacon].deviceSocketID);
+        }
+    }
+}
+
+
+function updateTrBeaconLocation(beaconTrID, deviceSocketID, isDevice){
+    console.log("updateTrBeaconLocation is called");
+    if(locator.devices[deviceSocketID] != undefined && isDevice){
+        locator.sensors.iBeacons[beaconTrID].location.X = locator.devices[deviceSocketID].location.X;
+        locator.sensors.iBeacons[beaconTrID].location.Y = locator.devices[deviceSocketID].location.Y;
+        locator.sensors.iBeacons[beaconTrID].location.Z = locator.devices[deviceSocketID].location.Z;
+    } else{
+        console.log('No device associated with this beacon tr');
+    }
+}
+
+
+function updateRcvrBeaconLocation(beaconRcvrID, deviceSocketID){
+    console.log("updateRcvrBeaconLocation is called");
+    if(locator.devices[deviceSocketID] != undefined){
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.X = locator.devices[deviceSocketID].location.X;
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Y = locator.devices[deviceSocketID].location.Y;
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Z = locator.devices[deviceSocketID].location.Z;
+    } else{
+        console.log('No device associated with this beacon rcvr');
+    }
+}
+
+
+setInterval(function() {  
+    //refreshBeaconsLocation();
+
+}, 500);
+
+
+
+exports.updateSpeedAndOrientation = function(socket, data, fn){
+    try{
+        //update the current device speed and rotation
+        if(locator.devices[socket.id] != undefined ){
+
+            console.log('\tDevice with given socket ID is found');
+            updateSpeedAndRotationsRate(
+                locator.devices[socket.id].location, data);
+        }
+        else if(data.deviceId != undefined){
+
+            var socketID = getDeviceSocketID(data.deviceId);
+            if(socketID != null){
+                updateSpeedAndRotationsRate( 
+                    locator.devices[socketID].location, data);
+            }
+        }
+        else{
+            console.log('\tDevice with given socket ID  is not found');
+            var initialLocation = {X:0, Y:0, Z:0};
+            var finalLocation = {X:2, Y:2, Z:2};
+            updateSpeedAndRotationsRate(
+                finalLocation, data);
+    
+         }
+    } catch(err){
+            console.log('*Failed to update Speed And Orientation due to: '+err);
+    }   
+}
+
+function updateSpeedAndRotationsRate(locationTwo, data){
+
+    // console.log('\nTrying to update the speed and Orientation of the device');
+    // console.log('previous location' + JSON.stringify(previousKinnectDeviceLocation));
+    // console.log('previous Rotations' + JSON.stringify(previousKinnectDeviceRotations));
+    try{
+        var speedAndRotationsInformation = {speed:{}, 
+                rotationsInformation:
+                {
+                    rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, 
+                    rotationsAngles:{rotationX:0, rotationY:0, rotationZ:0}
+                }
+            };
+
+        //Get Speed
+        var distanceInX = locationTwo.X - previousKinnectDeviceLocation.X;
+        var distanceInY = locationTwo.Y - previousKinnectDeviceLocation.Y;
+        var distanceInZ = locationTwo.Z - previousKinnectDeviceLocation.Z;
+        // console.log('distance in X ' + distanceInX + ' distance in Y ' + distanceInY + ' distance in Z  ' + distanceInZ);
+        var distance = Math.sqrt(Math.pow(distanceInX, 2) + Math.pow(distanceInY, 2) + Math.pow(distanceInZ, 2));
+        speedAndRotationsInformation.speed = (distance/timeInterval);
+
+        //Get rotations angles in degrees
+        var rotationInx = 90 - (math.atan(distanceInZ/distanceInY) * (180/Math.PI));
+        var rotationInY = 90 - (math.atan(distanceInZ/distanceInX) * (180/Math.PI));
+        var rotationInZ = 90 - (math.atan(distanceInX/distanceInY) * (180/Math.PI));
+        // console.log('rotationInx ' + rotationInx + ' rotationInY ' + rotationInY + ' rotationInZ ' + rotationInZ);
+        
+        //update rotationsa angles in radians
+        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationX = rotationInx * (Math.PI/180);
+        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationY = rotationInY * (Math.PI/180);
+        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationZ = rotationInZ * (Math.PI/180);
+
+        //Get rate of rotations in radians per second
+        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationXRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationX)/ timeInterval;
+        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationYRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationY)/ timeInterval;
+        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationZRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationZ)/ timeInterval;
+
+        //Update the previous location to be the new location
+        previousKinnectDeviceLocation.X = locationTwo.X;
+        previousKinnectDeviceLocation.Y = locationTwo.Y;
+        previousKinnectDeviceLocation.Z = locationTwo.Z;
+
+        //update the old rotation angles to be the next rotation
+        previousKinnectDeviceRotations.rotationX = rotationInx;
+        previousKinnectDeviceRotations.rotationY = rotationInY;
+        previousKinnectDeviceRotations.rotationZ = rotationInZ;
+
+        // console.log('Updated speed and RotationRates' + JSON.stringify(speedAndRotationsInformation));
+        // console.log('Updated previous location' + JSON.stringify(previousKinnectDeviceLocation));
+        // console.log('Updated previous Rotations' + JSON.stringify(previousKinnectDeviceRotations) + '\n\n');
+
+        //Log the updates
+        LogUpdatesToAFile(data, speedAndRotationsInformation);
+
+    }catch(err){
+            console.log('Failed to get the speed and orientation of device due to: '+err);
+    }
+}
+
+function LogUpdatesToAFile(data, speedAndRotations)
+{
+    // console.log("Logging the updates .....")
+    var date = new Date();
+    var kinnectData = {speed:{}, rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, timeStamp:date};
+    var deviceData = {speed:{}, rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, timeStamp:date}
+    
+    //Get device data 
+    deviceData.speed = data.speed;
+    deviceData.rotationsRate.rotationXRate = data.rotationsRate.rotationXRate;
+    deviceData.rotationsRate.rotationYRate = data.rotationsRate.rotationYRate;
+    deviceData.rotationsRate.rotationZRate = data.rotationsRate.rotationZRate;
+
+    
+    //Get Kinnect Data
+    kinnectData.speed = speedAndRotations.speed;
+    kinnectData.rotationsRate.rotationXRate = speedAndRotations.rotationsInformation.rotationsRate.rotationXRate;
+    kinnectData.rotationsRate.rotationYRate = speedAndRotations.rotationsInformation.rotationsRate.rotationYRate;
+    kinnectData.rotationsRate.rotationZRate = speedAndRotations.rotationsInformation.rotationsRate.rotationZRate;
+
+    // console.log('Device Data ' + JSON.stringify(deviceData) );
+    // console.log('kinnectData ' + JSON.stringify(kinnectData));
+    
+    fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/Kinnectlog.txt', '\n'+ JSON.stringify(kinnectData) + '\n', encoding='utf8');
+    fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/Devicelog.txt', '\n' + JSON.stringify(deviceData) + '\n', encoding='utf8');
+
+    // console.log("Done logging.")
+}
+
+
+function getDeviceSocketID (deviceID){
+    for(var socketID in locator.devices){
+        if(locator.devices[socketID].uniqueDeviceID == deviceID){
+            console.log('\tFound the device with the same ID');
+            return socketID;
+        }
+    }
+     return null;
+}
+
+
+
+
+
 //Send list of transmitters to either all reciever beacons 
 // when new tranmitter is registered or deregistered
 // or
@@ -308,195 +492,6 @@ function isNotIncluded(uuids, uuid){
     return true;
 }
 */
-
-function refreshBeaconsLocation(){
-    //console.log("refreshBeaconsLocation is called");
-    
-    for(var beacon in locator.sensors.iBeacons){
-        if(locator.sensors.iBeacons[beacon].deviceSocketID != undefined){
-            updateTrBeaconLocation(beacon, locator.sensors.iBeacons[beacon].deviceSocketID, locator.sensors.iBeacons[beacon].isDevice);
-        }
-    }
-
-    for (var iBeaconRcvr in locator.sensors.iBeaconRcvrs){
-        if(locator.sensors.iBeaconRcvrs[iBeaconRcvr].deviceSocketID){
-            updateRcvrBeaconLocation(iBeaconRcvr, locator.sensors.iBeacons[beacon].deviceSocketID);
-        }
-    }
-}
-
-
-function updateTrBeaconLocation(beaconTrID, deviceSocketID, isDevice){
-    console.log("updateTrBeaconLocation is called");
-    if(locator.devices[deviceSocketID] != undefined && isDevice){
-        locator.sensors.iBeacons[beaconTrID].location.X = locator.devices[deviceSocketID].location.X;
-        locator.sensors.iBeacons[beaconTrID].location.Y = locator.devices[deviceSocketID].location.Y;
-        locator.sensors.iBeacons[beaconTrID].location.Z = locator.devices[deviceSocketID].location.Z;
-    } else{
-        console.log('No device associated with this beacon tr');
-    }
-}
-
-
-function updateRcvrBeaconLocation(beaconRcvrID, deviceSocketID){
-    console.log("updateRcvrBeaconLocation is called");
-    if(locator.devices[deviceSocketID] != undefined){
-        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.X = locator.devices[deviceSocketID].location.X;
-        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Y = locator.devices[deviceSocketID].location.Y;
-        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Z = locator.devices[deviceSocketID].location.Z;
-    } else{
-        console.log('No device associated with this beacon rcvr');
-    }
-}
-
-
-setInterval(function() {  
-    //refreshBeaconsLocation();
-
-}, 500);
-
-
-
-exports.updateSpeedAndOrientation = function(socket, data, fn){
-
-
-    try{
-        //Get the current device location from kinnect
-        if(locator.devices[socket.id] != undefined ){
-            //console.log('\tDevice with given socket ID is found');
-
-            //Get speed and rotations rate of device from kinnect
-            var speedAndRotations = getSpeedAndRotationsRate(previousKinnectDeviceLocation, 
-                locator.devices[socket.id].location, data);
-            if(speedAndRotations != null){
-                
-            } else{
-                console.log('*Failed to update Speed And Orientation due to: '+err);
-            }
-        }
-        else if(data.deviceId != undefined){
-           
-            var socketID = getDeviceSocketID(data.deviceId);
-            if(socketID != null){
-                var speedAndRotations = getSpeedAndRotationsRate(previousKinnectDeviceLocation, 
-                locator.devices[socketID].location, data);
-            }
-        }
-        else{
-            console.log('\tDevice with given socket ID  is not found');
-                    
-        //     var initialLocation = {X:0, Y:0, Z:0};
-        //     var finalLocation = {X:2, Y:2, Z:2};
-
-        //     var speedAndRotations = getSpeedAndRotationsRate(initialLocation, 
-        //         finalLocation, data);
-         }
-    } catch(err){
-            console.log('*Failed to update Speed And Orientation due to: '+err);
-    }   
-}
-
-function getSpeedAndRotationsRate(locationOne, locationTwo, data){
-
-    console.log('\nTrying to update the speed and Orientation of the device');
-
-    // console.log('previous location' + JSON.stringify(previousKinnectDeviceLocation));
-    // console.log('previous Rotations' + JSON.stringify(previousKinnectDeviceRotations));
-
-    try{
-        var speedAndRotationsInformation = {speed:{}, 
-                rotationsInformation:
-                {
-                    rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, 
-                    rotationsAngles:{rotationX:0, rotationY:0, rotationZ:0}
-                }
-            };
-
-        //Get Speed
-        var distanceInX = locationTwo.X - locationOne.X;
-        var distanceInY = locationTwo.Y - locationOne.Y;
-        var distanceInZ = locationTwo.Z - locationOne.Z;
-        
-        //console.log('distance in X ' + distanceInX + ' distance in Y ' + distanceInY + ' distance in Z  ' + distanceInZ);
-
-        var distance = Math.sqrt(Math.pow(distanceInX, 2) + Math.pow(distanceInY, 2) + Math.pow(distanceInZ, 2));
-
-        speedAndRotationsInformation.speed = (distance/timeInterval);
-
-        //Get rotations in degrees
-        var rotationInx = 90 - (math.atan(distanceInZ/distanceInY) * (180/Math.PI))
-        var rotationInY = 90 - (math.atan(distanceInZ/distanceInX) * (180/Math.PI))
-        var rotationInZ = 90 - (math.atan(distanceInX/distanceInY) * (180/Math.PI))
-        
-        //console.log('rotationInx ' + rotationInx + ' rotationInY ' + rotationInY + ' rotationInZ ' + rotationInZ);
-        
-        //Get rotations in radians
-        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationX = rotationInx * (Math.PI/180);
-        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationY = rotationInY * (Math.PI/180);
-        speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationZ = rotationInZ * (Math.PI/180);
-
-        //Get rate of rotations in radians per second
-        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationXRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationX)/ timeInterval;
-        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationYRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationY)/ timeInterval;
-        speedAndRotationsInformation.rotationsInformation.rotationsRate.rotationZRate = ((rotationInx * (Math.PI/180)) - previousKinnectDeviceRotations.rotationZ)/ timeInterval;
-
-        //Update the previous location to be the new location
-        previousKinnectDeviceLocation.X = locationTwo.X;
-        previousKinnectDeviceLocation.Y = locationTwo.Y;
-        previousKinnectDeviceLocation.Z = locationTwo.Z;
-
-        //update the old rotation to be the next rotation
-        previousKinnectDeviceRotations.rotationX = speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationX;
-        previousKinnectDeviceRotations.rotationY = speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationY;
-        previousKinnectDeviceRotations.rotationZ = speedAndRotationsInformation.rotationsInformation.rotationsAngles.rotationZ;
-
-        // console.log('Updated speed and RotationRates' + JSON.stringify(speedAndRotationsInformation));
-        // console.log('Updated previous location' + JSON.stringify(previousKinnectDeviceLocation));
-        // console.log('Updated previous Rotations' + JSON.stringify(previousKinnectDeviceRotations));
-
-        //Log the updatez
-        LogUpdatesToAFile(data, speedAndRotationsInformation);
-        return speedAndRotationsInformation;
-    }catch(err){
-            console.log('Failed to get the speed and orientation of device due to: '+err);
-            return null;
-    }
-}
-
-function LogUpdatesToAFile(data, speedAndRotations)
-{
-    //console.log("Logging the updates .....")
-    var kinnectData = {speed:{}, rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, timeStamp:new Date()};
-    var deviceData = {speed:{}, rotationsRate:{rotationXRate:0, rotationYRate:0, rotationZRate:0}, timeStamp:new Date()}
-    
-    //Get device data 
-    deviceData.speed = data.speed;
-    deviceData.rotationsRate.rotationXRate = data.rotationsRate.rotationXRate;
-    deviceData.rotationsRate.rotationYRate = data.rotationsRate.rotationYRate;
-    deviceData.rotationsRate.rotationZRate = data.rotationsRate.rotationZRate;
-    
-    //Get Kinnect Data
-    kinnectData.speed = speedAndRotations.speed;
-    kinnectData.rotationsRate.rotationXRate = speedAndRotations.rotationsInformation.rotationsRate.rotationXRate;
-    kinnectData.rotationsRate.rotationYRate = speedAndRotations.rotationsInformation.rotationsRate.rotationYRate;
-    kinnectData.rotationsRate.rotationZRate = speedAndRotations.rotationsInformation.rotationsRate.rotationZRate;
-                
-    fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/Kinnectlog.txt', '\n'+ JSON.stringify(kinnectData) + '\n', encoding='utf8');
-    fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/Devicelog.txt', '\n' + JSON.stringify(deviceData) + '\n', encoding='utf8');
-
-    //console.log("Done logging.")
-}
-
-
-function getDeviceSocketID (deviceID){
-    for(var socketID in locator.devices){
-        if(locator.devices[socketID].uniqueDeviceID == deviceID){
-            console.log('\tFound the device with the same ID');
-            return socketID;
-        }
-    }
-     return null;
-}
 ;
 
 
