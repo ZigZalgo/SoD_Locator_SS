@@ -18,6 +18,7 @@ exports.registerKinectHandler = function(socket,sensorInfo,callback){
     if (Object.keys(sensorInfo).length != 0) {
         var kinect = new factory.Kinect(socket);
         //kinect.sensorType = sensorInfo.sensorType;
+
         kinect.FOV = sensorInfo.FOV;
         kinect.rangeInMM = sensorInfo.rangeInMM;
         kinect.frameHeight = sensorInfo.frameHeight;
