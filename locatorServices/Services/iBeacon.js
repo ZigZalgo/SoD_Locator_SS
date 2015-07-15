@@ -17,7 +17,7 @@ var math = require('mathjs');
 var previousKinnectDeviceLocation = {X: 0, Y: 0, Z:0};
 var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
 var timeInterval = (1/30);
-var devicesLocation = {};
+var devices = {};
 //-------------------------    Registration   ---------------------------------------------------------------------------//
 
 // handles when registerBeacon gets called
@@ -281,10 +281,10 @@ setInterval(function() {
 //TODO clean up deviceLocations Object once device is disconnected from server
 function getDeviceLocations (){
      for(var socketID in locator.devices){        
-        if(devicesLocation[socketID].device == undefined){
-            devicesLocation[socketID].device = locator.devices[socketID];
+        if(devices[socketID].device == undefined){
+            devices[socketID].device = locator.devices[socketID];
         } else{
-            devicesLocation[socketID].device.location = locator.devices[socketID].location;
+            devices[socketID].device.location = locator.devices[socketID].location;
         }
     }
 }
@@ -420,23 +420,36 @@ function getDeviceSocketID (deviceID){
      return null;
 }
 
-function getLastKnownLocationOfDevice (socketID){
-    try{
-         return locator.devices[socketID].location;
-    } catch (err){
-         console.log('Failed to get last know location of the device due to: '+err);
-    }
+
+/**
+ *  Update the location of devices every time it is called. 
+ *  
+ **/
+function updateDeviceLocation (socketID, rotationsAngles, distance){
+    //devices[socketID]
+
+    var newLocation = getNextLocation(distance, rotationsAngles);
+    devices[socketID].device.location.X = devices[socketID].device.location.X + newLocation.X;
+    devices[socketID].device.location.Z = devices[socketID].device.location.Z + newLocation.Z;
+
 }
 
-function getNextLocation (socketID, distance, rotations)
+
+/**
+ *  
+ *  Return the new location using the following forumla
+ *      x = (distance * cos(z);
+ *      Z = (distance) * cos(z);
+ *  The height is not taken care off here (Y) becuase it is not of interest to locations of devices
+ *  
+**/
+function getNextLocation (distance, rotationsAngles)
 {
-    if(devicesLocationOffset[socketID] == undefined){
-        devicesLocationOffset[socketID] = getLastKnownLocationOfDevice(socketID);    
-    }
+    var newLocation = {X:0, Y:0, Z:0};
+    newLocation.X = distance * math.cos(math.unit(rotationsAngles.rotationZ, 'deg'));
+    newLocation.Z = distance * math.sin(math.unit(rotationsAngles.rotationZ, 'deg'));
 
-    //Calculate the next location
-
-
+    return newLocation;
 }
 
 
