@@ -17,7 +17,7 @@ var math = require('mathjs');
 var previousKinnectDeviceLocation = {X: 0, Y: 0, Z:0};
 var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
 var timeInterval = (1/30);
-
+var devicesLocation = {};
 //-------------------------    Registration   ---------------------------------------------------------------------------//
 
 // handles when registerBeacon gets called
@@ -230,7 +230,7 @@ exports.getBeaconsTransmittersListLocation = function(socket, fn){
     socket.emit('getBeaconsTransmittersListLocation', {data: locations});    
 }
 
-//JGRzY7PL9NNSWMtZ8Ion
+
 exports.cleanUp = function (socketID){
 
     console.log('\ncleanUp is called for beacons');
@@ -259,53 +259,35 @@ exports.cleanUp = function (socketID){
 
 
 
-function refreshBeaconsLocation(){
-    //console.log("refreshBeaconsLocation is called");
-    
-    for(var beacon in locator.sensors.iBeacons){
-        if(locator.sensors.iBeacons[beacon].deviceSocketID != undefined){
-            updateTrBeaconLocation(beacon, locator.sensors.iBeacons[beacon].deviceSocketID, locator.sensors.iBeacons[beacon].isDevice);
-        }
-    }
-
-    for (var iBeaconRcvr in locator.sensors.iBeaconRcvrs){
-        if(locator.sensors.iBeaconRcvrs[iBeaconRcvr].deviceSocketID){
-            updateRcvrBeaconLocation(iBeaconRcvr, locator.sensors.iBeacons[beacon].deviceSocketID);
-        }
-    }
-}
 
 
-function updateTrBeaconLocation(beaconTrID, deviceSocketID, isDevice){
-    console.log("updateTrBeaconLocation is called");
-    if(locator.devices[deviceSocketID] != undefined && isDevice){
-        locator.sensors.iBeacons[beaconTrID].location.X = locator.devices[deviceSocketID].location.X;
-        locator.sensors.iBeacons[beaconTrID].location.Y = locator.devices[deviceSocketID].location.Y;
-        locator.sensors.iBeacons[beaconTrID].location.Z = locator.devices[deviceSocketID].location.Z;
-    } else{
-        console.log('No device associated with this beacon tr');
-    }
-}
+//-------------------------  End of Beacons   ---------------------------------------------------------------------------//
 
 
-function updateRcvrBeaconLocation(beaconRcvrID, deviceSocketID){
-    console.log("updateRcvrBeaconLocation is called");
-    if(locator.devices[deviceSocketID] != undefined){
-        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.X = locator.devices[deviceSocketID].location.X;
-        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Y = locator.devices[deviceSocketID].location.Y;
-        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Z = locator.devices[deviceSocketID].location.Z;
-    } else{
-        console.log('No device associated with this beacon rcvr');
-    }
-}
 
 
+
+
+
+//-------------------------  Start of Device Sensors   ---------------------------------------------------------------------------//
+
+
+//Get devices visible by kinnect locations two times a second
 setInterval(function() {  
-    //refreshBeaconsLocation();
+    getDeviceLocations();
 
 }, 500);
 
-
+//TODO clean up deviceLocations Object once device is disconnected from server
+function getDeviceLocations (){
+     for(var socketID in locator.devices){        
+        if(devicesLocation[socketID].device == undefined){
+            devicesLocation[socketID].device = locator.devices[socketID];
+        } else{
+            devicesLocation[socketID].device.location = locator.devices[socketID].location;
+        }
+    }
+}
 
 exports.updateSpeedAndOrientation = function(socket, data, fn){
     try{
@@ -324,6 +306,7 @@ exports.updateSpeedAndOrientation = function(socket, data, fn){
                     locator.devices[socketID].location, data);
             }
         }
+        //TODO Delete this
         else{
             console.log('\tDevice with given socket ID  is not found');
             var initialLocation = {X:0, Y:0, Z:0};
@@ -437,13 +420,90 @@ function getDeviceSocketID (deviceID){
      return null;
 }
 
+function getLastKnownLocationOfDevice (socketID){
+    try{
+         return locator.devices[socketID].location;
+    } catch (err){
+         console.log('Failed to get last know location of the device due to: '+err);
+    }
+}
 
 function getNextLocation (socketID, distance, rotations)
 {
+    if(devicesLocationOffset[socketID] == undefined){
+        devicesLocationOffset[socketID] = getLastKnownLocationOfDevice(socketID);    
+    }
+
+    //Calculate the next location
 
 
 }
 
+
+
+
+
+//-------------------------  End of Device Sensors ---------------------------------------------------------------------------//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function refreshBeaconsLocation(){
+    //console.log("refreshBeaconsLocation is called");
+    
+    for(var beacon in locator.sensors.iBeacons){
+        if(locator.sensors.iBeacons[beacon].deviceSocketID != undefined){
+            updateTrBeaconLocation(beacon, locator.sensors.iBeacons[beacon].deviceSocketID, locator.sensors.iBeacons[beacon].isDevice);
+        }
+    }
+
+    for (var iBeaconRcvr in locator.sensors.iBeaconRcvrs){
+        if(locator.sensors.iBeaconRcvrs[iBeaconRcvr].deviceSocketID){
+            updateRcvrBeaconLocation(iBeaconRcvr, locator.sensors.iBeacons[beacon].deviceSocketID);
+        }
+    }
+}
+
+
+function updateTrBeaconLocation(beaconTrID, deviceSocketID, isDevice){
+    console.log("updateTrBeaconLocation is called");
+    if(locator.devices[deviceSocketID] != undefined && isDevice){
+        locator.sensors.iBeacons[beaconTrID].location.X = locator.devices[deviceSocketID].location.X;
+        locator.sensors.iBeacons[beaconTrID].location.Y = locator.devices[deviceSocketID].location.Y;
+        locator.sensors.iBeacons[beaconTrID].location.Z = locator.devices[deviceSocketID].location.Z;
+    } else{
+        console.log('No device associated with this beacon tr');
+    }
+}
+
+
+function updateRcvrBeaconLocation(beaconRcvrID, deviceSocketID){
+    console.log("updateRcvrBeaconLocation is called");
+    if(locator.devices[deviceSocketID] != undefined){
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.X = locator.devices[deviceSocketID].location.X;
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Y = locator.devices[deviceSocketID].location.Y;
+        locator.sensors.iBeaconRcvrs[beaconRcvrID].location.Z = locator.devices[deviceSocketID].location.Z;
+    } else{
+        console.log('No device associated with this beacon rcvr');
+    }
+}
+
+
+setInterval(function() {  
+    //refreshBeaconsLocation();
+
+}, 500);
 
 //Send list of transmitters to either all reciever beacons 
 // when new tranmitter is registered or deregistered
