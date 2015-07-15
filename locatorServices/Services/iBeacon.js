@@ -16,7 +16,7 @@ var math = require('mathjs');
 
 var previousKinnectDeviceLocation = {X: 0, Y: 0, Z:0};
 var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
-var timeInterval = (1/2);
+var timeInterval = (1/30);
 
 //-------------------------    Registration   ---------------------------------------------------------------------------//
 
@@ -438,7 +438,11 @@ function getDeviceSocketID (deviceID){
 }
 
 
+function getNextLocation (socketID, distance, rotations)
+{
 
+
+}
 
 
 //Send list of transmitters to either all reciever beacons 
