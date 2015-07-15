@@ -63,7 +63,7 @@ var pulse = require('./locatorServices/pulse');
 
 
 app.configure(function(){
-    app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data' }));
+    app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data/temp' }));
     //app.use(express.bodyParser({uploadDir:'./data'}));
     app.use(app.router);
     //locator.loadConfig();
@@ -212,21 +212,21 @@ app.get('/setting',function(req,res){
     res.send(currentSetting);
 })
 
-app.post('/sensors/:id/uncalibrate', sensorsREST.uncalibrate)
-app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrientation)
+app.post('/sensors/:id/uncalibrate', sensorsREST.uncalibrate);
+app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrientation);
 
 
 
 app.get('/files/:fileName.:ext', data.show);
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {
-
-    console.log(req.files.dataFile.path + "          " + "data\\" + req.files.dataFile.name);
+    console.log(req.files.dataFile.path + "          " + "data\\temp\\" + req.files.dataFile.name);
     if(req.files.dataFile.name.length!=0) {
-        fs.rename(req.files.dataFile.path, "data\\" + req.files.dataFile.name, function (err) {
+        fs.rename(req.files.dataFile.path, "data\\temp\\" + req.files.dataFile.name, function (err) {
             if (err) throw err;
             locator.registerData({name: req.files.dataFile.name, type: req.files.dataFile.type, dataPath: "files\\" + req.files.dataFile.name});
             res.sendfile(__dirname + '/view/data.html');
+            //res.redirect('/');
         });
     }else{
         console.log('err: no file chosen');

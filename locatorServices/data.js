@@ -37,7 +37,7 @@ exports.fileList = function(req, res){
     var files   = [];
 
     // Walker options
-    var walker  = walk.walk('./data', { followLinks: false });
+    var walker  = walk.walk('./data/temp', { followLinks: false });
 
     walker.on('file', function(root, stat, next) {
         // Add this file to the list of files

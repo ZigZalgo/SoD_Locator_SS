@@ -19,3 +19,4 @@ workspace.xml
 tasks.xml
 .DS_Store
 desktop.ini
+temp/
