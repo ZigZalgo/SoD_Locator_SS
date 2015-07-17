@@ -455,7 +455,7 @@ function getNextLocation (distance, rotationsAngles)
 }
 
 
-
+//TODO - Test The following four functions
 exports.savePersonsListToSecondList = function(){
     try{
         for(var socketID in locator.persons){        
@@ -466,8 +466,45 @@ exports.savePersonsListToSecondList = function(){
     }
 }
 
+exports.savePersonToSecondList = function(socketID){
+    try{
+        if(locator.persons[socketID] != undefined){
+            if(persons[socketID] == undefined){
+                persons[socketID] = locator.persons[socketID];
+            } else{
+                console.log("Device is already saved to persons list");
+            }
+        } else{
+            console.log("Person is not on the list of locator.persons");
+        }
+    } catch (err){
+        console.log('Failed to copy persons to a second list due to: '+err);
+    }
+}
 
 
+exports.clearPersonsSecondList = function(){
+    try{
+        for(var socketID in persons){        
+             delete persons[socketID];
+        }
+    } catch(err){
+         console.log('Failed to delete persons from the second list due to: '+err);
+    }
+}
+
+exports.updatePersonsListFromSecondList = function(){
+    try{
+        for(var socketID in persons){
+            if(locator.persons[socketID] == undefined){
+                //Update the list
+                locator.persons[socketID] = persons[socketID];
+            }
+        }
+    } catch(err){
+
+    }
+}
 //-------------------------  End of Device Sensors ---------------------------------------------------------------------------//
 
 
