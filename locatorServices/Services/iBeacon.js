@@ -18,6 +18,8 @@ var previousKinnectDeviceLocation = {X: 0, Y: 0, Z:0};
 var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
 var timeInterval = (1/30);
 var devices = {};
+var persons = {};
+
 //-------------------------    Registration   ---------------------------------------------------------------------------//
 
 // handles when registerBeacon gets called
@@ -274,7 +276,7 @@ exports.cleanUp = function (socketID){
 
 //Get devices visible by kinnect locations two times a second
 setInterval(function() {  
-    getDeviceLocations();
+    //getDeviceLocations();
 
 }, 500);
 
@@ -453,6 +455,16 @@ function getNextLocation (distance, rotationsAngles)
 }
 
 
+
+exports.savePersonsListToSecondList = function(){
+    try{
+        for(var socketID in locator.persons){        
+             persons[socketID] = locator.persons[socketID];
+        }
+    } catch(err){
+         console.log('Failed to copy persons to a second list due to: '+err);
+    }
+}
 
 
 
