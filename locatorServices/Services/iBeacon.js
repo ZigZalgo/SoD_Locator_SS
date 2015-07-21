@@ -438,10 +438,33 @@ exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
 }
 
 exports.updatePersonLocationWithDeviceSensorInfo = function(socketID){
-    
+    locator.persons[socketID] = persons[socketID];
 }
 
-
+function copyPersonInfo (personToBeCopied){
+    var tmpPerson = {};
+    try{
+        tmpPerson.ID = personToBeCopied.ID;
+        tmpPerson.ID[id] = personToBeCopied.ID[id];
+           
+        tmpPerson.location = personToBeCopied.location;
+        tmpPerson.location.X = personToBeCopied.location.X.toFixed(3);
+        tmpPerson.location.Y = personToBeCopied.location.Y.toFixed(3);
+        tmpPerson.location.Z = personToBeCopied.location.Z.toFixed(3);
+        tmpPerson.orientation = personToBeCopied.orientation;
+        tmpPerson.ownedDeviceID = personToBeCopied.ownedDeviceID;
+        tmpPerson.pairingState = personToBeCopied.pairingState;
+        tmpPerson.currentlyTrackedBy = personToBeCopied.currentlyTrackedBy;
+        tmpPerson.lastUpdated = new Date();
+        tmpPerson.data = personToBeCopied.data;
+        tmpPerson.gesture = personToBeCopied.gesture;
+        tmpPerson.inRangeOf = personToBeCopied.inRangeOf;
+        //tmpPerson.hands = {left:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null},right:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null}}
+    } catch(err){
+        console.log('Was not able to to copy person information');
+    }    
+        return tmpPersonl;
+}
 
 
 
