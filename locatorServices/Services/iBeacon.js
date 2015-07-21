@@ -423,14 +423,11 @@ function getDeviceSocketID (deviceID){
 }
 
 
-/** Tuesday **/
+
 exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
     if(locator.persons[socketID] != undefined){
         //Save it to a different list
-        persons[socketID] = locator.persons[socketID];
-
-        //Update its location - TODO specify a time limit
-        persons[socketID] = locator.persons[socketID];
+        persons[socketID] = copyPersonInfo(locator.persons[socketID]);
 
     } else{
         console.log('Person with the given socket id does not exist');
@@ -438,8 +435,21 @@ exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
 }
 
 exports.updatePersonLocationWithDeviceSensorInfo = function(socketID){
-    locator.persons[socketID] = persons[socketID];
+    try{
+        if(locator.persons[socketID] == undefined){
+            locator.persons[socketID] = copyPersonInfo(persons[socketID]);
+        } else{
+            locator.persons[socketID].location = persons[socketID].location;
+            locator.persons[socketID].location.X = persons[socketID].location.X;
+            locator.persons[socketID].location.Y = persons[socketID].location.Y;
+            locator.persons[socketID].location.Z = persons[socketID].location.Z;
+        }
+    } catch(err){
+
+    }
+    
 }
+
 
 function copyPersonInfo (personToBeCopied){
     var tmpPerson = {};
@@ -468,44 +478,39 @@ function copyPersonInfo (personToBeCopied){
 
 
 
+//Calculate the next location of person/device
+function getNextLocationOfPerson (distance, rotationsAngles){
+    var newLocation = {X:0, Y:0, Z:0};
+    newLocation.X = distance * math.cos(math.unit(rotationsAngles.rotationZ, 'deg'));
+    newLocation.Z = distance * math.sin(math.unit(rotationsAngles.rotationZ, 'deg'));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- *  Update the location of devices every time it is called. 
- *  
- **/
-function updateDeviceLocation (socketID, rotationsAngles, distance){
-    //devices[socketID]
-
-    var newLocation = getNextLocation(distance, rotationsAngles);
-    devices[socketID].device.location.X = devices[socketID].device.location.X + newLocation.X;
-    devices[socketID].device.location.Z = devices[socketID].device.location.Z + newLocation.Z;
-
+    return newLocation;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -525,57 +530,6 @@ function getNextLocation (distance, rotationsAngles)
     return newLocation;
 }
 
-
-//TODO - Test The following four functions
-exports.savePersonsListToSecondList = function(){
-    try{
-        for(var socketID in locator.persons){        
-             persons[socketID] = locator.persons[socketID];
-        }
-    } catch(err){
-         console.log('Failed to copy persons to a second list due to: '+err);
-    }
-}
-
-exports.savePersonToSecondList = function(socketID){
-    try{
-        if(locator.persons[socketID] != undefined){
-            if(persons[socketID] == undefined){
-                persons[socketID] = locator.persons[socketID];
-            } else{
-                console.log("Device is already saved to persons list");
-            }
-        } else{
-            console.log("Person is not on the list of locator.persons");
-        }
-    } catch (err){
-        console.log('Failed to copy persons to a second list due to: '+err);
-    }
-}
-
-
-exports.clearPersonsSecondList = function(){
-    try{
-        for(var socketID in persons){        
-             delete persons[socketID];
-        }
-    } catch(err){
-         console.log('Failed to clear second personsList from the second list due to: '+err);
-    }
-}
-
-exports.updatePersonsListFromSecondList = function(){
-    try{
-        for(var socketID in persons){
-            if(locator.persons[socketID] == undefined){
-                //Update the list
-                locator.persons[socketID] = persons[socketID];
-            }
-        }
-    } catch(err){
-
-    }
-}
 //------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
 
 
