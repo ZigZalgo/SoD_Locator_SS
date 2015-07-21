@@ -423,6 +423,54 @@ function getDeviceSocketID (deviceID){
 }
 
 
+/** Tuesday **/
+exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
+    if(locator.persons[socketID] != undefined){
+        //Save it to a different list
+        persons[socketID] = locator.persons[socketID];
+
+        //Update its location - TODO specify a time limit
+        persons[socketID] = locator.persons[socketID];
+
+    } else{
+        console.log('Person with the given socket id does not exist');
+    }
+}
+
+exports.updatePersonLocationWithDeviceSensorInfo = function(socketID){
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  *  Update the location of devices every time it is called. 
  *  
@@ -489,7 +537,7 @@ exports.clearPersonsSecondList = function(){
              delete persons[socketID];
         }
     } catch(err){
-         console.log('Failed to delete persons from the second list due to: '+err);
+         console.log('Failed to clear second personsList from the second list due to: '+err);
     }
 }
 
@@ -505,7 +553,7 @@ exports.updatePersonsListFromSecondList = function(){
 
     }
 }
-//-------------------------  End of Device Sensors ---------------------------------------------------------------------------//
+//------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
 
 
 
@@ -578,7 +626,7 @@ function sendTransmittersList(socket, allRcvrs){
     var identifiersList = {};
     var majorsList = {};
     var minorsList = {};
-486240
+
     var counter = 0;
 
     if(false){
