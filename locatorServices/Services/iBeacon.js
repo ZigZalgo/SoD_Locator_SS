@@ -274,55 +274,83 @@ exports.cleanUp = function (socketID){
 //-------------------------  Start of Device Sensors   ---------------------------------------------------------------------------//
 
 
-//Get devices visible by kinnect locations two times a second
-setInterval(function() {  
-    //getDeviceLocations();
+//----> Step one - save person location to anoher list
+exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
+    if(locator.persons[socketID] != undefined){
+        //Save it to a different list
+        persons[socketID] = copyPersonInfo(locator.persons[socketID]);
 
-}, 500);
-
-//TODO clean up deviceLocations Object once device is disconnected from server
-function getDeviceLocations (){
-     for(var socketID in locator.devices){        
-        if(devices[socketID].device == undefined){
-            devices[socketID].device = locator.devices[socketID];
-        } else{
-            devices[socketID].device.location = locator.devices[socketID].location;
-        }
+    } else{
+        console.log('Person with the given socket id does not exist');
     }
 }
 
-exports.updateSpeedAndOrientation = function(socket, data, fn){
-    try{
-        //update the current device speed and rotation
-        if(locator.devices[socket.id] != undefined ){
-
-            console.log('\tDevice with given socket ID is found');
-            updateSpeedAndRotationsRate(
-                locator.devices[socket.id].location, data);
-        }
-        else if(data.deviceId != undefined){
-
-            var socketID = getDeviceSocketID(data.deviceId);
-            if(socketID != null){
-                updateSpeedAndRotationsRate( 
-                    locator.devices[socketID].location, data);
-            }
-        }
-        //TODO Delete this
-        else{
-            console.log('\tDevice with given socket ID  is not found');
-            var initialLocation = {X:0, Y:0, Z:0};
-            var finalLocation = {X:2, Y:2, Z:2};
-            updateSpeedAndRotationsRate(
-                finalLocation, data);
-    
-         }
-    } catch(err){
-            console.log('*Failed to update Speed And Orientation due to: '+err);
-    }   
+//----> Step two : update person location using the device sensor location
+exports.updateSpeedAndOrientation = function(socket, sensorData, fn){
+    updatePersonLocation(socket, sensorData);
 }
 
-function updateSpeedAndRotationsRate(locationTwo, data){
+
+//Calculate the next location of person/device
+function updatePersonLocation (socketID, sensorData){
+
+    if(persons[socketID] != undefined){
+        persons.location.X = (sensorData.speed * timeInterval) * math.cos(math.unit(sensorData.orientation.yaw, 'deg'));
+        persons.location.Z = (sensorData.speed * timeInterval) * math.sin(math.unit(sensorData.orientation.yaw, 'deg'));
+        updateOrignalListOfPersonLocation(socketID);
+    } 
+}
+
+function updateOrignalListOfPersonLocation (socketID){
+    try{
+        if(locator.persons[socketID] == undefined){
+            locator.persons[socketID] = copyPersonInfo(persons[socketID]);
+        } else{
+            locator.persons[socketID].location = persons[socketID].location;
+            locator.persons[socketID].location.X = persons[socketID].location.X;
+            locator.persons[socketID].location.Y = persons[socketID].location.Y;
+            locator.persons[socketID].location.Z = persons[socketID].location.Z;
+        }
+    } catch(err){
+
+    }
+}
+
+function copyPersonInfo (personToBeCopied){
+    var tmpPerson = {};
+    try{
+        tmpPerson.ID = personToBeCopied.ID;
+        tmpPerson.ID[id] = personToBeCopied.ID[id];
+           
+        tmpPerson.location = personToBeCopied.location;
+        tmpPerson.location.X = personToBeCopied.location.X.toFixed(3);
+        tmpPerson.location.Y = personToBeCopied.location.Y.toFixed(3);
+        tmpPerson.location.Z = personToBeCopied.location.Z.toFixed(3);
+        tmpPerson.orientation = personToBeCopied.orientation;
+        tmpPerson.ownedDeviceID = personToBeCopied.ownedDeviceID;
+        tmpPerson.pairingState = personToBeCopied.pairingState;
+        tmpPerson.currentlyTrackedBy = personToBeCopied.currentlyTrackedBy;
+        tmpPerson.lastUpdated = new Date();
+        tmpPerson.data = personToBeCopied.data;
+        tmpPerson.gesture = personToBeCopied.gesture;
+        tmpPerson.inRangeOf = personToBeCopied.inRangeOf;
+        //tmpPerson.hands = {left:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null},right:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null}}
+    } catch(err){
+        console.log('Was not able to to copy person information');
+    }    
+        return tmpPersonl;
+}
+
+//------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
+
+
+
+
+
+
+
+
+function updateSpeedAndRotationsRateToGetOffset(locationTwo, data){
 
     // console.log('\nTrying to update the speed and Orientation of the device');
     // console.log('previous location' + JSON.stringify(previousKinnectDeviceLocation));
@@ -336,7 +364,7 @@ function updateSpeedAndRotationsRate(locationTwo, data){
                 }
             };
 
-        //Get Speed
+        //Get Speed based in kinnect info
         var distanceInX = locationTwo.X - previousKinnectDeviceLocation.X;
         var distanceInY = locationTwo.Y - previousKinnectDeviceLocation.Y;
         var distanceInZ = locationTwo.Z - previousKinnectDeviceLocation.Z;
@@ -421,117 +449,6 @@ function getDeviceSocketID (deviceID){
     }
      return null;
 }
-
-
-
-exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
-    if(locator.persons[socketID] != undefined){
-        //Save it to a different list
-        persons[socketID] = copyPersonInfo(locator.persons[socketID]);
-
-    } else{
-        console.log('Person with the given socket id does not exist');
-    }
-}
-
-exports.updatePersonLocationWithDeviceSensorInfo = function(socketID){
-    try{
-        if(locator.persons[socketID] == undefined){
-            locator.persons[socketID] = copyPersonInfo(persons[socketID]);
-        } else{
-            locator.persons[socketID].location = persons[socketID].location;
-            locator.persons[socketID].location.X = persons[socketID].location.X;
-            locator.persons[socketID].location.Y = persons[socketID].location.Y;
-            locator.persons[socketID].location.Z = persons[socketID].location.Z;
-        }
-    } catch(err){
-
-    }
-    
-}
-
-
-function copyPersonInfo (personToBeCopied){
-    var tmpPerson = {};
-    try{
-        tmpPerson.ID = personToBeCopied.ID;
-        tmpPerson.ID[id] = personToBeCopied.ID[id];
-           
-        tmpPerson.location = personToBeCopied.location;
-        tmpPerson.location.X = personToBeCopied.location.X.toFixed(3);
-        tmpPerson.location.Y = personToBeCopied.location.Y.toFixed(3);
-        tmpPerson.location.Z = personToBeCopied.location.Z.toFixed(3);
-        tmpPerson.orientation = personToBeCopied.orientation;
-        tmpPerson.ownedDeviceID = personToBeCopied.ownedDeviceID;
-        tmpPerson.pairingState = personToBeCopied.pairingState;
-        tmpPerson.currentlyTrackedBy = personToBeCopied.currentlyTrackedBy;
-        tmpPerson.lastUpdated = new Date();
-        tmpPerson.data = personToBeCopied.data;
-        tmpPerson.gesture = personToBeCopied.gesture;
-        tmpPerson.inRangeOf = personToBeCopied.inRangeOf;
-        //tmpPerson.hands = {left:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null},right:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null}}
-    } catch(err){
-        console.log('Was not able to to copy person information');
-    }    
-        return tmpPersonl;
-}
-
-
-
-//Calculate the next location of person/device
-function getNextLocationOfPerson (distance, rotationsAngles){
-    var newLocation = {X:0, Y:0, Z:0};
-    newLocation.X = distance * math.cos(math.unit(rotationsAngles.rotationZ, 'deg'));
-    newLocation.Z = distance * math.sin(math.unit(rotationsAngles.rotationZ, 'deg'));
-
-    return newLocation;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- *  
- *  Return the new location using the following forumla
- *      x = (distance * cos(z);
- *      Z = (distance) * cos(z);
- *  The height is not taken care off here (Y) becuase it is not of interest to locations of devices
- *  
-**/
-function getNextLocation (distance, rotationsAngles)
-{
-    var newLocation = {X:0, Y:0, Z:0};
-    newLocation.X = distance * math.cos(math.unit(rotationsAngles.rotationZ, 'deg'));
-    newLocation.Z = distance * math.sin(math.unit(rotationsAngles.rotationZ, 'deg'));
-
-    return newLocation;
-}
-
-//------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
-
 
 
 
