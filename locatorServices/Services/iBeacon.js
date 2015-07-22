@@ -272,7 +272,8 @@ exports.cleanUp = function (socketID){
 
 
 //-------------------------  Start of Device Sensors   ---------------------------------------------------------------------------//
-
+//TODO Test it
+//TODO send distance rather than speed
 
 //----> Step one - save person location to anoher list
 exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
@@ -293,10 +294,9 @@ exports.updateSpeedAndOrientation = function(socket, sensorData, fn){
 
 //Calculate the next location of person/device
 function updatePersonLocation (socketID, sensorData){
-
     if(persons[socketID] != undefined){
-        persons.location.X = (sensorData.speed * timeInterval) * math.cos(math.unit(sensorData.orientation.yaw, 'deg'));
-        persons.location.Z = (sensorData.speed * timeInterval) * math.sin(math.unit(sensorData.orientation.yaw, 'deg'));
+        persons[socketID].location.X = persons[socketID].location.X + sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg'));
+        persons[socketID].location.Z = persons[socketID].location.Z + sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg'));
         updateOrignalListOfPersonLocation(socketID);
     } 
 }
@@ -338,9 +338,15 @@ function copyPersonInfo (personToBeCopied){
     } catch(err){
         console.log('Was not able to to copy person information');
     }    
-        return tmpPersonl;
+        return tmpPerson;
 }
 
+//Test
+
+function test ()
+{
+
+}
 //------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
 
 
