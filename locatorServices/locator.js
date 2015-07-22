@@ -104,6 +104,10 @@ exports.updateSpeedAndOrientation = function (socket, date, fn){
     locator.iBeaconService.updateSpeedAndOrientation(socket, date, fn);
 }
 
+exports.calibrateKinnectLocationWithDeviceSenosorLocation = function (socket, date){
+    locator.iBeaconService.calibrateKinnectLocationWithDeviceSenosorLocation(socket, date);
+}
+
 //------------------------------END OF BEACON---------------------------------------------------------------//
 
 

@@ -325,6 +325,18 @@ exports.handleRequest = function (socket) {
         }
     });
 
+
+
+    socket.on('calibrateKinnectLocationWithDeviceSenosorLocation', function (data) {
+        console.log('calibrateKinnectLocationWithDeviceSenosorLocation: '+JSON.stringify(data));
+        
+        try{
+            locator.calibrateKinnectLocationWithDeviceSenosorLocation(socket, data);
+        }catch(e) {
+            console.log("Error handling calibrateKinnectLocationWithDeviceSenosorLocation:  \n\tdue to: "+e);
+        }
+    });
+
     //END BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
 

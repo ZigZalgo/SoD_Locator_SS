@@ -276,14 +276,18 @@ exports.cleanUp = function (socketID){
 //TODO send distance rather than speed
 
 //----> Step one - save person location to anoher list
-exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID){
-    if(locator.persons[socketID] != undefined){
-        //Save it to a different list
-        persons[socketID] = copyPersonInfo(locator.persons[socketID]);
+exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID, data){
+    
+    for(var person in locator.persons){
+        if(data.personId == person){
+            //Save it to a different list
+            persons[socketID] = JSON.parse(JSON.stringify(locator.persons[person]));
+            persons[socketID].ID = 'tmp ID';
 
-    } else{
-        console.log('Person with the given socket id does not exist');
-    }
+            console.log('First List' + JSON.stringify(locator.persons));
+            console.log('Second List' + JSON.stringify(persons));
+        }
+    }        
 }
 
 //----> Step two : update person location using the device sensor location
@@ -316,37 +320,6 @@ function updateOrignalListOfPersonLocation (socketID){
     }
 }
 
-function copyPersonInfo (personToBeCopied){
-    var tmpPerson = {};
-    try{
-        tmpPerson.ID = personToBeCopied.ID;
-        tmpPerson.ID[id] = personToBeCopied.ID[id];
-           
-        tmpPerson.location = personToBeCopied.location;
-        tmpPerson.location.X = personToBeCopied.location.X.toFixed(3);
-        tmpPerson.location.Y = personToBeCopied.location.Y.toFixed(3);
-        tmpPerson.location.Z = personToBeCopied.location.Z.toFixed(3);
-        tmpPerson.orientation = personToBeCopied.orientation;
-        tmpPerson.ownedDeviceID = personToBeCopied.ownedDeviceID;
-        tmpPerson.pairingState = personToBeCopied.pairingState;
-        tmpPerson.currentlyTrackedBy = personToBeCopied.currentlyTrackedBy;
-        tmpPerson.lastUpdated = new Date();
-        tmpPerson.data = personToBeCopied.data;
-        tmpPerson.gesture = personToBeCopied.gesture;
-        tmpPerson.inRangeOf = personToBeCopied.inRangeOf;
-        //tmpPerson.hands = {left:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null},right:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null}}
-    } catch(err){
-        console.log('Was not able to to copy person information');
-    }    
-        return tmpPerson;
-}
-
-//Test
-
-function test ()
-{
-
-}
 //------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
 
 
