@@ -315,6 +315,8 @@ exports.handleRequest = function (socket) {
         locator.getBeaconsTransmittersListLocation(socket, fn);
     });
   
+
+    ////////////////  Device Sensors Location Updates /////////////
     socket.on('updateSpeedAndOrientation', function (data, fn) {
         console.log('New Speed and Orientation: '+JSON.stringify(data));
         

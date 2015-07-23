@@ -282,7 +282,6 @@ exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID, d
         if(data.personId == person){
             //Save it to a different list
             persons[socketID] = JSON.parse(JSON.stringify(locator.persons[person]));
-            persons[socketID].ID = 'tmp ID';
 
             console.log('First List' + JSON.stringify(locator.persons));
             console.log('Second List' + JSON.stringify(persons));
@@ -299,24 +298,29 @@ exports.updateSpeedAndOrientation = function(socket, sensorData, fn){
 //Calculate the next location of person/device
 function updatePersonLocation (socketID, sensorData){
     if(persons[socketID] != undefined){
-        persons[socketID].location.X = persons[socketID].location.X + sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg'));
-        persons[socketID].location.Z = persons[socketID].location.Z + sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg'));
-        updateOrignalListOfPersonLocation(socketID);
+
+        persons[socketID].location.X = persons[socketID].location.X + (sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg')));
+        persons[socketID].location.Z = persons[socketID].location.Z + (sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg')));
+        updateOrignalListOfPersonLocation(socketID, sensorData.personId);
+
+        // console.log('updated x = ' + )
+        // console.log('updated x = ' + )
     } 
 }
 
-function updateOrignalListOfPersonLocation (socketID){
+function updateOrignalListOfPersonLocation (socketID, personID){
     try{
-        if(locator.persons[socketID] == undefined){
-            locator.persons[socketID] = copyPersonInfo(persons[socketID]);
+        if(locator.persons[personID] == undefined){
+            locator.persons[personID] = copyPersonInfo(persons[socketID]);
         } else{
-            locator.persons[socketID].location = persons[socketID].location;
-            locator.persons[socketID].location.X = persons[socketID].location.X;
-            locator.persons[socketID].location.Y = persons[socketID].location.Y;
-            locator.persons[socketID].location.Z = persons[socketID].location.Z;
+            locator.persons[personID].location = persons[socketID].location;
+            locator.persons[personID].location.X = persons[socketID].location.X;
+            locator.persons[personID].location.Y = persons[socketID].location.Y;
+            locator.persons[personID].location.Z = persons[socketID].location.Z;
         }
+        console.log('First List' + JSON.stringify(locator.persons));
     } catch(err){
-
+         console.log('error updating the original list of persons' + JSON.stringify(locator.persons));
     }
 }
 
