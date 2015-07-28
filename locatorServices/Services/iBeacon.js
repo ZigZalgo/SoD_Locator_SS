@@ -305,8 +305,8 @@ function updatePersonLocation (socketID, sensorData){
         var distanceInX = (sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
         var distanceInZ = (sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
 
-        console.log(' distance in X ' + distanceInX);
-        console.log(' distance in Z ' + distanceInZ);
+        // console.log(' distance in X ' + distanceInX);
+        // console.log(' distance in Z ' + distanceInZ);
         
         persons[socketID].location.X = parseFloat(persons[socketID].location.X) + parseFloat(distanceInX);
         persons[socketID].location.Y = 1;
@@ -315,8 +315,8 @@ function updatePersonLocation (socketID, sensorData){
         persons[socketID].location.X = persons[socketID].location.X.toFixed(4);
         persons[socketID].location.Z = persons[socketID].location.Z.toFixed(4);
 
-        console.log(' updated distance in X ' + persons[socketID].location.X);
-        console.log(' updated distance in Z ' + persons[socketID].location.Z);
+        // console.log(' updated distance in X ' + persons[socketID].location.X);
+        // console.log(' updated distance in Z ' + persons[socketID].location.Z);
 
         updateOrignalListOfPersonLocation(socketID, sensorData.personId);
     } 
@@ -363,24 +363,20 @@ setInterval(function() {
 //Test Case
 function testCase (){
 
-    console.log('Test case is called');
-
-    var personID = 0;
+    var personID = 100000;
     var socketID = 111111111;
     
-    persons[socketID] = JSON.parse(JSON.stringify(locator.persons[personID]));
-    console.log('Copied person info is ' + JSON.stringify(persons[socketID]));
-
     if(locator.persons[personID] != undefined){
-        console.log('Person is found with given person ID');
-    }
+        persons[socketID] = JSON.parse(JSON.stringify(locator.persons[personID]));
 
-    delete locator.persons[personID];
-    
-    setInterval(function() {  
-        console.log('updating person Location');
-        testHelper(socketID, 1, 45);
-    }, 10000);
+
+        delete locator.persons[personID];
+        
+        setInterval(function() {  
+            //console.log('updating person Location');
+            testHelper(socketID, 1, 45);
+        }, 10000);
+    }
 }
 
 function testHelper (socketID, distance, angle){
@@ -394,7 +390,7 @@ function testHelper (socketID, distance, angle){
     sensorData.distance = distance;
     sensorData.orientation.yaw = angle;
 
-    console.log('Update Person Location with the following info ' + JSON.stringify(sensorData));
+    //console.log('Update Person Location with the following info ' + JSON.stringify(sensorData));
 
     updatePersonLocation(socketID, sensorData);
 }
