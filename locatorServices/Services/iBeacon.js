@@ -312,6 +312,9 @@ function updatePersonLocation (socketID, sensorData){
         persons[socketID].location.Y = 1;
         persons[socketID].location.Z = parseFloat(persons[socketID].location.Z) + parseFloat(distanceInZ);
 
+        persons[socketID].location.X = persons[socketID].location.X.toFixed(4);
+        persons[socketID].location.Z = persons[socketID].location.Z.toFixed(4);
+
         console.log(' updated distance in X ' + persons[socketID].location.X);
         console.log(' updated distance in Z ' + persons[socketID].location.Z);
 
@@ -329,7 +332,7 @@ function updateOrignalListOfPersonLocation (socketID, personID){
             locator.persons[personID].location.Y = persons[socketID].location.Y;
             locator.persons[personID].location.Z = persons[socketID].location.Z;
         }
-        console.log('First List' + JSON.stringify(locator.persons));
+        //console.log('First List' + JSON.stringify(locator.persons));
     } catch(err){
          console.log('error updating the original list of persons' + JSON.stringify(locator.persons) + 'due to' + err);
     }
