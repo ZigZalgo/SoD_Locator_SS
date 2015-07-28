@@ -336,6 +336,7 @@ function deletePersonFromPersonList (personID){
         console.log('unable to delete from persons List due to' + err);
     }
 }
+
 //Test Case
 function testCase (personID, socketID, distance1, angle1){
 
@@ -362,7 +363,7 @@ function testCase (personID, socketID, distance1, angle1){
 
 }
 
-
+//function testHe
 //------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
 
 
