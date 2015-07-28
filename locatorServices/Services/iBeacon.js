@@ -280,6 +280,7 @@ exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID, d
     
     for(var person in locator.persons){
         if(data.personId == person){
+            
             //Save it to a different list
             persons[socketID] = JSON.parse(JSON.stringify(locator.persons[person]));
 
@@ -311,7 +312,7 @@ function updatePersonLocation (socketID, sensorData){
 function updateOrignalListOfPersonLocation (socketID, personID){
     try{
         if(locator.persons[personID] == undefined){
-            locator.persons[personID] = copyPersonInfo(persons[socketID]);
+            locator.persons[personID] = JSON.parse(JSON.stringify(persons[socketID]));
         } else{
             locator.persons[personID].location = persons[socketID].location;
             locator.persons[personID].location.X = persons[socketID].location.X;
@@ -320,9 +321,47 @@ function updateOrignalListOfPersonLocation (socketID, personID){
         }
         console.log('First List' + JSON.stringify(locator.persons));
     } catch(err){
-         console.log('error updating the original list of persons' + JSON.stringify(locator.persons));
+         console.log('error updating the original list of persons' + JSON.stringify(locator.persons) + 'due to' + err);
     }
 }
+
+//Clear
+function deletePersonFromPersonList (personID){
+
+    try{
+        if(persons[personID] != undefined){
+            delete persons[personID];
+        }
+    } catch (err){
+        console.log('unable to delete from persons List due to' + err);
+    }
+}
+//Test Case
+function testCase (personID, socketID, distance1, angle1){
+
+     persons[socketID] = JSON.parse(JSON.stringify(locator.persons[personID]));
+     
+
+    setInterval(function() {  
+        //refreshBeaconsLocation();
+
+    }, 2000);
+    var sensorData = {
+                        distance:{}, 
+                        orientation:
+                            {yaw:{}
+                        }
+                    };
+
+    sensorData.distance = distance1;
+    sensorData.orientation.yaw = angle1;
+
+
+
+    updatePersonLocation(socketID, sensorData);
+
+}
+
 
 //------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
 
