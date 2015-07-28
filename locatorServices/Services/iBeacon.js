@@ -20,6 +20,8 @@ var timeInterval = (1/30);
 var devices = {};
 var persons = {};
 
+
+var counter = 0; 
 //-------------------------    Registration   ---------------------------------------------------------------------------//
 
 // handles when registerBeacon gets called
@@ -300,21 +302,29 @@ exports.updateSpeedAndOrientation = function(socket, sensorData, fn){
 function updatePersonLocation (socketID, sensorData){
     if(persons[socketID] != undefined){
 
-        persons[socketID].location.X = persons[socketID].location.X + (sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg')));
-        persons[socketID].location.Z = persons[socketID].location.Z + (sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg')));
-        updateOrignalListOfPersonLocation(socketID, sensorData.personId);
+        var distanceInX = (sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
+        var distanceInZ = (sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
 
-        // console.log('updated x = ' + )
-        // console.log('updated x = ' + )
+        console.log(' distance in X ' + distanceInX);
+        console.log(' distance in Z ' + distanceInZ);
+        
+        persons[socketID].location.X = parseFloat(persons[socketID].location.X) + parseFloat(distanceInX);
+        persons[socketID].location.Y = 1;
+        persons[socketID].location.Z = parseFloat(persons[socketID].location.Z) + parseFloat(distanceInZ);
+
+        console.log(' updated distance in X ' + persons[socketID].location.X);
+        console.log(' updated distance in Z ' + persons[socketID].location.Z);
+
+        updateOrignalListOfPersonLocation(socketID, sensorData.personId);
     } 
 }
+
 
 function updateOrignalListOfPersonLocation (socketID, personID){
     try{
         if(locator.persons[personID] == undefined){
             locator.persons[personID] = JSON.parse(JSON.stringify(persons[socketID]));
         } else{
-            locator.persons[personID].location = persons[socketID].location;
             locator.persons[personID].location.X = persons[socketID].location.X;
             locator.persons[personID].location.Y = persons[socketID].location.Y;
             locator.persons[personID].location.Z = persons[socketID].location.Z;
@@ -337,16 +347,40 @@ function deletePersonFromPersonList (personID){
     }
 }
 
+
+setInterval(function() { 
+        if(counter == 5){
+            testCase();
+        }
+
+        counter = counter + 1;
+    }, 5000);
+
+
 //Test Case
-function testCase (personID, socketID, distance1, angle1){
+function testCase (){
 
-     persons[socketID] = JSON.parse(JSON.stringify(locator.persons[personID]));
-     
+    console.log('Test case is called');
 
+    var personID = 0;
+    var socketID = 111111111;
+    
+    persons[socketID] = JSON.parse(JSON.stringify(locator.persons[personID]));
+    console.log('Copied person info is ' + JSON.stringify(persons[socketID]));
+
+    if(locator.persons[personID] != undefined){
+        console.log('Person is found with given person ID');
+    }
+
+    delete locator.persons[personID];
+    
     setInterval(function() {  
-        //refreshBeaconsLocation();
+        console.log('updating person Location');
+        testHelper(socketID, 1, 45);
+    }, 10000);
+}
 
-    }, 2000);
+function testHelper (socketID, distance, angle){
     var sensorData = {
                         distance:{}, 
                         orientation:
@@ -354,16 +388,13 @@ function testCase (personID, socketID, distance1, angle1){
                         }
                     };
 
-    sensorData.distance = distance1;
-    sensorData.orientation.yaw = angle1;
+    sensorData.distance = distance;
+    sensorData.orientation.yaw = angle;
 
-
+    console.log('Update Person Location with the following info ' + JSON.stringify(sensorData));
 
     updatePersonLocation(socketID, sensorData);
-
 }
-
-//function testHe
 //------------------------- End of Device Sensors  ---------------------------------------------------------------------------//
 
 
