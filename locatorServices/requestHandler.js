@@ -345,7 +345,7 @@ exports.handleRequest = function (socket) {
         try{
             locator.deletePersonFromLists(socket, data, fn);
         }catch(e) {
-            console.log("Error handling deletePersonFromList:  \n\tdue to: "+e);
+            console.log("Error handling deletePersonFromList: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
         }
     });
 

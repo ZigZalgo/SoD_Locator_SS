@@ -280,14 +280,14 @@ exports.cleanUp = function (socketID){
 //----> Step one - save person location to anoher list
 exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID, data){
     
+    console.log('\nlocator persons List\n' + JSON.stringify(locator.persons));
+    
     for(var person in locator.persons){
         if(data.personId == person){
             
             //Save it to a different list
             persons[socketID] = JSON.parse(JSON.stringify(locator.persons[person]));
-
-            console.log('First List' + JSON.stringify(locator.persons));
-            console.log('Second List' + JSON.stringify(persons));
+            console.log('\nSecondary persons List\n' + JSON.stringify(persons));
         }
     }        
 }
@@ -299,7 +299,7 @@ exports.updateSpeedAndOrientation = function(socket, sensorData, fn){
 
 //----> Step three : clear person from both lists
 exports.clearPersonFromLists = function (socket, personData, fn){
-    deletePersonFromPersonList(personData.personID);
+    deletePersonFromPersonList(socket, personData.personId);
 }
 
 //Calculate the next location of person/device
@@ -343,13 +343,22 @@ function updateOrignalListOfPersonLocation (socketID, personID){
 }
 
 //Clear
-function deletePersonFromPersonList (personID){
-
+function deletePersonFromPersonList (socketID,  personID){
+    console.log('Trying to delete person form both lists');
+    
     try{
-        if(persons[personID] != undefined){
-            delete persons[personID];
-            if(locator.persons[personID])
+
+        if(persons[socketID] != undefined){
+            delete persons[socketID];
+            console.log('deleted from the secondary list');
+            if(locator.persons[personID] != undefined){
+                delete locator.persons[personID];
+                console.log('deleted from the main list');
+            }
+        } else{
+            console.log('No person is found with the given ID' + personID);
         }
+        frontend.io.sockets.emit("refreshWebClientSensors", {});
     } catch (err){
         console.log('unable to delete from persons List due to' + err);
     }
