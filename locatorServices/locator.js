@@ -108,6 +108,10 @@ exports.calibrateKinnectLocationWithDeviceSenosorLocation = function (socket, da
     locator.iBeaconService.calibrateKinnectLocationWithDeviceSenosorLocation(socket, date);
 }
 
+exports.deletePersonFromLists = function (socket, date, fn){
+    locator.iBeaconService.clearPersonFromLists(socket, date, fn);
+}
+
 //------------------------------END OF BEACON---------------------------------------------------------------//
 
 

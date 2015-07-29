@@ -297,6 +297,10 @@ exports.updateSpeedAndOrientation = function(socket, sensorData, fn){
     updatePersonLocation(socket, sensorData);
 }
 
+//----> Step three : clear person from both lists
+exports.clearPersonFromLists = function (socket, personData, fn){
+    deletePersonFromPersonList(personData.personID);
+}
 
 //Calculate the next location of person/device
 function updatePersonLocation (socketID, sensorData){
@@ -305,8 +309,8 @@ function updatePersonLocation (socketID, sensorData){
         var distanceInX = (sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
         var distanceInZ = (sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
 
-        // console.log(' distance in X ' + distanceInX);
-        // console.log(' distance in Z ' + distanceInZ);
+        console.log(' distance in X ' + distanceInX);
+        console.log(' distance in Z ' + distanceInZ);
         
         persons[socketID].location.X = parseFloat(persons[socketID].location.X) + parseFloat(distanceInX);
         persons[socketID].location.Y = 1;
@@ -315,8 +319,8 @@ function updatePersonLocation (socketID, sensorData){
         persons[socketID].location.X = persons[socketID].location.X.toFixed(4);
         persons[socketID].location.Z = persons[socketID].location.Z.toFixed(4);
 
-        // console.log(' updated distance in X ' + persons[socketID].location.X);
-        // console.log(' updated distance in Z ' + persons[socketID].location.Z);
+        console.log(' updated distance in X ' + persons[socketID].location.X);
+        console.log(' updated distance in Z ' + persons[socketID].location.Z);
 
         updateOrignalListOfPersonLocation(socketID, sensorData.personId);
     } 
@@ -344,6 +348,7 @@ function deletePersonFromPersonList (personID){
     try{
         if(persons[personID] != undefined){
             delete persons[personID];
+            if(locator.persons[personID])
         }
     } catch (err){
         console.log('unable to delete from persons List due to' + err);
@@ -353,7 +358,7 @@ function deletePersonFromPersonList (personID){
 
 setInterval(function() { 
         if(counter == 5){
-            testCase();
+            //testCase();
         }
 
         counter = counter + 1;
@@ -373,7 +378,7 @@ function testCase (){
         delete locator.persons[personID];
         
         setInterval(function() {  
-            //console.log('updating person Location');
+            console.log('updating person Location');
             testHelper(socketID, 1, 45);
         }, 10000);
     }
@@ -390,7 +395,7 @@ function testHelper (socketID, distance, angle){
     sensorData.distance = distance;
     sensorData.orientation.yaw = angle;
 
-    //console.log('Update Person Location with the following info ' + JSON.stringify(sensorData));
+    console.log('Update Person Location with the following info ' + JSON.stringify(sensorData));
 
     updatePersonLocation(socketID, sensorData);
 }

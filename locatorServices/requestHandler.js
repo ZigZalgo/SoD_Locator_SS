@@ -339,6 +339,16 @@ exports.handleRequest = function (socket) {
         }
     });
 
+    socket.on('deletePersonFromList', function (data, fn) {
+        console.log('deletePersonFromList: '+JSON.stringify(data));
+        
+        try{
+            locator.deletePersonFromLists(socket, data, fn);
+        }catch(e) {
+            console.log("Error handling deletePersonFromList:  \n\tdue to: "+e);
+        }
+    });
+
     //END BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
 
