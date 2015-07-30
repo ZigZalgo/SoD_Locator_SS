@@ -373,7 +373,7 @@ exports.handleRequest = function (socket) {
         //console.log("Paring request: "+JSON.stringify(request));
         if(request.pairType==undefined){
             console.log("PairType is null, please specify a pairType when request.");
-            fn({status:"fail",msg:"need pairType in request(base,leftHand,or rightHand)."});
+            fn({status:-1,msg:"need pairType in request(base,leftHand,or rightHand)."});
         }else{
             if (request.uniqueDeviceID != undefined) {
                 console.log('receive paring request: pair device '+ request.uniqueDeviceID +' with person ' + request.uniquePersonID );

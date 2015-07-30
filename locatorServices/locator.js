@@ -756,12 +756,13 @@ exports.pairAndNotify = function(deviceSocketID, uniquePersonID,pairType){
 exports.pairDevice = function(deviceSocketID, uniquePersonID,pairType,socket,callback){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         " - Person ID: " + uniquePersonID;
-    console.log(pairType);
+    //console.log(pairType);
 
     if(locator.devices[deviceSocketID] != undefined && locator.persons[uniquePersonID] != undefined){
         if(locator.devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
-            // pair
-            locator.pairAndNotify(deviceSocketID, uniquePersonID);
+            // pair device with person
+            locator.pairAndNotify(deviceSocketID, uniquePersonID,pairType);
+            // pair person with device
             persons[uniquePersonID].ownedDeviceID = deviceSocketID;
             persons[uniquePersonID].pairingState = pairType;
             statusMsg += "\n Pairing successful.";
