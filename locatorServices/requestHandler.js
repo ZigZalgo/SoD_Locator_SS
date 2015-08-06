@@ -1044,7 +1044,7 @@ exports.handleRequest = function (socket) {
         //get persons from body, call update function for each person
         if (persons != null) {
             //console.log(Object.keys(persons).length);
-            //console.log(persons);
+            console.log(persons);
 			try{
                 locator.removeIDsNoLongerTracked(socket, persons);
 				locator.removeUntrackedPeople(0);
@@ -1052,11 +1052,34 @@ exports.handleRequest = function (socket) {
 			catch(err){
 				console.log("error trying to remove untracked people: " + err);
 			}
-            persons.forEach(function (person) {
+            /*persons.forEach(function (person) {
                 if(person.gesture!=null){
                     console.log(person.gesture);
                 }
                 locator.updatePersons(person, socket);
+            });*/
+
+            var associations = {}; // association of skeletonID w/ uniquePersonID
+            async.each(persons,function(person,eachItr){
+                if(person.gesture!=null){
+                    console.log(person.gesture);
+                }
+                console.log("111");
+                locator.updatePersons(person, socket,function(association){
+                    console.log(association);
+                    if(association!=null){
+                        associations[association.skeletonID] = association.uniquePersonID;
+                        eachItr()
+                    }else{
+                        associations[association.skeletonID] = -1;
+                        eachItr();
+                    }
+                });
+            },function(err){
+                console.log(associations);
+                if(fn!=undefined) {
+                    fn(associations);
+                }
             });
             /*if(fn!=undefined) {
                 fn();

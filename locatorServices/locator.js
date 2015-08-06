@@ -383,7 +383,8 @@ function gestureHandler(key,gesture,socket){
 }
 
 
-exports.updatePersons = function(receivedPerson, socket){
+exports.updatePersons = function(receivedPerson, socket,callback){
+   //var association = {skeletonID:receivedPerson.ID,uniquePersonID:person.uniquePersonID}; // the assication between the receivedPersonID and the uniquePersonID
     if(Object.keys(persons).length == 0){
         //nobody being tracked, add new person
         //person was not found
@@ -400,6 +401,9 @@ exports.updatePersons = function(receivedPerson, socket){
                 person.hands.right.location = receivedPerson.rightHandLocation;
             }
             persons[person.uniquePersonID] = person;
+            callback({skeletonID:receivedPerson.ID,uniquePersonID:person.uniquePersonID});
+        }else{
+            callback(null);
         }
     }
     else{
@@ -486,6 +490,7 @@ exports.updatePersons = function(receivedPerson, socket){
                             }
                             //console.log("\t->received Peron got updated " + "with personList.");
                             receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
+                            callback({skeletonID:receivedPerson.ID,uniquePersonID:personInList.uniquePersonID})
                             //console.log("udpate Person hand "+JSON.stringify(personInList.hands));
                             eachSeriesCallback();
                         }catch (e){
@@ -534,6 +539,9 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[nearestPersonID].gesture = receivedPerson.gesture;
                         persons[nearestPersonID].lastUpdated = new Date();
                         console.log('->-> Person ' + persons[nearestPersonID].uniquePersonID + ' ID length: (' + Object.keys(persons[nearestPersonID].ID).length + ') with details: ' + JSON.stringify(persons[nearestPersonID].ID));
+                        callback(association);
+                    }else{
+                        callback(null)
                     }
                 } // out side of the threshold
                 else {
@@ -551,12 +559,13 @@ exports.updatePersons = function(receivedPerson, socket){
                             }
                             persons[person.uniquePersonID] = person;
                             console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
+                            callback({skeletonID:receivedPerson.ID,uniquePersonID:person.uniquePersonID});
                         }else{
+                            callback(null);
                             //console.log("\t->A new person detected, though not sure if it is a person yet. TrackingState: "+receivedPerson.trackingState);
                         }
 
                     }
-
                 }
             }
         })
