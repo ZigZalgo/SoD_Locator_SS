@@ -1047,7 +1047,7 @@ exports.handleRequest = function (socket) {
             console.log(persons);
 			try{
                 locator.removeIDsNoLongerTracked(socket, persons);
-				locator.removeUntrackedPeople(0);
+				locator.removeUntrackedPeople(0,socket);
 			}
 			catch(err){
 				console.log("error trying to remove untracked people: " + err);
@@ -1064,7 +1064,7 @@ exports.handleRequest = function (socket) {
                 if(person.gesture!=null){
                     console.log(person.gesture);
                 }
-                console.log("111");
+                //console.log("111");
                 locator.updatePersons(person, socket,function(association){
                     console.log(association);
                     if(association!=null){

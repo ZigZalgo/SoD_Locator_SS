@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello React</title>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script> -->
+    <script src="/reactjs"></script>
+    <script src="/JSXTransformer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
+
+</head>
+<body>
+<div id="content"></div>
+<div id="mount-point"></div>
+<div id="myDiv"></div>
+<script type="text/jsx">
+    // Your code here
+    /** @jsx React.DOM */
+    /*var CommentBox = React.createClass({
+        render: function(){
+            return (
+                    <div className="commentBox">
+                        Hello,world! I am a CommentBox
+                    </div>
+            )
+        }
+    })*/
+    // React Box
+    var CommentBox = React.createClass({
+        loadCommentsFromServer: function(){
+            $.ajax({
+                url:this.props.url,
+                dataType:'json',
+                cache:false,
+                success:function(data){
+                    this.setState({data:data});
+                }.bind(this),
+                error: function(xhr,status,err){
+                    console.error(this.props.url,status,err.toString());
+                }.bind(this)
+            })
+        },
+        handleCommentSubmit: function(comment){
+            //TODO: Submit to the server and refresh the list
+            /*var comments = this.state.data;
+            var newComments = comments.concat([comment]);
+            this.setState({data: newComments});*/
+            $.ajax({
+                url:this.props.url,
+                dataType:"json",
+                type:"POST",
+                data:comment,
+                success: function(data){
+                    this.setState({data: data});
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+                }.bind(this)
+            })
+        },
+        getInitialState: function(){
+          return {data:[]}
+        },
+        componentDidMount:function(){
+            this.loadCommentsFromServer();
+            setInterval(this.loadCommentsFromServer,this.props.pollInterval)
+        },
+        render:function(){
+            return (
+                    <div className = "commentBox">
+                        <h1>Comments</h1>
+                        <CommentList data={this.state.data}/>
+                        <CommentForm onCommentSubmit={this.handleCommentSubmit}/>
+                    </div>
+            )
+        }
+    })
+
+    // React List
+    var CommentList = React.createClass({
+        render:function(){
+            //console.log(this.props.data);
+            var commentNodes = this.props.data.map(
+                    function(comment){
+                        return (
+                                <Comment key={comment.id} author = {comment.author}>
+                                    {comment.text}
+                                </Comment>
+                        )
+                    }
+            )
+            return (
+                    <div className="commentList">
+                        {commentNodes}
+                    </div>
+            )
+        }
+    })
+
+    // React Form
+    var CommentForm = React.createClass({
+        handleSubmit: function(e){
+            e.preventDefault();
+            var author = React.findDOMNode(this.refs.author).value.trim();
+            var text = React.findDOMNode(this.refs.text).value.trim();
+            if(!text || !author){
+                return;
+            }
+            console.log(author);
+            //TODO: send request to the server
+            this.props.onCommentSubmit({author:author,text:text});
+            React.findDOMNode(this.refs.author).value= "";
+            React.findDOMNode(this.refs.text).value= "";
+        },
+        render: function(){
+            return (
+                    <form className = "commentForm" onSubmit={this.handleSubmit}>
+                        <input type="text" placeholder="Your name" ref="author"/>
+                        <input type="text" placeholder="Say something..." ref="text"/>
+                        <input type="submit" value="Post"/>
+                    </form>
+            )
+        }
+    })
+
+    //React Comment
+    var Comment = React.createClass({
+        render: function() {
+            return (
+                    <div className="comment">
+                        <h2 className = "commentAuthor">
+                            {this.props.author}
+                        </h2>
+                        {this.props.children}
+                    </div>
+            )
+        }
+    })
+
+    var data = [
+        {key:1,author:"Pete Hunt", text:"this is one comment"},
+        {key:2,author:"Jordan Walke", text:"This is *another* comment"}
+    ];
+    React.render(
+            <CommentBox url="/files/comments.json" pollInterval = {2000}/>,
+            document.getElementById("content")
+    )
+    /*React.render(
+           React.DOM.h1(null,"hello,world!"),
+            document.getElementById("myDiv")
+    );*/
+    </script>
+</body>
+</html>

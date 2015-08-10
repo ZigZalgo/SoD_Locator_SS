@@ -706,7 +706,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 
 
 // Remove all the people doesn have ID in it
-exports.removeUntrackedPeople = function(timeOutInMS){
+exports.removeUntrackedPeople = function(timeOutInMS,socket){
     var now = new Date();
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
@@ -717,9 +717,14 @@ exports.removeUntrackedPeople = function(timeOutInMS){
                 //console.log('-> Timed out (' + timeOutInMS + ' ms), deleting person ' + persons[key].uniquePersonID);
                 //could refactor using promises or callback
                 if(persons[key].ownedDeviceID != null){
+                    if(persons[key].pairingState!="unpaired"){
+                        console.log("paired");
+                        frontend.clients[persons[key].ownedDeviceID].emit("pairedPersonDisappear",{PersonID:persons[key].uniquePersonID,location:persons[key].location})
+                    }
                     devices[persons[key].ownedDeviceID].ownerID = null;
                     devices[persons[key].ownedDeviceID].pairingState = "unpaired";
                     delete persons[key];
+
                 }
                 else{
                     delete persons[key];
@@ -969,7 +974,7 @@ exports.cleanUpDevice = function(socketID){
 
 
 // handles clean up sensor request
-exports.cleanUpSensor = function(socketID){
+exports.cleanUpSensor = function(socketID,socket){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
     //delete sensors[socketID];
     util.recursiveDeleteKey(locator.sensors,socketID).then(function(callback){
@@ -986,7 +991,7 @@ exports.cleanUpSensor = function(socketID){
                                 if (locator.persons[key].ID[IDkey] == socketID) {
                                     delete locator.persons[key].ID[IDkey];
                                     if (counter == 0) {
-                                        locator.removeUntrackedPeople(0);
+                                        locator.removeUntrackedPeople(0,socket);
                                     }
                                 }
                             }
