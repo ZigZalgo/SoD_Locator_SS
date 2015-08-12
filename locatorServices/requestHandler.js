@@ -122,7 +122,7 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('registerSensor', function (sensorInfo, fn) {
-        console.log('registering with sensorInfo: \n'+JSON.stringify(sensorInfo));
+        //console.log('registering with sensorInfo: \n'+JSON.stringify(sensorInfo));
         try{
             if(sensorInfo.sensorType!=null){
                 locator.registerSensor(socket,sensorInfo.sensorType,sensorInfo,fn);
@@ -345,10 +345,25 @@ exports.handleRequest = function (socket) {
         try{
             locator.deletePersonFromLists(socket, data, fn);
         }catch(e) {
-            console.log("Error handling deletePersonFromList: " + JSON.stringify(beaconsList)+"\n\tdue to: "+e);
+            console.log("Error handling deletePersonFromList: " + JSON.stringify(data)+"\n\tdue to: "+e);
         }
     });
 
+    socket.on('beaconReadings', function (data, fn) {
+        console.log('beaconReadings: '+JSON.stringify(data));
+        
+        try{
+            locator.updatePersonLocationWithBeaconReadings(socket, data, fn);
+        }catch(e) {
+            console.log("Error handling beaconReadings: " + JSON.stringify(data)+"\n\tdue to: "+e);
+        }
+    });
+    // socket.on('beaconReadings', function (data, fn) {
+    //     console.log('beaconReadings: ' + JSON/stringify(data));
+    //     try{
+
+    //     }
+    // }
     //END BEACON EVENTS////////////////////////////////////////////////////////////////////////////////////////
 
 

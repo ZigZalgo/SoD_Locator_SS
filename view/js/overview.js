@@ -992,6 +992,7 @@ function updateContentWithObjects(){
     }
 
     io.emit('getPeopleFromServer', {}, function(data){
+
         var htmlString = ""
         var c = document.getElementById("cnv");
         var ctx = c.getContext("2d");
@@ -1003,6 +1004,14 @@ function updateContentWithObjects(){
                 var zInMeters = data[key].location.Z*majorGridLineWidth;
                 ctx.beginPath();
                 ctx.fillStyle = "#c82124"; //red
+
+                 //Modifications
+                //different color if its obsereved by sth other than kinnect
+                if(data[key].observerType != undefined){
+                     console.log('observerType is ' + data[key].observerType);
+                     ctx.fillStyle = "#2cd72A"; //green
+                }
+                
                 ctx.arc(shiftXToGridOrigin(xInMeters),shiftYToGridOrigin(zInMeters),minorGridLineWidth,0,2*Math.PI);
                 ctx.strokeStyle = "rgba(200, 0, 0, 0.8)";
                 ctx.fill();
@@ -1021,6 +1030,15 @@ function updateContentWithObjects(){
                     // Adding device name for paired person
                 }
                 ctx.fillStyle = "#c82124"; //red
+
+                //Modifications
+                //different color if its obsereved by sth other than kinnect
+                if(data[key].observerType != undefined){
+                     console.log('observerType is ' + data[key].observerType);
+                     ctx.fillStyle = "#2cd72A"; //green
+                }
+
+
                 ctx.font = minorGridLineWidth*2+'px Arial';
                 ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+minorGridLineWidth/2,shiftYToGridOrigin(zInMeters)-minorGridLineWidth/2);
 

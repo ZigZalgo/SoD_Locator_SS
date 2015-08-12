@@ -65,7 +65,7 @@ exports.registerSensor = function(socket,type,sensorInfo,callback){
             locator.leapMotionService.registerLeapMotionHandler(socket,sensorInfo,callback);
             break;
         case "ibeacon":
-            console.log("Register iBeacon Inc");
+            //console.log("Register iBeacon Inc");
             locator.iBeaconService.registerIBeaconHandler(socket,sensorInfo,callback);
             break;
         default:
@@ -110,6 +110,10 @@ exports.calibrateKinnectLocationWithDeviceSenosorLocation = function (socket, da
 
 exports.deletePersonFromLists = function (socket, date, fn){
     locator.iBeaconService.clearPersonFromLists(socket, date, fn);
+}
+
+exports.updatePersonLocationWithBeaconReadings = function (socket, data, fn){
+    locator.iBeaconService.updatePersonLocationWithBeaconReadings(socket, data, fn);
 }
 
 //------------------------------END OF BEACON---------------------------------------------------------------//
@@ -711,6 +715,8 @@ exports.removeUntrackedPeople = function(timeOutInMS){
             if(Object.keys(persons[key].ID).length == 0 && (now.getTime()-persons[key].lastUpdated) > timeOutInMS ){
                 //console.log('-> Timed out (' + timeOutInMS + ' ms), deleting person ' + persons[key].uniquePersonID);
                 //could refactor using promises or callback
+                locator.iBeaconService.personLeavesKinnectView(persons[key]);
+
                 if(persons[key].ownedDeviceID != null){
                     devices[persons[key].ownedDeviceID].ownerID = null;
                     devices[persons[key].ownedDeviceID].pairingState = "unpaired";
