@@ -216,7 +216,6 @@ app.post('/sensors/:id/uncalibrate', sensorsREST.uncalibrate);
 app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrientation);
 
 
-
 app.get('/files/:fileName.:ext', data.show);
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {

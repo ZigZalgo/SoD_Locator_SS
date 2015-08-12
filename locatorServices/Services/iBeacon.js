@@ -1053,6 +1053,14 @@ function updateRcvrBeaconLocation(beaconRcvrID, deviceSocketID){
     }
 }
 
+var maxPresumePeopleNumber = -1; // Globle to current module
+exports.updateMaxPresumePeopleNumber = function(maxPeopleNumber, callback){
+    //locator.updateDeviceOrientation(req.params.orientation,req.params.id);
+    //console.log('-> '+maxPeopleNumber);
+    maxPresumePeopleNumber = maxPeopleNumber;
+    console.log("change maxPresumePeopleNumber to: "+maxPresumePeopleNumber);
+    callback(1)
+}
 
 setInterval(function() {  
     //refreshBeaconsLocation();

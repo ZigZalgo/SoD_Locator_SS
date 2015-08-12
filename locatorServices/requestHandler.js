@@ -1137,6 +1137,12 @@ exports.handleRequest = function (socket) {
         //return calibration for client? nah....... maybe....
     });
 
+    socket.on("updateMaxPeopleNumber",function(request,fn){
+        locator.iBeaconService.updateMaxPresumePeopleNumber(request.maxPeopleNumber,function(status){
+            fn(status)
+        });
+    });
+
 
 
 
