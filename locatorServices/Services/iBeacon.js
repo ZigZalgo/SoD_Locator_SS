@@ -21,9 +21,6 @@ var devices = {};
 
 //Sensors
 var persons = {};
-//Valid it it left the kinnect view
-var validToUpdatePersonLocation = {};
-
 var personsToSocketIds = {};
 
 
@@ -369,6 +366,8 @@ function calibrate (socketID, personID){
     Gets Called whenever the person leaves the kinnect view 
     As a result: Ask the device for location updates either by sensors or beacons
                  Save last known location by kinnect for the person
+
+    TODO - update locater.js to call this function when a person is paired with a devi
 */
 
 function personLeavesKinnectView (personData){
@@ -518,6 +517,8 @@ function updatePersonLocationFromBeaconReadings (socketID, beaconReadingsData)
     
     var matrix = [[equationFour.x, equationFour.z, equationFour.offset],[equationFive.x, equationFive.z, equationFive.offset]];
     var values = getMatrixValues(matrix);
+    values[0] = -1 * parseFloat(values[0]);
+    values[1] = -1 * parseFloat(values[1]);
 
     console.log("New Perosn Location is " + JSON.stringify(values));
     console.log("First Perosn List " + JSON.stringify(persons));
@@ -526,7 +527,7 @@ function updatePersonLocationFromBeaconReadings (socketID, beaconReadingsData)
         
         persons[beaconReadingsData.personId].location.X = values[0];
         persons[beaconReadingsData.personId].location.Z = values[1];
-        
+
         //Update original list (locator.persons)
         if(locator.persons[beaconReadingsData.personId] == undefined){
             locator.persons[beaconReadingsData.personId] = JSON.parse(JSON.stringify(persons[beaconReadingsData.personId]));
@@ -551,7 +552,8 @@ function updatePersonLocationFromBeaconReadings (socketID, beaconReadingsData)
     Data has to contain at least three beacons distances to the device (radiouses)
     This function will read the beacons location (static locations)
 **/
-function getBeaconsLocationWithTheirCorresspondingRadious (data){
+function getBeaconsLocationWithTheirCorresspondingRadious (data)
+{
    
    // var beacons = {
    //      beaconOne:{radious:41, location:{x:3, y:0, z:-50}},
@@ -559,6 +561,7 @@ function getBeaconsLocationWithTheirCorresspondingRadious (data){
    //      beaconThree:{radious:25, location:{x:-13, y:0, z:-34}},
    //  };
 
+   
     var beacons = {};
     beacons["beaconOne"] = {};
     beacons["beaconTwo"] = {};
@@ -699,7 +702,7 @@ function getBeaconsLocationWithTheirCorresspondingRadious (data){
     beacons["beaconOne"] = beaconOne;
     beacons["beaconTwo"] = beaconTwo;
     beacons["beaconThree"] = beaconThree;
-
+    
     console.log('Beacons Locations and their corresponding radiouses \n' + JSON.stringify(beacons));
     return beacons;
 }
