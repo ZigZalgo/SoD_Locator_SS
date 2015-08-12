@@ -481,24 +481,24 @@ function updatePersonLocationFromBeaconReadings (socketID, beaconReadingsData)
     //Get beacons Location with the corresponding radious
     var beacons = getBeaconsLocationWithTheirCorresspondingRadious(beaconReadingsData);
 
-    equationOne.x = parseInt(beacons.beaconOne.location.x)*(-2);
-    equationOne.z = parseInt(beacons.beaconOne.location.z)*(-2);
-    equationOne.offset =  Math.pow(parseInt(beacons.beaconOne.radious), 2)-(Math.pow(parseInt(beacons.beaconOne.location.x),2) +
-                                                                            Math.pow(parseInt(beacons.beaconOne.location.z),2));
+    equationOne.x = parseFloat(beacons.beaconOne.location.x)*(-2);
+    equationOne.z = parseFloat(beacons.beaconOne.location.z)*(-2);
+    equationOne.offset =  Math.pow(parseFloat(beacons.beaconOne.radious), 2)-(Math.pow(parseFloat(beacons.beaconOne.location.x),2) +
+                                                                            Math.pow(parseFloat(beacons.beaconOne.location.z),2));
     console.log("Equation One is " + equationOne.x + "X " + equationOne.z + "Z " + " = " + equationOne.offset)
    
 
-    equationTwo.x = parseInt(beacons.beaconTwo.location.x)*(-2);
-    equationTwo.z = parseInt(beacons.beaconTwo.location.z)*(-2);
-    equationTwo.offset =  Math.pow(parseInt(beacons.beaconTwo.radious), 2)-(Math.pow(parseInt(beacons.beaconTwo.location.x),2) +
-                                                                            Math.pow(parseInt(beacons.beaconTwo.location.z),2));
+    equationTwo.x = parseFloat(beacons.beaconTwo.location.x)*(-2);
+    equationTwo.z = parseFloat(beacons.beaconTwo.location.z)*(-2);
+    equationTwo.offset =  Math.pow(parseFloat(beacons.beaconTwo.radious), 2)-(Math.pow(parseFloat(beacons.beaconTwo.location.x),2) +
+                                                                            Math.pow(parseFloat(beacons.beaconTwo.location.z),2));
     console.log("Equation Two is " + equationTwo.x + "X " + equationTwo.z + "Z " + " = " + equationTwo.offset)
     
 
-    equationThree.x = parseInt(beacons.beaconThree.location.x)*(-2);
-    equationThree.z = parseInt(beacons.beaconThree.location.z)*(-2);
-    equationThree.offset =  Math.pow(parseInt(beacons.beaconThree.radious), 2)-(Math.pow(parseInt(beacons.beaconThree.location.x),2) +
-                                                                            Math.pow(parseInt(beacons.beaconThree.location.z),2));
+    equationThree.x = parseFloat(beacons.beaconThree.location.x)*(-2);
+    equationThree.z = parseFloat(beacons.beaconThree.location.z)*(-2);
+    equationThree.offset =  Math.pow(parseFloat(beacons.beaconThree.radious), 2)-(Math.pow(parseFloat(beacons.beaconThree.location.x),2) +
+                                                                            Math.pow(parseFloat(beacons.beaconThree.location.z),2));
     console.log("Equation Three is " + equationThree.x + "X " + equationThree.z + "Z " + " = " + equationThree.offset)
 
 
@@ -545,6 +545,106 @@ function updatePersonLocationFromBeaconReadings (socketID, beaconReadingsData)
         console.log('Orientations that come from the device and from Kinnect');
 
     }
+}
+
+
+function triangulatePersonLocationFromBeaconReadings (socketID, beaconReadingsData){
+
+    //Get beacons Location with the corresponding radius
+    //var beacons = getBeaconsLocationWithTheirCorresspondingRadious(beaconReadingsData);
+    var beacons = {
+        beaconOne:{radious:41, location:{x:3, y:0, z:-50}},
+        beaconTwo:{radious:13, location:{x:-11, y:0, z:2}},
+        beaconThree:{radious:25, location:{x:-13, y:0, z:-34}},
+    }; 
+    console.log("Beacons are " + JSON.stringify(beacons));
+
+    //Centers of the three circles - fix this
+    var P1 = { x: parseFloat(beacons.beaconOne.location.x),
+        y: parseFloat(beacons.beaconOne.location.y),
+        z: parseFloat(beacons.beaconOne.location.z)};
+    var P2 = { x: parseFloat(beacons.beaconTwo.location.x),
+        y: parseFloat(beacons.beaconTwo.location.y),
+        z: parseFloat(beacons.beaconTwo.location.z)};
+    var P3 = { x: parseFloat(beacons.beaconThree.location.x),
+        y: parseFloat(beacons.beaconThree.location.y),
+        z: parseFloat(beacons.beaconThree.location.z)};
+
+    var r_1 = parseFloat(beacons.beaconOne.radious);
+    var r_2 = parseFloat(beacons.beaconTwo.radious);
+    var r_3 = parseFloat(beacons.beaconThree.radious);
+    
+    var P2_P1 = sumVector(P2, negateVector(P1));
+    var d = magnitudeOfVector(P2_P1);
+    var e_x = divideVectorbyScalar(P2_P1, d);
+
+    var P3_P1 = sumVector(P3, negateVector(P1));
+    var i = dotProductOfTwoVectors(e_x, P3_P1);
+
+    var ie_x = multiplyVectorbyScalar(e_x, i);
+    var P3_P1_ie_x = sumVector(P3_P1, negateVector(ie_x));
+    var e_y = divideVectorbyScalar(P3_P1_ie_x, magnitudeOfVector(P3_P1_ie_x));
+
+    var j = dotProductOfTwoVectors(e_y, P3_P1);
+
+    var x = (Math.pow(r_1, 2) - Math.pow(r_2, 2) + Math.pow(d, 2)) / (2 * d);
+    var y = (Math.pow(r_1, 2) - Math.pow(r_3, 2) + Math.pow(i, 2) + Math.pow(j, 2)) / (2 *j) - (i/j)* x;
+
+    var intersectionPoint = sumVector(P1, sumVector(multiplyVectorbyScalar(e_x, x), multiplyVectorbyScalar(e_y, y)));
+
+    console.log("intersection Point is " + JSON.stringify(intersectionPoint));
+}
+
+/* Helper Functions for triangulatePersonLocationFromBeaconReadings */
+function sumVector (firstVector, secondVector)
+{
+    var sum = {};
+    sum.x = parseFloat(firstVector.x) + parseFloat(secondVector.x);
+    sum.y = parseFloat(firstVector.y) + parseFloat(secondVector.y);
+    sum.z = parseFloat(firstVector.z) + parseFloat(secondVector.z);
+
+    return sum;
+}
+
+function negateVector (vector){
+    
+    var negation = {};
+    negation.x = (-1) * parseFloat(vector.x);
+    negation.y = (-1) * parseFloat(vector.y);
+    negation.z = (-1) * parseFloat(vector.z);
+
+    return negation;
+}
+
+function divideVectorbyScalar (vector, scalar){
+    
+    var division = {};
+    division.x = parseFloat(vector.x) / parseFloat(scalar);
+    division.y = parseFloat(vector.y) / parseFloat(scalar);
+    division.z = parseFloat(vector.z) / parseFloat(scalar);
+
+    return division;
+}
+
+function multiplyVectorbyScalar (vector, scalar){
+
+    var product = {};
+    product.x = parseFloat(vector.x) * parseFloat(scalar);
+    product.y = parseFloat(vector.y) * parseFloat(scalar);
+    product.z = parseFloat(vector.z) * parseFloat(scalar);
+
+    return product;
+}
+
+function dotProductOfTwoVectors (firstVector, secondVector){
+    return ((parseFloat(firstVector.x) * parseFloat(secondVector.x)) + 
+            (parseFloat(firstVector.x) * parseFloat(secondVector.x)) + 
+            (parseFloat(firstVector.x) * parseFloat(secondVector.x)));
+}
+
+function magnitudeOfVector (vector){
+    return Math.sqrt(Math.pow(parseFloat(vector.x), 2) + Math.pow(parseFloat(vector.y),2) 
+            + Math.pow(parseFloat(vector.z),2));
 }
 
 
@@ -853,6 +953,7 @@ setInterval(function() {
             //testCase();
             //testCase2(); //Change person color once they leave the kinnect FOV
             //testCase3(); //print orientation calculated from  two locations.
+            triangulatePersonLocationFromBeaconReadings(234, 4234);
         }
 
         counter = counter + 1;
