@@ -539,7 +539,7 @@ exports.updatePersons = function(receivedPerson, socket,callback){
                         persons[nearestPersonID].gesture = receivedPerson.gesture;
                         persons[nearestPersonID].lastUpdated = new Date();
                         console.log('->-> Person ' + persons[nearestPersonID].uniquePersonID + ' ID length: (' + Object.keys(persons[nearestPersonID].ID).length + ') with details: ' + JSON.stringify(persons[nearestPersonID].ID));
-                        callback(association);
+                        callback({skeletonID:receivedPerson.ID,uniquePersonID:persons[nearestPersonID].uniquePersonID});
                     }else{
                         callback(null)
                     }
