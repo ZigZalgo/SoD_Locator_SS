@@ -215,6 +215,12 @@ app.get('/dataJS', function (req, res) {
 app.get('/UIJS',function(req,res){
     res.sendfile(__dirname + '/view/js/UI.js');
 })
+app.get("/unity3DEngine",function(req,res){
+    res.sendfile(__dirname+"/view/unity_visualizer.unity3d");
+})
+app.get("/unity3DVisualizer",function(req,res){
+    res.sendfile(__dirname+"/view/unity_visualizer.html");
+})
 
 app.get('/setting',function(req,res){
     var tempLocatorRoom = locator.room;
