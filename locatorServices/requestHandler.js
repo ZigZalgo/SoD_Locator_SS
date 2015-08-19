@@ -318,7 +318,7 @@ exports.handleRequest = function (socket) {
 
     ////////////////  Device Sensors Location Updates /////////////
     socket.on('updateSpeedAndOrientation', function (data, fn) {
-        console.log('New Speed and Orientation: '+JSON.stringify(data));
+        //console.log('New Speed and Orientation: '+JSON.stringify(data));
         
         try{
             locator.updateSpeedAndOrientation(socket, data, fn);
@@ -330,7 +330,7 @@ exports.handleRequest = function (socket) {
 
 
     socket.on('calibrateKinnectLocationWithDeviceSenosorLocation', function (data) {
-        console.log('calibrateKinnectLocationWithDeviceSenosorLocation: '+JSON.stringify(data));
+        //console.log('calibrateKinnectLocationWithDeviceSenosorLocation: '+JSON.stringify(data));
         
         try{
             locator.calibrateKinnectLocationWithDeviceSenosorLocation(socket, data);
@@ -340,7 +340,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('deletePersonFromList', function (data, fn) {
-        console.log('deletePersonFromList: '+JSON.stringify(data));
+        //console.log('deletePersonFromList: '+JSON.stringify(data));
         
         try{
             locator.deletePersonFromLists(socket, data, fn);
@@ -350,7 +350,7 @@ exports.handleRequest = function (socket) {
     });
 
     socket.on('beaconReadings', function (data, fn) {
-        console.log('beaconReadings: '+JSON.stringify(data));
+        //console.log('beaconReadings: '+JSON.stringify(data));
         
         try{
             locator.updatePersonLocationWithBeaconReadings(socket, data, fn);
