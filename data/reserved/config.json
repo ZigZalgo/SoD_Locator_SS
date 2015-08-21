@@ -1,5 +1,5 @@
 {
-    "stateID": 5,
+    "stateID": 9,
     "devices": {},
     "sensors": {
         "kinects": {
@@ -41,16 +41,16 @@
                 "nearRange": "5",
                 "farRange": "10",
                 "location": {
-                    "X": "2.222",
+                    "X": "2.136",
                     "Y": "0.600",
-                    "Z": "3.427"
+                    "Z": "3.374"
                 },
                 "deviceSocketID": null,
-                "ID": 54,
+                "ID": 98,
                 "beaconType": "Tr",
-                "socketID": "2XD8ceL-laIbzlZelmjO",
+                "socketID": "hO1h3iS13zBFSw-j8w1w",
                 "sensorType": "iBeacon",
-                "lastUpdated": "2015-08-19T01:34:12.066Z"
+                "lastUpdated": "2015-08-21T01:51:32.590Z"
             },
             "saved-26514": {
                 "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
@@ -64,16 +64,16 @@
                 "nearRange": "5",
                 "farRange": "10",
                 "location": {
-                    "X": "-1.699",
+                    "X": "-1.696",
                     "Y": "0.600",
-                    "Z": "2.638"
+                    "Z": "2.662"
                 },
                 "deviceSocketID": null,
-                "ID": 52,
+                "ID": 96,
                 "beaconType": "Tr",
-                "socketID": "RYK1GW65c9rlnYJ3lmjM",
+                "socketID": "oV6rrybBKxSsZoHk8w1u",
                 "sensorType": "iBeacon",
-                "lastUpdated": "2015-08-19T01:33:32.393Z"
+                "lastUpdated": "2015-08-21T01:50:58.092Z"
             },
             "saved-44858": {
                 "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
@@ -87,16 +87,16 @@
                 "nearRange": "5",
                 "farRange": "10",
                 "location": {
-                    "X": "-0.255",
+                    "X": "-0.091",
                     "Y": "0.600",
-                    "Z": "4.529"
+                    "Z": "4.524"
                 },
                 "deviceSocketID": null,
-                "ID": 55,
+                "ID": 99,
                 "beaconType": "Tr",
-                "socketID": "j5PYDy3oVs4h-swclmjP",
+                "socketID": "IMogeC9po3tzy9ev8w1x",
                 "sensorType": "iBeacon",
-                "lastUpdated": "2015-08-19T01:34:31.922Z"
+                "lastUpdated": "2015-08-21T01:51:53.064Z"
             },
             "saved-59646": {
                 "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
@@ -110,16 +110,16 @@
                 "nearRange": "5",
                 "farRange": "10",
                 "location": {
-                    "X": "1.398",
+                    "X": "1.605",
                     "Y": "0.600",
-                    "Z": "3.653"
+                    "Z": "3.198"
                 },
                 "deviceSocketID": null,
-                "ID": 53,
+                "ID": 97,
                 "beaconType": "Tr",
-                "socketID": "37QgQKtBghi1YoIUlmjN",
+                "socketID": "mJCFwBtQ-FZb1KEO8w1v",
                 "sensorType": "iBeacon",
-                "lastUpdated": "2015-08-19T01:33:49.648Z"
+                "lastUpdated": "2015-08-21T01:51:16.280Z"
             }
         },
         "iBeaconRcvrs": {}

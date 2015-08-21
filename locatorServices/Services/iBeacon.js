@@ -10,20 +10,17 @@ var locator     =   require('./../locator');
 var frontend    =   require('../../frontend');
 var factory     =   require('./../factory');
 var util        =   require('./../util');
-
 var fs = require('fs');
 var math = require('mathjs');
 
-var previousKinnectDeviceLocation = {X: 0, Y: 0, Z:0};
-var previousKinnectDeviceRotations = {rotationX:0, rotationY:0, rotationZ:0};
-var timeInterval = (1/30);
-var devices = {};
 
-//Sensors
-var persons = {};
+//Sensors/Beacons
 var personsToSocketIds = {};
+var persons = {};
+var deviceSensorData = {};
+var beaconData = {};
 
-
+//Test Cases
 var counter = 0; 
 
 
@@ -55,9 +52,6 @@ exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
         console.log('received null sensor info. Can not register to the server');
     }
 }
-
-
-
 
 //register Ibeacon to sensor list
 function registerIBeacon(socket, sensorInfo, callback){
@@ -121,8 +115,6 @@ function checkIfBeaconAlreadyRegistered (beacon){
     return false;
 }
 
-
-
 //Handles registering ibeaconReciever
 //TODO - Update location of reciever every time frame from the device it is paired  with
 // as well as trasmitters if applicable
@@ -149,8 +141,6 @@ function registerIBeaconRcvrHandler (socket,sensorInfo,callback){
         console.log('Reciever Beacon is already registered!');
     }
 }
-
-
 
 function checkIfExisted (deviceName){
     var bool = false;
@@ -196,9 +186,6 @@ exports.deRegisterIBeaconRcvrHandler = function (socket){
 }
 
 //-------------------------  End of de_Registration   ---------------------------------------------------------------------------//
-
-
-
 
 
 /**
@@ -298,12 +285,12 @@ exports.cleanUp = function (socketID){
 exports.calibrateKinnectLocationWithDeviceSenosorLocation = function(socketID, data){
     //console.log('Calibrate Kinnect with device sensors');
     //calibrate(socketID, data.personId);
-    setUpForLogging(data.personId);
+    setUpForLogging (data.personId);
 }
 
 
 exports.personLeavesKinnectView = function(updatedPerson){
-    personLeavesKinnectView(updatedPerson);
+    //personLeavesKinnectView(updatedPerson);
 }
  
 
@@ -317,7 +304,6 @@ exports.updateSpeedAndOrientation = function(socket, sensorData, fn){
 
 exports.updatePersonLocationWithBeaconReadings = function(socket, data, fn){
     //updatePersonLocationFromBeaconReadings(socket.id, data);
-    //triangulatePersonLocationFromBeaconReadings(socket.id, data);
     updatePersonLocationFromBeaconReadingsForLogging(socket.id, data);
 }
 
@@ -328,9 +314,6 @@ exports.clearPersonFromLists = function (socket, personData, fn){
 
 
 
-
-/////       Helper Functions        ////
-
 /* 
     In the calibration step:
         Save socketId to person ID to be able to alert the device later one once the person leaves the kinnect view
@@ -338,13 +321,11 @@ exports.clearPersonFromLists = function (socket, personData, fn){
 
         TODO - delete third line
 */
-function calibrate (socketID, personID){
+function calibrate (socketID, personId){
     
-    console.log('Calibration step wih ' + JSON.stringify(personID));
+    console.log('Calibration step wih ' + JSON.stringify(personId));
     try{
-        personsToSocketIds[personID] = socketID;
-        //persons[personID] = JSON.parse(JSON.stringify(locator.persons[personID]));
-        //persons[personID].observerType = 'Device Sensors';
+        personsToSocketIds[personId] = socketID;
     } catch(err){
          console.log('error calibrate ' + 'due to' + err);
     }
@@ -361,21 +342,25 @@ function calibrate (socketID, personID){
 
 function personLeavesKinnectView (personData){
 
-    // console.log('Person with the following information has left the kinnect view' + JSON.stringify(personData));
-
-    // try{
-    //     //Alert the device to update its location using either its sensors, beacons or both
-    //     if(personsToSocketIds[personData.uniquePersonID] != undefined){
-    //         personsToSocketIds[personData.uniquePersonID].emit("updatePersonLocation", {});
+    //console.log('Person with the following information has left the kinnect view' + JSON.stringify(personData));
+    try{
+        if(personsToSocketIds[personData.uniquePersonID] != undefined){
             
-    //         //Save the last known person location by kinnect
-    //         persons[personData.uniquePersonID] = JSON.parse(JSON.stringify(personData));
-    //     }
-
-        
-    // } catch(err){
-    //      console.log('error personLeavesKinnectView ' + 'due to' + err);
-    // }  
+            //Alert the device to update its location using either its sensors, beacons or both
+            //personsToSocketIds[personData.uniquePersonID].emit("updatePersonLocation", {});
+            
+            //Save the last known person location by kinnect
+            persons[personData.uniquePersonID] = JSON.parse(JSON.stringify(personData));
+            persons[personData.uniquePersonID].observerType = 'Device Sensors';     
+            
+            deviceSensorData[personData.uniquePersonID] = {distance:0, 
+                                            location:{X:persons[personData.uniquePersonID].location.X, Y:persons[personData.uniquePersonID].location.Y, Z:persons[personData.uniquePersonID].location.Z}, 
+                                            rotationAnglesInDegress:{yaw:0, pitch:0, roll:0}};
+            beaconData[personData.uniquePersonID] = {location:{X:persons[personData.uniquePersonID].location.X, Y:persons[personData.uniquePersonID].location.Y, Z:persons[personData.uniquePersonID].location.Z}};
+        }
+    } catch(err){
+         console.log('error personLeavesKinnectView ' + 'due to' + err);
+    } 
 }
 
 
@@ -393,41 +378,19 @@ function personLeavesKinnectView (personData){
 */
 function updatePersonLocationFromSensorUpdates (socketID, sensorData)
 {
-
-
     try{
 
-        //Check if person with the same id exists (Tracked by sensor location updates)
         if(persons[sensorData.personId] != undefined){
-
-            var distanceInX = (sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
-            var distanceInZ = (sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
-
-            console.log(' distance in X ' + distanceInX);
-            console.log(' distance in Z ' + distanceInZ);
-                
-            persons[sensorData.personId].location.X = parseFloat(persons[sensorData.personId].location.X) + parseFloat(distanceInX);
-            persons[sensorData.personId].location.Z = parseFloat(persons[sensorData.personId].location.Z) + parseFloat(distanceInZ);
-
-            persons[sensorData.personId].location.X = persons[sensorData.personId].location.X.toFixed(4);
-            persons[sensorData.personId].location.Z = persons[sensorData.personId].location.Z.toFixed(4);
-
-            console.log(' updated distance in X ' + persons[sensorData.personId].location.X);
-            console.log(' updated distance in Z ' + persons[sensorData.personId].location.Z);
-
-            //Update original list (locator.persons)
-            if(locator.persons[sensorData.personId] == undefined){
-                locator.persons[sensorData.personId] = JSON.parse(JSON.stringify(persons[sensorData.personId]));
-            } else{
-                locator.persons[sensorData.personId].location.X = persons[sensorData.personId].location.X;
-                locator.persons[sensorData.personId].location.Y = persons[sensorData.personId].location.Y;
-                locator.persons[sensorData.personId].location.Z = persons[sensorData.personId].location.Z;
-                locator.persons[sensorData.personId].observerType = 'Device Sensors';
-            }
-        
-        } else{
-                console.log('Not Valid yet to update its location');
-                console.log('Orientations that come from the device and from Kinnect');
+            //Left kinnect view
+            var newLocation = getPersonLocationFromSensors(sensorData.distance, sensorData.orientation.yaw, persons[sensorData.personId].location);
+            
+            deviceSensorData[sensorData.personId].distance = sensorData.distance;
+            deviceSensorData[sensorData.personId].location.X = newLocation.X;
+            deviceSensorData[sensorData.personId].location.Z = newLocation.Z;
+            deviceSensorData[sensorData.personId].rotationAnglesInDegress.yaw = sensorData.orientation.yaw;
+            deviceSensorData[sensorData.personId].rotationAnglesInDegress.pitch = sensorData.orientation.pitch;
+            deviceSensorData[sensorData.personId].rotationAnglesInDegress.roll = sensorData.orientation.roll;
+            //console.log('Sensor Updates is '+ JSON.stringify(deviceSensorData[sensorData.personId]));
         }
            
     } catch(err){
@@ -450,82 +413,25 @@ function updatePersonLocationFromSensorUpdates (socketID, sensorData)
 */
 function updatePersonLocationFromBeaconReadings (socketID, beaconReadingsData)
 {
-
-    console.log('Inside updatePersonLocationFromBeaconReadings');
-    var equationOne = {x:0, z:0, offset:0};
-    var equationTwo = {x:0, z:0, offset:0};
-    var equationThree = {x:0, z:0, offset:0};
-    
-    var equationFour = {x:0, z:0, offset:0};
-    var equationFive = {x:0, z:0, offset:0};
-
-    //Get beacons Location with the corresponding radious
-    var beacons = getBeaconsLocationWithTheirCorresspondingRadious(beaconReadingsData);
-
-    equationOne.x = parseFloat(beacons.beaconOne.location.x)*(-2);
-    equationOne.z = parseFloat(beacons.beaconOne.location.z)*(-2);
-    equationOne.offset =  Math.pow(parseFloat(beacons.beaconOne.radious), 2)-(Math.pow(parseFloat(beacons.beaconOne.location.x),2) +
-                                                                            Math.pow(parseFloat(beacons.beaconOne.location.z),2));
-    //console.log("Equation One is " + equationOne.x + "X " + equationOne.z + "Z " + " = " + equationOne.offset)
-   
-
-    equationTwo.x = parseFloat(beacons.beaconTwo.location.x)*(-2);
-    equationTwo.z = parseFloat(beacons.beaconTwo.location.z)*(-2);
-    equationTwo.offset =  Math.pow(parseFloat(beacons.beaconTwo.radious), 2)-(Math.pow(parseFloat(beacons.beaconTwo.location.x),2) +
-                                                                            Math.pow(parseFloat(beacons.beaconTwo.location.z),2));
-    //console.log("Equation Two is " + equationTwo.x + "X " + equationTwo.z + "Z " + " = " + equationTwo.offset)
-    
-
-    equationThree.x = parseFloat(beacons.beaconThree.location.x)*(-2);
-    equationThree.z = parseFloat(beacons.beaconThree.location.z)*(-2);
-    equationThree.offset =  Math.pow(parseFloat(beacons.beaconThree.radious), 2)-(Math.pow(parseFloat(beacons.beaconThree.location.x),2) +
-                                                                            Math.pow(parseFloat(beacons.beaconThree.location.z),2));
-    //console.log("Equation Three is " + equationThree.x + "X " + equationThree.z + "Z " + " = " + equationThree.offset)
-
-
-
-    //Equation one == Equation Two ==> results in Equation Four
-    equationFour.x = equationOne.x - equationTwo.x;
-    equationFour.z = equationOne.z - equationTwo.z;
-    equationFour.offset = equationTwo.offset - equationOne.offset;
-    //console.log("Equation one == Equation Two : " + equationFour.x + "X " + equationFour.z + "Z " + " = " + equationFour.offset)
-    
-    //Equation one == Equation Three ==> results in Equation Five
-    equationFive.x = equationOne.x - equationThree.x;
-    equationFive.z = equationOne.z - equationThree.z;
-    equationFive.offset = equationThree.offset - equationOne.offset;
-    //console.log("Equation one == Equation Three : " + equationFive.x + "X " + equationFive.z + "Z " + " = " + equationFive.offset)
-    
-    var matrix = [[equationFour.x, equationFour.z, equationFour.offset],[equationFive.x, equationFive.z, equationFive.offset]];
-    var values = getMatrixValues(matrix);
-    values[0] = -1 * parseFloat(values[0]);
-    values[1] = -1 * parseFloat(values[1]);
-
-    updateBeaconsData(values);
-    // console.log("New Perosn Location is " + JSON.stringify(values));
-    // console.log("First Perosn List " + JSON.stringify(person));
-    
     if(persons[beaconReadingsData.personId] != undefined){
-        
-        persons[beaconReadingsData.personId].location.X = values[0];
-        persons[beaconReadingsData.personId].location.Z = values[1];
+        //Left kinnect view
+        var newLocation = getPersonLocationFromBeacons(beaconReadingsData);
 
-        //Update original list (locator.persons)
-        if(locator.persons[beaconReadingsData.personId] == undefined){
-            locator.persons[beaconReadingsData.personId] = JSON.parse(JSON.stringify(persons[beaconReadingsData.personId]));
-            console.log("updated person location is " + locator.persons[beaconReadingsData.personId]);
-        } else{
+        //Filter the beacons readings
+        var updatedCurrentLocation = filterBeaconReadings(beaconData[beaconReadingsData.personId].location, newLocation);
+        beaconData[beaconReadingsData.personId].location.X = updatedCurrentLocation.X;
+        beaconData[beaconReadingsData.personId].location.Z = updatedCurrentLocation.Z;
 
-            locator.persons[beaconReadingsData.personId].location.X = persons[beaconReadingsData.personId].location.X;
-            locator.persons[beaconReadingsData.personId].location.Y = persons[beaconReadingsData.personId].location.Y;
-            locator.persons[beaconReadingsData.personId].location.Z = persons[beaconReadingsData.personId].location.Z;
-            locator.persons[beaconReadingsData.personId].observerType = 'Beacon Sensors';
-            frontend.io.sockets.emit("refreshWebClientSensors", {});
-        }
-    } else{
-        console.log('Not Valid yet to update its location');
+        //console.log('Beacon Updates is '+ JSON.stringify(beaconData[beaconReadingsData.personId]));
+        updatePersonLocationWithNewLocation(beaconReadingsData.personId);
+    }
+
+    else{
+        //console.log('Not Valid yet to update its location');
     }
 }
+
+
 
 
 function triangulatePersonLocationFromBeaconReadings (socketID, beaconReadingsData){
@@ -600,7 +506,175 @@ function triangulatePersonLocationFromBeaconReadings (socketID, beaconReadingsDa
 }
 
 
-/* Helper Functions for triangulatePersonLocationFromBeaconReadings */
+/* Helper Functions */
+
+function getPersonLocationFromSensors (distance, angle, previousLocation)
+{
+
+    var newLocation = {X:0, Y:0, Z:0};
+    
+    var distanceInX = (parseFloat(distance) * math.cos(math.unit(angle, 'deg'))).toFixed(3);
+    var distanceInZ = (parseFloat(distance)  * math.sin(math.unit(angle, 'deg'))).toFixed(3);
+    
+    newLocation.X = parseFloat(previousLocation.X) + parseFloat(distanceInX);
+    newLocation.Z = parseFloat(previousLocation.Z) + parseFloat(distanceInZ);
+    
+    newLocation.X = newLocation.X.toFixed(4);
+    newLocation.Z = newLocation.Z.toFixed(4);
+
+    return newLocation;
+}
+
+function getPersonLocationFromBeacons(beaconReadingsData)
+{
+    var newLocation = {};
+    var equationOne = {x:0, z:0, offset:0};
+    var equationTwo = {x:0, z:0, offset:0};
+    var equationThree = {x:0, z:0, offset:0};
+    
+    var equationFour = {x:0, z:0, offset:0};
+    var equationFive = {x:0, z:0, offset:0};
+
+    //Get beacons Location with the corresponding radious
+    var beacons = getBeaconsLocationWithTheirCorresspondingRadious(beaconReadingsData);
+    
+    equationOne.x = parseFloat(beacons.beaconOne.location.x)*(-2);
+    equationOne.z = parseFloat(beacons.beaconOne.location.z)*(-2);
+    equationOne.offset =  Math.pow(parseFloat(beacons.beaconOne.radious), 2)-(Math.pow(parseFloat(beacons.beaconOne.location.x),2) +
+                                                                            Math.pow(parseFloat(beacons.beaconOne.location.z),2));   
+    equationTwo.x = parseFloat(beacons.beaconTwo.location.x)*(-2);
+    equationTwo.z = parseFloat(beacons.beaconTwo.location.z)*(-2);
+    equationTwo.offset =  Math.pow(parseFloat(beacons.beaconTwo.radious), 2)-(Math.pow(parseFloat(beacons.beaconTwo.location.x),2) +
+                                                                            Math.pow(parseFloat(beacons.beaconTwo.location.z),2));
+    equationThree.x = parseFloat(beacons.beaconThree.location.x)*(-2);
+    equationThree.z = parseFloat(beacons.beaconThree.location.z)*(-2);
+    equationThree.offset =  Math.pow(parseFloat(beacons.beaconThree.radious), 2)-(Math.pow(parseFloat(beacons.beaconThree.location.x),2) +
+                                                                            Math.pow(parseFloat(beacons.beaconThree.location.z),2));
+    //Equation one == Equation Two ==> results in Equation Four
+    equationFour.x = equationOne.x - equationTwo.x;
+    equationFour.z = equationOne.z - equationTwo.z;
+    equationFour.offset = equationTwo.offset - equationOne.offset;
+    
+    //Equation one == Equation Three ==> results in Equation Five
+    equationFive.x = equationOne.x - equationThree.x;
+    equationFive.z = equationOne.z - equationThree.z;
+    equationFive.offset = equationThree.offset - equationOne.offset;
+    
+    //Solve the equations(4,5) to get X and Z values
+    var matrix = [[equationFour.x, equationFour.z, equationFour.offset],[equationFive.x, equationFive.z, equationFive.offset]];
+    var values = getMatrixValues(matrix);
+    values[0] = -1 * parseFloat(values[0]);
+    values[1] = -1 * parseFloat(values[1]);
+    
+    newLocation.X = values[0];
+    newLocation.Z = values[1];
+
+    return newLocation;
+}
+
+function updatePersonLocationWithNewLocation (personId)
+{
+    console.log('Previous Location is ' + JSON.stringify(persons[personId].location));
+    console.log('Distance Sent From Sensors ' + deviceSensorData[personId].distance);
+    console.log('Location Approx. From Sensors is ' + JSON.stringify(deviceSensorData[personId].location));
+    console.log('Rotation Angles From Sensors ' + JSON.stringify(deviceSensorData[personId].rotationAnglesInDegress));
+    console.log("Location Approx. From Beacons " + JSON.stringify(beaconData[personId].location));
+
+    var filteredLocation = regression(persons[personId].location, deviceSensorData[personId].distance, 
+            deviceSensorData[personId].location, deviceSensorData[personId].rotationAnglesInDegress, beaconData[personId].location);
+    updateListWithNewLocation(personId, filteredLocation);
+}
+
+
+function filterBeaconReadings (previousLocation, currentLocation)
+{
+
+    var distance = 0;
+    var maxDistance = 2;
+    var updatedCurrentLocation = {X:currentLocation.X, Z:currentLocation.Z};
+
+    distance = Math.sqrt(Math.pow(parseFloat((currentLocation.X) - parseFloat(previousLocation.X)), 2) 
+        + Math.pow(parseFloat((currentLocation.Z) - parseFloat(previousLocation.Z)), 2));
+     
+    console.log('Calculated distance is ' + distance);
+
+    if(distance > maxDistance){
+        //filter
+        console.log('Calculated distance is greater than 2 ');
+        updatedCurrentLocation.X = previousLocation.X;
+        updatedCurrentLocation.Z = previousLocation.Z;
+    }
+
+    return updatedCurrentLocation;
+}
+
+
+function regression (previousLocation, distance, locationFromDeviceSensors, deviceSensorAttitude, locationFromBeacon) 
+{
+    var filteredNewPersonLocation = {};
+
+    //Coefficients For X
+    var Xc1 = 1.0005777453083653;
+    var Xc2 = -0.004128593247979738;
+    var Xc3 = -0.02150378415284372;
+    var Xc4 = 0.00401697019208289;
+    var Xc5 = 0.0024411412401917736;
+    var Xc6 = 0.000007768542613258376;
+    var Xc7 = 0.0004064830592859838;
+    var Xc8 = -6.702270899356888 * Math.pow(10, -7);
+    var Xc9 = 0.002290223495516543;
+    var Xc10 = -0.0005242321224923328;
+
+    //Coefficients For Z
+    var Zc1 = 0.007838682582534468;
+    var Zc2 = 1.0002323418340708;
+    var Zc3 = -0.020036976481169828;
+    var Zc4 = -0.005546354522727104;
+    var Zc5 = -0.003479226546057387;
+    var Zc6 = 0.000015883328001277;
+    var Zc7 = 0.0009205157706720997;
+    var Zc8 = 0.000012793491439261746;
+    var Zc9 = -0.002155883652313796;
+    var Zc10 = 0.00010402709575781186;
+
+    var newX = (Xc1 * parseFloat(previousLocation.X)) + (Xc2 * parseFloat(previousLocation.Z)) + (distance * Xc3)
+                + (Xc4 * parseFloat(locationFromDeviceSensors.X)) + (Xc5 * parseFloat(locationFromDeviceSensors.Z))
+                + (Xc6 * parseFloat(deviceSensorAttitude.yaw)) + (Xc7 * parseFloat(deviceSensorAttitude.pitch)) 
+                + (Xc8 * parseFloat(deviceSensorAttitude.roll))
+                + (Xc9 * parseFloat(locationFromBeacon.X)) + (Xc10 * parseFloat(locationFromBeacon.Z)); 
+
+     var newZ = (Zc1 * parseFloat(previousLocation.X)) + (Zc2 * parseFloat(previousLocation.Z)) + (distance * Zc3)
+                + (Zc4 * parseFloat(locationFromDeviceSensors.X)) + (Zc5 * parseFloat(locationFromDeviceSensors.Z))
+                + (Zc6 * parseFloat(deviceSensorAttitude.yaw)) + (Zc7 * parseFloat(deviceSensorAttitude.pitch)) 
+                + (Xc8 * parseFloat(deviceSensorAttitude.roll))
+                + (Zc9 * parseFloat(locationFromBeacon.X)) + (Zc10 * parseFloat(locationFromBeacon.Z));
+
+    filteredNewPersonLocation.X = newX;
+    filteredNewPersonLocation.Z = newZ;
+
+    //console.log('previous Location is ' + JSON.stringify(previousLocation));
+    console.log('filteredNewPersonLocation is ' + JSON.stringify(filteredNewPersonLocation));
+
+    return filteredNewPersonLocation;
+}
+
+function updateListWithNewLocation (personId, newLocation) {
+    
+    if(persons[personId] != undefined){
+        persons[personId].location.X = newLocation.X;
+        persons[personId].location.Z = newLocation.Z;
+        
+        //Update original list (locator.persons)
+        if(locator.persons[personId] == undefined){
+            locator.persons[personId] = JSON.parse(JSON.stringify(persons[personId]));
+        } else{
+            locator.persons[personId].location.X = newLocation.X;
+            locator.persons[personId].location.Z = newLocation.Z;
+        }
+    }
+}
+
+
 function sumVector (firstVector, secondVector)
 {
     var sum = {};
@@ -897,63 +971,64 @@ function deletePersonFromPersonList (socketID,  personID){
 
 
 
+
 //------------------------- Logging  ---------------------------------------------------------------------------//
 
 var sensorsReadingsList = {};
 var beaconsReadingsList = {};
 
-var sensorsReadingsStarted = false;
-var beaconsReadingsStarted = false;
+var sensorsReadingsStarted = true;
+var beaconsReadingsStarted = true;
 var loggingModeIsEnabled = true;
 
-var previousKinnectLocation = {X: 0, Y: 0, Z:0};
-var previousBeaconLocation = {X: 0, Y: 0, Z:0};
+var previousKinnectLocation = {};
+var previousBeaconLocation = {};
 
-var distanceFromSensors = 0;
-var orientationFromSensor = {yaw:0, pitch: 0, roll:0};
-var accelVector = {X:0, Y:0, Z:0};
-var gyroVector = {X:0, Y:0, Z:0};
+var distanceFromSensors = {};
+var orientationFromSensor = {};
+var accelVector = {};
+var gyroVector = {};
+
+var previousLocations = {};
+var currentLocations = {};
+var usersNotVisibleToKinnect = {};
 
 
-function setUpForLogging (personId){
-    if(loggingModeIsEnabled){
-        console.log('Setting up for logging');
-        
-        if(locator.persons[personId] != undefined){
-            sensorsReadingsList[personId] = JSON.parse(JSON.stringify(locator.persons[personId]));
-            beaconsReadingsList[personId] = JSON.parse(JSON.stringify(locator.persons[personId]));
+function setUpForLogging (personId)
+{
+    console.log('Setting up for logging');  
+    if(locator.persons[personId] != undefined){
+        sensorsReadingsList[personId] = JSON.parse(JSON.stringify(locator.persons[personId]));
+        beaconsReadingsList[personId] = JSON.parse(JSON.stringify(locator.persons[personId]));
+        distanceFromSensors[personId] = 0;
+        orientationFromSensor[personId] = {};
+        accelVector[personId] = {};
+        gyroVector[personId] = {};
 
-            sensorsReadingsStarted = true;
-            beaconsReadingsStarted = true;
-             console.log('Done Setting up for logging');
-        }
+        previousKinnectLocation[personId] = {};
+        previousBeaconLocation[personId] = {};
+
+        console.log('Done Setting up for logging');
     }
 }
 
 
-function updatePersonLocationFromSensorUpdatesForLogging (socketID, sensorData)
+function updatePersonLocationFromSensorUpdatesForLogging(socketID, sensorData)
 {
-
     try{
         //Check if person with the same id exists (Tracked by sensor location updates)
         if(sensorsReadingsList[sensorData.personId] != undefined){
-            sensorsReadingsStarted = true;
-
-            var distanceInX = (sensorData.distance  * math.cos(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
-            var distanceInZ = (sensorData.distance  * math.sin(math.unit(sensorData.orientation.yaw, 'deg'))).toFixed(3);
-                
-            sensorsReadingsList[sensorData.personId].location.X = parseFloat(sensorsReadingsList[sensorData.personId].location.X) + parseFloat(distanceInX);
-            sensorsReadingsList[sensorData.personId].location.Z = parseFloat(sensorsReadingsList[sensorData.personId].location.Z) + parseFloat(distanceInZ);
-
-            sensorsReadingsList[sensorData.personId].location.X = sensorsReadingsList[sensorData.personId].location.X.toFixed(4);
-            sensorsReadingsList[sensorData.personId].location.Z = sensorsReadingsList[sensorData.personId].location.Z.toFixed(4);
+            sensorsReadingsStarted == true 
+            var newLocation = getPersonLocationFromSensors(sensorData.distance, sensorData.orientation.yaw, sensorsReadingsList[sensorData.personId].location);
             
-            //console.log("New Perosn Location Accoriding to Sensors is " + JSON.stringify(sensorsReadingsList[sensorData.personId].location));
-            updateSensorData (sensorData);
+            sensorsReadingsList[sensorData.personId].location.X = newLocation.X;
+            sensorsReadingsList[sensorData.personId].location.Z = newLocation.Z;
+            distanceFromSensors[sensorData.personId] = sensorData.distance;
+            orientationFromSensor[sensorData.personId] = JSON.parse(JSON.stringify(sensorData.orientation));
+            accelVector[sensorData.personId] = JSON.parse(JSON.stringify(sensorData.acceleration));
+            gyroVector[sensorData.personId] = JSON.parse(JSON.stringify(sensorData.rotationsRate));
+
             WriteToALogFile(sensorData.personId);
-        
-        } else{
-                console.log('Not Valid yet to update its location');
         }
            
     } catch(err){
@@ -964,85 +1039,15 @@ function updatePersonLocationFromSensorUpdatesForLogging (socketID, sensorData)
 
 function updatePersonLocationFromBeaconReadingsForLogging (socketID, beaconReadingsData)
 {
+    if(beaconsReadingsList[beaconReadingsData.personId] != undefined){
 
-    //console.log('Inside updatePersonLocationFromBeaconReadings');
-    var equationOne = {x:0, z:0, offset:0};
-    var equationTwo = {x:0, z:0, offset:0};
-    var equationThree = {x:0, z:0, offset:0};
-    
-    var equationFour = {x:0, z:0, offset:0};
-    var equationFive = {x:0, z:0, offset:0};
+        var newLocation = getPersonLocationFromBeacons(beaconReadingsData);
+        var updatedCurrentLocation = filterBeaconReadings(beaconsReadingsList[beaconReadingsData.personId].location, newLocation);
 
-    //Get beacons Location with the corresponding radious
-    var beacons = getBeaconsLocationWithTheirCorresspondingRadious(beaconReadingsData);
+        beaconsReadingsList[beaconReadingsData.personId].location.X = updatedCurrentLocation.X;
+        beaconsReadingsList[beaconReadingsData.personId].location.Z = updatedCurrentLocation.Z;
+        //console.log('Updating baacon logs with ' + JSON.stringify(beaconsReadingsList[beaconReadingsData.personId].location));
 
-    equationOne.x = parseFloat(beacons.beaconOne.location.x)*(-2);
-    equationOne.z = parseFloat(beacons.beaconOne.location.z)*(-2);
-    equationOne.offset =  Math.pow(parseFloat(beacons.beaconOne.radious), 2)-(Math.pow(parseFloat(beacons.beaconOne.location.x),2) +
-                                                                            Math.pow(parseFloat(beacons.beaconOne.location.z),2));
-    //console.log("Equation One is " + equationOne.x + "X " + equationOne.z + "Z " + " = " + equationOne.offset)
-   
-
-    equationTwo.x = parseFloat(beacons.beaconTwo.location.x)*(-2);
-    equationTwo.z = parseFloat(beacons.beaconTwo.location.z)*(-2);
-    equationTwo.offset =  Math.pow(parseFloat(beacons.beaconTwo.radious), 2)-(Math.pow(parseFloat(beacons.beaconTwo.location.x),2) +
-                                                                            Math.pow(parseFloat(beacons.beaconTwo.location.z),2));
-    //console.log("Equation Two is " + equationTwo.x + "X " + equationTwo.z + "Z " + " = " + equationTwo.offset)
-    
-
-    equationThree.x = parseFloat(beacons.beaconThree.location.x)*(-2);
-    equationThree.z = parseFloat(beacons.beaconThree.location.z)*(-2);
-    equationThree.offset =  Math.pow(parseFloat(beacons.beaconThree.radious), 2)-(Math.pow(parseFloat(beacons.beaconThree.location.x),2) +
-                                                                            Math.pow(parseFloat(beacons.beaconThree.location.z),2));
-    //console.log("Equation Three is " + equationThree.x + "X " + equationThree.z + "Z " + " = " + equationThree.offset)
-
-
-
-    //Equation one == Equation Two ==> results in Equation Four
-    equationFour.x = equationOne.x - equationTwo.x;
-    equationFour.z = equationOne.z - equationTwo.z;
-    equationFour.offset = equationTwo.offset - equationOne.offset;
-    //console.log("Equation one == Equation Two : " + equationFour.x + "X " + equationFour.z + "Z " + " = " + equationFour.offset)
-    
-    //Equation one == Equation Three ==> results in Equation Five
-    equationFive.x = equationOne.x - equationThree.x;
-    equationFive.z = equationOne.z - equationThree.z;
-    equationFive.offset = equationThree.offset - equationOne.offset;
-    //console.log("Equation one == Equation Three : " + equationFive.x + "X " + equationFive.z + "Z " + " = " + equationFive.offset)
-    
-    var matrix = [[equationFour.x, equationFour.z, equationFour.offset],[equationFive.x, equationFive.z, equationFive.offset]];
-    var values = getMatrixValues(matrix);
-    values[0] = -1 * parseFloat(values[0]);
-    values[1] = -1 * parseFloat(values[1]);
-
-    //console.log("New Perosn Location Accoriding to Beacon is " + JSON.stringify(values));
-    updateBeaconsData(values, beaconReadingsData.personId);
-   
-}
-
-
-function updateSensorData (sensorData){
-    
-    distanceFromSensors = sensorData.distance;
-
-    orientationFromSensor.yaw = sensorData.orientation.yaw;
-    orientationFromSensor.pitch = sensorData.orientation.pitch;
-    orientationFromSensor.roll = sensorData.orientation.roll;
-
-    accelVector.X = sensorData.acceleration.X;
-    accelVector.Y = sensorData.acceleration.Y;
-    accelVector.Z = sensorData.acceleration.Z;
-
-    gyroVector.X = sensorData.rotationsRate.rotationXRate;
-    gyroVector.Y = sensorData.rotationsRate.rotationYRate;
-    gyroVector.Z = sensorData.rotationsRate.rotationZRate;
-}
-
-function updateBeaconsData (values, personId){
-
-    if(beaconsReadingsList[personId] != undefined){
-        beaconsReadingsList[personId].location.X = values[0];
-        beaconsReadingsList[personId].location.Z = values[1];
     } else {
         console.log('Not able to update beacon list of persons locations');
     }
@@ -1050,45 +1055,35 @@ function updateBeaconsData (values, personId){
 
 
 function WriteToALogFile (personId) {
-    
-    if(sensorsReadingsStarted == true && beaconsReadingsStarted == true){
-        //time stamp
-        var date = new Date();
+    //time stamp
+    var date = new Date();
 
-        //Get the data
-        var logData = {kinnectData:{}, deviceSensorData:{}, beaconData:{}, timeStamp:date};
-        logData.kinnectData = getKinnectData(personId);
-        logData.deviceSensorData = getSensorData(personId);
-        logData.beaconData = getBeaconData(personId);
+     //Get the data
+    var logData = {kinnectData:{}, deviceSensorData:{}, beaconData:{}, timeStamp:date};
+    logData.kinnectData = getKinnectData(personId);
+    logData.deviceSensorData = getSensorData(personId);
+    logData.beaconData = getBeaconData(personId);
         
-        //Write to the log file
-        console.log('\nData to log is \n' + JSON.stringify(logData));
-        fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/log.txt', '\n'+ JSON.stringify(logData) + '\n', encoding='utf8');
-
-        updatePreviousLocations(personId);
-    } else {
-        console.log('Not able to write to a file');
-    }
+    //Write to the log file
+    console.log('\nData to log is \n' + JSON.stringify(logData));
+    fs.appendFileSync('/Users/hal9000/Desktop/ASELAB/log.txt', '\n'+ JSON.stringify(logData) + '\n', encoding='utf8');
 }
 
 function getKinnectData (personId){
 
     var kinnectData = {location:{}, previousLocation:{}, rotationAnglesInDegress:{}};
     var location =  {X:0, Y:0, Z:0};
-    var previousLocation =  {X:0, Y:0, Z:0};
+    var previousLocation =  JSON.parse(JSON.stringify(previousKinnectLocation[personId]));
    
     if(locator.persons[personId] != undefined){
        location.X = locator.persons[personId].location.X;
        location.Y = locator.persons[personId].location.Y;
        location.Z = locator.persons[personId].location.Z;
 
-       previousLocation.X = previousKinnectLocation.X;
-       previousLocation.Y = previousKinnectLocation.Y;
-       previousLocation.Z = previousKinnectLocation.Z;
-
        kinnectData.location = location;
        kinnectData.previousLocation = previousLocation;
-       kinnectData.rotationAnglesInDegress = getOrientationFromTwoLocations(previousKinnectLocation, location);
+       kinnectData.rotationAnglesInDegress = getOrientationFromTwoLocations(previousLocation, location);
+       previousKinnectLocation[personId] = JSON.parse(JSON.stringify(location));
     }
 
     return kinnectData;
@@ -1097,26 +1092,24 @@ function getKinnectData (personId){
 
 function getSensorData (personId)
 {
-    var deviceSensorData = {distance:0, location:{X:0, Y:0, Z:0}, rotationAnglesInDegress:{}, gyroData:{}, accelData:{}};
-
+    var deviceSensorDataLog = {distance:0, location:{X:0, Y:0, Z:0}, rotationAnglesInDegress:{}, gyroData:{}, accelData:{}};
     
     if(sensorsReadingsList[personId] != undefined){
-        deviceSensorData.distance = distanceFromSensors;
-        deviceSensorData.rotationAnglesInDegress = orientationFromSensor;
-        deviceSensorData.gyroData = gyroVector;
-        deviceSensorData.accelData = accelVector;
-        deviceSensorData.location.X = sensorsReadingsList[personId].location.X;
-        deviceSensorData.location.Y = sensorsReadingsList[personId].location.Y;
-        deviceSensorData.location.Z = sensorsReadingsList[personId].location.Z;
+        deviceSensorDataLog.distance = distanceFromSensors[personId];
+        deviceSensorDataLog.rotationAnglesInDegress = JSON.parse(JSON.stringify(orientationFromSensor[personId]));
+        deviceSensorDataLog.gyroData = JSON.parse(JSON.stringify(accelVector[personId]));
+        deviceSensorDataLog.accelData = JSON.parse(JSON.stringify(gyroVector[personId]));
+        deviceSensorDataLog.location = JSON.parse(JSON.stringify(beaconsReadingsList[personId].location));
     }
     
-    return deviceSensorData;
+    return deviceSensorDataLog;
 }
 
 
 function getBeaconData (personId)
 {
-    var beaconData = {location:{}, rotationAnglesInDegress:{}};
+
+    var beaconDataLog = {location:{}, rotationAnglesInDegress:{}};
     var location =  {X:0, Y:0, Z:0};
    
     if(beaconsReadingsList[personId] != undefined){
@@ -1124,11 +1117,12 @@ function getBeaconData (personId)
        location.Y = beaconsReadingsList[personId].location.Y;
        location.Z = beaconsReadingsList[personId].location.Z;
 
-       beaconData.location = location;
-       beaconData.rotationAnglesInDegress = getOrientationFromTwoLocations(previousBeaconLocation, beaconsReadingsList[personId].location);
+       beaconDataLog.location = location;
+       beaconDataLog.rotationAnglesInDegress = getOrientationFromTwoLocations(previousBeaconLocation[personId], beaconsReadingsList[personId].location);
+       previousBeaconLocation[personId] = JSON.parse(JSON.stringify(location));
     }
 
-    return beaconData;
+    return beaconDataLog;
 }
 
 /** 
@@ -1190,6 +1184,8 @@ setInterval(function() {
             //testCase3(); //print orientation calculated from  two locations.
             //triangulatePersonLocationFromBeaconReadings(234, 4234);
             //testCase4();
+            //testCase5();
+            //testCase6();
         }
 
         counter = counter + 1;
@@ -1246,7 +1242,24 @@ function testCase4 (){
     WriteToALogFile(personId);
 }
 
+function testCase5 () {
+    var currentLocation = {X:3, Z:4}; 
+    var previousLocation = {X:7, Z:1};
 
+    var currentUpdatedLocation = filterBeaconReadings(previousLocation, currentLocation);
+    console.log('current Updated location is '+ JSON.stringify(currentUpdatedLocation));
+}
+
+function testCase6 (){
+
+    var previousLocation = {X:1, Y:1, Z:1};
+    var distance = 2;
+    var locationFromDeviceSensors = {X:1.5, Y:1, Z:2};
+    var deviceSensorAttitude = {yaw:45, pitch:45, roll:45};
+    var locationFromBeacon = {X:1.5, Y:1, Z:2};
+
+    regression(previousLocation, distance, locationFromDeviceSensors, deviceSensorAttitude, locationFromBeacon)
+}
 function testHelper (socketID, distance, angle){
     var sensorData = {
                         distance:{}, 
@@ -1393,8 +1406,6 @@ function isNotIncluded(uuids, uuid){
 
 */
 ;
-
-
 
 
 
