@@ -18,10 +18,7 @@ var math = require('mathjs');
 var personsToSocketIds = {};
 var persons = {};
 var deviceSensorData = {};
-var beaconData = {};
-
-//Test Cases
-var counter = 0; 
+var beaconData = {}; 
 
 
 //-------------------------    Registration   ---------------------------------------------------------------------------//
@@ -34,13 +31,13 @@ exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
         
         if(sensorInfo.beaconType == "Tr"){
             //Transmitter beacon
-            //console.log('Beacon typ is Transmitter.');
+            console.log('Registering Transmitter Beacon ...');
             registerIBeacon(socket, sensorInfo, callback);
             //registerBeaconTemporarily(socket, sensorInfo, callback);
         } 
         else if (sensorInfo.beaconType == "Rcvr"){
             //Reciever Beacon
-            console.log('Beacon typ is Reciever.');
+            console.log('Registering Beacon Reciever ...');
             registerIBeaconRcvrHandler(socket,sensorInfo,callback);
         } 
         else{
@@ -102,6 +99,11 @@ function registerIBeacon(socket, sensorInfo, callback){
     } 
 }
 
+/*
+    return true if the provided beacon is already in the list of beacons tracked by the server
+    using the minor, major and uuid. 
+    return false otherwise.
+*/
 function checkIfBeaconAlreadyRegistered (beacon){
     for (ibeacon in locator.sensors.iBeacons){
         if(beacon.uuid == locator.sensors.iBeacons[ibeacon].uuid){
@@ -1175,8 +1177,9 @@ function updatePreviousLocations (personId){
 
 //------------------------- End of Logging  ---------------------------------------------------------------------------//
 
-
-
+/*
+//Test Cases
+var counter = 0;
 setInterval(function() { 
         if(counter == 5){
             //testCase();
@@ -1335,7 +1338,7 @@ setInterval(function() {
 // when new tranmitter is registered or deregistered
 // or
 // to who recently registered as beacon reciever
-/*
+
 function sendTransmittersList(socket, allRcvrs){
     //Generate a list of different uuids the server is a ware of
     var uuidsList = {};
