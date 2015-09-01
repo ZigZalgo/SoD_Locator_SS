@@ -6,49 +6,68 @@
  *
  * */
 
-var locator     =   require('./../locator');
-var frontend    =   require('../../frontend');
-var factory     =   require('./../factory');
-var util        =   require('./../util');
-var fs = require('fs');
-var math = require('mathjs');
+    var locator     =   require('./../locator');
+    var frontend    =   require('../../frontend');
+    var factory     =   require('./../factory');
+    var util        =   require('./../util');
+    var fs = require('fs');
+    var math = require('mathjs');
 
 
-//Sensors/Beacons
-var personsToSocketIds = {};
-var persons = {};
-var deviceSensorData = {};
-var beaconData = {}; 
+    //Sensors/Beacons
+    var personsToSocketIds = {};
+    var persons = {};
+    var deviceSensorData = {};
+    var beaconData = {}; 
 
 
 //-------------------------    Registration   ---------------------------------------------------------------------------//
 
-// handles when registerBeacon gets called
-exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
+    /**
+     *  Gets called when "registerSensor" is triggered with sensor type of "ibeacon".
+     *  If sensorInfo.beaconType is Tr which indicates transmitter, the sensorInfo will include the following information
+     *      minor - number like 1234
+     *      major - number like 1234
+     *      uuid - unique identifier, 32 hex digits for example B9407F30-F5F8-466E-AFF9-25556B57FE6D
+     *      identifier - a string that identifies the region for instance, "ASELAB"
+     *      isDevice - a boolean string idetifying if the beacon is a phone or just a small device
+     *      name - A sequence of 40 hexadecimals identifying the device. 
+     *             Look at the following link in how to get the iOS device uuid "http://stackoverflow.com/questions/20944932/how-to-get-device-udid-in-programatically-in-ios7"
+     *      personId - Id of the person paired with the device sending the sensorInfo to the server so
+     *             that the location of beacon gets updated (static beacons for now). 
+     *
+     *  If sensorInfo.beaconType is Rcvr which indicates reciever, the sensorInfo will include the following information
+     *      name - A sequence of 40 hexadecimals identifying the device. 
+     *             Look at the following link in how to get the iOS device uuid "http://stackoverflow.com/questions/20944932/how-to-get-device-udid-in-programatically-in-ios7"
+     *      personId - Id of the person paired with the device sending the sensorInfo to the server so
+     *             that the location of beacon gets updated (static beacons for now). 
+     *
+     * */
+    exports.registerIBeaconHandler = function(socket,sensorInfo,callback){
 
-    // Generating a Beacon sensor object to be added to list
-    if (Object.keys(sensorInfo).length != 0) {
-        
-        if(sensorInfo.beaconType == "Tr"){
-            //Transmitter beacon
-            console.log('Registering Transmitter Beacon ...');
-            registerIBeacon(socket, sensorInfo, callback);
-            //registerBeaconTemporarily(socket, sensorInfo, callback);
-        } 
-        else if (sensorInfo.beaconType == "Rcvr"){
-            //Reciever Beacon
-            console.log('Registering Beacon Reciever ...');
-            registerIBeaconRcvrHandler(socket,sensorInfo,callback);
-        } 
-        else{
-            console.log('Unknown beaocn type');
+        // Generating a Beacon sensor object to be added to list
+        if (Object.keys(sensorInfo).length != 0) {
+            
+            if(sensorInfo.beaconType == "Tr"){
+                //Transmitter beacon
+                console.log('Registering Transmitter Beacon ...');
+                registerIBeacon(socket, sensorInfo, callback);
+                //registerBeaconTemporarily(socket, sensorInfo, callback);
+            } 
+            else if (sensorInfo.beaconType == "Rcvr"){
+                //Reciever Beacon
+                console.log('Registering Beacon Reciever ...');
+                registerIBeaconRcvrHandler(socket,sensorInfo,callback);
+            } 
+            else{
+                console.log('Unknown beaocn type');
+            }
+
+
+        } else {
+            console.log('received null sensor info. Can not register to the server');
         }
-
-
-    } else {
-        console.log('received null sensor info. Can not register to the server');
     }
-}
 
 //register Ibeacon to sensor list
 function registerIBeacon(socket, sensorInfo, callback){
