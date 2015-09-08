@@ -1,10 +1,126 @@
 {
-    "stateID": 11,
+    "stateID": 19,
     "devices": {},
     "sensors": {
         "kinects": {},
         "leapMotions": {},
-        "iBeacons": {},
+        "iBeacons": {
+            "saved-2": {
+                "uuid": 0,
+                "major": 1,
+                "minor": 2,
+                "identifier": 3,
+                "name": "HappyJSBeaconTransmitter",
+                "isFromConfig": true,
+                "isDevice": false,
+                "immediateRange": "1",
+                "nearRange": "5",
+                "farRange": "10",
+                "location": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0
+                },
+                "deviceSocketID": null,
+                "ID": 195,
+                "beaconType": "Tr",
+                "socketID": "Q0eBsYAIfz9t8-rUNPrt",
+                "sensorType": "iBeacon",
+                "lastUpdated": "2015-08-12T00:02:05.377Z"
+            },
+            "saved-10949": {
+                "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                "major": "48863",
+                "minor": "10949",
+                "identifier": "ASELab.iBeaconModules",
+                "name": "77DB33C1-0EA2-4EE0-93BB-CB296AA3D3E6",
+                "isFromConfig": true,
+                "isDevice": false,
+                "immediateRange": "1",
+                "nearRange": "5",
+                "farRange": "10",
+                "location": {
+                    "X": "2.135",
+                    "Y": "0.600",
+                    "Z": "3.255"
+                },
+                "deviceSocketID": null,
+                "ID": 193,
+                "beaconType": "Tr",
+                "socketID": "5BiXvFGvVzvZfWPrNPrr",
+                "sensorType": "iBeacon",
+                "lastUpdated": "2015-08-12T00:01:33.924Z"
+            },
+            "saved-26514": {
+                "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                "major": "11445",
+                "minor": "26514",
+                "identifier": "ASELab.iBeaconModules",
+                "name": "77DB33C1-0EA2-4EE0-93BB-CB296AA3D3E6",
+                "isFromConfig": true,
+                "isDevice": false,
+                "immediateRange": "1",
+                "nearRange": "5",
+                "farRange": "10",
+                "location": {
+                    "X": "-1.554",
+                    "Y": "0.600",
+                    "Z": "2.425"
+                },
+                "deviceSocketID": null,
+                "ID": 191,
+                "beaconType": "Tr",
+                "socketID": "Flai3C6jqECDSyVbNPrp",
+                "sensorType": "iBeacon",
+                "lastUpdated": "2015-08-12T00:00:40.388Z"
+            },
+            "saved-44858": {
+                "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                "major": "26040",
+                "minor": "44858",
+                "identifier": "ASELab.iBeaconModules",
+                "name": "77DB33C1-0EA2-4EE0-93BB-CB296AA3D3E6",
+                "isFromConfig": true,
+                "isDevice": false,
+                "immediateRange": "1",
+                "nearRange": "5",
+                "farRange": "10",
+                "location": {
+                    "X": "0.051",
+                    "Y": "0.600",
+                    "Z": "4.464"
+                },
+                "deviceSocketID": null,
+                "ID": 194,
+                "beaconType": "Tr",
+                "socketID": "2lTNVk4wTRMYsPjANPrs",
+                "sensorType": "iBeacon",
+                "lastUpdated": "2015-08-12T00:01:48.839Z"
+            },
+            "saved-59646": {
+                "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                "major": "30964",
+                "minor": "59646",
+                "identifier": "ASELab.iBeaconModules",
+                "name": "77DB33C1-0EA2-4EE0-93BB-CB296AA3D3E6",
+                "isFromConfig": true,
+                "isDevice": false,
+                "immediateRange": "1",
+                "nearRange": "5",
+                "farRange": "10",
+                "location": {
+                    "X": "1.120",
+                    "Y": "0.600",
+                    "Z": "2.175"
+                },
+                "deviceSocketID": null,
+                "ID": 192,
+                "beaconType": "Tr",
+                "socketID": "3Pj6tZTBXsyHhisGNPrq",
+                "sensorType": "iBeacon",
+                "lastUpdated": "2015-08-12T00:01:10.226Z"
+            }
+        },
         "iBeaconRcvrs": {}
     },
     "room": {

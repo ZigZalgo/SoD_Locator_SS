@@ -95,7 +95,13 @@
                     console.log(callback);
                 });
             }) // end of click
-
+            $("#updateMaxPeopleNumber").on('click',function(){
+                sod.socket.emit("updateMaxPeopleNumber",{maxPeopleNumber:Number($("#maxPeopleNumber").val())},function(status){
+                    if(status==1){
+                        console.log("success");
+                    }
+                });
+            })
         })// end of document ready
     </script>
 </head>
@@ -126,7 +132,8 @@
             <tr><td><li id="startMovement">Start Movement</li></td><td> </td></tr>
             <tr><td><li id="stopMovement">Stop Movement</li></td><td> </td></tr>
             <tr><td><li id="saveiBeaconState">Save Current State(iBeacon)</li></td><td> </td></tr>
-            <tr><td><li id="cleariBeaconState">Clear Current State(iBeacon)</li></td><td> </td></tr>
+            <tr><td><li id="cleariBeaconState">Clear Current State(iBeacon)</li></td><td> </td></tr>\
+            <tr><td><li id="updateMaxPeopleNumber">Update max people number</li></td><td> Expecting Max People :<input id='maxPeopleNumber'  type="text" value='0'></td></tr>
         </table>
     </nav>
     <div class="status_wrap">

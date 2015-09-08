@@ -188,7 +188,7 @@ function iBeacon(socket, sensorInfo, deviceSocketID, personID){
         this.nearRange = '5';
         this.farRange = '10';
 
-        this.location = {X: null, Y: null, Z:null};
+        this.location = {X: 0, Y: 0, Z:0};
         this.deviceSocketID = deviceSocketID;
         this.personID = personID;
 
