@@ -88,6 +88,24 @@ app.get('/mobile', function (req, res) {
 app.get('/grid', function (req, res) {
     res.sendfile(__dirname + '/view/Grid.html');
 });
+
+// React Section
+app.get('/react', function (req, res) {
+    res.sendfile(__dirname + '/view/react.html');
+});
+app.get('/reactjs',function(req,res){
+    res.sendfile(__dirname+"/view/js/react-0.13.3/build/react.js");
+})
+app.get('/JSXTransformer',function(req,res){
+    res.sendfile(__dirname+"/view/js/react-0.13.3/build/JSXTransformer.js");
+})
+app.post('/files/comments.json', function (req, res) {
+    console.log(req.body);
+
+    res.send('POST request to homepage' );
+});
+// END of React Section
+
 app.get('/user', function (req, res) {
     res.sendfile(__dirname + '/view/user.html');
 });
@@ -143,6 +161,7 @@ app.get('/jquery', function (req, res) {
     res.sendfile(__dirname + '/view/js/jquery-1.11.1.min.js');
 });
 
+
 app.get('/kinetic', function (req, res) {
     res.sendfile(__dirname + '/view/js/kinetic-v5.1.0.min.js');
 });
@@ -196,6 +215,12 @@ app.get('/dataJS', function (req, res) {
 app.get('/UIJS',function(req,res){
     res.sendfile(__dirname + '/view/js/UI.js');
 })
+app.get("/unity3DEngine",function(req,res){
+    res.sendfile(__dirname+"/view/unity_visualizer.unity3d");
+})
+app.get("/unity3DVisualizer",function(req,res){
+    res.sendfile(__dirname+"/view/unity_visualizer.html");
+})
 
 app.get('/setting',function(req,res){
     var tempLocatorRoom = locator.room;
@@ -211,6 +236,10 @@ app.get('/setting',function(req,res){
     res.status(200);
     res.send(currentSetting);
 })
+app.get('/people', function (req, res) {
+    res.send(locator.persons);
+});
+
 
 app.post('/sensors/:id/uncalibrate', sensorsREST.uncalibrate);
 app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrientation);
@@ -261,7 +290,7 @@ io.sockets.on('connection', function (socket) {
             switch(clients[socket.id].clientType){
                 case 'sensor':
                     console.log("\tSensor Disconnected");
-                    locator.cleanUpSensor(socket.id);
+                    locator.cleanUpSensor(socket.id,socket);
                     break;
                 case 'webClient':
                     break;

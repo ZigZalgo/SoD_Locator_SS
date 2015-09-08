@@ -231,4 +231,7 @@ $(document).ready(function(){
         $(this).toggleClass('button');
     });
 
+    $("#goto_unityVis").on("mouseover",function(){
+        showNormalStatus("Unity Visualizer Require Firefox to Run");
+    });
 })

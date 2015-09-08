@@ -309,7 +309,9 @@ SODSensor.prototype = {
                 var person = {ID:'JS_'+ i.toFixed(0),location:{X:-0.2,Y:1,Z:1}, trackingState: 1};
                 this.people.push(person);
             }
-            this.socket.emit('personUpdate',this.people);
+            this.socket.emit('personUpdate',this.people,function(associations){
+                console.log(associations);
+            });
             console.log('JS Kinect Client generated '+numPeople+' people and pushed to the server');
         }catch(err){
             console.log(err)

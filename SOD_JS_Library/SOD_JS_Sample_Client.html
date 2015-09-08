@@ -154,6 +154,10 @@
                         console.log("Received: " + JSON.stringify(data))
                         showGreenStatus(JSON.stringify(data))
                     })
+
+                    sod.addListener("pairedPersonDisappear",function(data){
+                        console.log(data);
+                    });
                 }else{
                     showRedStatus('Can not register this client again. One page only can register one device.');
                 }
