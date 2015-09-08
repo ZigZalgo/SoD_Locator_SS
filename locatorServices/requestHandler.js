@@ -1091,7 +1091,7 @@ exports.handleRequest = function (socket) {
                 }
                 //console.log("111");
                 locator.updatePersons(person, socket,function(association){
-                   // console.log("association: "+JSON.stringify(association));
+                    //console.log("\nassociation: "+JSON.stringify(association));
                     if(association!=null){
                         associations[association.skeletonID] = association.uniquePersonID;
                         eachItr()
@@ -1101,9 +1101,13 @@ exports.handleRequest = function (socket) {
                     }
                 });
             },function(err){
-                //console.log(associations);
+
                 if(fn!=undefined) {
-                    fn(associations);
+                    if(Object.keys(associations).length == 0){
+                        fn(null);
+                    }else{
+                        fn(associations);
+                    }
                 }
             });
             /*if(fn!=undefined) {
