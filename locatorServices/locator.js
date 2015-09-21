@@ -386,7 +386,7 @@ function gestureHandler(key,gesture,socket){
             frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"Release"});
             break;
         default:
-            console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
+            console.log("Some gesture detected from person " + key + ": " + persons[key]);
     }
 }
 
