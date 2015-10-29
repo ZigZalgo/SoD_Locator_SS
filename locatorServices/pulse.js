@@ -72,7 +72,7 @@ function roomIntersectionEvent(){
         if(deviceList.hasOwnProperty(deviceKey)){
             //console.log(deviceKey);
             var device = deviceList[deviceKey];
-            if(device.location!=undefined && device.location!=null){
+            if(device.location!=undefined && device.location!=null && device.orientation != null&& device.orientation != undefined){
                 locator.getIntersectionPointInRoom(device,function(intersectionPoint,observerCB){
                     //console.log(JSON.stringify(intersectionPoint));
                     if(intersectionPoint!=null && intersectionPoint!=undefined){
@@ -115,8 +115,9 @@ function roomIntersectionEvent(){
 // all the event handlers
 function sendIntersectionPoints(){
     for(var deviceKey in locator.devices){
-        if(locator.devices.hasOwnProperty(deviceKey)){
+        if(locator.devices.hasOwnProperty(deviceKey)) {
             var socketID = deviceKey;
+            if (locator.devices[socketID].orientation != undefined) {
                 locator.calcIntersectionPointsForDevices(socketID, locator.getDevicesInFront(deviceKey, locator.devices), function (intersectionList) {
                     //console.log('calling back? '+ JSON.stringify(intersectionPoint));
                     if (intersectionList != null) {
@@ -124,7 +125,14 @@ function sendIntersectionPoints(){
                             // forEach is also sync
                             async.each(intersectionList,
                                 function (intersectionPointWrapper, callback) {
-                                    frontend.clients[intersectionPointWrapper.intersectedSocketID].emit("intersected", {relevance: intersectionPointWrapper.relevance, intersectionPoint: intersectionPointWrapper.intersectionPoint, intersectedBy: {type: "device", ID: locator.devices[intersectionPointWrapper.observerSocketID].uniqueDeviceID}});
+                                    frontend.clients[intersectionPointWrapper.intersectedSocketID].emit("intersected", {
+                                        relevance: intersectionPointWrapper.relevance,
+                                        intersectionPoint: intersectionPointWrapper.intersectionPoint,
+                                        intersectedBy: {
+                                            type: "device",
+                                            ID: locator.devices[intersectionPointWrapper.observerSocketID].uniqueDeviceID
+                                        }
+                                    });
                                     callback();
                                 }, function (err) {
                                     // handles when all the events are fired
@@ -138,9 +146,10 @@ function sendIntersectionPoints(){
                         }
                     }
                 });
-            //}// error checking for orientation
-            //console.log('intersections: ' + JSON.stringify(intersections));
-        }
+                //}// error checking for orientation
+                //console.log('intersections: ' + JSON.stringify(intersections));
+            }
+        }// end of orientation null check
     }
 }
 
@@ -155,38 +164,47 @@ function cleaner(){
 function inViewEvent(){
     for(var deviceKey in locator.devices){
         // interating through all the devices
-        if(locator.devices.hasOwnProperty(deviceKey)){
-            var CurrentInViewDeviceList = locator.getDevicesInFront(frontend.clients[deviceKey].id,locator.devices);
-            //console.log("key: "+  JSON.stringify(CurrentInViewDeviceList));
-            //console.log(CurrentInViewDeviceList);
-            for(var currentInViewDevicesKey in CurrentInViewDeviceList){
-                if(locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] == undefined){
-                    locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] = {type:'device',ID:locator.devices[CurrentInViewDeviceList[currentInViewDevicesKey]].uniqueDeviceID}
-                    console.log('added-> ' +JSON.stringify(locator.devices[deviceKey].inViewList)  + ' to inViewlist');
-                    try{
-                        frontend.clients[locator.devices[deviceKey].socketID].emit("enterView",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},
-                            visitor:locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]]});
-                    }catch(e){
-                        console.log("unable to send enterView event message due to: "+ e);
-                    }
-                }
-            }// end of for CurrentInViewDevicelist
-            for(var inViewListKey in locator.devices[deviceKey].inViewList){
-                if(locator.devices[deviceKey].inViewList.hasOwnProperty(inViewListKey)){
-                    //console.log("CurrentInViewDeviceList: "+JSON.stringify(CurrentInViewDeviceList));
-                    if(locator.devices[deviceKey].inViewList[inViewListKey] != undefined && CurrentInViewDeviceList.indexOf(inViewListKey) == -1) {  // if the inViewList device
-                        console.log('deleting->' +  JSON.stringify(locator.devices[deviceKey].inViewList[inViewListKey]));
-                        try{
-                            frontend.clients[locator.devices[deviceKey].socketID].emit("leaveView",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},
-                                visitor:locator.devices[deviceKey].inViewList[inViewListKey]});
-                            delete locator.devices[deviceKey].inViewList[inViewListKey];
-                        }catch(e){
-                            console.log("unable to send leaveView message due to: "+ e);
+        if(locator.devices.hasOwnProperty(deviceKey)) {
+            if (locator.devices[deviceKey].orientation != undefined) {
+                var CurrentInViewDeviceList = locator.getDevicesInFront(frontend.clients[deviceKey].id, locator.devices);
+                //console.log("key: "+  JSON.stringify(CurrentInViewDeviceList));
+                //console.log(CurrentInViewDeviceList);
+                for (var currentInViewDevicesKey in CurrentInViewDeviceList) {
+                    if (locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] == undefined) {
+                        locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]] = {
+                            type: 'device',
+                            ID: locator.devices[CurrentInViewDeviceList[currentInViewDevicesKey]].uniqueDeviceID
+                        }
+                        console.log('added-> ' + JSON.stringify(locator.devices[deviceKey].inViewList) + ' to inViewlist');
+                        try {
+                            frontend.clients[locator.devices[deviceKey].socketID].emit("enterView", {
+                                observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'},
+                                visitor: locator.devices[deviceKey].inViewList[CurrentInViewDeviceList[currentInViewDevicesKey]]
+                            });
+                        } catch (e) {
+                            console.log("unable to send enterView event message due to: " + e);
                         }
                     }
-                }// End of if hasProperty
+                }// end of for CurrentInViewDevicelist
+                for (var inViewListKey in locator.devices[deviceKey].inViewList) {
+                    if (locator.devices[deviceKey].inViewList.hasOwnProperty(inViewListKey)) {
+                        //console.log("CurrentInViewDeviceList: "+JSON.stringify(CurrentInViewDeviceList));
+                        if (locator.devices[deviceKey].inViewList[inViewListKey] != undefined && CurrentInViewDeviceList.indexOf(inViewListKey) == -1) {  // if the inViewList device
+                            console.log('deleting->' + JSON.stringify(locator.devices[deviceKey].inViewList[inViewListKey]));
+                            try {
+                                frontend.clients[locator.devices[deviceKey].socketID].emit("leaveView", {
+                                    observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'},
+                                    visitor: locator.devices[deviceKey].inViewList[inViewListKey]
+                                });
+                                delete locator.devices[deviceKey].inViewList[inViewListKey];
+                            } catch (e) {
+                                console.log("unable to send leaveView message due to: " + e);
+                            }
+                        }
+                    }// End of if hasProperty
+                }
             }
-        }
+        } // end of orientation check
     }// end of inView Event
 }
 

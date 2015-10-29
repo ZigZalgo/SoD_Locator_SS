@@ -61,9 +61,10 @@ exports.handleRequest = function (socket) {
         }else{
             locator.registerDevice(socket,deviceInfo)
         }
-
     });
+    socket.on("registerDevice",function(deviceInfo,fn){
 
+    })
 
     /**
      *  "registerDataPoint" listener handles register Device request
@@ -1129,14 +1130,10 @@ exports.handleRequest = function (socket) {
         handdata.sensorID = locator.sensors.leapMotions[socket.id].ID;
         for (var key in util.filterDevices(socket, handdata)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
-
-
                 if(handdata.gestureType=="TYPE_CIRCLE") {
                     frontend.clients[key].emit("check", handdata);
                     console.log("check");
                 }
-
-
             }
         }
 

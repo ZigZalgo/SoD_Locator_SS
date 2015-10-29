@@ -1114,25 +1114,37 @@ function updateContentWithObjects(){
         for(var key in data){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
-                //console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP);
+                console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP + " JSON "+JSON.stringify(data[key]));
                 //console.log(data[key]);
                 if(!data[key].stationary){
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
-                        '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
-                        '<td>'+Math.round(data[key].orientation.yaw*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
+                        '<td>('+getCoordinatesInText(data[key].location)+')</td>'+
+                        '<td>'+getOrientationInText(data[key].orientation)+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }
                 else{
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
-                        '<td>('+data[key].location.X.toFixed(3)+', '+data[key].location.Y+', '+data[key].location.Z.toFixed(3)+')</td>'+
-                        '<td>'+Math.round(data[key].orientation.yaw*ROUND_RATIO)/ROUND_RATIO+'</td>' +'<td>disabled</td>'+
+                        '<td>('+getCoordinatesInText(data[key].location)+')</td>'+
+                        '<td>'+getOrientationInText(data[key].orientation)+'</td>' +'<td>disabled</td>'+
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }
             }
         }
-
+        function getCoordinatesInText(vector3){
+            if(vector3!=undefined)
+                return vector3.X.toFixed(3)+', '+ vector3.Y.toFixed(3)+', '+ vector3.Z.toFixed(3)
+            else
+                return "undefined"
+        }
+        function getOrientationInText(orienatation){
+            if(orienatation!=undefined){
+                return Math.round(orienatation.yaw*ROUND_RATIO)/ROUND_RATIO
+            }else{
+                return undefined
+            }
+        }
         $('#devices').html('<legend>Devices</legend>' +
             '<table id = "device_table">' +
             '<tr><th>ID</th><th>Name</th><th>Type</th><th>location</th> <th>orientation</th>'+

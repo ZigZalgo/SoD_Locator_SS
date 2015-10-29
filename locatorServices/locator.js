@@ -34,6 +34,8 @@ exports.projectorService = require("./Services/projector");
 exports.kinectService = require('./Services/kinect');
 exports.leapMotionService = require('./Services/leapMotion');
 exports.iBeaconService = require('./Services/iBeacon');
+exports.tangoService = require('./Services/tango');
+
 
 var room = new factory.Room({X:0,Y:0,Z:0},6, 8, 4);
 exports.room = room;
@@ -1183,8 +1185,10 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             device.orientation = deviceInfo.orientation;
         }
 
-        if(device.orientation.yaw>=360){
-            device.orientation.yaw = device.orientation.yaw % 360;
+        if(device.orientation != undefined){
+            if(device.orientation.yaw>=360){
+                device.orientation.yaw = device.orientation.yaw % 360;
+            }
         }
         // JSclient may register deivce with location as well.
         if(deviceInfo.location!=undefined){
