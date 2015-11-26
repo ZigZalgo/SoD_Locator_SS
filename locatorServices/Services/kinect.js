@@ -15,6 +15,10 @@ var util        =   require('./../util');
 // handles when registerKinect gets called
 exports.registerKinectHandler = function(socket,sensorInfo,callback){
     // Generating a kinect sensor object to be added to list
+    if(locator.sensors.kinects.hasOwnProperty[socket.id]){
+        console.log("kinect exits");
+        callback(-1)
+    }
     if (Object.keys(sensorInfo).length != 0) {
         var kinect = new factory.Kinect(socket);
         //kinect.sensorType = sensorInfo.sensorType;

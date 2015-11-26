@@ -3,11 +3,46 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
-    io = io.connect()
-    io.on('connect', function () {
-        console.log("socket connected");
-        io.emit("registerWebClient", {});
-        io.emit("broadcast", {listener: "string", payload: "testdata"});
+    $(document).ready(function(){
+        io = io.connect()
+        io.on('connect', function () {
+            console.log("socket connected");
+            io.emit("registerWebClient", {});
+            io.emit("broadcast", {listener: "string", payload: "testdata"});
+        });
+
+
+        //console.log($('textarea').val());
+        var data = $('textarea').val();
+        //console.log(data.split("\n"));
+        var dataLines = data.split("\n");
+        var result = 0;
+        var number = 0;
+        console.log(dataLines);
+        dataLines.forEach(function(line){
+            //console.log(line.split("\t"));
+            var eachLine = line.split("\t");
+            console.log(Number(eachLine[0])*Number(eachLine[1]))
+            //$('textarea').val($('textarea').val() + "\n"+Number(eachLine[1]))
+            result+=Number(eachLine[0])*Number(eachLine[1]);
+            number += Number(eachLine[1]);
+            //console.log(Number(eachLine[1]));
+        })
+        console.log(result/200 + ' - '+ 1/(result/200) +" Counter: "+number);
+
+
+
+        var n = 200;
+        var p =1/result*200;
+        result = 0
+        for(var i=1;i<=30;i++){
+            $('textarea').val($('textarea').val() + "\n"+Math.round(200*p*(Math.pow(1-p,i-1))*100)/100);
+            //console.log(p+" - "+ );
+            result+=Math.round(200*p*(Math.pow(1-p,i-1))*100)/100;
+        }
+        console.log(result);
+        console.log(1-Math.pow(1-p,30));
+
     });
 
 </script>
@@ -15,6 +50,36 @@
 <body>
 <div>
     <span>Testing Page</span>
+    <textarea>1 	 25
+2 	 23
+3 	 18
+4 	 20
+5 	 12
+6 	 12
+7 	 10
+8 	 7
+9 	 9
+10 	 6
+11 	 5
+12 	 4
+13 	 6
+14 	 5
+15 	 3
+16 	 3
+17 	 3
+18 	 2
+19 	 2
+20 	 5
+21 	 5
+22 	 3
+23 	 2
+24 	 2
+25 	 2
+26 	 1
+27 	 1
+28 	 2
+29 	 1
+30 	 1</textarea>
 </div>
 
 <div id="status" style="height: 200px;"></div> <!--This is where the data from the server is added-->

@@ -246,6 +246,9 @@ app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrient
 
 
 app.get('/files/:fileName.:ext', data.show);
+app.get('/test', function(req,res){
+    res.sendfile(__dirname+"/view/testing.html");
+});
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {
     console.log(req.files.dataFile.path + "          " + "data\\temp\\" + req.files.dataFile.name);
