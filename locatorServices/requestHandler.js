@@ -529,6 +529,7 @@ exports.handleRequest = function (socket) {
                 console.log('-> update device Location event received with request' +JSON.stringify(request));
                 locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].location = request.newLocation;
                 console.log('ID: '+ locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].uniqueDeviceID+ ' -> ' +JSON.stringify(locator.devices[Object.keys(locator.getDeviceByID(request.ID))[0]].location));
+
                 break;
             case 'dataPoint':
                 locator.dataPoints[request.ID].location = request.newLocation;

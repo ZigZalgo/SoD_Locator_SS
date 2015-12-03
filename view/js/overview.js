@@ -1114,7 +1114,7 @@ function updateContentWithObjects(){
         for(var key in data){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
-                console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP + " JSON "+JSON.stringify(data[key]));
+                //console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP + " JSON "+JSON.stringify(data[key]));
                 //console.log(data[key]);
                 if(!data[key].stationary){
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+

@@ -12,6 +12,7 @@ var locator = require('./locatorServices/locator');
 // Server Initilize
 init();
 
+/*
 net.createServer(
     function(socket)
     {
@@ -27,13 +28,6 @@ net.createServer(
                 //console.log("<cross-domain-policy>");
                 toReturn+=("<cross-domain-policy>\n");
                 toReturn+=("<allow-access-from domain=\"*\" to-ports=\"*\"/>\n");
-                /*domains.forEach(
-                    function(domain)
-                    {
-                        var parts = domain.split(':');
-                        toReturn+=("<allow-access-from domain=\""*"\" to-ports=\""*"\"/>\n");
-                    }
-                );*/
                 //console.log("</cross-domain-policy>");
                 toReturn+=("</cross-domain-policy>\n");
                 //console.log(toReturn);
@@ -42,7 +36,7 @@ net.createServer(
             }
         })}
 ).listen(843);
-
+*/
 
 
 var http = require('http')

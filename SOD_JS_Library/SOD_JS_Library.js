@@ -74,8 +74,8 @@ function SODDevice(deviceInfo){
     //setters]
     console.log('deviceInfo: '+ JSON.stringify(deviceInfo));
     for(var key in deviceInfo){
-        //console.log('key '+ key +' :'+ this.device[key]);
         this.device[key] = deviceInfo[key];
+        console.log('key '+ key +' :'+ this.device[key]);
         if(key == 'stationary'){
             console.log('changed to: '+this.device[key] + '\t by deviceInfo: '+ this.device[key]);
         }
@@ -173,10 +173,11 @@ SODDevice.prototype = {
         }
         this.socket.emit('getDistanceToDevice',{ID:targetID},callbackFunction);
     },
-    updateDeviceInfo : function(deviceInfo,callbackFunction){
+    updateDeviceInfo : function(newLocation,callbackFunction){
         //deviceInfo.socket = this.socket;
-        console.log('updating device info:'+ JSON.stringify(deviceInfo));
-        this.socket.emit('updateDeviceInfo',deviceInfo,callbackFunction);
+        console.log('updating device location:'+ JSON.stringify(newLocation));
+        //this.socket.emit('updateDeviceInfo',deviceInfo,callbackFunction);
+        this.socket.emit("updateObjectLocation",{objectType:"device",ID:this.device.ID,newLocation:newLocation})
     },
     pairPersonWithID : function(personID){
         console.log('pairing with person' + personID);

@@ -1219,10 +1219,17 @@ exports.registerDevice = function(socket, deviceInfo,fn){
             fn({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
 
-        if(deviceInfo.deviceType == "iBeaconRcvr"){
-            console.log("Device Type is iBeaconRcvr");
-            locator.iBeaconService.registerIBeaconRcvrHandler(socket,deviceInfo,fn); 
+        switch(deviceInfo.deviceType) {
+            case "iBeaconRcvr":
+                console.log("Device Type is iBeaconRcvr");
+                locator.iBeaconService.registerIBeaconRcvrHandler(socket, deviceInfo, fn);
+                break;
+            case "Tango":
+                console.log("A tango tries to register.");
+                break;
+            default:
         }
+
 
     }
 }
