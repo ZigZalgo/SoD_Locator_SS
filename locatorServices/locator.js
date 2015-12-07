@@ -391,7 +391,8 @@ function gestureHandler(key,gesture,socket){
 }
 
 
-exports.updatePersons = function(receivedPerson, socket){
+exports.updatePersons = function(receivedPerson, socket,callback){
+   //var association = {skeletonID:receivedPerson.ID,uniquePersonID:person.uniquePersonID}; // the assication between the receivedPersonID and the uniquePersonID
     if(Object.keys(persons).length == 0){
         //nobody being tracked, add new person
         //person was not found
@@ -409,6 +410,9 @@ exports.updatePersons = function(receivedPerson, socket){
                 person.hands.right.location = receivedPerson.rightHandLocation;
             }
             persons[person.uniquePersonID] = person;
+            callback({skeletonID:receivedPerson.ID,uniquePersonID:person.uniquePersonID});
+        }else{
+            callback(null);
         }
     }
     else{
@@ -494,7 +498,8 @@ exports.updatePersons = function(receivedPerson, socket){
 
                             }
                             //console.log("\t->received Peron got updated " + "with personList.");
-                            //receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
+                            receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
+                            callback({skeletonID:receivedPerson.ID,uniquePersonID:personInList.uniquePersonID})
                             //console.log("udpate Person hand "+JSON.stringify(personInList.hands));
                             eachSeriesCallback();
                         }catch (e){
@@ -546,6 +551,9 @@ exports.updatePersons = function(receivedPerson, socket){
 						locator.iBeaconService.updateStatus(nearestPersonID, 'tracked');
 						locator.iBeaconService.deleteZombie(nearestPersonID);
                         console.log('->-> Person ' + persons[nearestPersonID].uniquePersonID + ' ID length: (' + Object.keys(persons[nearestPersonID].ID).length + ') with details: ' + JSON.stringify(persons[nearestPersonID].ID));
+                        callback({skeletonID:receivedPerson.ID,uniquePersonID:persons[nearestPersonID].uniquePersonID});
+                    }else{
+                        callback(null)
                     }
                 } // out side of the threshold
                 else {
@@ -623,11 +631,11 @@ exports.updatePersons = function(receivedPerson, socket){
 								console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
 							}
                         }else{
+                            callback(null);
                             //console.log("\t->A new person detected, though not sure if it is a person yet. TrackingState: "+receivedPerson.trackingState);
                         }
 
                     }
-
                 }
             }
         })
@@ -768,7 +776,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
 
 
 // Remove all the people doesn have ID in it
-exports.removeUntrackedPeople = function(timeOutInMS){
+exports.removeUntrackedPeople = function(timeOutInMS,socket){
     var now = new Date();
     for(var key in persons){
         if(persons.hasOwnProperty(key)){
@@ -782,9 +790,14 @@ exports.removeUntrackedPeople = function(timeOutInMS){
 
 				// Alaa - Probably need to comment this block of code to keep the device associated with the person
                 if(persons[key].ownedDeviceID != null){
+                    if(persons[key].pairingState!="unpaired"){
+                        console.log("paired");
+                        frontend.clients[persons[key].ownedDeviceID].emit("pairedPersonDisappear",{PersonID:persons[key].uniquePersonID,location:persons[key].location})
+                    }
                     devices[persons[key].ownedDeviceID].ownerID = null;
                     devices[persons[key].ownedDeviceID].pairingState = "unpaired";
                     delete persons[key];
+
                 }
                 else{
                     delete persons[key];
@@ -830,12 +843,13 @@ exports.pairAndNotify = function(deviceSocketID, uniquePersonID,pairType){
 exports.pairDevice = function(deviceSocketID, uniquePersonID,pairType,socket,callback){
     var statusMsg = "Device Socket ID: " + deviceSocketID +
         " - Person ID: " + uniquePersonID;
-    console.log(pairType);
+    //console.log(pairType);
 
     if(locator.devices[deviceSocketID] != undefined && locator.persons[uniquePersonID] != undefined){
         if(locator.devices[deviceSocketID].pairingState == "unpaired" && persons[uniquePersonID].pairingState == "unpaired"){
-            // pair
-            locator.pairAndNotify(deviceSocketID, uniquePersonID);
+            // pair device with person
+            locator.pairAndNotify(deviceSocketID, uniquePersonID,pairType);
+            // pair person with device
             persons[uniquePersonID].ownedDeviceID = deviceSocketID;
             persons[uniquePersonID].pairingState = pairType;
             statusMsg += "\n Pairing successful.";
@@ -1033,7 +1047,7 @@ exports.cleanUpDevice = function(socketID){
 
 
 // handles clean up sensor request
-exports.cleanUpSensor = function(socketID){
+exports.cleanUpSensor = function(socketID,socket){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
     //delete sensors[socketID];
     util.recursiveDeleteKey(locator.sensors,socketID).then(function(callback){
@@ -1050,7 +1064,7 @@ exports.cleanUpSensor = function(socketID){
                                 if (locator.persons[key].ID[IDkey] == socketID) {
                                     delete locator.persons[key].ID[IDkey];
                                     if (counter == 0) {
-                                        locator.removeUntrackedPeople(0);
+                                        locator.removeUntrackedPeople(0,socket);
                                     }
                                 }
                             }

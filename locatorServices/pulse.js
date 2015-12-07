@@ -210,7 +210,7 @@ function inRangeEvent(){
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:{type:"person",ID:locator.persons[personKey].uniquePersonID}});
-                                if(locator.persons[personKey].pairingState=="paired") {
+                                if(locator.persons[personKey].pairingState!="unpaired") {
                                     locator.emitEventToPairedDevice(locator.persons[personKey], "enterObserveRange",
                                          {
                                             observer: {
@@ -230,8 +230,8 @@ function inRangeEvent(){
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:{type:"person",ID:locator.persons[personKey].uniquePersonID}});
-                                console.log('-> enter rect '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
-                                if(locator.persons[personKey].pairingState=="paired"){
+                                console.log('-> enter rect '+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey])+" person: "+JSON.stringify(locator.persons[personKey]));
+                                if(locator.persons[personKey].pairingState!="unpaired"){
                                     locator.emitEventToPairedDevice(locator.persons[personKey],"enterObserveRange",{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:locator.devices[deviceKey].deviceType},visitor:{type:locator.devices[locator.persons[personKey].ownedDeviceID].deviceType,ID:locator.devices[locator.persons[personKey].ownedDeviceID].uniqueDeviceID}})
                                 }
 
@@ -242,7 +242,7 @@ function inRangeEvent(){
                             if (locator.devices[deviceKey].observer.observerType == 'radial' && util.distanceBetweenPoints(locator.persons[personKey].location, locator.devices[deviceKey].location) > locator.devices[deviceKey].observer.observeRange) {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, visitor: {type:"person",ID:locator.persons[personKey].uniquePersonID}});
-                                if(locator.persons[personKey].pairingState=="paired") {
+                                if(locator.persons[personKey].pairingState!="unpaired") {
                                     locator.emitEventToPairedDevice(locator.persons[personKey], "leaveObserveRange",
                                         {
                                             observer: {
@@ -263,7 +263,7 @@ function inRangeEvent(){
                             {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, visitor: {type:"person",ID:locator.persons[personKey].uniquePersonID}});
-                                if(locator.persons[personKey].pairingState=="paired") {
+                                if(locator.persons[personKey].pairingState!="unpaired") {
                                     locator.emitEventToPairedDevice(locator.persons[personKey], "leaveObserveRange",
                                         {
                                             observer: {

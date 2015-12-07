@@ -133,11 +133,11 @@
                     });
                     sod.addListener('leaveObserveRange',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
-                        console.log('->leaves'+JSON.stringify(data.payload));
+                        console.log('->leaves'+JSON.stringify(data));
                     });
                     sod.addListener('grabInObserveRange',function(data){
                         //showNormalStatus(JSON.stringify(data.payload));
-                        console.log('->grab event:'+JSON.stringify(data.payload));
+                        console.log('->grab event:'+JSON.stringify(data));
                     });
 
                     sod.addListener('request',function(data){
@@ -154,6 +154,10 @@
                         console.log("Received: " + JSON.stringify(data))
                         showGreenStatus(JSON.stringify(data))
                     })
+
+                    sod.addListener("pairedPersonDisappear",function(data){
+                        console.log(data);
+                    });
                 }else{
                     showRedStatus('Can not register this client again. One page only can register one device.');
                 }

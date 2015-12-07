@@ -1116,6 +1116,7 @@ function updateContentWithObjects(){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
                 //console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP);
+                //console.log(data[key]);
                 if(!data[key].stationary){
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
                         '<td>('+data[key].location.X+', '+data[key].location.Y+', '+data[key].location.Z+')</td>'+
@@ -1140,7 +1141,7 @@ function updateContentWithObjects(){
             '<th>Owner</th>'+
             '</tr>'+
             '' +htmlString+
-            '</table>'); /*appending the data on the page using Jquery */
+            '</table>'); /*appending the data on the page*/
     });
 }
 
@@ -1269,7 +1270,7 @@ var matrixTransformation = function(personLocation,angle){
 
 io.emit("registerWebClient", {});
 $(document).ready(function(){
-    setInterval(function() {updateContentWithObjects(); }, 500); //poll server for people list and display on canvas
+    setInterval(function() {updateContentWithObjects(); }, 200); //poll server for people list and display on canvas
 })
 
 var sendResetRequest = function(socketID){

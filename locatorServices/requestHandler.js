@@ -398,7 +398,7 @@ exports.handleRequest = function (socket) {
         //console.log("Paring request: "+JSON.stringify(request));
         if(request.pairType==undefined){
             console.log("PairType is null, please specify a pairType when request.");
-            fn({status:"fail",msg:"need pairType in request(base,leftHand,or rightHand)."});
+            fn({status:-1,msg:"need pairType in request(base,leftHand,or rightHand)."});
         }else{
             if (request.uniqueDeviceID != undefined) {
                 console.log('receive paring request: pair device '+ request.uniqueDeviceID +' with person ' + request.uniquePersonID );
@@ -1072,16 +1072,43 @@ exports.handleRequest = function (socket) {
             //console.log(persons);
 			try{
                 locator.removeIDsNoLongerTracked(socket, persons);
-				locator.removeUntrackedPeople(0);
+				locator.removeUntrackedPeople(0,socket);
 			}
 			catch(err){
 				console.log("error trying to remove untracked people: " + err);
 			}
-            persons.forEach(function (person) {
+            /*persons.forEach(function (person) {
                 if(person.gesture!=null){
                     console.log(person.gesture);
                 }
                 locator.updatePersons(person, socket);
+            });*/
+
+            var associations = {}; // association of skeletonID w/ uniquePersonID
+            async.each(persons,function(person,eachItr){
+                if(person.gesture!=null){
+                    console.log(person.gesture);
+                }
+                //console.log("111");
+                locator.updatePersons(person, socket,function(association){
+                    //console.log("\nassociation: "+JSON.stringify(association));
+                    if(association!=null){
+                        associations[association.skeletonID] = association.uniquePersonID;
+                        eachItr()
+                    }else{
+                        associations[person.ID] = -1;
+                        eachItr();
+                    }
+                });
+            },function(err){
+
+                if(fn!=undefined) {
+                    if(Object.keys(associations).length == 0){
+                        fn(null);
+                    }else{
+                        fn(associations);
+                    }
+                }
             });
             /*if(fn!=undefined) {
                 fn();
