@@ -386,7 +386,7 @@ function gestureHandler(key,gesture,socket){
             frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"Release"});
             break;
         default:
-            console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
+            //console.log("Some gesture detected from person " + key + ": " + persons[key].gesture);
     }
 }
 
@@ -397,6 +397,7 @@ exports.updatePersons = function(receivedPerson, socket){
         //person was not found
         if((receivedPerson.trackingState==1) && receivedPerson.ID != undefined && receivedPerson.location != undefined){ //if provided an ID and a location, update
             console.log("received Person: "+JSON.stringify(receivedPerson));
+			
             var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
             person.lastUpdated = new Date();
             person.currentlyTrackedBy = socket.id;
@@ -493,7 +494,7 @@ exports.updatePersons = function(receivedPerson, socket){
 
                             }
                             //console.log("\t->received Peron got updated " + "with personList.");
-                            receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
+                            //receivedPersonProcessed = true;    // set the lock to true indicate the receivedPersons has been processed
                             //console.log("udpate Person hand "+JSON.stringify(personInList.hands));
                             eachSeriesCallback();
                         }catch (e){
@@ -528,8 +529,9 @@ exports.updatePersons = function(receivedPerson, socket){
                 if (nearestDistance < 0.4) {
                     //console.log("Done with all persons."+" with closest person: "+nearestPersonID+" ,distance: "+nearestDistance);
                     // if the sensor hasn't been registered to the person's seen-by-sensor list, and the person isn't used in any other person's list
-
-                    if ((existingID.indexOf(receivedPerson.ID) == -1) && persons[nearestPersonID].ID[receivedPerson.ID] == undefined) {
+					
+					if(persons[nearestPersonID].ID[receivedPerson.ID] == undefined) {
+                    //if ((existingID.indexOf(receivedPerson.ID) == -1) && persons[nearestPersonID].ID[receivedPerson.ID] == undefined) {	
                         //console.log('person '+persons[nearestPersonID].uniquePersonID+' is now tracked by ' + socket.id);
                         //locator.removeUntrackedPersonID(persons[nearestPersonID].ID, receivedPerson.ID,socket)
                         console.log('-> Merging person to ' + persons[nearestPersonID].uniquePersonID + ' with nearestDistance : ' + nearestDistance);
@@ -541,6 +543,8 @@ exports.updatePersons = function(receivedPerson, socket){
                         persons[nearestPersonID].ID[receivedPerson.ID] = socket.id;
                         persons[nearestPersonID].gesture = receivedPerson.gesture;
                         persons[nearestPersonID].lastUpdated = new Date();
+						locator.iBeaconService.updateStatus(nearestPersonID, 'tracked');
+						locator.iBeaconService.deleteZombie(nearestPersonID);
                         console.log('->-> Person ' + persons[nearestPersonID].uniquePersonID + ' ID length: (' + Object.keys(persons[nearestPersonID].ID).length + ') with details: ' + JSON.stringify(persons[nearestPersonID].ID));
                     }
                 } // out side of the threshold
@@ -550,15 +554,74 @@ exports.updatePersons = function(receivedPerson, socket){
                     //util.findWithAttr(persons,'ID',receivedPerson.ID);
                     if ((existingID.indexOf(receivedPerson.ID) == -1) && (receivedPerson.ID != undefined) && (receivedPerson.location != undefined)) { //if provided an ID and a location, update
                         if((receivedPerson.trackingState == 1)){
-                            var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
-                            person.lastUpdated = new Date();
-                            person.currentlyTrackedBy = socket.id;
-                            person.gesture = receivedPerson.gesture;
-                            if (person.gesture != null) {
-                                gestureHandler(person.uniquePersonID, person.gesture, socket);//handles the guesture
-                            }
-                            persons[person.uniquePersonID] = person;
-                            console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
+						
+							/*!--------------- Re-pairing Code Start ---------------!*/
+							if(locator.iBeaconService.areThereZombies()) {
+								console.log('There are zombies!!!!!!!');
+								
+								// TODO - This should change so that it depends on a door-mounted sensor
+								// that counts the number of users in the room. The number is compared to 
+								// the number of zombies + tracked users to find out whether or not there 
+								// are any untracked users.
+								var areThereUntrackedUsers = true;
+								
+								var ZOMBIE_MERGE_THRESHOLD = 0.7;
+								
+								var zombies = locator.iBeaconService.zombies();
+								
+								var nearestZombie = null;
+								var nearestZombieDistance = 1000;
+								
+								for (var zombie in zombies) {
+									if(util.distanceBetweenPoints(zombies[zombie].location, receivedPerson.location) < nearestZombieDistance) {
+										nearestZombieDistance = util.distanceBetweenPoints(zombies[zombie].location, receivedPerson.location);
+										nearestZombie = zombie;
+									}
+								}
+								
+								if((!areThereUntrackedUsers || nearestZombieDistance <= ZOMBIE_MERGE_THRESHOLD) && persons[nearestZombie] != undefined) {
+									var foundSensorSocketInPersonID = util.findKeyByValue(zombies[nearestZombie].ID,socket.id);
+									if(foundSensorSocketInPersonID!=false){
+										console.log("Person already contains sensor ID. Deleting.");
+										if(persons[nearestZombie] != undefined) delete persons[nearestZombie].ID[foundSensorSocketInPersonID];
+									}
+									
+									
+									persons[nearestZombie].ID[receivedPerson.ID] = socket.id;
+									persons[nearestZombie].gesture = receivedPerson.gesture;
+									persons[nearestZombie].lastUpdated = new Date();
+									persons[nearestZombie].observerType = undefined;
+									
+									locator.iBeaconService.updateStatus(nearestZombie, 'tracked');
+									locator.iBeaconService.deleteZombie(nearestZombie);
+								}
+								
+								else {
+									var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+									person.lastUpdated = new Date();
+									person.currentlyTrackedBy = socket.id;
+									person.gesture = receivedPerson.gesture;
+									if (person.gesture != null) {
+										gestureHandler(person.uniquePersonID, person.gesture, socket);//handles the guesture
+									}
+									persons[person.uniquePersonID] = person;
+									console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
+								}
+								
+							}
+							/*!--------------- Re-pairing Code End ---------------!*/
+						
+							else{
+								var person = new factory.Person(receivedPerson.ID, receivedPerson.location, socket);
+								person.lastUpdated = new Date();
+								person.currentlyTrackedBy = socket.id;
+								person.gesture = receivedPerson.gesture;
+								if (person.gesture != null) {
+									gestureHandler(person.uniquePersonID, person.gesture, socket);//handles the guesture
+								}
+								persons[person.uniquePersonID] = person;
+								console.log('-> Register new person ' + person.uniquePersonID + ' since the distance off by ' + nearestDistance + ' with ID:' + JSON.stringify(person.ID) + ' by sensor :' + socket.id);
+							}
                         }else{
                             //console.log("\t->A new person detected, though not sure if it is a person yet. TrackingState: "+receivedPerson.trackingState);
                         }
@@ -717,6 +780,7 @@ exports.removeUntrackedPeople = function(timeOutInMS){
                 //could refactor using promises or callback
                 locator.iBeaconService.personLeavesKinnectView(persons[key]);
 
+				// Alaa - Probably need to comment this block of code to keep the device associated with the person
                 if(persons[key].ownedDeviceID != null){
                     devices[persons[key].ownedDeviceID].ownerID = null;
                     devices[persons[key].ownedDeviceID].pairingState = "unpaired";

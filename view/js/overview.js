@@ -908,9 +908,10 @@ function updateContentWithObjects(){
                 var sensorX = 0; //get this from sensor list later on
                 var sensorY=  0;
                 var angle = 270;
-                if(kinectList[key].calibration["Rotation"]!=0&&kinectList[key].calibration["Rotation"]!=null){
-                    sensorX += (kinectList[key].calibration["xSpaceTransition"]*pixelsPerMeter/1000); //changed from += to -= probably because sensor see mirror image?
-                    sensorY += (kinectList[key].calibration["ySpaceTransition"]*pixelsPerMeter/1000);
+				
+                if(kinectList[key].calibration["Rotation"]!=null){//kinectList[key].calibration["Rotation"]!=0&&kinectList[key].calibration["Rotation"]!=null){
+					sensorX += (kinectList[key].calibration["xSpaceTransition"]*pixelsPerMeter/1000); //changed from += to -= probably because sensor see mirror image?
+					sensorY += (kinectList[key].calibration["ySpaceTransition"]*pixelsPerMeter/1000);
                     angle += kinectList[key].calibration["Rotation"];
                 }
                 //console.log("X: "+sensorX+"  Y: "+sensorY+"  Angle: "+angle);
