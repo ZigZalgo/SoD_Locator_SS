@@ -524,6 +524,7 @@ exports.handleRequest = function (socket) {
     // update device or data Point location
     socket.on('updateObjectLocation', function (request,fn) {
         //not checking for fn(callback), since adding a callback here would be costly
+
         switch(request.objectType){
             case 'device':
                 console.log('-> update device Location event received with request' +JSON.stringify(request));

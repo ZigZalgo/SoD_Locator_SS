@@ -425,38 +425,44 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
     stationaryDevice.add(deviceID);
 
      //console.log('Observer:' + JSON.stringify(observer));
-     if(observer.observerType == 'radial') {
-         var observeRangeVisual = new Kinetic.Circle({
-             x: 0,
-             y: 0,
-             radius: observer.observeRange * pixelsPerMeter,
-             fill: '',
-             stroke: 'green',
-             strokeWidth: 1,
-             opacity: 0.8,
-             blurRadius: 50
-         });
-         stationaryDevice.add(observeRangeVisual);
-     }else if(observer.observerType == 'rectangular'){
-         var width = observer.observeWidth*pixelsPerMeter;
-         var height = observer.observeHeight*pixelsPerMeter;
-         //console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
-         //console.log(width+'-'+height);
-         var rotatedDirection = matrixTransformation({X:observer.observerDistance*pixelsPerMeter,Y:0,Z:0},-(deviceView.getRotationDeg()+FOV/2));
-         var observeRangeVisual = new Kinetic.Rect({
-             x: rotatedDirection.X-(width/2),
-             y: rotatedDirection.Z-(height/2),
-             width: width,
-             height: height,
-             fill:'',
-             stroke: 'green',
-             strokeWidth:1,
-             opacity:1
-         });
-         stationaryDevice.add(observeRangeVisual);
-     }
+if(observer!=undefined) {
+    if (observer.observerType == 'radial') {
+        var observeRangeVisual = new Kinetic.Circle({
+            x: 0,
+            y: 0,
+            radius: observer.observeRange * pixelsPerMeter,
+            fill: '',
+            stroke: 'green',
+            strokeWidth: 1,
+            opacity: 0.8,
+            blurRadius: 50
+        });
+        stationaryDevice.add(observeRangeVisual);
+    } else if (observer.observerType == 'rectangular') {
+        var width = observer.observeWidth * pixelsPerMeter;
+        var height = observer.observeHeight * pixelsPerMeter;
+        //console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
+        //console.log(width+'-'+height);
+        var rotatedDirection = matrixTransformation({
+            X: observer.observerDistance * pixelsPerMeter,
+            Y: 0,
+            Z: 0
+        }, -(deviceView.getRotationDeg() + FOV / 2));
+        var observeRangeVisual = new Kinetic.Rect({
+            x: rotatedDirection.X - (width / 2),
+            y: rotatedDirection.Z - (height / 2),
+            width: width,
+            height: height,
+            fill: '',
+            stroke: 'green',
+            strokeWidth: 1,
+            opacity: 1
+        });
+        stationaryDevice.add(observeRangeVisual);
+    }
+
     // mouse events
-    stationaryDevice.on('mouseover', function() {
+    stationaryDevice.on('mouseover', function () {
         document.body.style.cursor = 'pointer';
         this.children[1].fill('#31CC00');
         this.children[1].stroke('');
@@ -465,7 +471,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         layer.draw();
     });
 
-    stationaryDevice.on('mouseout', function() {
+    stationaryDevice.on('mouseout', function () {
         document.body.style.cursor = 'default';
         this.children[1].fill('green');
         this.children[1].stroke('black');
@@ -474,32 +480,41 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
 
         //this.fill('rgba(0, 255, 0, 1.0)');
         ////this.stroke('');
-       // this.strokeWidth('0');
+        // this.strokeWidth('0');
         //this.opacity('0.3');
         layer.draw();
     });
 
-    var directionVector = {X:0,Y:0,Z:0};
-    var movedVector={X:0,Y:0,Z:0};
-    stationaryDevice.on('dragstart',function(){
-        console.log('dragged ' + ID+' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
-        movedVector = {X:this.getPosition().x/pixelsPerMeter,Y:0,Z:this.getPosition().y/pixelsPerMeter};
+    var directionVector = {X: 0, Y: 0, Z: 0};
+    var movedVector = {X: 0, Y: 0, Z: 0};
+    stationaryDevice.on('dragstart', function () {
+        console.log('dragged ' + ID + ' -> ' + this.getPosition().x / pixelsPerMeter + ',' + this.getPosition().y / pixelsPerMeter);
+        movedVector = {X: this.getPosition().x / pixelsPerMeter, Y: 0, Z: this.getPosition().y / pixelsPerMeter};
     });
-    stationaryDevice.on('dragend',function(){
-        console.log('dropped ' + ID +' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
-        movedVector.X -= this.getPosition().x/pixelsPerMeter;
-        movedVector.Z -= this.getPosition().y/pixelsPerMeter;
+    stationaryDevice.on('dragend', function () {
+        console.log('dropped ' + ID + ' -> ' + this.getPosition().x / pixelsPerMeter + ',' + this.getPosition().y / pixelsPerMeter);
+        movedVector.X -= this.getPosition().x / pixelsPerMeter;
+        movedVector.Z -= this.getPosition().y / pixelsPerMeter;
         directionVector.X += -(movedVector.X);
         directionVector.Z += -(movedVector.Z);
-        if(Math.abs(movedVector.X)>=0.1|| Math.abs(movedVector.Z)>=0.1){
+        if (Math.abs(movedVector.X) >= 0.1 || Math.abs(movedVector.Z) >= 0.1) {
             console.log('directionVector : ' + JSON.stringify(directionVector));
-            console.log("original location: "+JSON.stringify(originLocation));
-            io.emit('updateObjectLocation',{ID:ID,newLocation:{X:originLocation.X+directionVector.X,Y:originLocation.Y,Z:originLocation.Z+directionVector.Z},objectType:'device'});
+            console.log("original location: " + JSON.stringify(originLocation));
+            io.emit('updateObjectLocation', {
+                ID: ID,
+                newLocation: {
+                    X: originLocation.X + directionVector.X,
+                    Y: originLocation.Y,
+                    Z: originLocation.Z + directionVector.Z
+                },
+                objectType: 'device'
+            });
             refreshStationaryLayer();
         }
     });
+}
+    layer.add(stationaryDevice);
 
-     layer.add(stationaryDevice);
      ///TODO: add FOVGroupController
     if(FOV!=undefined){
         var rotatedDirection = matrixTransformation({X:stationaryDevice.children[0].outerRadius(),Y:0,Z:0},-(stationaryDevice.children[0].getRotationDeg()+FOV/2));
@@ -787,13 +802,17 @@ function refreshStationaryLayer() {
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function (data) {
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
-                if (data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null && data[key].observer != undefined) {
-                    //console.log("X:" + data[key].location.X)
-                    //console.log("Y:" + data[key].location.Y)
-                    //console.log("Z:" + data[key].location.Z)
-                    drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
-                        data[key].location.X, data[key].location.Z, data[key].width,
-                            data[key].depth, data[key].orientation.yaw, data[key].FOV,data[key].observer,layer,stage)
+                if(data[key].hasOwnProperty("stationary")&&data[key].hasOwnProperty("location")) {
+                    if (data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null && data[key].observer != undefined) {
+                        //console.log("X:" + data[key].location.X)
+                        //console.log("Y:" + data[key].location.Y)
+                        //console.log("Z:" + data[key].location.Z)
+                        drawStationaryDevice(data[key].uniqueDeviceID, data[key].location,
+                            data[key].location.X, data[key].location.Z, data[key].width,
+                            data[key].depth, data[key].orientation.yaw, data[key].FOV, data[key].observer, layer, stage)
+                    }
+                }else{
+                    console.log("LOVE?");
                 }
             }
         }
@@ -1094,6 +1113,14 @@ function updateContentWithObjects(){
         }
     });
 
+
+    var devicesStage = new Kinetic.Stage({
+        container:  document.getElementById('cnvSensors'),
+        width: 800,
+        height: 800
+    });
+    var deviceSlayer = new Kinetic.Layer();
+
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function(data){
         var htmlString= "";
 
@@ -1129,6 +1156,14 @@ function updateContentWithObjects(){
                         '<td>'+getOrientationInText(data[key].orientation)+'</td>' +'<td>disabled</td>'+
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
+                }
+                if(data[key].deviceType=="Tango"){
+                    //console.log(data[key]);
+                    if(data[key].hasOwnProperty("orientation")&& data[key].hasOwnProperty("location")) {
+                        drawStationaryDevice(data[key].uniqueDeviceID, data[key].location,
+                            data[key].location.X, data[key].location.Z, data[key].width,
+                            data[key].depth, data[key].orientation.yaw, data[key].FOV, data[key].observer, deviceSlayer, devicesStage)
+                    }
                 }
             }
         }

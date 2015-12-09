@@ -1056,19 +1056,19 @@ exports.cleanUpSensor = function(socketID,socket){
 /*
  Update a registered device with a new device info
  */
-exports.updateDevice = function(socket,deviceInfo,fn){
+exports.updateDevice = function(socketid,deviceInfo,fn){
 
-    if(devices[socket] != undefined){
-        console.log('Updating Device ' + devices[socket].uniqueDeviceID +' with device info: '+JSON.stringify(deviceInfo));
+    if(devices[socketid] != undefined){
+        console.log('Updating Device ' + devices[socketid].uniqueDeviceID +' with device info: '+JSON.stringify(deviceInfo));
         for(var key in deviceInfo){
-            devices[socket][key] = deviceInfo[key];
+            devices[socketid][key] = deviceInfo[key];
         }
     }else{
         console.log("got a device update request but the device hasn't been registered yet");
     }
 
     if(fn!=undefined){
-        fn(devices[socket]);
+        fn(devices[socketid]);
     }
 }
 
@@ -1215,7 +1215,7 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         console.log("Registering device: " + JSON.stringify(device)+"\n");
         //console.log('emitting registered device ID : '+ locator.devices[socket.id].uniqueDeviceID);
         if (fn != undefined) {
-            //console.log('callback with' + {deviceID:device.uniqueDeviceID,socketID:socket.id});
+            console.log('callback with' + JSON.stringify({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation}));
             fn({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
         }
 

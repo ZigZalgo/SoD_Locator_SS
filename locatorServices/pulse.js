@@ -72,7 +72,7 @@ function roomIntersectionEvent(){
         if(deviceList.hasOwnProperty(deviceKey)){
             //console.log(deviceKey);
             var device = deviceList[deviceKey];
-            if(device.location!=undefined && device.location!=null && device.orientation != null&& device.orientation != undefined){
+            if(device.location!=undefined && device.location!=null && device.orientation != null&& device.orientation != undefined&&device.hasOwnProperty("Observer")){
                 locator.getIntersectionPointInRoom(device,function(intersectionPoint,observerCB){
                     //console.log(JSON.stringify(intersectionPoint));
                     if(intersectionPoint!=null && intersectionPoint!=undefined){
