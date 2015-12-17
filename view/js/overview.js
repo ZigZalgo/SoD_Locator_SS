@@ -249,6 +249,8 @@ function drawSensor(context,X,Y,index,angle,FOV){
     context.fillText('K'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
 }
 
+
+
 //function takes room information and stage&layer from kineticJS
 function drawRoom(roomInfo,stage,layer,callback){
     //console.log("Drawing room: "+JSON.stringify(roomInfo));
@@ -365,6 +367,11 @@ function degrees (radians) {return radians * (180/Math.PI)}
 // cf. http://stackoverflow.com/a/12221474/257568
 function angle (cx, cy, px, py) {var x = cx - px; var y = cy - py; return Math.atan2 (-y, -x)}
 function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x), 2) + Math.pow ((p2y - p1y), 2))}
+function getDeviceOrientation(deviceX,deviceZ){
+    var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
+    var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+    return returnDegree;
+}
 
  function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observer,layer,stage){
      //console.log('width: '+ width + ' && height: ' + height);
@@ -379,11 +386,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         draggable:true
     });
 
-    function getDeviceOrientation(deviceX,deviceZ){
-        var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
-        var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
-        return returnDegree;
-    }
+
 
    // var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
     //var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
@@ -1120,6 +1123,8 @@ function updateContentWithObjects(){
         height: 800
     });
     var deviceSlayer = new Kinetic.Layer();
+    var cSensorsFromTango = document.getElementById("cnvSensors");
+    var ctxSensorsFromTango = cSensorsFromTango.getContext("2d");
 
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function(data){
         var htmlString= "";
@@ -1144,6 +1149,14 @@ function updateContentWithObjects(){
                 //console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP + " JSON "+JSON.stringify(data[key]));
                 //console.log(data[key]);
                 if(!data[key].stationary){
+                    try {
+                        if (data[key].deviceType == "Tango") {
+                            //console.log(data[key]);
+                            drawTango(ctxSensorsFromTango, data[key].location.X, data[key].location.Z, data[key].uniqueDeviceID, data[key].orientation.yaw, 45) //ctxSensors,sensorX,sensorY,kinectList[key].ID,angle, kinectList[key].FOV
+                        }
+                    }catch(e){
+                        console.log(e);
+                    }
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
                         '<td>('+getCoordinatesInText(data[key].location)+')</td>'+
                         '<td>'+getOrientationInText(data[key].orientation)+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
@@ -1157,14 +1170,7 @@ function updateContentWithObjects(){
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }
-                if(data[key].deviceType=="Tango"){
-                    //console.log(data[key]);
-                    if(data[key].hasOwnProperty("orientation")&& data[key].hasOwnProperty("location")) {
-                        drawStationaryDevice(data[key].uniqueDeviceID, data[key].location,
-                            data[key].location.X, data[key].location.Z, data[key].width,
-                            data[key].depth, data[key].orientation.yaw, data[key].FOV, data[key].observer, deviceSlayer, devicesStage)
-                    }
-                }
+
             }
         }
         function getCoordinatesInText(vector3){
@@ -1189,6 +1195,42 @@ function updateContentWithObjects(){
             '' +htmlString+
             '</table>'); /*appending the data on the page*/
     });
+}
+
+function drawTango(context,X,Y,index,angle,FOV){
+    var sensorX = X*pixelsPerMeter; //get this from sensor list later on
+    var sensorY = Y*pixelsPerMeter; //get this from sensor list later on
+    //var tangoWidth = 200;
+//    /console.log("drawing sensor  ->  X : "+sensorX+"Y: "+sensorY)
+    //draw circle for sensor on visualizer
+    var actualOrientation = 270-(angle+(90-getDeviceOrientation(X,Y)));
+    console.log(actualOrientation+" - "+getDeviceOrientation(X,Y)+" angle: "+angle);
+    context.beginPath();
+    context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),150/1000*pixelsPerMeter,actualOrientation*DEGREES_TO_RADIANS,actualOrientation*DEGREES_TO_RADIANS+Math.PI,true);
+    context.closePath();
+    context.lineWidth = 1;
+    context.fillStyle = 'rgba(58, 201, 51, 0.95)';
+    context.fill();
+    context.strokeStyle = '#292929';
+    context.stroke();
+    context.font = minorGridLineWidth*2+'px Arial';
+    context.fillStyle = '#3370d4';
+    context.fillText('T'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
+    var gradientVector = {X:1000,Z:0};
+    // get the vector from sensor point to the end point ot gradient
+    var rotatedGradientVector = matrixTransformation(gradientVector,actualOrientation);
+    //console.log('rotated: ' + JSON.stringify(rotatedGradientVector));
+    //console.log('sensorX: ' + sensorX + '\tsensorY: ' + sensorY);
+    // get the end point of the gradient
+    var endPointOfGradient = {X:shiftXToGridOrigin((rotatedGradientVector.X)/1000*pixelsPerMeter+sensorX),Z:shiftYToGridOrigin((rotatedGradientVector.Z)/1000*pixelsPerMeter+sensorY)}          // move the point to where it belongs in the canvas
+    //console.log('end point : ' + JSON.stringify(endPointOfGradient));
+    //console.log('->'  +shiftXToGridOrigin(sensorX)+'\t'+ shiftYToGridOrigin(sensorY)+'\t'+ endPointOfGradient.X+'\t'+endPointOfGradient.Z);
+    var grd = context.createLinearGradient(sensorX, sensorY, endPointOfGradient.X,endPointOfGradient.Z)//shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY) + (data[key].rangeInMM)/1000*pixelsPerMeter);
+    grd.addColorStop(0, 'rgba(58, 201, 51, 0.95)');
+    grd.addColorStop(1, 'rgba(58, 201, 51, 0.95)');
+    drawView(context, sensorX, sensorY, 1000, grd,(270-actualOrientation), 45);
+    //drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation.yaw+orientationToSensor+90), 30);
+
 }
 
 io.on("webMessageEvent",function(message){
