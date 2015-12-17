@@ -248,7 +248,9 @@ function drawSensor(context,X,Y,index,angle,FOV){
     context.fillStyle = '#3370d4';
     context.fillText('K'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
 }
-
+function getActualOrientationYaw(yaw,locationX,locationZ){
+    return (270-(yaw+(90-Math.abs(getDeviceOrientation(locationX,locationZ)))))%360;
+}
 
 
 //function takes room information and stage&layer from kineticJS
@@ -1203,7 +1205,7 @@ function drawTango(context,X,Y,index,angle,FOV){
     //var tangoWidth = 200;
 //    /console.log("drawing sensor  ->  X : "+sensorX+"Y: "+sensorY)
     //draw circle for sensor on visualizer
-    var actualOrientation = 270-(angle+(90-getDeviceOrientation(X,Y)));
+    var actualOrientation = getActualOrientationYaw(angle,X,Y)
     console.log(actualOrientation+" - "+getDeviceOrientation(X,Y)+" angle: "+angle);
     context.beginPath();
     context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),150/1000*pixelsPerMeter,actualOrientation*DEGREES_TO_RADIANS,actualOrientation*DEGREES_TO_RADIANS+Math.PI,true);
@@ -1213,9 +1215,6 @@ function drawTango(context,X,Y,index,angle,FOV){
     context.fill();
     context.strokeStyle = '#292929';
     context.stroke();
-    context.font = minorGridLineWidth*2+'px Arial';
-    context.fillStyle = '#3370d4';
-    context.fillText('T'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
     var gradientVector = {X:1000,Z:0};
     // get the vector from sensor point to the end point ot gradient
     var rotatedGradientVector = matrixTransformation(gradientVector,actualOrientation);
@@ -1230,7 +1229,9 @@ function drawTango(context,X,Y,index,angle,FOV){
     grd.addColorStop(1, 'rgba(58, 201, 51, 0.95)');
     drawView(context, sensorX, sensorY, 1000, grd,(270-actualOrientation), 45);
     //drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation.yaw+orientationToSensor+90), 30);
-
+    context.font = minorGridLineWidth*2+'px Arial';
+    context.fillStyle = "black";
+    context.fillText('T'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
 }
 
 io.on("webMessageEvent",function(message){

@@ -1066,7 +1066,6 @@ exports.updateDevice = function(socketid,deviceInfo,fn){
     }else{
         console.log("got a device update request but the device hasn't been registered yet");
     }
-
     if(fn!=undefined){
         fn(devices[socketid]);
     }
