@@ -989,7 +989,7 @@ exports.handleRequest = function (socket) {
     });
 
     /**
-     *  "sendEventToDevicesWithSelection" listener send playload to devices with selection including self.
+     *  "sendEventToDevicesWithSelection" listener send event and playload to devices with selection including self.
      *  @event sendEventToDevicesWithSelection
      *  @param {!object} request contains a nullable eventName, a array of selections such as the arrays of selection such as ["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]
      *  @param {?requestCallback} fn return callback contains status
@@ -997,14 +997,16 @@ exports.handleRequest = function (socket) {
      *  @example
      *  var request = {
      *      selection:["all", "inView", "inRange","allExclusive", "paired", "nearest", "single<ID number>"]
-     *      eventName:"anEventName" // if this is null, then the payload will be send to device directly without an eventname
+     *      eventName:"anEventName", // if this is null, then the payload will be send to device directly without an eventname
+     *      data:"data"//data that you want to send
      *      };
+     *
      *  socket.emit("sendEventToDevicesWithSelection",request,function(callback){
      *      console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
      *  })
      * */
     socket.on('sendEventToDevicesWithSelection', function(payload, fn){
-        //console.log(payload);
+        console.log(payload);
         for (var key in util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(payload.eventName==undefined){
@@ -1068,6 +1070,10 @@ exports.handleRequest = function (socket) {
 
     //END SENDING SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
+    /*
+        Update person location and gesture data. Coming from Kinect
+
+     */
     socket.on('personUpdate', function (persons, fn) {
         //get persons from body, call update function for each person
         if (persons != null) {
@@ -1168,6 +1174,9 @@ exports.handleRequest = function (socket) {
             fn(status)
         });
     });
+    socket.on("overrideMapInfo",function(request,fn){
+        locator.tangoService.overrideMapInfo(request.position,null);
+    })
 
 
 

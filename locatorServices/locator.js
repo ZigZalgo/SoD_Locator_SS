@@ -7,6 +7,8 @@ var Q = require('q');
 var async = require("async");
 var pulse = require("./pulse");
 var dataService = require("./data");
+const EventEmitter = require("events");
+
 //var events = require("events");
 
 
@@ -456,6 +458,7 @@ exports.updatePersons = function(receivedPerson, socket,callback){
                             }*/
                             if(receivedPerson.leftHandLocation!=null){
                                 personInList.hands.left.location = receivedPerson.leftHandLocation;
+
                             }
                             if(receivedPerson.rightHandLocation!=null){
                                 personInList.hands.right.location = receivedPerson.rightHandLocation;
