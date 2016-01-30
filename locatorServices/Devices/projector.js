@@ -1,7 +1,7 @@
 var locator     =   require('./../locator');
 var frontend    =   require('../../frontend');
 var factory     =   require('./../factory');
-var util        =   require('./../util');
+var util        =   require('./../sod_util');
 
 
 

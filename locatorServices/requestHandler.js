@@ -1,7 +1,7 @@
 var locator = require('./locator');
 var factory = require('./factory');
 var frontend = require('./../frontend');
-var util = require('./util');
+var sod_util = require('./sod_util');
 var pulse = require("./pulse");
 var async =
     require("async");
@@ -403,7 +403,7 @@ exports.handleRequest = function (socket) {
         }else{
             if (request.uniqueDeviceID != undefined) {
                 console.log('receive paring request: pair device '+ request.uniqueDeviceID +' with person ' + request.uniquePersonID );
-                locator.pairDevice(util.getDeviceSocketIDByID(request.uniqueDeviceID),request.uniquePersonID,request.pairType,socket,fn);
+                locator.pairDevice(sod_util.getDeviceSocketIDByID(request.uniqueDeviceID),request.uniquePersonID,request.pairType,socket,fn);
             }else
             if (request.deviceSocketID != undefined) {
                 locator.pairDevice(request.deviceSocketID, request.uniquePersonID,request.pairType,socket,fn);
@@ -723,7 +723,7 @@ exports.handleRequest = function (socket) {
     socket.on('getDevicesWithSelection', function (request, fn) {
        // console.log("There are " + request.selection.length + " filters in selection array." + JSON.stringify(request.selection))
         //console.log(util.filterDevices(socket, request.selection));
-        fn(util.filterDevices(socket, request));
+        fn(sod_util.filterDevices(socket, request));
     })
 
 
@@ -741,10 +741,10 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on("getDeviceInViewWithDistance",function(request,fn){
-        var devicesInView = util.filterDevices(socket,{selection:['inView']});
+        var devicesInView = sod_util.filterDevices(socket,{selection:['inView']});
         var listWithDistance = {};
         async.each(Object.keys(devicesInView),function(deviceKey,eachCallback){
-            util.getDistanceOfTwoLocation(locator.devices[socket.id].location,locator.devices[deviceKey].location,function(callback){
+            sod_util.getDistanceOfTwoLocation(locator.devices[socket.id].location,locator.devices[deviceKey].location,function(callback){
                 console.log(callback);
                 listWithDistance[deviceKey] = locator.devices[deviceKey];
                 listWithDistance[deviceKey]["distance"] = callback
@@ -857,10 +857,10 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('getDistanceToDevice', function (request, fn) {
-        if (util.getDeviceSocketIDByID(request.ID) != undefined) {
+        if (sod_util.getDeviceSocketIDByID(request.ID) != undefined) {
             //target device found, return distance
             try {
-                fn(util.distanceBetweenPoints(locator.devices[socket.id].location, locator.devices[util.getDeviceSocketIDByID(request.ID)].location));
+                fn(sod_util.distanceBetweenPoints(locator.devices[socket.id].location, locator.devices[sod_util.getDeviceSocketIDByID(request.ID)].location));
             }
             catch (err) {
                 console.log("Error calculating distance between devices: " + err);
@@ -885,10 +885,10 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('getDistanceBetweenDevices', function (request, fn) {
-        if (util.getDeviceSocketIDByID(request.ID1) != undefined && util.getDeviceSocketIDByID(request.ID2) != undefined) {
+        if (sod_util.getDeviceSocketIDByID(request.ID1) != undefined && sod_util.getDeviceSocketIDByID(request.ID2) != undefined) {
             //target devices found, return distance
             try {
-                fn(util.distanceBetweenPoints(locator.devices[util.getDeviceSocketIDByID(request.ID1)].location, locator.devices[util.getDeviceSocketIDByID(request.ID2)].location));
+                fn(sod_util.distanceBetweenPoints(locator.devices[sod_util.getDeviceSocketIDByID(request.ID1)].location, locator.devices[sod_util.getDeviceSocketIDByID(request.ID2)].location));
             }
             catch (err) {
                 console.log("Error calculating distance between devices: " + err);
@@ -914,9 +914,9 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('getDistanceBetweenPersonAndDevice', function (request, fn) {
-        if (locator.persons[request.ID1] != undefined && util.getDeviceSocketIDByID(request.ID2)!=undefined){
+        if (locator.persons[request.ID1] != undefined && sod_util.getDeviceSocketIDByID(request.ID2)!=undefined){
             try{
-                fn(util.distanceBetweenPoints(locator.persons[request.ID1].location, locator.devices[util.getDeviceSocketIDByID(request.ID2)].location));
+                fn(sod_util.distanceBetweenPoints(locator.persons[request.ID1].location, locator.devices[sod_util.getDeviceSocketIDByID(request.ID2)].location));
             }
             catch(err){
                 console.log("Error calculating distance between person and device: " + err);
@@ -943,7 +943,7 @@ exports.handleRequest = function (socket) {
     socket.on('getDistanceBetweenPeople', function(request, fn){
         if(locator.persons[request.ID1] != undefined && locator.persons[request.ID2]){
             try{
-                fn(util.distanceBetweenPoints(locator.persons[request.ID1].location, locator.persons[request.ID2].location));
+                fn(sod_util.distanceBetweenPoints(locator.persons[request.ID1].location, locator.persons[request.ID2].location));
             }
             catch(err){
                 console.log("Error calculating distance between people: " + err);
@@ -973,7 +973,7 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('sendEventToDevicesWithSelectionIncludingSelf', function(payload, fn){
-        for (var key in util.filterDevices(socket, payload)) {
+        for (var key in sod_util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key)) {
                 if(payload.eventName==undefined){
                     frontend.clients[key].send(payload)
@@ -1007,7 +1007,7 @@ exports.handleRequest = function (socket) {
      * */
     socket.on('sendEventToDevicesWithSelection', function(payload, fn){
         console.log(payload);
-        for (var key in util.filterDevices(socket, payload)) {
+        for (var key in sod_util.filterDevices(socket, payload)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(payload.eventName==undefined){
                     frontend.clients[key].send(payload.data)
@@ -1025,7 +1025,7 @@ exports.handleRequest = function (socket) {
 
     socket.on('requestDataFromSelection', function (request, fn) {
         console.log("Got request: " + JSON.stringify(request));
-        for (var key in util.filterDevices(socket, request)) {
+        for (var key in sod_util.filterDevices(socket, request)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(request.arguments==undefined) request.arguments = null;
                 frontend.clients[key].emit("request",
@@ -1136,7 +1136,7 @@ exports.handleRequest = function (socket) {
         console.log("Hand update with data: "+JSON.stringify(handdata));
         handdata.socketID = socket.id;
         handdata.sensorID = locator.sensors.leapMotions[socket.id].ID;
-        for (var key in util.filterDevices(socket, handdata)) {
+        for (var key in sod_util.filterDevices(socket, handdata)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
                 if(handdata.gestureType=="TYPE_CIRCLE") {
                     frontend.clients[key].emit("check", handdata);

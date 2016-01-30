@@ -1,16 +1,14 @@
 var factory = require('./factory');
 var _ = require('underscore');
 var locator = require('./locator')
-var util = require('./util');
+var sod_util = require('./sod_util');
 var frontend = require('./../frontend');
 var Q = require('q');
 var async = require("async");
 var pulse = require("./pulse");
 var dataService = require("./data");
+const util = require("util")
 const EventEmitter = require("events");
-
-//var events = require("events");
-
 
 var dataPoints = {};
 var persons = {};
@@ -32,15 +30,39 @@ exports.sensors = sensors;
 exports.dataPoints = dataPoints;
 exports.projectors = projector;
 //exports = projector;
-exports.projectorService = require("./Services/projector");
-exports.kinectService = require('./Services/kinect');
-exports.leapMotionService = require('./Services/leapMotion');
-exports.iBeaconService = require('./Services/iBeacon');
-exports.tangoService = require('./Services/tango');
+exports.projectorService = require("./Devices/projector");
+exports.kinectService = require('./Devices/kinect');
+exports.leapMotionService = require('./Devices/leapMotion');
+exports.iBeaconService = require('./Devices/iBeacon');
+exports.tangoService = require('./Devices/tango');
 
 
 var room = new factory.Room({X:0,Y:0,Z:0},6, 8, 4);
 exports.room = room;
+
+
+/**
+ * Internal Affairs: handles all the internal events;
+ *
+ */
+/*function myStream(){
+    EventEmitter.call(this);
+}
+util.inherits(myStream,EventEmitter)
+myStream.prototype.write = function(data){
+    this.emit("data",data)
+}
+var stream = new myStream();
+console.log(stream instanceof EventEmitter); // True
+console.log(myStream.super_ === EventEmitter); // True
+stream.on('data', function(data){
+    console.log("Received Data: "+data);
+})
+stream.write("It works!")
+stream.on('GestureHandler');
+*/
+// End of Internal Events
+
 
 
 // TODO: test!
@@ -126,7 +148,7 @@ exports.updatePersonLocationWithBeaconReadings = function (socket, data, fn){
 // calibration to sensors
 exports.calibrateSensors = function(sensorOnePoints, sensorTwoPoints){
     console.log("Calibrating Kinect...");
-    return util.getTranslationRule(sensorOnePoints[0], sensorOnePoints[1], sensorTwoPoints[0], sensorTwoPoints[1])
+    return sod_util.getTranslationRule(sensorOnePoints[0], sensorOnePoints[1], sensorTwoPoints[0], sensorTwoPoints[1])
 }
 
 /*
@@ -142,7 +164,7 @@ function isEmpty(str) {
  * **/
 function grabDataInRange(requestObject,targetObject){
     var distance,dataRange;
-    distance = util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
+    distance = sod_util.distanceBetweenPoints(requestObject.location,targetObject.location); // get distance between data and object
     console.log(requestObject);
     if(targetObject.observer.observerType=='radial'&&distance<targetObject.observer.observeRange){
         try{
@@ -210,7 +232,7 @@ exports.dropData = function(socket,requestObject,dropRange,fn){
                         var distance, dataPointDropRange;
                         dataPointDropRange = dataPoints[key].dropRange;              // get range of this point
                         //console.log('->-> Calculating: ' + JSON.stringify(requestObject.location) + ' with DP:' + dataPoints[key].ID + ' location: ' + JSON.stringify(dataPoints[key].location));
-                        distance = util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
+                        distance = sod_util.distanceBetweenPoints(requestObject.location, dataPoints[key].location); // get distance between data and object
                         if (distance <= dataPointDropRange) {
                             grabAllData(dataPoints[key], requestObject);    //dump the data once and return.
                             console.log('-> Dumping data to data point: ' + dataPoints[key].ID + ' since the distance: ' + distance + ' within dropRange: ' + dropRange);
@@ -272,13 +294,13 @@ function inRangeEvent(){
                         {
                             //console.log(JSON.stringify(locator.devices[deviceKey].observer));
                             if(locator.devices[deviceKey].observer.observerType == 'radial' &&
-                                util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observer.observeRange)
+                                sod_util.distanceBetweenPoints(locator.persons[personKey].location,locator.devices[deviceKey].location)<=locator.devices[deviceKey].observer.observeRange)
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:locator.persons[personKey].uniquePersonID}});
                                 console.log('-> enter radial'+JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                             }else if(locator.devices[deviceKey].observer.observerType == 'rectangular'
-                                && util.isInRect(locator.persons[personKey].location,util.getObserverLocation(locator.devices[deviceKey]),locator.devices[deviceKey].observer.observeWidth,locator.devices[deviceKey].observer.observeHeight) == true) // handles rectangular
+                                && sod_util.isInRect(locator.persons[personKey].location,sod_util.getObserverLocation(locator.devices[deviceKey]),locator.devices[deviceKey].observer.observeWidth,locator.devices[deviceKey].observer.observeHeight) == true) // handles rectangular
                             {
                                 locator.persons[personKey].inRangeOf[deviceKey] = {type:'device',ID:locator.devices[deviceKey].uniqueDeviceID};
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("enterObserveRange", {payload:{observer:{ID:locator.devices[deviceKey].uniqueDeviceID,type:'device'},visitor:locator.persons[personKey].uniquePersonID}});
@@ -287,13 +309,13 @@ function inRangeEvent(){
                         }
                         else if(locator.persons[personKey].inRangeOf[deviceKey]!=undefined) // handles leaves event
                         {
-                            if (locator.devices[deviceKey].observer.observerType == 'radial' && util.distanceBetweenPoints(locator.persons[personKey].location, locator.devices[deviceKey].location) > locator.devices[deviceKey].observer.observeRange) {
+                            if (locator.devices[deviceKey].observer.observerType == 'radial' && sod_util.distanceBetweenPoints(locator.persons[personKey].location, locator.devices[deviceKey].location) > locator.devices[deviceKey].observer.observeRange) {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, visitor: locator.persons[personKey].uniquePersonID}});
                                 delete locator.persons[personKey].inRangeOf[deviceKey];
                             }
                             if (locator.devices[deviceKey].observer.observerType == 'rectangular'
-                                && util.isInRect(locator.persons[personKey].location, util.getObserverLocation(locator.devices[deviceKey]), locator.devices[deviceKey].observer.observeWidth, locator.devices[deviceKey].observer.observeHeight) == false) // handles rectangular
+                                && sod_util.isInRect(locator.persons[personKey].location, sod_util.getObserverLocation(locator.devices[deviceKey]), locator.devices[deviceKey].observer.observeWidth, locator.devices[deviceKey].observer.observeHeight) == false) // handles rectangular
                             {
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[deviceKey]));
                                 frontend.clients[locator.devices[deviceKey].socketID].emit("leaveObserveRange", {payload: {observer: {ID: locator.devices[deviceKey].uniqueDeviceID, type: 'device'}, visitor: locator.persons[personKey].uniquePersonID}});
@@ -311,14 +333,14 @@ function inRangeEvent(){
                 if(locator.dataPoints.hasOwnProperty(dataPointKey)){
                     if(locator.persons[personKey].inRangeOf[dataPointKey]==undefined){ // handles enter event
                         if(locator.dataPoints[dataPointKey].observer.observerType=='rectangular'){
-                            if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer)==true){
+                            if(sod_util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer)==true){
                                 console.log('person inside of dataPoint: '+dataPointKey );
                                 locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                                 //TODO: add sendMessageToSubscriber function call
                                 locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                                 console.log('-> enter rec '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             }
-                        }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)<=locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
+                        }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && sod_util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)<=locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             locator.persons[personKey].inRangeOf[dataPointKey] = {type:'dataPoint',ID:locator.dataPoints[dataPointKey].ID};
                             locator.emitEventToSubscriber('enterObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber)
                             console.log('-> enter radial '+JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
@@ -326,13 +348,13 @@ function inRangeEvent(){
                     }else if(locator.persons[personKey].inRangeOf[dataPointKey]!=undefined){ // handles leave event
                         if(locator.dataPoints[dataPointKey].observer.observerType=='rectangular'){
                             //console.log('inRange '+ (locator.dataPoints[dataPointKey].location.Z-locator.dataPoints[dataPointKey].observer.observeHeight/2));
-                            if(util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer.observeHeight)==false){
+                            if(sod_util.isInRect(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location,locator.dataPoints[dataPointKey].observer.observeWidth,locator.dataPoints[dataPointKey].observer.observeHeight)==false){
                                 console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                                 //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}});
                                 locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
                                 delete locator.persons[personKey].inRangeOf[dataPointKey];
                             }
-                        }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)>locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
+                        }else if(locator.dataPoints[dataPointKey].observer.observerType=='radial' && sod_util.distanceBetweenPoints(locator.persons[personKey].location,locator.dataPoints[dataPointKey].location)>locator.dataPoints[dataPointKey].observer.observeRange){ // end of rectangualar
                             console.log('-> leaves ' + JSON.stringify(locator.persons[personKey].inRangeOf[dataPointKey]));
                             //frontend.io.sockets.emit('leaveObserveRange', {payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}});
                             locator.emitEventToSubscriber('leaveObserveRange',{payload: {observer: {ID: locator.dataPoints[dataPointKey].ID, type: 'dataPoint'}, visitor: locator.persons[personKey].uniquePersonID}},locator.dataPoints[dataPointKey].subscriber);
@@ -354,11 +376,11 @@ function inRangeEvent(){
 function grabEventHandler(object){
     //var distance;
     //var dataRange;
-    for( var key in dataPoints){
-        if(dataPoints.hasOwnProperty(key)){
+    for( var key in dataPoints) {
+        if (dataPoints.hasOwnProperty(key)) {
             //dataRange = dataPoints[key].range;              // get range of this point
             //distance = util.distanceBetweenPoints(object.location,dataPoints[key].location); // get distance between data and object
-            grabDataInRange(object,dataPoints[key]); // try to grab data from all the dataPoints
+            grabDataInRange(object, dataPoints[key]); // try to grab data from all the dataPoints
             //if(distance <= dataRange){
             // starting transfer data
             //var data = {dataPath:dataPoints[key].data};// copy data path from dataPoints to person;
@@ -366,7 +388,6 @@ function grabEventHandler(object){
             //}
         }
     }
-
 }
 
 
@@ -520,9 +541,9 @@ exports.updatePersons = function(receivedPerson, socket,callback){
                     }
                 }else{
                     //  The receivedPerson that is not in  this person list
-                    if(util.distanceBetweenPoints(personInList.location, receivedPerson.location) < nearestDistance){
+                    if(sod_util.distanceBetweenPoints(personInList.location, receivedPerson.location) < nearestDistance){
                         //
-                        nearestDistance= util.distanceBetweenPoints(personInList.location, receivedPerson.location);
+                        nearestDistance= sod_util.distanceBetweenPoints(personInList.location, receivedPerson.location);
                         nearestPersonID = personKey;
                         eachSeriesCallback();
                     }else{
@@ -543,7 +564,7 @@ exports.updatePersons = function(receivedPerson, socket,callback){
                         //console.log('person '+persons[nearestPersonID].uniquePersonID+' is now tracked by ' + socket.id);
                         //locator.removeUntrackedPersonID(persons[nearestPersonID].ID, receivedPerson.ID,socket)
                         console.log('-> Merging person to ' + persons[nearestPersonID].uniquePersonID + ' with nearestDistance : ' + nearestDistance);
-                        var foundSensorSocketInPersonID = util.findKeyByValue(persons[nearestPersonID].ID,socket.id);
+                        var foundSensorSocketInPersonID = sod_util.findKeyByValue(persons[nearestPersonID].ID,socket.id);
                         if(foundSensorSocketInPersonID!=false){
                             console.log("Person already contains sensor ID. Deleting.");
                             delete persons[nearestPersonID].ID[foundSensorSocketInPersonID];
@@ -686,7 +707,7 @@ exports.removeIDsNoLongerTracked = function(socket, newListOfPeople){
             // for all the keys in current person's ID list
             for(var IDkey in persons[key].ID){
                 //if current sensor socket ID is exists in the current person's ID list, and this sensor ID doesn't exit in the new list of people
-                if(persons[key].ID[IDkey] == socket.id && util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
+                if(persons[key].ID[IDkey] == socket.id && sod_util.findWithAttr(newListOfPeople, "ID", IDkey) == undefined){
                     try{
                         if(Object.keys(persons[key].ID).length > 1){
                             console.log('Person :'+persons[key].uniquePersonID+' currentlyTrackedBy before: ' + persons[key].currentlyTrackedBy +' seen by: '+ JSON.stringify(persons[key].ID) + ' deleting : '+persons[key].ID[IDkey]);//persons[key].ID[Object.keys(persons[key].ID)[0]]);
@@ -755,11 +776,11 @@ exports.removeUntrackedPersonID = function(personIDList,receivedPersonID,sensorS
     console.log('\t->-> im in!');
     if(personIDList[receivedPersonID]==undefined){
         // if the sensor socket.id exists
-        console.log('\t->-> existing ID: '+ util.findKeyWithAttr(personIDList,sensorSocket.id));
-        if(util.findKeyWithAttr(personIDList,sensorSocket.id)!=null){
+        console.log('\t->-> existing ID: '+ sod_util.findKeyWithAttr(personIDList,sensorSocket.id));
+        if(sod_util.findKeyWithAttr(personIDList,sensorSocket.id)!=null){
 
-            console.log('\t-> Deleting '+util.findKeyWithAttr(personIDList,sensorSocket.id)+' from ' + JSON.stringify(personIDList));
-            delete personIDList[util.findKeyWithAttr(personIDList,sensorSocket.id)];
+            console.log('\t-> Deleting '+sod_util.findKeyWithAttr(personIDList,sensorSocket.id)+' from ' + JSON.stringify(personIDList));
+            delete personIDList[sod_util.findKeyWithAttr(personIDList,sensorSocket.id)];
         }
     }
 }
@@ -992,7 +1013,7 @@ exports.cleanUpDevice = function(socketID){
 exports.cleanUpSensor = function(socketID,socket){
     frontend.io.sockets.emit("refreshWebClientSensors", {});
     //delete sensors[socketID];
-    util.recursiveDeleteKey(locator.sensors,socketID).then(function(callback){
+    sod_util.recursiveDeleteKey(locator.sensors,socketID).then(function(callback){
         switch(callback.toLowerCase()) {
             case 'kinects':
                 console.log("a kinect disconnected");
@@ -1247,8 +1268,8 @@ exports.getIntersectionPointInRoom = function(observer,callback){
     // pitch as z rotation, yaw as Y rotation
     var room = locator.room;
     var observerHeight = observer.location.Y;
-    var pitchRad = observer.orientation.pitch * util.DEGREES_TO_RADIANS;
-    util.isInRect(observer.location,room.location,room.length,room.depth,function(observerInRoom){
+    var pitchRad = observer.orientation.pitch * sod_util.DEGREES_TO_RADIANS;
+    sod_util.isInRect(observer.location,room.location,room.length,room.depth,function(observerInRoom){
         if(observerInRoom) {
             //console.log('orientation: '+JSON.stringify(observer.orientation));
             if (observer.orientation.pitch > 0) { // if the observer is looking up
@@ -1269,16 +1290,16 @@ exports.getIntersectionPointInRoom = function(observer,callback){
                 function (plcallback) {
                     if(hit != 'neither') {
                         //console.log();
-                        util.translateOrientationToReference(observer,
+                        sod_util.translateOrientationToReference(observer,
                             function (orientationToReference) {
                                // console.log("Ori to Reference: "+orientationToReference);
-                                util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
+                                sod_util.matrixTransformation(initialVector, -orientationToReference, function (arg) {
                                   //  console.log("Direction Vector: "+JSON.stringify(arg)+" ProjectionFromHeight: "+projectionFromHeight);
                                     //console.log("direction: "+JSON.stringify(arg));
                                     //var observerSightIn2DV = factory.makeLineUsingOrientation(observer.location, orientationToReference);
-                                    util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
+                                    sod_util.pointMoveToDirection(observer.location, arg, Math.abs(projectionFromHeight), function (movedLocation) {
                                         //console.log("MovedLocation: " + JSON.stringify(movedLocation));
-                                        util.inRoom(movedLocation, function (inRoomBool) {
+                                        sod_util.inRoom(movedLocation, function (inRoomBool) {
                                         // console.log("In room ? "+inRoomBool);
                                             if (inRoomBool == false) {
                                                 plcallback(null, null);
@@ -1299,7 +1320,7 @@ exports.getIntersectionPointInRoom = function(observer,callback){
                 },
                 function (plcallback) {
                     // check if intersected on four walls
-                    util.getIntersectedWall(observer, function (result) {
+                    sod_util.getIntersectedWall(observer, function (result) {
                         //console.log(result);
                         plcallback(null, result)
                     })
@@ -1339,7 +1360,7 @@ exports.getIntersectionPointInRoom = function(observer,callback){
 // TODO: test!
 exports.calcIntersectionPointsForDevices = function(observerSocketID, devicesInFront,done){
     var returnDevices = {};
-    util.translateOrientationToReference(locator.devices[observerSocketID],
+    sod_util.translateOrientationToReference(locator.devices[observerSocketID],
     function(orientationToReference){
         //console.log('got orientation to reference: ' + orientationToReference);
         var observerLineOfSight = factory.makeLineUsingOrientation(locator.devices[observerSocketID].location, orientationToReference);
@@ -1349,19 +1370,19 @@ exports.calcIntersectionPointsForDevices = function(observerSocketID, devicesInF
                 function(deviceInFront,deviceInFrontCallback){ // using async each function to iterate through the whole array
                     if (devices[deviceInFront] != undefined) {
                         if (devices[deviceInFront].width != null) {
-                            var sides = util.getLinesOfShape(devices[deviceInFront]);
+                            var sides = sod_util.getLinesOfShape(devices[deviceInFront]);
 
                             var intersectionPointWrap = {intersectionPoint:null,distance:1000,observerSocketID:locator.devices[observerSocketID].socketID,intersectedSocketID:locator.devices[deviceInFront].socketID,relevance:{X:0,Y:0}};
                             //console.log("Sides: " + JSON.stringify(sides))
                             async.each(sides,
                                 // 2nd param is the function that each item is passed to
                                 function(side, callback){
-                                    util.getIntersectionPoint(observerLineOfSight, side).then(
+                                    sod_util.getIntersectionPoint(observerLineOfSight, side).then(
                                         function(IntersectionPoint){
                                             //console.log("intersection point: " + JSON.stringify(IntersectionPoint));
                                             if (IntersectionPoint != null) {
                                                 //console.log("Added an intersection point: " + JSON.stringify(intPoint))
-                                                var distance = util.distanceBetweenPoints(devices[observerSocketID].location, IntersectionPoint);
+                                                var distance = sod_util.distanceBetweenPoints(devices[observerSocketID].location, IntersectionPoint);
                                                 if(distance<=intersectionPointWrap.distance){
                                                     intersectionPointWrap.intersectionPoint = IntersectionPoint;
                                                     intersectionPointWrap.distance = distance;
@@ -1469,9 +1490,9 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
             try {
 
                 //get the angle to sens
-                var angleToSensor = util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
-                var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
-                var rightFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor - (observer.FOV / 2));
+                var angleToSensor = sod_util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
+                var leftFieldOfView = sod_util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
+                var rightFieldOfView = sod_util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor - (observer.FOV / 2));
 
                 //console.log("Left FOV = " + leftFieldOfView)
                 //console.log("Right FOV = " + rightFieldOfView)s
@@ -1481,13 +1502,13 @@ exports.getDevicesInFront = function(observerSocketID, deviceList){
                     if (deviceList[key] != observer && deviceList[key].location != undefined) {
                         //console.log(deviceList[key].location);
                         if (leftFieldOfView > rightFieldOfView &&
-                            (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
-                            (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                            (sod_util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView &&
+                            (sod_util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
                             return true;
                         }
                         else if (leftFieldOfView < rightFieldOfView) {
-                            if ((util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
-                                (util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                            if ((sod_util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                                (sod_util.normalizeAngle(Math.atan2(deviceList[key].location.Z - observer.location.Z, deviceList[key].location.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
                                 return true;
                             }
                         }
@@ -1521,8 +1542,8 @@ exports.getNearestDevice = function (observer, listDevices) {
                 }
 
                 //if device in list is closer to observer than currentClosestDevice, replace currentClosestDevice with device in list
-                else if (util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) <
-                    util.distanceBetweenPoints(currentClosestDevice.location, observer.location)) {
+                else if (sod_util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) <
+                    sod_util.distanceBetweenPoints(currentClosestDevice.location, observer.location)) {
                     return compareNextDeviceInList(keyIndexOfDeviceList - 1, listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]]);
                 }
                 //currentClosestDevice is closer to observer than device in list, no change
@@ -1554,8 +1575,8 @@ exports.getDevicesWithinRange = function (observer, maxRange, listDevices) {
             if(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].uniqueDeviceID == observer.uniqueDeviceID){
                 return filterDeviceListByRange(keyIndexOfDeviceList - 1, listDevicesToReturn);
             }
-            else if (util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) > maxRange) {
-                console.log(util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location));
+            else if (sod_util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location) > maxRange) {
+                console.log(sod_util.distanceBetweenPoints(listDevices[Object.keys(listDevices)[keyIndexOfDeviceList]].location, observer.location));
                 console.log(maxRange);
                 return filterDeviceListByRange(keyIndexOfDeviceList - 1, listDevicesToReturn);
             }
@@ -1600,8 +1621,8 @@ exports.getDeviceByID = function (ID){
         var container = {};
 
         if(ID != undefined){
-            if(devices[util.getDeviceSocketIDByID(ID)] != undefined){
-                container[util.getDeviceSocketIDByID(ID)] = devices[util.getDeviceSocketIDByID(ID)];
+            if(devices[sod_util.getDeviceSocketIDByID(ID)] != undefined){
+                container[sod_util.getDeviceSocketIDByID(ID)] = devices[sod_util.getDeviceSocketIDByID(ID)];
                 return container;
             }
             else{
@@ -1875,5 +1896,4 @@ exports.loadModifySaveCurrentState_single = function(entity,action,finalCallback
             //console.log(JSON.stringify(locator.room,null,4));
         }
     })
-
 }

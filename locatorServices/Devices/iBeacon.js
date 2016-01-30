@@ -9,7 +9,7 @@
     var locator     =   require('./../locator');
     var frontend    =   require('../../frontend');
     var factory     =   require('./../factory');
-    var util        =   require('./../util');
+    var sod_util    =   require('./../sod_util');
     var fs = require('fs');
     var math = require('mathjs');
 

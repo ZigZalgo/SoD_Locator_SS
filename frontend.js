@@ -48,7 +48,7 @@ var requestHandler = require('./locatorServices/requestHandler');
 var fs = require('fs');
 var factory = require('./locatorServices/factory');
 var locator = requestHandler.locator;
-var util = require('./locatorServices/util');
+var util = require('./locatorServices/sod_util');
 var clients = {};
 exports.io = io;
 exports.clients = clients;
@@ -354,7 +354,7 @@ function init(){
     var fs = require('fs');
     var dataDirectory = 'data/temp/';
 //var thumbnailSize = 400;
-    var util = require('./locatorServices/util');
+    var util = require('./locatorServices/sod_util');
     var mime = require('mime');
 
     //

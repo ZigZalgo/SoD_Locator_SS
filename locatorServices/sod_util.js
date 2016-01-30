@@ -1,6 +1,6 @@
 var factory = require('./factory');
 var locator = require('./locator');
-var util = require('./util');
+var sod_util = require('./sod_util');
 var Q = require('q');
 var async = require('async');
 
@@ -52,10 +52,10 @@ exports.getTranslationRule = function (startingLocation1, endingLocation1, start
     return(setVariables(fixSign));
 
     function setVariables(cb) {
-        var degreeBetweenVectors = util.getDegreeOfTwoVectors(util.getVector(startingLocation1, endingLocation1), util.getVector(startingLocation2, endingLocation2)); // using dot product
-        var rotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2, endingLocation2), degreeBetweenVectors);               // clockwise
-        var counterRotatedVector2 = util.matrixTransformation(util.getVector(startingLocation2, endingLocation2), -degreeBetweenVectors);
-        var rotatedVectorEndingLocation2 = util.matrixTransformation(endingLocation2, degreeBetweenVectors);
+        var degreeBetweenVectors = sod_util.getDegreeOfTwoVectors(sod_util.getVector(startingLocation1, endingLocation1), sod_util.getVector(startingLocation2, endingLocation2)); // using dot product
+        var rotatedVector2 = sod_util.matrixTransformation(sod_util.getVector(startingLocation2, endingLocation2), degreeBetweenVectors);               // clockwise
+        var counterRotatedVector2 = sod_util.matrixTransformation(sod_util.getVector(startingLocation2, endingLocation2), -degreeBetweenVectors);
+        var rotatedVectorEndingLocation2 = sod_util.matrixTransformation(endingLocation2, degreeBetweenVectors);
         //console.log("CALLING fixSign with degreeBetweenVectors = " + degreeBetweenVectors)
         return(cb(degreeBetweenVectors, rotatedVector2, counterRotatedVector2, rotatedVectorEndingLocation2));
     }
@@ -63,7 +63,7 @@ exports.getTranslationRule = function (startingLocation1, endingLocation1, start
     function fixSign(degreeBetweenVectors, rotatedVector2, counterRotatedVector2, rotatedVectorEndingLocation2) {
         var spaceTransitionX;
         var spaceTransitionZ;
-        if (Math.abs(rotatedVector2.X - util.getVector(startingLocation1, endingLocation1).X) < util.ROUND_RATIO && Math.abs(rotatedVector2.Z - util.getVector(startingLocation1, endingLocation1).Z) < util.ROUND_RATIO) {
+        if (Math.abs(rotatedVector2.X - sod_util.getVector(startingLocation1, endingLocation1).X) < sod_util.ROUND_RATIO && Math.abs(rotatedVector2.Z - sod_util.getVector(startingLocation1, endingLocation1).Z) < sod_util.ROUND_RATIO) {
             spaceTransitionX = (endingLocation1.X - rotatedVectorEndingLocation2.X);
             spaceTransitionZ = (endingLocation1.Z - rotatedVectorEndingLocation2.Z);
             return {
@@ -75,8 +75,8 @@ exports.getTranslationRule = function (startingLocation1, endingLocation1, start
                 startingLocation: startingLocation2
             };
         }
-        else if (Math.abs(counterRotatedVector2.X - util.getVector(startingLocation1, endingLocation1).X) < util.ROUND_RATIO && Math.abs(counterRotatedVector2.Z - util.getVector(startingLocation1, endingLocation1).Z) < util.ROUND_RATIO) {
-            var counterRotatedVectorEndingLocation2 = util.matrixTransformation(endingLocation2, -degreeBetweenVectors);
+        else if (Math.abs(counterRotatedVector2.X - sod_util.getVector(startingLocation1, endingLocation1).X) < sod_util.ROUND_RATIO && Math.abs(counterRotatedVector2.Z - sod_util.getVector(startingLocation1, endingLocation1).Z) < sod_util.ROUND_RATIO) {
+            var counterRotatedVectorEndingLocation2 = sod_util.matrixTransformation(endingLocation2, -degreeBetweenVectors);
             spaceTransitionX = (endingLocation1.X - counterRotatedVectorEndingLocation2.X);
             spaceTransitionZ = (endingLocation1.Z - counterRotatedVectorEndingLocation2.Z);
             return {
@@ -246,7 +246,7 @@ exports.isInRect = function(objectLocation,observerLocation,width,height,fn){
 // get the intersection point from four walls, value passed into callback
 exports.getIntersectedWall = function(observer,callback){
     // get translation rule
-    util.translateOrientationToReference(observer,
+    sod_util.translateOrientationToReference(observer,
         function(orientationToReference){
             //console.log("To reference: "+ orientationToReference);
         var room = locator.room;
@@ -258,21 +258,21 @@ exports.getIntersectedWall = function(observer,callback){
         // process all fource walls, try to get intersection in XZ space
         async.parallel([
             function(paCallback){
-                util.getIntersectionPoint(observerSight,top).then(function(data){
+                sod_util.getIntersectionPoint(observerSight,top).then(function(data){
                     //console.log("haha"+JSON.stringify(data));
                     //console.log("TOP: "+ JSON.stringify(top));
                     paCallback(null,{intersectedPoint:data,side:'top'});
                 })
             },function(paCallback){
-                util.getIntersectionPoint(observerSight,left).then(function(data){
+                sod_util.getIntersectionPoint(observerSight,left).then(function(data){
                     paCallback(null,{intersectedPoint:data,side:'left'});
                 })
             },function(paCallback){
-                util.getIntersectionPoint(observerSight,right).then(function(data){
+                sod_util.getIntersectionPoint(observerSight,right).then(function(data){
                     paCallback(null,{intersectedPoint:data,side:'right'});
                 })
             },function(paCallback){
-                util.getIntersectionPoint(observerSight,bottom).then(function(data){
+                sod_util.getIntersectionPoint(observerSight,bottom).then(function(data){
                     paCallback(null,{intersectedPoint:data,side:'bottom'});
                 })
             }
@@ -307,7 +307,7 @@ exports.getIntersectedWall = function(observer,callback){
                                 //console.log("intPoint:" + JSON.stringify(intPoint));
                                 //console.log("observer:" + JSON.stringify(observer));
 
-                                util.isPointInView(intPoint.intersectedPoint,observer,function(isInView){
+                                sod_util.isPointInView(intPoint.intersectedPoint,observer,function(isInView){
                                     //console.log(isInView);
                                     if(isInView&&callbackLock==false){
                                         callbackLock=true;  // lock the callback to prevent multiple callback being invoked
@@ -321,7 +321,7 @@ exports.getIntersectedWall = function(observer,callback){
                             //console.log("intPoint:" + JSON.stringify(intPoint));
                             // once we get the intersectionPoint in FOV, we get the Y intersection value from pitch
                             if(intPoint!=null) {
-                                util.getDistanceOfTwoLocation(observer.location, intPoint.intersectedPoint, function (XZProjection) {
+                                sod_util.getDistanceOfTwoLocation(observer.location, intPoint.intersectedPoint, function (XZProjection) {
                                     var intersectionY = Math.tan(observer.orientation.pitch * DEGREES_TO_RADIANS) * XZProjection + parseFloat(observer.location.Y);
                                     //console.log("Y: "+intersectionY + "room.location.Y"+room.location.Y+"room.height"+room.height);
                                     if (intersectionY > (room.location.Y + room.height) ||
@@ -344,10 +344,10 @@ exports.getIntersectedWall = function(observer,callback){
                     })
                 }else{
                     // if there is only one intersection point , we double check if the point is in view
-                    util.isPointInView(intersectedPoints[0].intersectedPoint,observer,function(isInView){
+                    sod_util.isPointInView(intersectedPoints[0].intersectedPoint,observer,function(isInView){
                         if(isInView){
                             // if the point is inView we callback with the Y interesection value of data
-                            util.getDistanceOfTwoLocation(observer.location,intersectedPoints[0].intersectedPoint,function(XZProjection){
+                            sod_util.getDistanceOfTwoLocation(observer.location,intersectedPoints[0].intersectedPoint,function(XZProjection){
                                 var intersectionY = Math.tan(observer.orientation.pitch*DEGREES_TO_RADIANS)*XZProjection+observer.location.Y;
                                 if(intersectionY>(room.location.Y+room.height)||
                                     intersectionY<(room.location.Y)){
@@ -373,7 +373,7 @@ exports.getIntersectedWall = function(observer,callback){
 }
 // in 2D
 exports.pointMoveToDirection = function(locationOfPoint, moveDirectionVector, distance,callback){
-    util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
+    sod_util.getDistanceOfTwoLocation({X:0,Y:0,Z:0},moveDirectionVector,function(result){
         //console.log("vector distance: "+result+"\t direction: "+JSON.stringify(moveDirectionVector));
 
         var ratioToDistance = distance/result;
@@ -398,7 +398,7 @@ exports.inRoom = function(objectLocation,callback){
     if(objectLocation.Y > room.height||objectLocation.Y<0){
         callback(false);
     }else{
-        util.isInRect(objectLocation,room.location,room.length,room.depth,function(bool){
+        sod_util.isInRect(objectLocation,room.location,room.length,room.depth,function(bool){
             callback(bool);
         });
     }
@@ -408,8 +408,8 @@ exports.inRoom = function(objectLocation,callback){
 // Tested!
 exports.getIntersectionPoint = function (line1, line2) {
     //if lines are parallel
-    var isGreater = util.isGreater;
-    var isLess = util.isLess;
+    var isGreater = sod_util.isGreater;
+    var isLess = sod_util.isLess;
     return calculatePossibleInt(line1,line2).then(
         function(IntersectionPoint){
             if (line1.isLineSegement) {
@@ -591,8 +591,8 @@ exports.getDistanceToKinect = function (personX, personZ) {
 * Get a observerLocation of a object with orientation and observer (such as device objects)
 * */
 exports.getObserverLocation = function(objectWithObserver){
-    var actualOrientation = 360 - (objectWithObserver.orientation.yaw + util.getObjectOrientationToSensor(objectWithObserver.location.X,objectWithObserver.location.Z) + 90+ objectWithObserver.FOV/2);
-    var rotatedDirection = util.matrixTransformation({X:objectWithObserver.observer.observerDistance,Y:0,Z:0},-(actualOrientation+objectWithObserver.FOV/2));
+    var actualOrientation = 360 - (objectWithObserver.orientation.yaw + sod_util.getObjectOrientationToSensor(objectWithObserver.location.X,objectWithObserver.location.Z) + 90+ objectWithObserver.FOV/2);
+    var rotatedDirection = sod_util.matrixTransformation({X:objectWithObserver.observer.observerDistance,Y:0,Z:0},-(actualOrientation+objectWithObserver.FOV/2));
     var observerLocation = {X:rotatedDirection.X+objectWithObserver.location.X,Y:rotatedDirection.Y+objectWithObserver.location.Y,Z:rotatedDirection.Z+objectWithObserver.location.Z};
     return observerLocation;
 }
@@ -872,7 +872,7 @@ exports.getNearest = function(subject,objectList,functionCallback){
     async.eachSeries(Object.keys(objectList),function(index,itrCallback){
         //console.log(index);
         //console.log("\t"+JSON.stringify(subject)+"\n\t"+ JSON.stringify(objectList[index]));
-        util.getDistanceOfTwoLocation(subject.location,objectList[index].location,function(distance){
+        sod_util.getDistanceOfTwoLocation(subject.location,objectList[index].location,function(distance){
             if(distance<nearestDistance){
                 nearestDistance = distance;
                 nearestObject = objectList[index];
@@ -949,9 +949,9 @@ exports.isPointInView = function(pointLocation,observer,callback){
                     callback(false);
                 }
                 //get the angle to sens
-                var angleToSensor = util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
-                var leftFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
-                var rightFieldOfView = util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor - (observer.FOV / 2));
+                var angleToSensor = sod_util.getObjectOrientationToSensor(observer.location.X, observer.location.Z);
+                var leftFieldOfView = sod_util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor + (observer.FOV / 2));
+                var rightFieldOfView = sod_util.normalizeAngle(360 - observer.orientation.yaw - 90 - angleToSensor - (observer.FOV / 2));
 
                 //console.log("Left FOV = " + leftFieldOfView)
                 //console.log("Right FOV = " + rightFieldOfView)
@@ -959,8 +959,8 @@ exports.isPointInView = function(pointLocation,observer,callback){
 
                 if (pointLocation!=undefined) {
                     if (leftFieldOfView > rightFieldOfView){
-                        if(((util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView) &&
-                            ((util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView))
+                        if(((sod_util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView) &&
+                            ((sod_util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView))
                         {
                             //console.log("YES1");
                             callback(true)
@@ -971,8 +971,8 @@ exports.isPointInView = function(pointLocation,observer,callback){
                         }
                     }
                     else if (leftFieldOfView < rightFieldOfView) {
-                        if ((util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
-                            (util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
+                        if ((sod_util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) < leftFieldOfView ||
+                            (sod_util.normalizeAngle(Math.atan2(pointLocation.Z - observer.location.Z, pointLocation.X - observer.location.X) * 180 / Math.PI)) > rightFieldOfView) {
                             //console.log("YES2");
                             callback(true)
                             return true;

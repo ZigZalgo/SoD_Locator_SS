@@ -10,7 +10,7 @@
 var locator     =   require('./../locator');
 var frontend    =   require('../../frontend');
 var factory     =   require('./../factory');
-var util        =   require('./../util');
+var sod_util        =   require('./../sod_util');
 
 // handles when registerKinect gets called
 exports.registerKinectHandler = function(socket,sensorInfo,callback){

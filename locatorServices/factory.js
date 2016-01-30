@@ -1,4 +1,4 @@
-var util = require('./util');
+var sod_util = require('./sod_util');
 
 var uniquePersonCounter = 0;
 var reservedDeviceIDRange = 100;
@@ -262,7 +262,7 @@ function Device(socket, opts){
         if(opts['ID']){
             if(intRegex.test(opts['ID'])) {
                 if(0 <= opts['ID'] && opts['ID'] <= reservedDeviceIDRange){
-                    if(util.getDeviceSocketIDByID(opts['ID']) == undefined){
+                    if(sod_util.getDeviceSocketIDByID(opts['ID']) == undefined){
                         this.uniqueDeviceID = opts['ID'];
                     }
                     else{
@@ -311,7 +311,7 @@ function Device(socket, opts){
         //this.uniqueDeviceID = uniqueDeviceCounter++;
         this.deviceType = "Not specified";
         this.location = {X: null, Y: null, Z:null};
-        this.FOV = util.DEFAULT_FIELD_OF_VIEW;
+        this.FOV = sod_util.DEFAULT_FIELD_OF_VIEW;
         this.depth = null;
         this.height = null;
         this.width =  null;

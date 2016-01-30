@@ -5,7 +5,7 @@
 var fs = require('fs');
 var dataDirectory = 'data/temp/';
 //var thumbnailSize = 400;
-var util = require('./util');
+var sod_util = require('./sod_util');
 var mime = require('mime');
 var locator = require('./locator');
 
@@ -126,7 +126,7 @@ exports.loadJSONWithCallback = function(path,callback){
         }
         else{
             try {
-                console.log(data);
+                //console.log(data);
                 obj = JSON.parse(data);
                 callback(obj)
             }catch(e){

@@ -9,7 +9,7 @@
 var locator     =   require('./../locator');
 var frontend    =   require('../../frontend');
 var factory     =   require('./../factory');
-var util        =   require('./../util');
+var sod_util        =   require('./../sod_util');
 var async       =   require('async');
 
 var maximumDistanceThreshold = 1.5;
@@ -56,7 +56,7 @@ exports.updatePersonWithHandData = function(handData,callback){
     handData.sensorID = locator.sensors.leapMotions[handData.socketID].ID;
     // use async module to handle when all the people are being processed
     if(Object.keys(locator.persons)>=0) {
-        util.getNearest(locator.sensors.leapMotions[handData.socketID], locator.persons, function (nearestObjectWithDistance) {
+        sod_util.getNearest(locator.sensors.leapMotions[handData.socketID], locator.persons, function (nearestObjectWithDistance) {
             console.log("Nearest object: " + JSON.stringify(nearestObjectWithDistance));
             if(nearestObjectWithDistance.distance<=maximumDistanceThreshold){
                 // once the closes person is within the threshold
