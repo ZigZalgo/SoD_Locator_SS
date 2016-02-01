@@ -1062,6 +1062,11 @@ function updateContentWithObjects(){
                      ctx.fillStyle = "#2cd72A"; //green
                 }
 
+                if(data[key].gesture != null){
+                    ctx.fillStyle = "white"; //green
+                }else{
+                    ctx.fillStyle = "#c82124"
+                }
 
                 ctx.font = minorGridLineWidth*2+'px Arial';
                 ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+minorGridLineWidth/2,shiftYToGridOrigin(zInMeters)-minorGridLineWidth/2);
