@@ -11,8 +11,10 @@ var locator = require('./locator');
 
 exports.show = function(req, res){
     var fileName = req.params.fileName;
-    var ext = req.params.ext;
-    var filePath = dataDirectory + fileName + "." + ext;
+    var ext = "";
+    if(req.params.res!=undefined)
+        ext = "."+req.params.ext;
+    var filePath = dataDirectory + fileName + ext;
 
     fs.readFile(filePath, function(err, data){
         if(err){

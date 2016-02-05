@@ -240,14 +240,17 @@ app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrient
 
 
 app.get('/files/:fileName.:ext', data.show);
+app.get('/files/:fileName', data.show);
 app.get('/test', function(req,res){
     res.sendfile(__dirname+"/view/testing.html");
 });
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {
-    console.log(req.files.dataFile.path + "          " + "data\\temp\\" + req.files.dataFile.name);
+    console.log(req.files.dataFile.path + "          " + "data/temp/" + req.files.dataFile.name);
+    //console.log(req);
+
     if(req.files.dataFile.name.length!=0) {
-        fs.rename(req.files.dataFile.path, "data\\temp\\" + req.files.dataFile.name, function (err) {
+        fs.rename(req.files.dataFile.path, "data/temp/" +req.files.dataFile.name, function (err) {
             if (err) throw err;
             locator.registerData({name: req.files.dataFile.name, type: req.files.dataFile.type, dataPath: "files\\" + req.files.dataFile.name});
             res.sendfile(__dirname + '/view/data.html');
