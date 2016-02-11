@@ -12,10 +12,11 @@ var locator = require('./locator');
 exports.show = function(req, res){
     var fileName = req.params.fileName;
     var ext = "";
-    if(req.params.res!=undefined)
+    console.log(req.params);
+    if(req.params.ext!=undefined)
         ext = "."+req.params.ext;
     var filePath = dataDirectory + fileName + ext;
-
+    console.log(filePath+" - "+req.params.ext);
     fs.readFile(filePath, function(err, data){
         if(err){
             if(err.code === 'ENOENT'){

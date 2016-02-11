@@ -19,6 +19,8 @@
     "async":"*",
     "jsdoc":"*",
     "net":"*",
-    "mathjs":"*"
+    "mathjs":"*",
+    "connect":"*",
+    "coffee-script":"*"
   }
 }
