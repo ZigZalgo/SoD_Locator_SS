@@ -246,11 +246,9 @@ app.get('/test', function(req,res){
 });
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {
-    console.log();
-    console.log(req.files.dataFile.path + "          " + "data/temp/" + req.files.dataFile.name);
+    /*console.log(req.files);
+    console.log(req.files.dataFile.path + "          " + "data/temp/" + req.files.dataFile.name);*/
     //console.log(req);
-
-
     if(req.files.dataFile.name.length!=0) {
         fs.rename(req.files.dataFile.path, "data/temp/" +req.files.dataFile.name, function (err) {
             if (err) throw err;

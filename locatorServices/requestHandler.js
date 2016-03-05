@@ -54,7 +54,6 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('registerDevice', function (deviceInfo, fn) {
-        console.log("Something tried to register...");
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         if(fn!=undefined) {
             locator.registerDevice(socket, deviceInfo,fn);
@@ -741,20 +740,20 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on("getDeviceInViewWithDistance",function(request,fn){
-        var devicesInView = sod_util.filterDevices(socket,{selection:['inView']});
-        var listWithDistance = {};
+        var devicesInView = sod_util.filterDevices(socket,{selection:['inView']})   // list of devices in view
+        var listWithDistance = {}                                                   // init for callback result
         async.each(Object.keys(devicesInView),function(deviceKey,eachCallback){
+            // going through devicesInView list ,find the distance between them.
             sod_util.getDistanceOfTwoLocation(locator.devices[socket.id].location,locator.devices[deviceKey].location,function(callback){
-                console.log(callback);
-                listWithDistance[deviceKey] = locator.devices[deviceKey];
+                // making result list
+                listWithDistance[deviceKey] = locator.devices[deviceKey]
                 listWithDistance[deviceKey]["distance"] = callback
-                eachCallback();
+                eachCallback()
             })
         },function(err){
-            console.log("ALL done."+JSON.stringify(listWithDistance));
+            //All done sending the list back
             if(fn!=undefined){
-                console.log(fn);
-                fn(listWithDistance);
+                fn(listWithDistance)
             }
         })
     });
@@ -946,7 +945,7 @@ exports.handleRequest = function (socket) {
                 fn(sod_util.distanceBetweenPoints(locator.persons[request.ID1].location, locator.persons[request.ID2].location));
             }
             catch(err){
-                console.log("Error calculating distance between people: " + err);
+                console.log("requestHandler.js_Event'getDistanceBetweenPeople'_Error calculating distance between people: " + err);
                 fn(-1);
             }
         }
@@ -1005,20 +1004,19 @@ exports.handleRequest = function (socket) {
      *      console.log(callback);  // callback object contains the distance between person ID1=0 and person ID2=1
      *  })
      * */
-    socket.on('sendEventToDevicesWithSelection', function(payload, fn){
-        console.log(payload);
-        for (var key in sod_util.filterDevices(socket, payload)) {
+    socket.on('sendEventToDevicesWithSelection', function(selection, fn){
+        for (var key in sod_util.filterDevices(socket, selection)) {
             if (locator.devices.hasOwnProperty(key) && socket != frontend.clients[key]) {
-                if(payload.eventName==undefined){
-                    frontend.clients[key].send(payload.data)
+                if(selection.eventName==undefined){
+                    frontend.clients[key].send(selection.data)
                 }
                 else{
-                    frontend.clients[key].emit(payload.eventName, payload.data)
+                    frontend.clients[key].emit(selection.eventName, selection.data)
                 }
             }
         }
         if (fn != undefined) {
-            fn({status: "server: content sent to devices with selection: " + payload.selection});
+            fn({status: "server: content sent to devices with selection: " + selection.selection});
         }
     });
 
@@ -1077,30 +1075,19 @@ exports.handleRequest = function (socket) {
     socket.on('personUpdate', function (persons, fn) {
         //get persons from body, call update function for each person
         if (persons != null) {
-            //console.log(Object.keys(persons).length);
-            //console.log(persons);
 			try{
                 locator.removeIDsNoLongerTracked(socket, persons);
 				locator.removeUntrackedPeople(0,socket);
 			}
-			catch(err){
-				console.log("error trying to remove untracked people: " + err);
-			}
-            /*persons.forEach(function (person) {
-                if(person.gesture!=null){
-                    console.log(person.gesture);
-                }
-                locator.updatePersons(person, socket);
-            });*/
-
+			catch(err) {
+                console.log("error trying to remove untracked people: " + err);
+            }
             var associations = {}; // association of skeletonID w/ uniquePersonID
             async.each(persons,function(person,eachItr){
-                if(person.gesture!=null){
+                if(person.gesture!=null) {
                     console.log(person.gesture);
                 }
-                //console.log("111");
                 locator.updatePersons(person, socket,function(association){
-                    //console.log("\nassociation: "+JSON.stringify(association));
                     if(association!=null){
                         associations[association.skeletonID] = association.uniquePersonID;
                         eachItr()
@@ -1110,7 +1097,6 @@ exports.handleRequest = function (socket) {
                     }
                 });
             },function(err){
-
                 if(fn!=undefined) {
                     if(Object.keys(associations).length == 0){
                         fn(null);
@@ -1119,14 +1105,10 @@ exports.handleRequest = function (socket) {
                     }
                 }
             });
-            /*if(fn!=undefined) {
-                fn();
-            }*/
         }
         else {
-            console.log("request was null");
+            console.log("requestHandler.js 'personUpdate' events param:persons is null");
         }
-        //locator.printPersons();
     });
 
 
