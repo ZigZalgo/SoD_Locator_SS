@@ -11,8 +11,8 @@ var locator = require('./locator');
 
 exports.show = function(req, res){
     var fileName = req.params.fileName;
-    var ext = "";
-    console.log(req.params);
+    var ext = ""
+    console.log("GET: "+JSON.stringify(req.params)+" query: "+JSON.stringify(req.query));
     if(req.params.ext!=undefined)
         ext = "."+req.params.ext;
     var filePath = dataDirectory + fileName + ext;
@@ -34,6 +34,36 @@ exports.show = function(req, res){
         }
     });
 }
+
+exports.adfShow = function(req, res){
+    var fileName = req.params.fileName;
+    var ext = ""
+    console.log("GET: "+JSON.stringify(req.params)+" query: "+JSON.stringify(req.query));
+    if(req.params.ext!=undefined)
+        ext = "."+req.params.ext;
+    if(req.query.hasOwnProperty("ADFLastUpdate")){
+        var filePath = dataDirectory + fileName + ext;
+        fs.stat(dataDirectory+"adf", function(err,stat){
+            console.log(stat);
+            var adfModifiedDate = new Date(Date.parse(req.query["ADFLastUpdate"]))
+            console.log(adfModifiedDate);
+            console.log(new Date(stat.mtime));
+            if(adfModifiedDate== new Date(stat.mtime)){
+                console.log("same time");
+            }else{
+                console.log("Wrong Time");
+            }
+
+        })
+
+    }else{
+        console.log("Requesting ADF with No ADFLastUpdate query? Man you are playing FIRE. ");
+    }
+    res.writeHead(200, {'Content-Type':"LOVELIFE"});
+    res.write("Whatup");
+    res.end();
+}
+
 
 exports.fileList = function(req, res){
     var walk    = require('walk');

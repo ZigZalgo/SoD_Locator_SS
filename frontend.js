@@ -240,6 +240,7 @@ app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrient
 
 
 app.get('/files/:fileName.:ext', data.show);
+app.get('/adf/', data.adfShow);
 app.get('/files/:fileName', data.show);
 app.get('/test', function(req,res){
     res.sendfile(__dirname+"/view/testing.html");
