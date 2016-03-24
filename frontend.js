@@ -1,11 +1,12 @@
 // Starting SoD Locator Services
-var express = require('express.io');
+var express = require('express');
 var net = require("net");
-var app = express().http().io();
 var data = require('./locatorServices/data');
 var sensorsREST = require('./locatorServices/REST/sensors');
 var devicesREST = require('./locatorServices/REST/devices');
 var locator = require('./locatorServices/locator');
+var connect = require("connect");
+var bodyParser = require("body-parser");
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
@@ -37,11 +38,13 @@ net.createServer(
         })}
 ).listen(843);
 */
-
-
-var http = require('http')
-    , server = http.createServer(app)
-    , io = require('socket.io').listen(server);
+//Migrating to Sockt.IO 1.0
+var app = require("express")();
+var http = require('http').Server(app);
+var io = require('socket.io').listen(http);
+http.listen(3000,function(){
+    console.log("listening on 3000");
+})
 var path = require('path');
 io.set('log level',0);
 var requestHandler = require('./locatorServices/requestHandler');
@@ -56,42 +59,37 @@ exports.clients = clients;
 var pulse = require('./locatorServices/pulse');
 
 
-app.configure(function(){
-    app.use(express.bodyParser({ keepExtensions: true, uploadDir: './data/temp' }));
-    //app.use(express.bodyParser({uploadDir:'./data'}));
-    app.use(app.router);
-    //locator.loadConfig();
-})
-
-if(isNaN(process.argv[2])){
+app.use(bodyParser({ keepExtensions: true, uploadDir: './data/temp' }));
+//app.use(express.bodyParser({uploadDir:'./data'}));
+/*if(isNaN(process.argv[2])){
     server.listen(3000);
 
 }
 else{
     server.listen(process.argv[2]);
-}
+}*/
 
 //requestHandler.start();
 
 app.get('/', function (req, res) {
-    res.sendfile(__dirname + '/view/setup.html');
+    res.sendFile(__dirname + '/view/setup.html');
 });
 app.get('/mobile', function (req, res) {
-    res.sendfile(__dirname + '/view/mobile.html');
+    res.sendFile(__dirname + '/view/mobile.html');
 });
 app.get('/grid', function (req, res) {
-    res.sendfile(__dirname + '/view/Grid.html');
+    res.sendFile(__dirname + '/view/Grid.html');
 });
 
 // React Section
 app.get('/react', function (req, res) {
-    res.sendfile(__dirname + '/view/react.html');
+    res.sendFile(__dirname + '/view/react.html');
 });
 app.get('/reactjs',function(req,res){
-    res.sendfile(__dirname+"/view/js/react-0.13.3/build/react.js");
+    res.sendFile(__dirname+"/view/js/react-0.13.3/build/react.js");
 })
 app.get('/JSXTransformer',function(req,res){
-    res.sendfile(__dirname+"/view/js/react-0.13.3/build/JSXTransformer.js");
+    res.sendFile(__dirname+"/view/js/react-0.13.3/build/JSXTransformer.js");
 })
 app.post('/files/comments.json', function (req, res) {
     console.log(req.body);
@@ -101,119 +99,119 @@ app.post('/files/comments.json', function (req, res) {
 // END of React Section
 
 app.get('/user', function (req, res) {
-    res.sendfile(__dirname + '/view/user.html');
+    res.sendFile(__dirname + '/view/user.html');
 });
 app.get('/testing', function (req, res) {
-    res.sendfile(__dirname + '/view/testing.html');
+    res.sendFile(__dirname + '/view/testing.html');
 });
 
 // Start: documentation
 app.get('/scripts/prettify/prettify.js', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/scripts/prettify/prettify.js');
+    res.sendFile(__dirname + '/data/reserved/doc/out/scripts/prettify/prettify.js');
 });
 
 app.get('/global.html', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/global.html');
+    res.sendFile(__dirname + '/data/reserved/doc/out/global.html');
 });
 
 app.get('/crossdomain.xml', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/crossdomain.xml');
+    res.sendFile(__dirname + '/data/reserved/crossdomain.xml');
 });
 
 
 
 app.get('/scripts/prettify/lang-css.js', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/scripts/prettify/lang-css.js');
+    res.sendFile(__dirname + '/data/reserved/doc/out/scripts/prettify/lang-css.js');
 });
 
 app.get('/styles/prettify-tomorrow.css', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/styles/prettify-tomorrow.css');
+    res.sendFile(__dirname + '/data/reserved/doc/out/styles/prettify-tomorrow.css');
 });
 
 app.get('/scripts/linenumber.js', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/scripts/linenumber.js');
+    res.sendFile(__dirname + '/data/reserved/doc/out/scripts/linenumber.js');
 });
 
 app.get('/requestHandler.js.html', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/requestHandler.js.html');
+    res.sendFile(__dirname + '/data/reserved/doc/out/requestHandler.js.html');
 });
 
 app.get('/styles/jsdoc-default.css', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/styles/jsdoc-default.css');
+    res.sendFile(__dirname + '/data/reserved/doc/out/styles/jsdoc-default.css');
 });
 
 app.get('/doc', function (req, res) {
-    res.sendfile(__dirname + '/data/reserved/doc/out/index.html');
+    res.sendFile(__dirname + '/data/reserved/doc/out/index.html');
 });
 
 app.get("/architecture",function(request,respond){
-    respond.sendfile(__dirname+"/data/reserved/SoD-Architecture.png");
+    respond.sendFile(__dirname+"/data/reserved/SoD-Architecture.png");
 });
 // End of documentation
 
 app.get('/jquery', function (req, res) {
-    res.sendfile(__dirname + '/view/js/jquery-1.11.1.min.js');
+    res.sendFile(__dirname + '/view/js/jquery-1.11.1.min.js');
 });
 
 
 app.get('/kinetic', function (req, res) {
-    res.sendfile(__dirname + '/view/js/kinetic-v5.1.0.min.js');
+    res.sendFile(__dirname + '/view/js/kinetic-v5.1.0.min.js');
 });
 
 app.get('/jquery-mobile', function (req, res) {
-    res.sendfile(__dirname + '/view/js/jquery.mobile-1.4.3.min.js');
+    res.sendFile(__dirname + '/view/js/jquery.mobile-1.4.3.min.js');
 });
 
 
 app.get('/style', function (req, res) {
-    res.sendfile(__dirname + '/view/style/style.css');
+    res.sendFile(__dirname + '/view/style/style.css');
 });
 //jquery.mobile-1.4.3.min.css
 app.get('/style-mobile', function (req, res) {
-    res.sendfile(__dirname + '/view/style/jquery.mobile-1.4.3.min.css');
+    res.sendFile(__dirname + '/view/style/jquery.mobile-1.4.3.min.css');
 });
 // I don't know why Jquery wants to load this so bad
 app.get('/images/ajax-loader.gif', function (req, res) {
-    res.sendfile(__dirname + '/view/images/ajax-loader.gif');
+    res.sendFile(__dirname + '/view/images/ajax-loader.gif');
 });
 
 app.get('/overviewJS', function (req, res) {
-    res.sendfile(__dirname + '/view/js/overview.js');
+    res.sendFile(__dirname + '/view/js/overview.js');
 });
 
 
 app.get('/calibrateJS', function (req, res) {
-    res.sendfile(__dirname + '/view/js/calibrate.js');
+    res.sendFile(__dirname + '/view/js/calibrate.js');
 });
 app.get('/SoDLibrary', function (req, res) {
-    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Library.js');
+    res.sendFile(__dirname + '/SOD_JS_Library/SOD_JS_Library.js');
 });
 app.get('/JSDeviceClient', function (req, res) {
-    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Sample_Client.html');
+    res.sendFile(__dirname + '/SOD_JS_Library/SOD_JS_Sample_Client.html');
 });
 app.get('/JSSensorClient', function (req, res) {
-    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_Sensor_Client.html');
+    res.sendFile(__dirname + '/SOD_JS_Library/SOD_JS_Sensor_Client.html');
 });
 app.get('/JSclientCSS', function (req, res) {
-    res.sendfile(__dirname + '/SOD_JS_Library/sample_client_style.css');
+    res.sendFile(__dirname + '/SOD_JS_Library/sample_client_style.css');
 });
 app.get('/JSDataPointClient', function (req, res) {
-    res.sendfile(__dirname + '/SOD_JS_Library/SOD_JS_DataPoint_Client.html');
+    res.sendFile(__dirname + '/SOD_JS_Library/SOD_JS_DataPoint_Client.html');
 });
 app.get('/data', function (req, res) {
-    res.sendfile(__dirname + '/view/data.html');
+    res.sendFile(__dirname + '/view/data.html');
 });
 app.get('/dataJS', function (req, res) {
-    res.sendfile(__dirname + '/view/js/dataView.js');
+    res.sendFile(__dirname + '/view/js/dataView.js');
 });
 app.get('/UIJS',function(req,res){
-    res.sendfile(__dirname + '/view/js/UI.js');
+    res.sendFile(__dirname + '/view/js/UI.js');
 })
 app.get("/unity3DEngine",function(req,res){
-    res.sendfile(__dirname+"/view/unity_visualizer.unity3d");
+    res.sendFile(__dirname+"/view/unity_visualizer.unity3d");
 })
 app.get("/unity3DVisualizer",function(req,res){
-    res.sendfile(__dirname+"/view/unity_visualizer.html");
+    res.sendFile(__dirname+"/view/unity_visualizer.html");
 })
 
 app.get('/setting',function(req,res){
@@ -243,7 +241,7 @@ app.get('/files/:fileName.:ext', data.show);
 app.get('/adf/', data.adfShow);
 app.get('/files/:fileName', data.show);
 app.get('/test', function(req,res){
-    res.sendfile(__dirname+"/view/testing.html");
+    res.sendFile(__dirname+"/view/testing.html");
 });
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {
@@ -254,7 +252,7 @@ app.post('/upload', function(req, res) {
         fs.rename(req.files.dataFile.path, "data/temp/" +req.files.dataFile.name, function (err) {
             if (err) throw err;
             locator.registerData({name: req.files.dataFile.name, type: req.files.dataFile.type, dataPath: "files\\" + req.files.dataFile.name});
-            res.sendfile(__dirname + '/view/data.html');
+            res.sendFile(__dirname + '/view/data.html');
             //res.redirect('/');
         });
     }else{
@@ -262,7 +260,7 @@ app.post('/upload', function(req, res) {
     }
 });
 
-io.sockets.on('connection', function (socket) {
+io.on('connection', function (socket) {
     socket.on('error', function() { console.log("error"); });
     console.log("something connected with sessionID [" + socket.id + "] and IP [" + socket.handshake.address.address + "]");
 
@@ -338,8 +336,6 @@ function init(){
 
     //exports.serverAddress;
     setTimeout(function(){pulse.start();}, 3000); // three second after heartbeat
-
-
 
 // setting up server IP and display in the console
     for (var k in interfaces) {

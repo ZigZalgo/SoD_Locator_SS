@@ -10,9 +10,7 @@
     "chai": "*",
     "mocha": "*",
     "underscore": "*",
-    "socket.io": "0.9.17",
     "zeparser": "0.0.7",
-    "express.io": "*",
     "walk": "*",
     "mime": "*",
     "q":"*",
@@ -21,6 +19,9 @@
     "net":"*",
     "mathjs":"*",
     "connect":"*",
-    "coffee-script":"*"
+    "coffee-script":"*",
+    "express":"4.10.2",
+    "socket.io":"*",
+    "body-parser":"*"
   }
 }
