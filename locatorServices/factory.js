@@ -117,7 +117,6 @@ Person.prototype = {
 
 exports.Person = Person;
 
-
 // Kinect constructor
 function Kinect(socket){
     try{

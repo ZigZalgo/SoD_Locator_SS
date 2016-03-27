@@ -5,10 +5,7 @@ var sod_util = require('./sod_util');
 var pulse = require("./pulse");
 var async =
     require("async");
-// TODO: test!
-/*exports.start = function () {
-    locator.start();
-};*/
+var ERRequestHandler = require("ERServices/ERRequestHandler");
 
 exports.locator = locator;
 /**
@@ -19,7 +16,6 @@ exports.locator = locator;
  */
 exports.handleRequest = function (socket) {
     //START REGISTRATION EVENTS//////////////////////////////////////////////////////////////////////////////////////
-
     /**
      *  "registerDevice" listener handles register Device request
      *  @event reigsterDevice
@@ -54,6 +50,7 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('registerDevice', function (deviceInfo, fn) {
+        //console.log(deviceInfo);
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         if(fn!=undefined) {
             locator.registerDevice(socket, deviceInfo,fn);
@@ -61,8 +58,9 @@ exports.handleRequest = function (socket) {
             locator.registerDevice(socket,deviceInfo)
         }
     });
-    socket.on("registerDevice",function(deviceInfo,fn){
-
+    socket.on('Log',function(data){
+        console.log(data);
+        console.log(typeof data);
     })
 
     /**
@@ -1068,6 +1066,10 @@ exports.handleRequest = function (socket) {
 
     //END SENDING SERVICES///////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+
+
     /*
         Update person location and gesture data. Coming from Kinect
 
@@ -1110,8 +1112,6 @@ exports.handleRequest = function (socket) {
             console.log("requestHandler.js 'personUpdate' events param:persons is null");
         }
     });
-
-
 
 
     socket.on('handsUpdate',function(handdata,fn){
@@ -1163,4 +1163,5 @@ exports.handleRequest = function (socket) {
 
 
 
+    ERRequestHandler(socket);// Pass on the socket to ER scenario
 };
