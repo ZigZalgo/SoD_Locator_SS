@@ -1,11 +1,14 @@
 // Starting SoD Locator Services
 var express = require('express.io');
+var path = require('path');
 var net = require("net");
 var app = express().http().io();
+app.use(express.static(path.join(__dirname,'public')))
 var data = require('./locatorServices/data');
 var sensorsREST = require('./locatorServices/REST/sensors');
 var devicesREST = require('./locatorServices/REST/devices');
 var locator = require('./locatorServices/locator');
+
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
@@ -42,7 +45,7 @@ net.createServer(
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
-var path = require('path');
+
 io.set('log level',0);
 var requestHandler = require('./locatorServices/requestHandler');
 var fs = require('fs');
@@ -81,6 +84,9 @@ app.get('/mobile', function (req, res) {
 });
 app.get('/grid', function (req, res) {
     res.sendfile(__dirname + '/view/Grid.html');
+});
+app.get('/ER', function (req, res) {
+    res.sendfile(__dirname + '/view/ERMap/ERMap.html');
 });
 
 // React Section

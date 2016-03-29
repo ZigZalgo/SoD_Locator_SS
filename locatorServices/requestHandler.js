@@ -5,7 +5,7 @@ var sod_util = require('./sod_util');
 var pulse = require("./pulse");
 var async =
     require("async");
-var ERRequestHandler = require("ERServices/ERRequestHandler");
+var ERRequestHandler = require("./ERServices/ERRequestHandler");
 
 exports.locator = locator;
 /**
@@ -1163,5 +1163,5 @@ exports.handleRequest = function (socket) {
 
 
 
-    ERRequestHandler(socket);// Pass on the socket to ER scenario
+    ERRequestHandler.handle(socket);// Pass on the socket to ER scenario
 };

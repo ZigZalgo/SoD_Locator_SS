@@ -10,10 +10,16 @@ var async =
 exports.handle = function(socket){
     // Handles all the sockets related to ER scenario
     socket.on("ERPersonUpdate",function(personData, cb){
-        console.log("YO");
+        console.log(personData);
         if(locator.devices.hasOwnProperty(socket.id)){
-            console.log(personData)
+            //console.log(personData)
+            if(personData.hasOwnProperty("personID")){
+                ERLocator.updateERPersonData(socket,personData);
+            }
         }
+    })
+    socket.on("getAllERPerson",function(data,callback){
+        callback(ERLocator.ERPersons)
     })
 
 }
