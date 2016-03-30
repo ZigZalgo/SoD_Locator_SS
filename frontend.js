@@ -112,6 +112,9 @@ app.get('/user', function (req, res) {
 app.get('/testing', function (req, res) {
     res.sendfile(__dirname + '/view/testing.html');
 });
+app.get("/ERClient",function(req,res){
+    res.sendfile(__dirname+"/view/ERMap/ERClient.html")
+})
 
 // Start: documentation
 app.get('/scripts/prettify/prettify.js', function (req, res) {

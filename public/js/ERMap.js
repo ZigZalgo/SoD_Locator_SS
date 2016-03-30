@@ -5,6 +5,17 @@
  */
 
 // jQuery to collapse the navbar on scroll
+
+var locationOfInteresing = {lat:51.0801184, ltd: -114.1325908}
+// Custom Map Marker Icon - Customize the map-marker.png file to customize your icon
+var image = 'img/ER_map_marker_whitebg.png';
+var fireIcon = 'img/fireicon.png'
+var policeIcon = 'img/policeicon.png'
+var myLatLng = new google.maps.LatLng(locationOfInteresing.lat, locationOfInteresing.ltd);
+var EEELLocation = new google.maps.LatLng(51.0811681,-114.1300747);
+var responderLocation = new google.maps.LatLng(51.0796703,-114.1292812);
+
+
 function collapseNavbar() {
     if ($(".navbar").offset().top > 50) {
         $(".navbar-fixed-top").addClass("top-nav-collapse");
@@ -39,38 +50,38 @@ var map = null;
 // When the window has finished loading create our google map below
 google.maps.event.addDomListener(window, 'load', init);
 google.maps.event.addDomListener(window, 'resize', function() {
-    map.setCenter(new google.maps.LatLng(40.6700, -73.9400));
+    map.setCenter(myLatLng);
 });
 
 // Config socket.io
 io = io.connect();
 io.on('connect',function(data){
-    io.emit("getAllERPerson","",function(ERPeople){
-        console.log(data) // Works
-        for(var personKey in ERPeople){
-            if(ERPeople.hasOwnProperty(person)){
-                var personOfInterest = ERPeople[person];
-                if(personOfInterest.hasOwnProperty("heartbeat")){
-                    heartbeat = personOfInterest.heartbeat
-                    heartbeatWindow.setContent('<div style="color:black;"><div>Police: <span style="font-weight: bold;">John 117</span></div> <div>Heart beat: <span style="font-weight: bold;color:red;">'+heartbeat+'</span></div></div>')
-                    console.log(heartbeat);
+
+    setInterval(function(){
+        io.emit("getAllERPerson","",function(ERPeople){
+            console.log(ERPeople) // Works
+            for(var personKey in ERPeople){
+                if(ERPeople.hasOwnProperty(personKey)){
+                    var personOfInterest = ERPeople[personKey];
+                    if(personOfInterest.hasOwnProperty("heartbeat")){
+                        heartbeatWindow.setContent('<div style="color:black;"><div>Police: <span style="font-weight: bold;">John 117</span></div> <div>Heart beat: <span style="font-weight: bold;color:red;">'+personOfInterest.heartbeat+'</span></div></div>')
+                    }
                 }
             }
-        }
-    })
+        })
+    },1000)
 })
-
 
 function init() {
     // Basic options for a simple Google Map
     // For more options see: https://developers.google.com/maps/documentation/javascript/reference#MapOptions
-    var locationOfInteresing = {lat:51.0801184, ltd: -114.1325908}
+
     var mapOptions = {
         // How zoomed in you want the map to start at (always required)
         zoom: 17,
 
         // The latitude and longitude to center the map (always required)
-        center: new google.maps.LatLng(51.0801184, -114.1325908), // New York
+        center: myLatLng, // New York
 
         // Disables the default Google Maps UI components
         disableDefaultUI: false,
@@ -151,7 +162,7 @@ function init() {
             "stylers": [{
                 "saturation": 36
             }, {
-                "color": "#333333"
+                "color": "#a6a6a6"
             }, {
                 "lightness": 40
             }]
@@ -196,13 +207,7 @@ function init() {
     // Create the Google Map using out element and options defined above
     map = new google.maps.Map(mapElement, mapOptions);
 
-    // Custom Map Marker Icon - Customize the map-marker.png file to customize your icon
-    var image = 'img/ER_map_marker_whitebg.png';
-    var fireIcon = 'img/fireicon.png'
-    var policeIcon = 'img/policeicon.png'
-    var myLatLng = new google.maps.LatLng(locationOfInteresing.lat, locationOfInteresing.ltd);
-    var EEELLocation = new google.maps.LatLng(51.0811681,-114.1300747);
-    var responderLocation = new google.maps.LatLng(51.0796703,-114.1292812);
+
     //51.081034,-114.131995
     var beachMarker = new google.maps.Marker({
         position: myLatLng,
@@ -215,7 +220,7 @@ function init() {
         icon: fireIcon
     });
     heartbeatWindow = new google.maps.InfoWindow({
-        content: '<div style="color:black;"><div>Police: <span style="font-weight: bold;">John 117</span></div> <div>Heart beat: <span style="font-weight: bold;color:red;">'+heartbeat+'</span></div></div>'
+        content: '<div style="color:black;"><div>Police: <span style="font-weight: bold;">John 117</span></div> <div>Heart beat: <span id="ERPerson-117" style="font-weight: bold;color:red;">'+heartbeat+'</span></div></div>'
     });
     var responder = new google.maps.Marker({
         position: responderLocation,
