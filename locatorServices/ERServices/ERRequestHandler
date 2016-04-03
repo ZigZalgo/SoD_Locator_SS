@@ -10,7 +10,7 @@ var async =
 exports.handle = function(socket){
     // Handles all the sockets related to ER scenario
     socket.on("ERPersonUpdate",function(personData, cb){
-        console.log("Update Person Data: "+JSON.stringify(personData));
+        console.log("\nUpdate Person Data: "+JSON.stringify(personData));
             //console.log(personData)
         if(personData.hasOwnProperty("personID")){
             ERLocator.updateERPersonData(socket,personData);

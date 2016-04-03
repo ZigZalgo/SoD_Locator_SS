@@ -16,10 +16,9 @@ exports.createERPerson = function(socket){
 
 }
 exports.updateERPersonData = function(socket,updateData){
-    console.log(updateData);
     var personOfInterest;
     if(!ERPersons.hasOwnProperty(updateData.personID.toString())){
-        console.log("person "+updateData.personID+" doesn't exists");
+        console.log("person "+updateData.personID+" doesn't exists, making new person");
         var person = new factory.Person(117,null,socket);
         //console.log("person: "+JSON.stringify(person));
         person["socket"] = socket.id
@@ -32,12 +31,14 @@ exports.updateERPersonData = function(socket,updateData){
         }
         ERPersons[person.uniquePersonID] = person;
     }else{
-        console.log("person exists udpating info ");
         personOfInterest = ERPersons[updateData.personID.toString()]
         //console.log(personOfInterest);
         if(updateData.hasOwnProperty("heartbeat")){
+            if(Number(updateData['heartbeat'])!=0){
+                console.log("beep : "+Number(updateData['heartbeat']));
+            }
             personOfInterest.heartbeat = updateData["heartbeat"]
-            console.log("udpated person heartbeat to ");
+            console.log("updated person "+personOfInterest.uniquePersonID+" heartbeat to "+updateData['heartbeat']);
         }
     }
 

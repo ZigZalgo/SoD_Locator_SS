@@ -1240,6 +1240,8 @@ exports.registerDevice = function(socket, deviceInfo,fn){
         if (fn != undefined) {
             console.log('callback with' + JSON.stringify({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation}));
             fn({ID:devices[socket.id].uniqueDeviceID,status:"registered",entity:devices[socket.id],deviceID:device.uniqueDeviceID,socketID:socket.id,currentDeviceNumber:Object.keys(locator.devices).length,orientation:device.orientation});
+        }else{
+            socket.emit("assignUniqueID",{uniqueDeviceID:devices[socket.id].uniqueDeviceID});
         }
 
         switch(deviceInfo.deviceType) {

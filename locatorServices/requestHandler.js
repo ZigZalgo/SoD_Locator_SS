@@ -50,7 +50,7 @@ exports.handleRequest = function (socket) {
      *  })
      * */
     socket.on('registerDevice', function (deviceInfo, fn) {
-        //console.log(deviceInfo);
+        console.log("register device" + JSON.stringify(deviceInfo));
         frontend.clients[socket.id].clientType = deviceInfo.deviceType;
         if(fn!=undefined) {
             locator.registerDevice(socket, deviceInfo,fn);
