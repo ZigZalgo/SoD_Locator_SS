@@ -10,8 +10,8 @@ var locationOfInteresing = {lat:51.0801184, ltd: -114.1325908}
 // Custom Map Marker Icon - Customize the map-marker.png file to customize your icon
 var image = 'img/ER_map_marker_whitebg.png';
 var fireIcon = 'img/fireicon.png'
-var policeIcon = 'img/policeicon.png'
 var myLatLng = new google.maps.LatLng(locationOfInteresing.lat, locationOfInteresing.ltd);
+var policeIcon = {url:'img/police_green_2.png',scaledSize: new google.maps.Size(51,51)}
 var EEELLocation = new google.maps.LatLng(51.0811681,-114.1300747);
 var responderLocation = new google.maps.LatLng(51.0796703,-114.1292812);
 
@@ -90,7 +90,14 @@ function init() {
 
         // How you would like to style the map. 
         // This is where you would paste any style found on Snazzy Maps.
-        styles: [{
+        styles: [
+            {
+                stylers: [
+                    {"color":"#676566"}
+
+                ]
+            }
+            ,{
             "featureType": "water",
             "elementType": "geometry",
             "stylers": [{
@@ -142,7 +149,7 @@ function init() {
             }]
         }, {
             "featureType": "poi",
-            "elementType": "geometry",
+            "elementType": "all",
             "stylers": [{
                 "color": "#000000"
             }, {
@@ -220,9 +227,10 @@ function init() {
         icon: fireIcon
     });
     heartbeatWindow = new google.maps.InfoWindow({
-        content: '<div style="color:black;"><div>Police: <span style="font-weight: bold;">John 117</span></div> <div>Heart beat: <span id="ERPerson-117" style="font-weight: bold;color:red;">'+heartbeat+'</span></div></div>'
+        content: '<div style="color:black;"><div>Police: <span style="font-weight: bold;">John 117</span></div> ' +
+        '<div>Heart beat: <span id="ERPerson-117" style="font-weight: bold;color:red;">'+heartbeat+'</span></div></div>'
     });
-    var responder = new google.maps.Marker({
+    responder = new google.maps.Marker({
         position: responderLocation,
         map: map,
         icon: policeIcon
@@ -230,6 +238,14 @@ function init() {
     responder.addListener('click',function(){
         heartbeatWindow.open(map,responder);
     })
+
+    responder.setIcon()
+    responder.setIcon(amberPoliceIcon)
+    responder.setLabel("123");
+    responder.setTitle("321")
 }
+var responder;
+var redPoliceIcon = {url:"img/police_red.png",scaledSize: new google.maps.Size(51,51)}
+var amberPoliceIcon = {url:"img/police_amber.png",scaledSize: new google.maps.Size(51,51)}
 var heartbeatWindow ;
 var heartbeat = 75
