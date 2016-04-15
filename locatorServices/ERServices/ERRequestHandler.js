@@ -19,5 +19,12 @@ exports.handle = function(socket){
     socket.on("getAllERPerson",function(data,callback){
         callback(ERLocator.ERPersons)
     })
-
+    socket.on("showMediaAll",function(){
+        socket.broadcast.emit("showMedia")
+    })
+    socket.on("updateERLocation",function(request,callback){
+        //console.log(request);
+        var requestLocation = request.split(',')
+        socket.broadcast.emit("updateERLocationOnMap",{lat:requestLocation[0],lng:requestLocation[1]})
+    });
 }

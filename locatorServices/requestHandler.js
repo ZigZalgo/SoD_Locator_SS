@@ -1056,7 +1056,7 @@ exports.handleRequest = function (socket) {
     socket.on('broadcast', function (request, fn) {
         try {
             //console.log(JSON.stringify(request));
-            console.log("Received Broadcast emit from "+ frontend.clients[socket.id].clientType);
+            console.log("Received Broadcast emit from "+ frontend.clients[socket.id].clientType+" with message: "+JSON.stringify(request));
             socket.broadcast.emit(request.listener, {payload: request.payload, sourceID: socket.id});
         }
         catch (err) {
