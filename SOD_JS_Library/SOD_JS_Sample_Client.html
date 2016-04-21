@@ -39,6 +39,8 @@
             var sod;
             //initialization:
 
+            // For testing
+
 
             //END LISTENERS////////////////////////////////////////////////
 
@@ -97,7 +99,9 @@
                         sod.registerDevice(sod);
                         showGreenStatus('connect to server ..')
                     });
-
+                    sod.addListener('mapUpdate',function(data){
+                        console.log(data);
+                    })
 
                     sod.addListener('gesture',function(data){
                         //sod.registerDevice(sod);

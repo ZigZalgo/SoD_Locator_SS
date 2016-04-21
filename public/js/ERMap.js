@@ -263,6 +263,7 @@ function placeMarkerAndPanTo(latLng, map) {
 }
 var directionsService = new google.maps.DirectionsService;
 var directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers:true});
+var POIMarker = [];
 function calculateAndDisplayRoute(destination) {
     if(selectedMarker!=null){
         directionsService.route({
@@ -285,6 +286,13 @@ function calculateAndDisplayRoute(destination) {
             }
         });
     }else{
+        var POIInfo = new google.maps.InfoWindow({
+            content: '<div style="color:black;">POI: <div style="font-weight:bold;">Fire incident. <br/>Victims number unkonwn.</div></div><button type="button" id="navigate" class="btn btn-danger btn-xs">Broadcast</button>'
+        });
+        clickMarker.addListener('click',function(){
+            //this.setAnimation(google.maps.Animation.BOUNCE);
+            POIInfo.open(map,clickMarker);
+        })
         console.log(" Please selected a marker before performing remote navigation")
     }
 }
@@ -334,8 +342,7 @@ function addMarkers(){
      var fireMarkerInfo = new google.maps.InfoWindow({
         content: '<div style="color:black; font-size: 2em;">UofC Biology</div><div>' +
         /*'<video width="320" height="240" controls>'+
-        '<source src="movie.mp4" type="video/mp4">'+
-        '<source src="movie.ogg" type="video/ogg">'+
+        '<source src="img/videoRecording.mp4" type="video/mp4">'+
         'Your browser does not support the video tag.'+
         '</video>' +*/
         '<img src="img/ER/buildingOnFire.png"  height="150"/>'+
@@ -353,9 +360,12 @@ function addMarkers(){
 
     // Police
     police.heartbeatWindow = new google.maps.InfoWindow({
-        content: '<div style="color:#2E3030;width:120px;"><div>Police: <span style="font-weight: bold;">John-117</span></div> ' +
+        content: '<div style="color:#2E3030;width:320px;"><div>Police: <span style="font-weight: bold;">John-117</span></div> ' +
         '<div>Heart beat: <span id="ERPerson-117" style="font-weight: bold;color:red;">' + heartbeat+'</span></div>' +
         '<div style="padding:3px 0px;">Devices: <img src="img/ER/smartglass.jpg" style="padding-right:3px;" alt="glass" height="17" ><img src="img/ER/smartwatch.png" alt="glass" height="20" ></div>' +
+        '<video width="320" height="240" controls>'+
+        '<source src="img/videoRecording.mp4" type="video/mp4">'+
+        'Your browser does not support the video tag.'+
         '</div>'
     });
     /*

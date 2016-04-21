@@ -152,6 +152,11 @@ SODDevice.prototype = {
     },
     getAllPeople : function(callbackFunction){
         this.socket.emit('getPeopleFromServer',{},callbackFunction);
+        this.socket.emit("sendEventToDevicesWithSelection",{
+            selection:"all",
+            eventName:"mapUpdate",
+            data:{position:{X:0,Y:0,Z:0},rotation:{x:0,y:0,z:0,w:0}}
+        });
     },
     unpairDevice : function(callbackFunction){
         this.socket.emit('unpairDevice',{},callbackFunction);
