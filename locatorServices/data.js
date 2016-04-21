@@ -5,15 +5,18 @@
 var fs = require('fs');
 var dataDirectory = 'data/temp/';
 //var thumbnailSize = 400;
-var util = require('./util');
+var sod_util = require('./sod_util');
 var mime = require('mime');
 var locator = require('./locator');
 
 exports.show = function(req, res){
     var fileName = req.params.fileName;
-    var ext = req.params.ext;
-    var filePath = dataDirectory + fileName + "." + ext;
-
+    var ext = ""
+    console.log("GET: "+JSON.stringify(req.params)+" query: "+JSON.stringify(req.query));
+    if(req.params.ext!=undefined)
+        ext = "."+req.params.ext;
+    var filePath = dataDirectory + fileName + ext;
+    console.log(filePath+" - "+req.params.ext);
     fs.readFile(filePath, function(err, data){
         if(err){
             if(err.code === 'ENOENT'){
@@ -31,6 +34,36 @@ exports.show = function(req, res){
         }
     });
 }
+
+exports.adfShow = function(req, res){
+    var fileName = req.params.fileName;
+    var ext = ""
+    console.log("GET: "+JSON.stringify(req.params)+" query: "+JSON.stringify(req.query));
+    if(req.params.ext!=undefined)
+        ext = "."+req.params.ext;
+    if(req.query.hasOwnProperty("ADFLastUpdate")){
+        var filePath = dataDirectory + fileName + ext;
+        fs.stat(dataDirectory+"adf", function(err,stat){
+            console.log(stat);
+            var adfModifiedDate = new Date(Date.parse(req.query["ADFLastUpdate"]))
+            console.log(adfModifiedDate);
+            console.log(new Date(stat.mtime));
+            if(adfModifiedDate== new Date(stat.mtime)){
+                console.log("same time");
+            }else{
+                console.log("Wrong Time");
+            }
+
+        })
+
+    }else{
+        console.log("Requesting ADF with No ADFLastUpdate query? Man you are playing FIRE. ");
+    }
+    res.writeHead(200, {'Content-Type':"LOVELIFE"});
+    res.write("Whatup");
+    res.end();
+}
+
 
 exports.fileList = function(req, res){
     var walk    = require('walk');
@@ -126,7 +159,7 @@ exports.loadJSONWithCallback = function(path,callback){
         }
         else{
             try {
-                console.log(data);
+                //console.log(data);
                 obj = JSON.parse(data);
                 callback(obj)
             }catch(e){

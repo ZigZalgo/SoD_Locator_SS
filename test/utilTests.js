@@ -1,4 +1,4 @@
-var util = require('../locatorServices/util');
+var sod_util = require('../locatorServices/sod_util');
 var locator = require('../locatorServices/locator');
 var factory = require('../locatorServices/factory');
 var chai = require('chai');
@@ -7,7 +7,6 @@ var expect = chai.expect;
 var async = require("async");
 var Q = require("q");
 var should = chai.should();
-var locator
 
 describe("util.getSpaceTransitionRule()", function() {
     // starting and ending point for each kinect sensor sees the same project
@@ -21,11 +20,11 @@ describe("util.getSpaceTransitionRule()", function() {
     var expectedResult = {X:2*1000,Y:0,Z:-2*1000}
     var angle = 45;
     it("testing Final Result of getSpaceTransitionRule  X", function(){
-        expect(util.getSpaceTransitionRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle).X).to.be.closeTo(expectedResult.X,0.000001);
+        expect(sod_util.getSpaceTransitionRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle).X).to.be.closeTo(expectedResult.X,0.000001);
     });
 
     it("testing Final Result of getSpaceTransitionRule  Z", function(){
-        expect(util.getSpaceTransitionRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle).Z).to.be.closeTo(expectedResult.Z,0.000001);
+        expect(sod_util.getSpaceTransitionRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2,angle).Z).to.be.closeTo(expectedResult.Z,0.000001);
     });
 
     /*it("testing Final Result of getTranslationRule", function(){
@@ -84,25 +83,25 @@ describe("util.getTranslationRule() standarded example", function() {
     var endingLocation2   = {X:(-2+Math.sqrt(3))*1000, Y:0, Z:1000};
 
     it("testing the calculation inside of getTranslationRule() for vector1)", function(){
-        expect(util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:1*1000}); // objects equal
+        expect(sod_util.getVector(startingLocation1,endingLocation1)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:1*1000}); // objects equal
     });
-    var vector1 = util.getVector(startingLocation1,endingLocation1);
+    var vector1 = sod_util.getVector(startingLocation1,endingLocation1);
 
     it("testing the calculation inside of getTranslationRule() for vector2)", function(){
-        expect(util.getVector(startingLocation2,endingLocation2)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:-1*1000}); // objects equal
+        expect(sod_util.getVector(startingLocation2,endingLocation2)).to.eql({X:Math.sqrt(3)*1000,Y:0,Z:-1*1000}); // objects equal
     });
-    var vector2 = util.getVector(startingLocation2,endingLocation2);
+    var vector2 = sod_util.getVector(startingLocation2,endingLocation2);
 
     it("testing the calculation inside of getTranslationRule() between degrees of vector1 & vector2)", function(){
-        expect(util.getDegreeOfTwoVectors(vector1,vector2)).to.be.closeTo(60,0.00001); // objects equal
+        expect(sod_util.getDegreeOfTwoVectors(vector1,vector2)).to.be.closeTo(60,0.00001); // objects equal
     });
-    var degree = util.getDegreeOfTwoVectors(vector1,vector2);
+    var degree = sod_util.getDegreeOfTwoVectors(vector1,vector2);
     it("testing the matrixTransformation inside of getTranslationRule() )", function(){
-        expect(util.matrixTransformation(vector2,degree).Z).to.eql(-2000); // objects equal
+        expect(sod_util.matrixTransformation(vector2,degree).Z).to.eql(-2000); // objects equal
     });
 
     it("testing Final Result of getTranslationRule in (1,1)-(1+sqt[3],2) (-2,2)-(-2+sqt[3],1)", function(){
-        expect(util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
+        expect(sod_util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2)).
             to.eql({degree:-degree,xDistance:3000,
                 zDistance:-1000,xSpaceTransition: 3732.050807568877,zSpaceTransition: 1732.0533333333333,startingLocation:startingLocation2}); // objects equal
     });
@@ -114,25 +113,25 @@ describe("util.translateToCoordinateSpace()", function() {
     var startingLocation2 = {X:-2*1000 ,Y:0 ,Z:2*1000};
     var endingLocation2   = {X:(-2+Math.sqrt(3))*1000, Y:0, Z:1*1000};
 
-    var rule = util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2);
+    var rule = sod_util.getTranslationRule(startingLocation1,endingLocation1,startingLocation2,endingLocation2);
 
     it("testing input startingLocation2 if it will translate to the startingLocation1", function(){
-        expect(util.translateToCoordinateSpace(startingLocation2,rule)).to.eql(startingLocation1); // objects equal
+        expect(sod_util.translateToCoordinateSpace(startingLocation2,rule)).to.eql(startingLocation1); // objects equal
     });
 
     it("testing if input startingLocation2 if it will translate to the endingLocation1 in Z value", function(){
-        expect(util.translateToCoordinateSpace(endingLocation2,rule).X).to.be.closeTo(endingLocation1.X,(1/util.ROUND_RATIO)); // objects equal
+        expect(sod_util.translateToCoordinateSpace(endingLocation2,rule).X).to.be.closeTo(endingLocation1.X,(1/sod_util.ROUND_RATIO)); // objects equal
     });
 
     it("testing if in put endingLocation2 if it will translate to the endingLocation1 in Z value", function(){
-        expect(util.translateToCoordinateSpace(endingLocation2,rule).Z).to.be.closeTo(endingLocation1.Z,(1/util.ROUND_RATIO)); // objects equal
+        expect(sod_util.translateToCoordinateSpace(endingLocation2,rule).Z).to.be.closeTo(endingLocation1.Z,(1/sod_util.ROUND_RATIO)); // objects equal
     });
 
     // testing point1
     var point1 = {X:(-2+Math.sqrt(3))*1000,Y:0,Z:2*1000}
 
     it("testing point1 translate to MASTER KINECT", function(){
-        expect(util.translateToCoordinateSpace(point1,rule).Z).to.be.closeTo(2.5*1000,util.ROUND_RATIO); // objects equal
+        expect(sod_util.translateToCoordinateSpace(point1,rule).Z).to.be.closeTo(2.5*1000,sod_util.ROUND_RATIO); // objects equal
     });
 });
 
@@ -143,11 +142,11 @@ describe("util.matrixTransformation()", function(){
     var correctResult={X:1.8660254037844388*1000,Y:0.11,Z:1.2320508075688774*1000};
 
     it("given (1,2) rotate 30 degrees clockwise should output new location (1.8660254037844386,1.2320508075688774)", function(){
-        expect(util.matrixTransformation(testLocation,30).Z).to.be.closeTo(1.2320508075688774*1000,util.ROUND_RATIO);//(util.matrixTransformation(testLocation,30), correctResult);
+        expect(sod_util.matrixTransformation(testLocation,30).Z).to.be.closeTo(1.2320508075688774*1000,sod_util.ROUND_RATIO);//(util.matrixTransformation(testLocation,30), correctResult);
     });
 
     it("given (1,2) rotate 30 degrees clockwise should output new location (1.8660254037844386,1.2320508075688774)", function(){
-        expect(util.matrixTransformation(testLocation,30).X).to.be.closeTo(1.8660254037844386*1000,util.ROUND_RATIO);//(util.matrixTransformation(testLocation,30), correctResult);
+        expect(sod_util.matrixTransformation(testLocation,30).X).to.be.closeTo(1.8660254037844386*1000,sod_util.ROUND_RATIO);//(util.matrixTransformation(testLocation,30), correctResult);
     });
 
 });
@@ -156,7 +155,7 @@ describe("util.matrixTransformation()", function(){
 
 describe("util.mathRoundWithDecimal()", function(){
     it(" should get the 1.2345 to 1.23 with getting 2 decimal value", function(){
-        expect(util.mathRoundWithDecimal(1.2345,2)).to.eql(1.23);;//(util.matrixTransformation(testLocation,30), correctResult);
+        expect(sod_util.mathRoundWithDecimal(1.2345,2)).to.eql(1.23);;//(util.matrixTransformation(testLocation,30), correctResult);
     });
 });
 
@@ -188,7 +187,7 @@ describe("util.getVector()", function(){
     var vectorB={X:2,Y:0.11,Z:1};
 
     it("given A = (1,2) B = (2,1) should return 30 degree)", function(){
-        expect(util.getVector(vectorA,vectorB)).to.eql({X:1,Y:0,Z:-1}); // objects equal
+        expect(sod_util.getVector(vectorA,vectorB)).to.eql({X:1,Y:0,Z:-1}); // objects equal
     });
 });
 
@@ -202,20 +201,20 @@ describe("util.getDegreeOfTwoVectors()", function(){
     var vector4 = {X:1,Y:0,Z:-Math.sqrt(3)}
 
     it("given V1 = (1,-sqrt(3)) V2 = (0,0) should output 150 degrees", function(){
-        expect(util.getDegreeOfTwoVectors(vector4,vector0)).to.be.closeTo(60,0.00001);  //within 0.00001 is close enough
+        expect(sod_util.getDegreeOfTwoVectors(vector4,vector0)).to.be.closeTo(60,0.00001);  //within 0.00001 is close enough
     });
 
 
     it("given V1 = (1,-sqrt(3)) V2 = (sqrt(3),1) should output 150 degrees", function(){
-        expect(util.getDegreeOfTwoVectors(vector4,vectorB)).to.be.closeTo(90,0.00001);  //within 0.00001 is close enough
+        expect(sod_util.getDegreeOfTwoVectors(vector4,vectorB)).to.be.closeTo(90,0.00001);  //within 0.00001 is close enough
     });
 
     it("given V1 = (1,sqrt(3)) V2 = (0,0) should output 150 degrees", function(){
-        expect(util.getDegreeOfTwoVectors(vectorA,vector0)).to.be.closeTo(60,0.00001);  //within 0.00001 is close enough
+        expect(sod_util.getDegreeOfTwoVectors(vectorA,vector0)).to.be.closeTo(60,0.00001);  //within 0.00001 is close enough
     });
 
     it("given V1 = (1,sqrt(3)) V2 = (sqrt(3),1) should output 30 degrees", function(){
-        expect(util.getDegreeOfTwoVectors(vectorA,vectorB)).to.be.closeTo(30,0.00001);  //within 0.00001 is close enough
+        expect(sod_util.getDegreeOfTwoVectors(vectorA,vectorB)).to.be.closeTo(30,0.00001);  //within 0.00001 is close enough
     });
 });
 
@@ -224,10 +223,10 @@ describe("util.getDegreeOfTwoVectors()", function(){
 describe("util.getPersonAngle()", function(){
     // Get example when the angle of X=0.5,, should out put 14.292786284569123
     it("should output angle 18.43494882292201 when person is at X = 1,Z = 3", function(){
-        assert.equal(util.getObjectOrientationToSensor(1,3), 18.43494882292201);
+        assert.equal(sod_util.getObjectOrientationToSensor(1,3), 18.43494882292201);
     });
     it("should return angle 27 when X = 1, Z = 0",function(){
-        assert.equal(util.getObjectOrientationToSensor(0,1),0);
+        assert.equal(sod_util.getObjectOrientationToSensor(0,1),0);
     });
 });
 
@@ -235,7 +234,7 @@ describe("util.getPersonAngle()", function(){
 describe("util.getDistanceToKinect()", function(){
     // Get example when the angle of X=0.5,, should out put 14.292786284569123
     it("should output angle 3.1622776601683795 when person is at X = 1, Z = 3", function(){
-        assert.equal(util.getDistanceToKinect(1,3), 3.1622776601683795);
+        assert.equal(sod_util.getDistanceToKinect(1,3), 3.1622776601683795);
     });
 });
 
@@ -243,53 +242,53 @@ describe("util.getDistanceToKinect()", function(){
 describe("util.distanceBetweenPoints()", function(){
     // positive same point case
     it("should return '0', if passed '{X: 1, Y: 1, Z: 1}' and '{X: 1, Y: 1, Z: 1}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: 1, Y: 1, Z: 1}, {X: 1, Y: 1, Z: 1}), 0);
+        assert.equal(sod_util.distanceBetweenPoints({X: 1, Y: 1, Z: 1}, {X: 1, Y: 1, Z: 1}), 0);
     });
 
     // positive same X (and Y) case
     it("should return '3', if passed '{X: 1, Y: 1, Z: 2}' and '{X: 1, Y: 1, Z: 5}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: 1, Y: 1, Z: 2}, {X: 1, Y: 1, Z: 5}), 3);
+        assert.equal(sod_util.distanceBetweenPoints({X: 1, Y: 1, Z: 2}, {X: 1, Y: 1, Z: 5}), 3);
     });
 
     // positive same Z (and Y) case
     it("should return '3', if passed '{X: 2, Y: 1, Z: 1}' and '{X: 5, Y: 1, Z: 1}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: 5, Y: 1, Z: 1}), 3);
+        assert.equal(sod_util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: 5, Y: 1, Z: 1}), 3);
     });
 
     // positive decimal point case
     it("should return '5.830951894845301', if passed '{X: 2, Y: 1, Z: 1}' and '{X: 5, Y: 1, Z: 6}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: 5, Y: 1, Z: 6}), 5.830951894845301);
+        assert.equal(sod_util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: 5, Y: 1, Z: 6}), 5.830951894845301);
     });
 
     // positive integer case
     it("should return '5', if passed '{X: 2, Y: 1, Z: 1}' and '{X: 5, Y: 1, Z: 5}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: 5, Y: 1, Z: 5}), 5);
+        assert.equal(sod_util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: 5, Y: 1, Z: 5}), 5);
     });
 
 
     // negative same point case
     it("should return '0', if passed '{X: -1, Y: -1, Z: -1}' and '{X: -1, Y: -1, Z: -1}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: -1, Y: -1, Z: -1}, {X: -1, Y: -1, Z: -1}), 0);
+        assert.equal(sod_util.distanceBetweenPoints({X: -1, Y: -1, Z: -1}, {X: -1, Y: -1, Z: -1}), 0);
     });
 
     // negative same X (and Y) case
     it("should return '7', if passed '{X: -1, Y: -1, Z: -2}' and '{X: -1, Y: -1, Z: 5}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: -1, Y: -1, Z: -2}, {X: -1, Y: -1, Z: 5}), 7);
+        assert.equal(sod_util.distanceBetweenPoints({X: -1, Y: -1, Z: -2}, {X: -1, Y: -1, Z: 5}), 7);
     });
 
     // negative same Z (and Y) case
     it("should return '7', if passed '{X: -2, Y: -1, Z: -1}' and '{X: 5, Y: -1, Z: -1}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: -2, Y: -1, Z: -1}, {X: 5, Y: -1, Z: -1}), 7);
+        assert.equal(sod_util.distanceBetweenPoints({X: -2, Y: -1, Z: -1}, {X: 5, Y: -1, Z: -1}), 7);
     });
 
     // negative decimal point case
     it("should return '5.830951894845301', if passed '{X: -2, Y: -1, Z: -1}' and '{X: -5, Y: -1, Z: -6}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: -2, Y: -1, Z: -1}, {X: -5, Y: -1, Z: -6}), 5.830951894845301);
+        assert.equal(sod_util.distanceBetweenPoints({X: -2, Y: -1, Z: -1}, {X: -5, Y: -1, Z: -6}), 5.830951894845301);
     });
 
     // negative integer case
     it("should return '5', if passed '{X: 2, Y: 1, Z: 1}' and '{X: -1, Y: 1, Z: -3}'", function(){
-        assert.equal(util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: -1, Y: 1, Z: -3}), 5);
+        assert.equal(sod_util.distanceBetweenPoints({X: 2, Y: 1, Z: 1}, {X: -1, Y: 1, Z: -3}), 5);
     });
 });
 
@@ -301,7 +300,7 @@ describe("util.pointMoveToDirection()",function(){
     var directionVector = {X:-0.5,Y:0,Z:Math.sqrt(3)/2};
     var distance = 1;
     it(" should move a point to a dedicated direction by a certain distance ", function(done) {
-        util.pointMoveToDirection(originalLocation,directionVector,distance,function(data){
+        sod_util.pointMoveToDirection(originalLocation,directionVector,distance,function(data){
             expect(data.X).to.be.closeTo(-0.5,0.01);
             expect(data.Z).to.be.closeTo(1.86,0.01);
             done()
@@ -314,9 +313,9 @@ describe("util.pointMoveToDirection()",function(){
     var directionVector = {X:1,Y:0,Z:0};
     var distance = 1;
     it(" should move a point to a dedicated direction by a certain distance with actual data", function(done) {
-        util.matrixTransformation(directionVector,-120,function(rotatedMatrix){
+        sod_util.matrixTransformation(directionVector,-120,function(rotatedMatrix){
             console.log("rotated: "+JSON.stringify(rotatedMatrix));
-            util.pointMoveToDirection(originalLocation,rotatedMatrix,distance,function(data){
+            sod_util.pointMoveToDirection(originalLocation,rotatedMatrix,distance,function(data){
 
                 console.log(data);
                 //expect(data.X).to.be.closeTo(-0.5,0.01);
@@ -343,19 +342,19 @@ describe("util.inRoom()",function(){
             //data.X.should.equal(-0.66)
             async.parallel([
                     function(paCallback){
-                        util.inRoom(data,function(bool){
+                        sod_util.inRoom(data,function(bool){
                             expect(bool).to.eql(true);
                             paCallback(null);
                         });
                     },
                     function(paCallback){
-                        util.inRoom({X:2.9,Y:3.9,Z:3.9},function(bool){
+                        sod_util.inRoom({X:2.9,Y:3.9,Z:3.9},function(bool){
                             expect(bool).to.eql(true);
                             paCallback(null);
                         });
                     },
                     function(paCallback){
-                        util.inRoom({X:2.9,Y:4.1,Z:4.1},function(bool){
+                        sod_util.inRoom({X:2.9,Y:4.1,Z:4.1},function(bool){
                             expect(bool).to.eql(false);
                             paCallback(null);
                         });
@@ -379,7 +378,7 @@ describe("util.getIntersectionPoint() with Room sides",function(){
     var testRoom = new factory.Room(location,length,depth,height);
     //
     it(" should get proper intersection point from four sides of the room", function(done){
-    util.translateOrientationToReference({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:30},FOV:30},
+    sod_util.translateOrientationToReference({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:30},FOV:30},
         function(orientationToReference){
             console.log("Orientation to reference: "+orientationToReference);
             var line2 = factory.makeLineUsingOrientation({X:0,Y:1,Z:1},orientationToReference)
@@ -390,20 +389,20 @@ describe("util.getIntersectionPoint() with Room sides",function(){
 
                 async.parallel([
                     function(paCallback){
-                        util.getIntersectionPoint(line2,top).then(function(data){
+                        sod_util.getIntersectionPoint(line2,top).then(function(data){
                             //console.log("haha"+JSON.stringify(data));
                             paCallback(null,data);
                         })
                     },function(paCallback){
-                        util.getIntersectionPoint(line2,left).then(function(data){
+                        sod_util.getIntersectionPoint(line2,left).then(function(data){
                             paCallback(null,data);
                         })
                     },function(paCallback){
-                        util.getIntersectionPoint(line2,right).then(function(data){
+                        sod_util.getIntersectionPoint(line2,right).then(function(data){
                             paCallback(null,data);
                         })
                     },function(paCallback){
-                        util.getIntersectionPoint(line2,bottom).then(function(data){
+                        sod_util.getIntersectionPoint(line2,bottom).then(function(data){
                             paCallback(null,data);
                         })
                     }
@@ -433,7 +432,7 @@ describe("util.getIntersectedWall() ",function(){
     //var line2 = factory.makeLineUsingOrientation({X:0,Y:1,Z:1},{pitch:-45,yaw:30})
     it(" should get 1 value return with which wall gets hit with yaw = 30", function(okay){
         var origin = {X:0,Y:1,Z:1};
-            util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:20,yaw:30},FOV:30}, function (data) {
+            sod_util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:20,yaw:30},FOV:30}, function (data) {
                 try {
                     console.log(data);
                     //expect(data).to.eql(null);
@@ -446,7 +445,7 @@ describe("util.getIntersectedWall() ",function(){
     })
 
     it(" should get 1 value return with which wall gets hit with yaw=45", function(okay){
-        util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:45},FOV:70}, function (data) {
+        sod_util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:45},FOV:70}, function (data) {
             //console.log(data);
             try {
                 expect(data).to.eql(null);
@@ -460,7 +459,7 @@ describe("util.getIntersectedWall() ",function(){
         })
     })
     it(" should get 1 value return with which wall gets hit with yaw = 60", function(okay){
-        util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:60},FOV:70}, function (data) {
+        sod_util.getIntersectedWall({location:{X:0,Y:1,Z:1},orientation:{pitch:-45,yaw:60},FOV:70}, function (data) {
             console.log(data);
             try {
                 expect(data).to.eql(null);
@@ -474,7 +473,7 @@ describe("util.getIntersectedWall() ",function(){
     it(" should with real data 1", function(done) {
         //var pointOfInterest1 = {X:0,Y:0,Z:0};
         var device1 = {"uniqueDeviceID":101,"orientation":{"yaw":-83.43,"pitch":45},"name":"JSClient","socketID":"b2Z6p3i8OZDg_TyNoU6h","deviceType":"JSClientDevice","location":{"X":1,"Y":1,"Z":1},"FOV":70,"depth":1,"height":1,"width":1,"ownerID":null,"pairingState":"unpaired","intersectionPoint":{"X":0,"Y":0},"lastUpdated":"2015-03-24T02:34:11.488Z","stationary":true,"deviceIP":"127.0.0.1","observer":{"observerType":"rectangular","observeWidth":2,"observeHeight":1,"observerDistance":1},"inRangeOf":{},"inViewList":{},"subscribeToEvents":{"receiveIntersectionPoints":true,"receiveInViewList":true}};
-        util.getIntersectedWall(device1, function (data) {
+        sod_util.getIntersectedWall(device1, function (data) {
             console.log(data);
             try {
                 //expect(data).to.eql(null); // test result change due to room change
@@ -489,7 +488,7 @@ describe("util.getIntersectedWall() ",function(){
     it(" should with real data 2", function(done) {
         //var pointOfInterest1 = {X:0,Y:0,Z:0};
         var device1 = {"uniqueDeviceID":101,"orientation":{"yaw":60.32,"pitch":45},"name":"JSClient","socketID":"3ZOUPwubnoH-SR1UvAMD","deviceType":"JSClientDevice","location":{"X":-0.040000000000000924,"Y":0,"Z":1},"FOV":70,"depth":1,"height":1,"width":1,"ownerID":null,"pairingState":"unpaired","intersectionPoint":{"X":0,"Y":0},"lastUpdated":"2015-03-24T03:03:21.485Z","stationary":true,"deviceIP":"127.0.0.1","observer":{"observerType":"rectangular","observeWidth":2,"observeHeight":1,"observerDistance":1},"inRangeOf":{},"inViewList":{},"subscribeToEvents":{"receiveIntersectionPoints":true,"receiveInViewList":true}}
-        util.getIntersectedWall(device1, function (data) {
+        sod_util.getIntersectedWall(device1, function (data) {
             console.log(data);
             try {
                 //expect(data.length).to.eql(1);
@@ -509,7 +508,7 @@ describe("util.isPointInView()",function(){
     it(" should check if a point is a view", function(done) {
         var pointOfInterest1 = {X:0,Y:0,Z:0};
         var device1 = {location:{X:0,Y:1,Z:1},orientation:{pitch:20,yaw:0},FOV:45};
-        util.isPointInView(pointOfInterest1,device1,function(bool){
+        sod_util.isPointInView(pointOfInterest1,device1,function(bool){
 
             try {
                 expect(bool).to.eql(true);
@@ -524,7 +523,7 @@ describe("util.isPointInView()",function(){
     it(" should check if a point is a view with yaw 16 FOV 30", function(done) {
         var pointOfInterest1 = {X:0,Y:0,Z:0};
         var device1 = {location:{X:0,Y:1,Z:1},orientation:{pitch:20,yaw:16},FOV:30};
-        util.isPointInView(pointOfInterest1,device1,function(bool){
+        sod_util.isPointInView(pointOfInterest1,device1,function(bool){
 
             try {
                 expect(bool).to.eql(false);

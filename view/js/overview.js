@@ -248,6 +248,10 @@ function drawSensor(context,X,Y,index,angle,FOV){
     context.fillStyle = '#3370d4';
     context.fillText('K'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
 }
+function getActualOrientationYaw(yaw,locationX,locationZ){
+    return (270-(yaw+(90-Math.abs(getDeviceOrientation(locationX,locationZ)))))%360;
+}
+
 
 //function takes room information and stage&layer from kineticJS
 function drawRoom(roomInfo,stage,layer,callback){
@@ -365,6 +369,11 @@ function degrees (radians) {return radians * (180/Math.PI)}
 // cf. http://stackoverflow.com/a/12221474/257568
 function angle (cx, cy, px, py) {var x = cx - px; var y = cy - py; return Math.atan2 (-y, -x)}
 function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x), 2) + Math.pow ((p2y - p1y), 2))}
+function getDeviceOrientation(deviceX,deviceZ){
+    var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
+    var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
+    return returnDegree;
+}
 
  function drawStationaryDevice(ID,originLocation,X, Z, width, height, orientation, FOV,observer,layer,stage){
      //console.log('width: '+ width + ' && height: ' + height);
@@ -379,11 +388,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         draggable:true
     });
 
-    function getDeviceOrientation(deviceX,deviceZ){
-        var angleTowardsKinect = Math.atan2(deviceX,deviceZ);
-        var returnDegree = angleTowardsKinect * RADIANS_TO_DEGREES;
-        return returnDegree;
-    }
+
 
    // var actualOrientation = 360 - (orientation + getDeviceOrientation(X,Z) + 90+ FOV/2);
     //var startAngle = (actualOrientation+(FOV/2))*Math.PI/180;
@@ -425,38 +430,44 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
     stationaryDevice.add(deviceID);
 
      //console.log('Observer:' + JSON.stringify(observer));
-     if(observer.observerType == 'radial') {
-         var observeRangeVisual = new Kinetic.Circle({
-             x: 0,
-             y: 0,
-             radius: observer.observeRange * pixelsPerMeter,
-             fill: '',
-             stroke: 'green',
-             strokeWidth: 1,
-             opacity: 0.8,
-             blurRadius: 50
-         });
-         stationaryDevice.add(observeRangeVisual);
-     }else if(observer.observerType == 'rectangular'){
-         var width = observer.observeWidth*pixelsPerMeter;
-         var height = observer.observeHeight*pixelsPerMeter;
-         //console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
-         //console.log(width+'-'+height);
-         var rotatedDirection = matrixTransformation({X:observer.observerDistance*pixelsPerMeter,Y:0,Z:0},-(deviceView.getRotationDeg()+FOV/2));
-         var observeRangeVisual = new Kinetic.Rect({
-             x: rotatedDirection.X-(width/2),
-             y: rotatedDirection.Z-(height/2),
-             width: width,
-             height: height,
-             fill:'',
-             stroke: 'green',
-             strokeWidth:1,
-             opacity:1
-         });
-         stationaryDevice.add(observeRangeVisual);
-     }
+if(observer!=undefined) {
+    if (observer.observerType == 'radial') {
+        var observeRangeVisual = new Kinetic.Circle({
+            x: 0,
+            y: 0,
+            radius: observer.observeRange * pixelsPerMeter,
+            fill: '',
+            stroke: 'green',
+            strokeWidth: 1,
+            opacity: 0.8,
+            blurRadius: 50
+        });
+        stationaryDevice.add(observeRangeVisual);
+    } else if (observer.observerType == 'rectangular') {
+        var width = observer.observeWidth * pixelsPerMeter;
+        var height = observer.observeHeight * pixelsPerMeter;
+        //console.log('deviceView rotation: '+(deviceView.getRotationDeg()-FOV/2) + '\t actually orientation: '+actualOrientation);
+        //console.log(width+'-'+height);
+        var rotatedDirection = matrixTransformation({
+            X: observer.observerDistance * pixelsPerMeter,
+            Y: 0,
+            Z: 0
+        }, -(deviceView.getRotationDeg() + FOV / 2));
+        var observeRangeVisual = new Kinetic.Rect({
+            x: rotatedDirection.X - (width / 2),
+            y: rotatedDirection.Z - (height / 2),
+            width: width,
+            height: height,
+            fill: '',
+            stroke: 'green',
+            strokeWidth: 1,
+            opacity: 1
+        });
+        stationaryDevice.add(observeRangeVisual);
+    }
+
     // mouse events
-    stationaryDevice.on('mouseover', function() {
+    stationaryDevice.on('mouseover', function () {
         document.body.style.cursor = 'pointer';
         this.children[1].fill('#31CC00');
         this.children[1].stroke('');
@@ -465,7 +476,7 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
         layer.draw();
     });
 
-    stationaryDevice.on('mouseout', function() {
+    stationaryDevice.on('mouseout', function () {
         document.body.style.cursor = 'default';
         this.children[1].fill('green');
         this.children[1].stroke('black');
@@ -474,32 +485,41 @@ function distance (p1x, p1y, p2x, p2y) {return Math.sqrt (Math.pow ((p2x - p1x),
 
         //this.fill('rgba(0, 255, 0, 1.0)');
         ////this.stroke('');
-       // this.strokeWidth('0');
+        // this.strokeWidth('0');
         //this.opacity('0.3');
         layer.draw();
     });
 
-    var directionVector = {X:0,Y:0,Z:0};
-    var movedVector={X:0,Y:0,Z:0};
-    stationaryDevice.on('dragstart',function(){
-        console.log('dragged ' + ID+' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
-        movedVector = {X:this.getPosition().x/pixelsPerMeter,Y:0,Z:this.getPosition().y/pixelsPerMeter};
+    var directionVector = {X: 0, Y: 0, Z: 0};
+    var movedVector = {X: 0, Y: 0, Z: 0};
+    stationaryDevice.on('dragstart', function () {
+        console.log('dragged ' + ID + ' -> ' + this.getPosition().x / pixelsPerMeter + ',' + this.getPosition().y / pixelsPerMeter);
+        movedVector = {X: this.getPosition().x / pixelsPerMeter, Y: 0, Z: this.getPosition().y / pixelsPerMeter};
     });
-    stationaryDevice.on('dragend',function(){
-        console.log('dropped ' + ID +' -> '+ this.getPosition().x/pixelsPerMeter+','+this.getPosition().y/pixelsPerMeter);
-        movedVector.X -= this.getPosition().x/pixelsPerMeter;
-        movedVector.Z -= this.getPosition().y/pixelsPerMeter;
+    stationaryDevice.on('dragend', function () {
+        console.log('dropped ' + ID + ' -> ' + this.getPosition().x / pixelsPerMeter + ',' + this.getPosition().y / pixelsPerMeter);
+        movedVector.X -= this.getPosition().x / pixelsPerMeter;
+        movedVector.Z -= this.getPosition().y / pixelsPerMeter;
         directionVector.X += -(movedVector.X);
         directionVector.Z += -(movedVector.Z);
-        if(Math.abs(movedVector.X)>=0.1|| Math.abs(movedVector.Z)>=0.1){
+        if (Math.abs(movedVector.X) >= 0.1 || Math.abs(movedVector.Z) >= 0.1) {
             console.log('directionVector : ' + JSON.stringify(directionVector));
-            console.log("original location: "+JSON.stringify(originLocation));
-            io.emit('updateObjectLocation',{ID:ID,newLocation:{X:originLocation.X+directionVector.X,Y:originLocation.Y,Z:originLocation.Z+directionVector.Z},objectType:'device'});
+            console.log("original location: " + JSON.stringify(originLocation));
+            io.emit('updateObjectLocation', {
+                ID: ID,
+                newLocation: {
+                    X: originLocation.X + directionVector.X,
+                    Y: originLocation.Y,
+                    Z: originLocation.Z + directionVector.Z
+                },
+                objectType: 'device'
+            });
             refreshStationaryLayer();
         }
     });
+}
+    layer.add(stationaryDevice);
 
-     layer.add(stationaryDevice);
      ///TODO: add FOVGroupController
     if(FOV!=undefined){
         var rotatedDirection = matrixTransformation({X:stationaryDevice.children[0].outerRadius(),Y:0,Z:0},-(stationaryDevice.children[0].getRotationDeg()+FOV/2));
@@ -787,13 +807,17 @@ function refreshStationaryLayer() {
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function (data) {
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
-                if (data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null && data[key].observer != undefined) {
-                    //console.log("X:" + data[key].location.X)
-                    //console.log("Y:" + data[key].location.Y)
-                    //console.log("Z:" + data[key].location.Z)
-                    drawStationaryDevice(data[key].uniqueDeviceID,data[key].location,
-                        data[key].location.X, data[key].location.Z, data[key].width,
-                            data[key].depth, data[key].orientation.yaw, data[key].FOV,data[key].observer,layer,stage)
+                if(data[key].hasOwnProperty("stationary")&&data[key].hasOwnProperty("location")) {
+                    if (data[key].stationary == true && data[key].location.X != null && data[key].location.Y != null && data[key].location.Z != null && data[key].observer != undefined) {
+                        //console.log("X:" + data[key].location.X)
+                        //console.log("Y:" + data[key].location.Y)
+                        //console.log("Z:" + data[key].location.Z)
+                        drawStationaryDevice(data[key].uniqueDeviceID, data[key].location,
+                            data[key].location.X, data[key].location.Z, data[key].width,
+                            data[key].depth, data[key].orientation.yaw, data[key].FOV, data[key].observer, layer, stage)
+                    }
+                }else{
+                    console.log("LOVE?");
                 }
             }
         }
@@ -1038,6 +1062,11 @@ function updateContentWithObjects(){
                      ctx.fillStyle = "#2cd72A"; //green
                 }
 
+                if(data[key].gesture != null){
+                    ctx.fillStyle = "white"; //green
+                }else{
+                    ctx.fillStyle = "#c82124"
+                }
 
                 ctx.font = minorGridLineWidth*2+'px Arial';
                 ctx.fillText(data[key].uniquePersonID,shiftXToGridOrigin(xInMeters)+minorGridLineWidth/2,shiftYToGridOrigin(zInMeters)-minorGridLineWidth/2);
@@ -1094,6 +1123,16 @@ function updateContentWithObjects(){
         }
     });
 
+
+    var devicesStage = new Kinetic.Stage({
+        container:  document.getElementById('cnvSensors'),
+        width: 800,
+        height: 800
+    });
+    var deviceSlayer = new Kinetic.Layer();
+    var cSensorsFromTango = document.getElementById("cnvSensors");
+    var ctxSensorsFromTango = cSensorsFromTango.getContext("2d");
+
     io.emit('getDevicesWithSelection', {selection: ["all"]}, function(data){
         var htmlString= "";
 
@@ -1114,9 +1153,17 @@ function updateContentWithObjects(){
         for(var key in data){
             uniqueDeviceIDToSocketID[data[key].uniqueDeviceID] = key;
             if(data.hasOwnProperty(key)){
-                console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP + " JSON "+JSON.stringify(data[key]));
+                //console.log('device ID '+data[key].uniqueDeviceID+'IP: '+data[key].deviceIP + " JSON "+JSON.stringify(data[key]));
                 //console.log(data[key]);
                 if(!data[key].stationary){
+                    try {
+                        if (data[key].deviceType == "Tango") {
+                            //console.log(data[key]);
+                            drawTango(ctxSensorsFromTango, data[key].location.X, data[key].location.Z, data[key].uniqueDeviceID, data[key].orientation.yaw, 45) //ctxSensors,sensorX,sensorY,kinectList[key].ID,angle, kinectList[key].FOV
+                        }
+                    }catch(e){
+                        console.log(e);
+                    }
                     htmlString+='<tr><td>' +data[key].uniqueDeviceID+'</td>'+ '<td>' +data[key].name +'</td>'+'<td>' +data[key].deviceType +'</td>'+
                         '<td>('+getCoordinatesInText(data[key].location)+')</td>'+
                         '<td>'+getOrientationInText(data[key].orientation)+'</td>' +'<td>'+pairingInfo(data[key].pairingState)+'</td>'+
@@ -1130,6 +1177,7 @@ function updateContentWithObjects(){
                         '<td>'+data[key].ownerID+'</td>'+
                         '</tr>'
                 }
+
             }
         }
         function getCoordinatesInText(vector3){
@@ -1154,6 +1202,41 @@ function updateContentWithObjects(){
             '' +htmlString+
             '</table>'); /*appending the data on the page*/
     });
+}
+
+function drawTango(context,X,Y,index,angle,FOV){
+    var sensorX = X*pixelsPerMeter; //get this from sensor list later on
+    var sensorY = Y*pixelsPerMeter; //get this from sensor list later on
+    //var tangoWidth = 200;
+//    /console.log("drawing sensor  ->  X : "+sensorX+"Y: "+sensorY)
+    //draw circle for sensor on visualizer
+    var actualOrientation = getActualOrientationYaw(angle,X,Y)
+    console.log(actualOrientation+" - "+getDeviceOrientation(X,Y)+" angle: "+angle);
+    context.beginPath();
+    context.arc(shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY),150/1000*pixelsPerMeter,actualOrientation*DEGREES_TO_RADIANS,actualOrientation*DEGREES_TO_RADIANS+Math.PI,true);
+    context.closePath();
+    context.lineWidth = 1;
+    context.fillStyle = 'rgba(58, 201, 51, 0.95)';
+    context.fill();
+    context.strokeStyle = '#292929';
+    context.stroke();
+    var gradientVector = {X:1000,Z:0};
+    // get the vector from sensor point to the end point ot gradient
+    var rotatedGradientVector = matrixTransformation(gradientVector,actualOrientation);
+    //console.log('rotated: ' + JSON.stringify(rotatedGradientVector));
+    //console.log('sensorX: ' + sensorX + '\tsensorY: ' + sensorY);
+    // get the end point of the gradient
+    var endPointOfGradient = {X:shiftXToGridOrigin((rotatedGradientVector.X)/1000*pixelsPerMeter+sensorX),Z:shiftYToGridOrigin((rotatedGradientVector.Z)/1000*pixelsPerMeter+sensorY)}          // move the point to where it belongs in the canvas
+    //console.log('end point : ' + JSON.stringify(endPointOfGradient));
+    //console.log('->'  +shiftXToGridOrigin(sensorX)+'\t'+ shiftYToGridOrigin(sensorY)+'\t'+ endPointOfGradient.X+'\t'+endPointOfGradient.Z);
+    var grd = context.createLinearGradient(sensorX, sensorY, endPointOfGradient.X,endPointOfGradient.Z)//shiftXToGridOrigin(sensorX), shiftYToGridOrigin(sensorY) + (data[key].rangeInMM)/1000*pixelsPerMeter);
+    grd.addColorStop(0, 'rgba(58, 201, 51, 0.95)');
+    grd.addColorStop(1, 'rgba(58, 201, 51, 0.95)');
+    drawView(context, sensorX, sensorY, 1000, grd,(270-actualOrientation), 45);
+    //drawView(ctx, xInMeters, zInMeters, 1000, "#2cd72A",(data[key].orientation.yaw+orientationToSensor+90), 30);
+    context.font = minorGridLineWidth*2+'px Arial';
+    context.fillStyle = "black";
+    context.fillText('T'+index,shiftXToGridOrigin(sensorX)+minorGridLineWidth,shiftYToGridOrigin(sensorY)-minorGridLineWidth*1.5);
 }
 
 io.on("webMessageEvent",function(message){

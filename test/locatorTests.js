@@ -47,7 +47,7 @@ describe("locator.printPersons()", function(){
         assert.equal(locator.printPersons(), true);
     });
 });*/
-var util = require('../locatorServices/util');
+var sod_util = require('../locatorServices/sod_util');
 var locator = require('../locatorServices/locator');
 var factory = require('../locatorServices/factory');
 var chai = require('chai');

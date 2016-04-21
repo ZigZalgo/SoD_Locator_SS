@@ -1,17 +1,21 @@
 // Starting SoD Locator Services
 var express = require('express.io');
+var path = require('path');
 var net = require("net");
 var app = express().http().io();
+app.use(express.static(path.join(__dirname,'public')))
 var data = require('./locatorServices/data');
 var sensorsREST = require('./locatorServices/REST/sensors');
 var devicesREST = require('./locatorServices/REST/devices');
 var locator = require('./locatorServices/locator');
+
 //var static = require('node-static');
 //var fileServer = new static.Server('./images');
 
 // Server Initilize
 init();
 
+/*
 net.createServer(
     function(socket)
     {
@@ -27,13 +31,6 @@ net.createServer(
                 //console.log("<cross-domain-policy>");
                 toReturn+=("<cross-domain-policy>\n");
                 toReturn+=("<allow-access-from domain=\"*\" to-ports=\"*\"/>\n");
-                /*domains.forEach(
-                    function(domain)
-                    {
-                        var parts = domain.split(':');
-                        toReturn+=("<allow-access-from domain=\""*"\" to-ports=\""*"\"/>\n");
-                    }
-                );*/
                 //console.log("</cross-domain-policy>");
                 toReturn+=("</cross-domain-policy>\n");
                 //console.log(toReturn);
@@ -42,19 +39,19 @@ net.createServer(
             }
         })}
 ).listen(843);
-
+*/
 
 
 var http = require('http')
     , server = http.createServer(app)
     , io = require('socket.io').listen(server);
-var path = require('path');
+
 io.set('log level',0);
 var requestHandler = require('./locatorServices/requestHandler');
 var fs = require('fs');
 var factory = require('./locatorServices/factory');
 var locator = requestHandler.locator;
-var util = require('./locatorServices/util');
+var util = require('./locatorServices/sod_util');
 var clients = {};
 exports.io = io;
 exports.clients = clients;
@@ -88,6 +85,9 @@ app.get('/mobile', function (req, res) {
 app.get('/grid', function (req, res) {
     res.sendfile(__dirname + '/view/Grid.html');
 });
+app.get('/ER', function (req, res) {
+    res.sendfile(__dirname + '/view/ERMap/ERMap.html');
+});
 
 // React Section
 app.get('/react', function (req, res) {
@@ -112,6 +112,9 @@ app.get('/user', function (req, res) {
 app.get('/testing', function (req, res) {
     res.sendfile(__dirname + '/view/testing.html');
 });
+app.get("/ERClient",function(req,res){
+    res.sendfile(__dirname+"/view/ERMap/ERClient.html")
+})
 
 // Start: documentation
 app.get('/scripts/prettify/prettify.js', function (req, res) {
@@ -246,14 +249,18 @@ app.post('/devices/updateOrientation/:id/:orientation', devicesREST.updateOrient
 
 
 app.get('/files/:fileName.:ext', data.show);
+app.get('/adf/', data.adfShow);
+app.get('/files/:fileName', data.show);
 app.get('/test', function(req,res){
     res.sendfile(__dirname+"/view/testing.html");
 });
 app.get('/filesList', data.fileList);
 app.post('/upload', function(req, res) {
-    console.log(req.files.dataFile.path + "          " + "data\\temp\\" + req.files.dataFile.name);
+    /*console.log(req.files);
+    console.log(req.files.dataFile.path + "          " + "data/temp/" + req.files.dataFile.name);*/
+    //console.log(req);
     if(req.files.dataFile.name.length!=0) {
-        fs.rename(req.files.dataFile.path, "data\\temp\\" + req.files.dataFile.name, function (err) {
+        fs.rename(req.files.dataFile.path, "data/temp/" +req.files.dataFile.name, function (err) {
             if (err) throw err;
             locator.registerData({name: req.files.dataFile.name, type: req.files.dataFile.type, dataPath: "files\\" + req.files.dataFile.name});
             res.sendfile(__dirname + '/view/data.html');
@@ -360,7 +367,7 @@ function init(){
     var fs = require('fs');
     var dataDirectory = 'data/temp/';
 //var thumbnailSize = 400;
-    var util = require('./locatorServices/util');
+    var util = require('./locatorServices/sod_util');
     var mime = require('mime');
 
     //

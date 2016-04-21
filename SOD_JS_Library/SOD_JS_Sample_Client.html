@@ -39,6 +39,8 @@
             var sod;
             //initialization:
 
+            // For testing
+
 
             //END LISTENERS////////////////////////////////////////////////
 
@@ -83,10 +85,11 @@
                         observer = {observerType:'rectangular',observeWidth:Number($('#inputObserveWidth').val()),observeHeight:Number($('#inputObserveHeight').val()),observerDistance:Number($('#inputObserverDistance').val())};
                     }
 
-                    console.log('stationary: '+ stationary);
+                    //console.log('stationary: '+ stationary);
+                    console.log($('#inputDeviceType').val());
                     sod = new SODDevice({orientation:{yaw:Number($('input#inputOrientationYaw').val()),pitch:Number($('input#inputOrientationPitch').val())}
                         ,FOV:Number($('#inputFOVDegree').val()),location:{X:Number($('input#inputLocationX').val()),Y:Number($('input#inputLocationY').val()),Z:Number($('input#inputLocationZ').val())},
-                        width:Number($('input#inputDeviceWidth').val()),depth:Number($('input#inputDeviceDepth').val()),height:Number($('input#inputDeviceHeight').val()),stationary:stationary,observer:observer});
+                        width:Number($('input#inputDeviceWidth').val()),depth:Number($('input#inputDeviceDepth').val()),height:Number($('input#inputDeviceHeight').val()),stationary:stationary,observer:observer,deviceType:$('#inputDeviceType').val()});
                     sod.init(serverURL,socketURL, sod);
 
                     //ADD LISTENERS////////////////////////////////////////////////
@@ -96,7 +99,9 @@
                         sod.registerDevice(sod);
                         showGreenStatus('connect to server ..')
                     });
-
+                    sod.addListener('mapUpdate',function(data){
+                        console.log(data);
+                    })
 
                     sod.addListener('gesture',function(data){
                         //sod.registerDevice(sod);
@@ -225,10 +230,15 @@
                 sod.getDeviceWithSelection(selectionChain,testFunction);
             }) // end of click
 
-            $("#updateDeviceInfo").on('click',function(){
-                var infoToUpdate = {name:$('#updateName').val()};
-                console.log(infoToUpdate);
-                sod.updateDeviceInfo(infoToUpdate,testFunction);
+            $("#updateDeviceLocation").on('click',function(){
+                //var infoToUpdate = {name:$('#updateName').val()};
+                //console.log(infoToUpdate);
+                //sod.updateDeviceInfo(infoToUpdate,testFunction);
+                var XForUpdate = Number($("#updateLocationX").val())
+                var YForUpdate = Number($("#updateLocationY").val())
+                var ZForUpdate = Number($("#updateLocationZ").val())
+                console.log(XForUpdate+" - "+ YForUpdate + " - "+ZForUpdate)
+                sod.updateDeviceInfo({X:XForUpdate,Y:YForUpdate,Z:ZForUpdate});
             }) // end of click
 
             $('#pairDeviceWithPersonID').on('click',function(){
@@ -306,7 +316,7 @@
                     FOV:<input id='inputFOVDegree'  type="text" value='70'>
 
                     <br/>Location: X<input id='inputLocationX'  type="text" value='1'> Y<input id='inputLocationY'  type="text" value='1'>
-                    Z<input id='inputLocationZ'  type="text" value='1'><br/> width:<input id="inputDeviceWidth" type="text" value='1'/> depth:<input id='inputDeviceDepth'  type="text" value='1'/>
+                    Z<input id='inputLocationZ'  type="text" value='1'><br/> width:<input id="inputDeviceWidth" type="text" value='0.2'/> depth:<input id='inputDeviceDepth'  type="text" value='0.2'/>
                     height:<input id='inputDeviceHeight'  type="text" value='1'/>
                     <!--<label for="inputObserveRange">observeRange:</label><input id='inputObserveRange'  type="text" value='2'/>-->
                     <fieldset>
@@ -327,6 +337,7 @@
                             <option>true</option>
                             <option>false</option>
                     </select>
+                    <input id='inputDeviceType'  type="text" value='tango'>
                 </td></tr>
                 <tr><td><li id="reconnect">Reconnect</li></td></tr>
                 <tr><td><li id="getPeopleAll">Get All People</li></td></tr>
@@ -345,8 +356,12 @@
                     Chain2 <input id='selectionChain_2'  type="text" value='all'>
                     Chain3 <input id='selectionChain_3'  type="text" value='all'>
                     Chain4 <input id='selectionChain_4'  type="text" value='all'> </td>
-                <tr><td><li id="updateDeviceInfo">Update Device info</li></td>
-                <td>Name: <input id='updateName'  type="text" value='JSUpdateName'></td></tr>
+                <tr><td><li id="updateDeviceLocation">Update Device Location</li></td>
+                <td>Name: <input id='updateName'  type="text" value='JSUpdateName'></td>
+                <td>X: <input id='updateLocationX'  type="text" value='0'></td>
+                <td>X: <input id='updateLocationY'  type="text" value='0'></td>
+                <td>X: <input id='updateLocationZ'  type="text" value='0'></td>
+            </tr>
                 <tr><td><li id="pairDeviceWithPersonID">pairWithPerson</li></td><td>Person ID: <input id='pairPersonID'  type="text" value='1'></td></tr>
                 <tr><td><li id="sendStringToAll">send String</li></td><td>string: <input id='stringToSend'  type="text" value="hello I'm from JS client.">
                     selection:<select id="sendStringSelection"><br/>

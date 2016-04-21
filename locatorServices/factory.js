@@ -1,4 +1,4 @@
-var util = require('./util');
+var sod_util = require('./sod_util');
 
 var uniquePersonCounter = 0;
 var reservedDeviceIDRange = 100;
@@ -83,17 +83,26 @@ exports.projector = projector;
 
 function Person(id, location, socket){
     try{
-        if(location.X == null || location.Y == null || location.Z == null){
-            var err = new Error("X, Y, or Z is null");
-            this.emit('error', err);
-        }
+
         this.ID = {};
         this.ID[id] = socket.id;
-        this.uniquePersonID = uniquePersonCounter++;
+        //console.log(typeof id);
+        if(typeof id == 'number' && id!=-1){
+            this.uniquePersonID = id
+        }else{
+            this.uniquePersonID = uniquePersonCounter++;
+        }
         this.location = location;
-        this.location.X = location.X.toFixed(3);
-        this.location.Y = location.Y.toFixed(3);
-        this.location.Z = location.Z.toFixed(3);
+        if(location!=undefined){
+            if(location.X == null || location.Y == null || location.Z == null){
+                var err = new Error("X, Y, or Z is null");
+                this.emit('error', err);
+            }else{
+                this.location.X = location.X.toFixed(3);
+                this.location.Y = location.Y.toFixed(3);
+                this.location.Z = location.Z.toFixed(3);
+            }
+        }
         this.orientation = null;
         this.ownedDeviceID = null;
         this.pairingState = "unpaired";
@@ -101,10 +110,12 @@ function Person(id, location, socket){
         this.lastUpdated = new Date();
         this.data = {};
         this.gesture = "untracked";
+        this.heartbeat = -1;
         this.inRangeOf = {};
         this.hands = {left:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null},right:{ID:null,gesture:null,sensorID:null,lastUpdated:null,location:null}}
     }
     catch(err){
+        console.log("creating person failed: "+err);
         return false;
     }
 }
@@ -116,7 +127,6 @@ Person.prototype = {
 };
 
 exports.Person = Person;
-
 
 // Kinect constructor
 function Kinect(socket){
@@ -262,7 +272,7 @@ function Device(socket, opts){
         if(opts['ID']){
             if(intRegex.test(opts['ID'])) {
                 if(0 <= opts['ID'] && opts['ID'] <= reservedDeviceIDRange){
-                    if(util.getDeviceSocketIDByID(opts['ID']) == undefined){
+                    if(sod_util.getDeviceSocketIDByID(opts['ID']) == undefined){
                         this.uniqueDeviceID = opts['ID'];
                     }
                     else{
@@ -311,7 +321,7 @@ function Device(socket, opts){
         //this.uniqueDeviceID = uniqueDeviceCounter++;
         this.deviceType = "Not specified";
         this.location = {X: null, Y: null, Z:null};
-        this.FOV = util.DEFAULT_FIELD_OF_VIEW;
+        this.FOV = sod_util.DEFAULT_FIELD_OF_VIEW;
         this.depth = null;
         this.height = null;
         this.width =  null;
