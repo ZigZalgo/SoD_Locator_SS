@@ -392,6 +392,138 @@ function gestureHandler(key,gesture,socket){
     }
 }
 
+/**
+ *  Handles hand states detected for each user.
+ *  A gesture (gestureHandler) is a combination of segments (eg. wave = 1) hand left of shoulder + 2) hand right of shoulder).
+ *  A hand state is the frame-by-frame state of each/both hand(s). For example, hand is open/closed.
+ *  Released = both hands open
+ *  Pan = one hand closed only
+ *  Zoom = both hands closed
+ *  param:
+ *      -> key: the key of the person object
+ *      -> left: the left hand state including location
+ *      -> right: the right hand state including location
+ *      -> the socket ID (sensor's socket)
+ * */
+function handStateHandler(key, leftState, leftConfidence, leftLocation, rightState, rightConfidence, rightLocation, socket){
+    if(leftState == null) leftState == "Open";
+    //if(leftLocation == null) leftLocation = {X: 0, Y: 0,Z: 0};
+    if(leftState == "Lasso") leftState == "Closed";
+    //if(rightLocation == null) rightLocation = {X: 0, Y: 0,Z: 0};
+    if(rightState == null) rightState == "Open";
+    if(rightState == "Lasso") rightState == "Closed";
+
+    if(rightState == "Closed" && leftState == "Closed" && leftLocation != null && rightLocation != null){
+        if(rightConfidence == "High" && leftConfidence == "High"){
+            // high confidence zoom (both hands closed)
+            frontend.io.sockets.emit("handStateConfident", {
+                person: locator.persons[key].uniquePersonID,
+                handstate: "zoom", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+            });
+        }
+        // all confidence zoom event
+        frontend.io.sockets.emit("handState", {
+            person: locator.persons[key].uniquePersonID,
+            handstate: "zoom", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+        });
+    }
+    else if(rightState == "Closed" && rightLocation != null && leftState != "Closed"){
+        if(rightConfidence == "High") {
+            // high confidence right pan (right hand closed) (low/high confidence left hand)
+            frontend.io.sockets.emit("handStateConfident", {
+                person: locator.persons[key].uniquePersonID,
+                handstate: "rightPan", location: rightLocation
+            });
+        }
+        // all confidence right pan (right hand closed)
+        frontend.io.sockets.emit("handState", {
+            person: locator.persons[key].uniquePersonID,
+            handstate: "rightPan", location: rightLocation
+        });
+    }
+    else if(leftState == "Closed" && leftLocation != null && rightState != "Closed"){
+        if(leftConfidence == "High") {
+            // high confidence left pan (left hand closed) (low/high confidence right hand)
+            frontend.io.sockets.emit("handStateConfident", {
+                person: locator.persons[key].uniquePersonID,
+                handstate: "leftPan", location: leftLocation
+            });
+        }
+        // all confidence left pan (left hand closed)
+        frontend.io.sockets.emit("handState", {
+            person: locator.persons[key].uniquePersonID,
+            handstate: "leftPan", location: leftLocation
+        });
+    }
+    else if(rightState == "Open" && leftState == "Open" && rightLocation != null && leftLocation != null){
+        if(leftConfidence == "High" && rightConfidence == "High") {
+            // high confidence release (both hands open)
+            frontend.io.sockets.emit("handStateConfident", {
+                person: locator.persons[key].uniquePersonID,
+                handstate: "released", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+            });
+        }
+        // all confidence release (both hands open)
+        frontend.io.sockets.emit("handState", {
+            person: locator.persons[key].uniquePersonID,
+            handstate: "released", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+        });
+    }
+    /*
+    if(rightState == "Open"){
+        if(leftState == "Open"){
+            //right hand open, left hand open
+            console.log("released")
+            frontend.io.sockets.emit("handState",{person:locator.persons[key].uniquePersonID,
+                handstate:"released", distance: util.distanceBetweenPoints(leftLocation, rightLocation)});
+            if(rightConfidence == "High" && leftConfidence == "High"){
+                frontend.io.sockets.emit("handStateConfident",{person:locator.persons[key].uniquePersonID,
+                    handstate:"released", distance: util.distanceBetweenPoints(leftLocation, rightLocation)});
+            }
+        }
+        else{
+            //right hand open, left hand closed/lasso
+            console.log("leftpan")
+            frontend.io.sockets.emit("handState",{person:locator.persons[key].uniquePersonID,
+                handstate:"leftpan", distance: util.distanceBetweenPoints(leftLocation, rightLocation)});
+            if(rightConfidence == "High" && leftConfidence == "High") {
+                frontend.io.sockets.emit("handStateConfident",{person:locator.persons[key].uniquePersonID,
+                    handstate:"leftpan", distance: util.distanceBetweenPoints(leftLocation, rightLocation)});
+            }
+        }
+    }
+    else {
+        if (leftState == "Open") {
+            //right hand closed/lasso, left hand open
+            console.log("rightpan")
+            frontend.io.sockets.emit("handState", {
+                person: locator.persons[key].uniquePersonID,
+                handstate: "rightpan", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+            });
+            if(rightConfidence == "High" && leftConfidence == "High") {
+                frontend.io.sockets.emit("handStateConfident", {
+                    person: locator.persons[key].uniquePersonID,
+                    handstate: "rightpan", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+                });
+            }
+        }
+        else {
+            //right hand closed/lasso, left hand closed/lasso
+            console.log("zoom")
+            frontend.io.sockets.emit("handState", {
+                person: locator.persons[key].uniquePersonID,
+                handstate: "zoom", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+            });
+            if(rightConfidence == "High" && leftConfidence == "High") {
+                frontend.io.sockets.emit("handStateConfident", {
+                    person: locator.persons[key].uniquePersonID,
+                    handstate: "zoom", distance: util.distanceBetweenPoints(leftLocation, rightLocation)
+                });
+            }
+        }
+    }*/
+}
+
 
 exports.updatePersons = function(receivedPerson, socket,callback){
    //var association = {skeletonID:receivedPerson.ID,uniquePersonID:person.uniquePersonID}; // the assication between the receivedPersonID and the uniquePersonID
@@ -440,7 +572,6 @@ exports.updatePersons = function(receivedPerson, socket,callback){
                         gestureHandler(personKey,personInList.gesture,socket);//handles the guesture
                     }
 
-
                     if(personInList.currentlyTrackedBy == socket.id){
                         // receivedPerson also come the the main track sensor, update personInList attributes
                         try{
@@ -460,6 +591,11 @@ exports.updatePersons = function(receivedPerson, socket,callback){
                             if(receivedPerson.rightHandLocation!=null){
                                 personInList.hands.right.location = receivedPerson.rightHandLocation;
                             }
+
+                            handStateHandler(personKey, receivedPerson.leftHandState, receivedPerson.leftHandConfidence,
+                                receivedPerson.leftHandLocation, receivedPerson.rightHandState,
+                                receivedPerson.rightHandConfidence, receivedPerson.rightHandLocation, socket);
+
                             if(personInList.ownedDeviceID != null) {
                                 /**
                                  *  Check which hand/base the ownedDevice is paired to. Update the location based on
@@ -1761,7 +1897,7 @@ exports.saveCurrentState = function(){
 
 exports.loadConfig = function(){
     //console.log();
-    dataService.loadJSONWithCallback("data/reserved/config.json",function(callback){
+    dataService.loadJSONWithCallback("../data/reserved/config.json",function(callback){
         if(callback!=null){
             //console.log(callback);
             console.log("Config file loaded..");
