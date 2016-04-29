@@ -7,6 +7,7 @@ var Q = require('q');
 var async = require("async");
 var pulse = require("./pulse");
 var dataService = require("./data");
+var path= require("path");
 const util = require("util")
 const EventEmitter = require("events");
 
@@ -1929,7 +1930,7 @@ exports.saveCurrentState = function(){
 
 exports.loadConfig = function(){
     //console.log();
-    dataService.loadJSONWithCallback("../data/reserved/config.json",function(callback){
+    dataService.loadJSONWithCallback(__dirname+"/../data/reserved/config.json",function(callback){
         if(callback!=null){
             //console.log(callback);
             console.log("Config file loaded..");

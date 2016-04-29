@@ -29,6 +29,10 @@ $(document).ready(function(){
         console.log('navigate on click');
         io.emit("broadcast",{listener:"remoteNavigation",payload:{lat:clickMarkerLocation.lat(),lng:clickMarkerLocation.lng()}});
     })
+    $('#map').on('click','#broadcastPOI',function(){
+        console.log('navigate on click');
+        io.emit("broadcast",{listener:"broadcastPOI",payload:{info:"Fire incident. Victims number unknown."}});
+    })
 });
 
 // jQuery for page scrolling feature - requires jQuery Easing plugin
@@ -287,7 +291,7 @@ function calculateAndDisplayRoute(destination) {
         });
     }else{
         var POIInfo = new google.maps.InfoWindow({
-            content: '<div style="color:black;">POI: <div style="font-weight:bold;">Fire incident. <br/>Victims number unkonwn.</div></div><button type="button" id="navigate" class="btn btn-danger btn-xs">Broadcast</button>'
+            content: '<div style="color:black;">POI: <div style="font-weight:bold;">Fire incident. <br/>Victims number unknown.</div></div><button type="button" id="broadcastPOI" class="btn btn-danger btn-xs">Broadcast</button>'
         });
         clickMarker.addListener('click',function(){
             //this.setAnimation(google.maps.Animation.BOUNCE);
