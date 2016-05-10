@@ -38,6 +38,11 @@ exports.updateERPersonData = function(socket,updateData){
             personOfInterest.heartbeat = updateData["heartbeat"]
             console.log("updated person "+personOfInterest.uniquePersonID+" heartbeat to "+updateData['heartbeat']);
         }
+        if(updateData.hasOwnProperty("GeoLocation")){
+            personOfInterest['GeoLocation']['lat'] = updateData["GeoLocation"]["lat"]
+            personOfInterest["GeoLocation"]["lng"] = updateData["GeoLocation"]["lng"]
+            console.log("updated person "+personOfInterest.uniquePersonID+" location to "+personOfInterest['GeoLocation']['lat']+' - '+ personOfInterest['GeoLocation']['lng']);
+        }
     }
 }
 

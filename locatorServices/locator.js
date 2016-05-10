@@ -2030,8 +2030,6 @@ exports.loadModifySaveCurrentState_single = function(entity,action,finalCallback
                 default :
                     console.log("Unknown modify option:"+entity);
             }
-
-
             //console.log(JSON.stringify(locator.room,null,4));
         }
     })

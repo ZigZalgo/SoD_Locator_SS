@@ -9,7 +9,7 @@ var sod_util = require('./sod_util');
 var frontend = require('./../frontend');
 var async = require('async');
 var pulse = require('./pulse');
-
+var ERLocator = require('./ERServices/ERLocator')
 
 // Location variable
 var heartbeat = null;
@@ -50,6 +50,8 @@ exports.start = function(){
                     sendIntersectionPoints();
                 }
 
+                // send ERResponder info out
+                updateERResponders()
             },pulse.initPulseInterval);
             /*if(pulse.eventsSwitch.sendIntersectionPoints == true){
                 var sendIntersectionPointsInterval = setInterval(function(){
@@ -58,11 +60,30 @@ exports.start = function(){
                 );
                 pulse.intervals.sendIntersectionPoints = sendIntersectionPointsInterval;
             }*/
-
         }catch(e){
             console.log('unable to start heartbeat due to: '+ e);
         }
 };
+
+function updateERResponders(){
+    //console.log("ERPersons: "+JSON.stringify(ERLocator.ERPersons));
+    if(Object.keys(frontend.clients).length != 0) {
+        //console.log(frontend.clients[Object.keys(frontend.clients)[0]].clientType);
+        frontend.clients[Object.keys(frontend.clients)[0]].broadcast.emit("OnRespondersUpdate",
+            {
+                "117": {
+                    ID: 117,
+                    heartbeat: 75,
+                    GeoLocation: {lat: 51.080202, lng: -114.124955}
+                },
+                "118": {
+                    ID: 118,
+                    heartbeat: 150,
+                    GeoLocation: {lat: 51.080876, lng:-114.128502}
+                }
+            });
+    }
+}
 
 function roomIntersectionEvent(){
     //console.log('YO');
