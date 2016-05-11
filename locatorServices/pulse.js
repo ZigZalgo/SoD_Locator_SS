@@ -68,20 +68,26 @@ exports.start = function(){
 function updateERResponders(){
     //console.log("ERPersons: "+JSON.stringify(ERLocator.ERPersons));
     if(Object.keys(frontend.clients).length != 0) {
+        //console.log(Object.keys(frontend.clients));
         //console.log(frontend.clients[Object.keys(frontend.clients)[0]].clientType);
+        var mockResponderLilst = {
+            "117": {
+                ID: 117,
+                heartbeat: 75,
+                GeoLocation: {lat: 51.080202, lng: -114.124955}
+            },
+            "118": {
+                ID: 118,
+                heartbeat: 150,
+                GeoLocation: {lat: 51.080876, lng:-114.128502}
+            }
+        }
+        // send the events to self as well
+        frontend.clients[Object.keys(frontend.clients)[0]].emit("OnRespondersUpdate",
+           mockResponderLilst);
+        // broad cast the event
         frontend.clients[Object.keys(frontend.clients)[0]].broadcast.emit("OnRespondersUpdate",
-            {
-                "117": {
-                    ID: 117,
-                    heartbeat: 75,
-                    GeoLocation: {lat: 51.080202, lng: -114.124955}
-                },
-                "118": {
-                    ID: 118,
-                    heartbeat: 150,
-                    GeoLocation: {lat: 51.080876, lng:-114.128502}
-                }
-            });
+           mockResponderLilst );
     }
 }
 
