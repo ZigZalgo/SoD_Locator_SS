@@ -27,4 +27,16 @@ exports.handle = function(socket){
         var requestLocation = request.split(',')
         socket.broadcast.emit("updateERLocationOnMap",{lat:requestLocation[0],lng:requestLocation[1]})
     });
+    socket.on('updatePOIRequest',function(request,callback){
+        console.log(JSON.stringify(request));
+        if(request.hasOwnProperty('id')&&request.hasOwnProperty('description')&&
+            request.hasOwnProperty('location')&&request.hasOwnProperty('eventType')){
+            var POIUpdateMsg = {id:request.id,description:request.description,location:request.location,eventType:request.eventType}
+            socket.broadcast.emit('POIUpdate',POIUpdateMsg,function(){
+
+            })
+        }else{
+            console.log('Wrong event request '+ JSON.stringify(request))
+        }
+    })
 }
