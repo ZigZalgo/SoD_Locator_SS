@@ -74,12 +74,12 @@ function updateERResponders(){
             "117": {
                 ID: 117,
                 heartbeat: 75,
-                GeoLocation: {lat: 51.080202, lng: -114.124955}
+                GeoLocation: {lat: 51.04916, lng: -114.0730}
             },
             "118": {
                 ID: 118,
                 heartbeat: 150,
-                GeoLocation: {lat: 51.080876, lng:-114.128502}
+                GeoLocation: {lat: 51.04914, lng:-114.0740}
             }
         }
         // send the events to self as well
