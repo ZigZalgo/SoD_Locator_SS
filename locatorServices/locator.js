@@ -402,14 +402,34 @@ function grabEventHandler(object){
 function gestureHandler(key,gesture,socket){
     switch(gesture){
         case "Grab":
-            console.log("-> GRAB gesture detected from person: " + key + "!");
+            console.log("-> GRAB (default right hand) gesture detected from person: " + key + "!");
             grabEventHandler(persons[key]); // try to grab data if any data is within range
             frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"Grab"});
             break;
+        case "GrabLeft":
+            console.log("-> GRAB (left hand) gesture detected from person: " + key + "!");
+            grabEventHandler(persons[key]); // try to grab data if any data is within range
+            frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"GrabLeft"});
+            break;
+        case "GrabRight":
+            console.log("-> GRAB (right hand) gesture detected from person: " + key + "!");
+            grabEventHandler(persons[key]); // try to grab data if any data is within range
+            frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"GrabRight"});
+            break;
         case "Release":
-            console.log("-> RELEASE gesture detected from person: " + key + "!");
+            console.log("-> RELEASE (default right hand) gesture detected from person: " + key + "!");
             locator.dropData(socket,persons[key],0.5); // set the default drop range to 1 meter for now
             frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"Release"});
+            break;
+        case "ReleaseLeft":
+            console.log("-> RELEASE (left hand) gesture detected from person: " + key + "!");
+            locator.dropData(socket,persons[key],0.5); // set the default drop range to 1 meter for now
+            frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"ReleaseLeft"});
+            break;
+        case "ReleaseRight":
+            console.log("-> RELEASE (right hand) gesture detected from person: " + key + "!");
+            locator.dropData(socket,persons[key],0.5); // set the default drop range to 1 meter for now
+            frontend.io.sockets.emit("gesture",{person:locator.persons[key].uniquePersonID,gesture:"ReleaseRight"});
             break;
         default:
             console.log("Some gesture detected from person " + key + ": " + persons[key]);
